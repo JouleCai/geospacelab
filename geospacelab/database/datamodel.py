@@ -23,7 +23,7 @@ class GeospaceVariable(np.ndarray):
     """
     def __new__(cls, input_array, **kwargs):
     # Input array is a list, truple, or np.ndarray, or SpPhyVariable instance
-        if isinstance(input_array, SpPhyVariable):
+        if isinstance(input_array, GeospaceVariable):
             obj = input_array
         else:
             # The input array is casted to the SpPHyVariable type, the default copy is False
