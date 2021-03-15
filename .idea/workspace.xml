@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4ada4ff0-2cb9-4e76-9490-8e8e8c86c3b6" name="Default Changelist" comment="Adjust directories">
+    <list default="true" id="4ada4ff0-2cb9-4e76-9490-8e8e8c86c3b6" name="Default Changelist" comment="create Visual class">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/geospacelab/explorer/_init_variable.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/explorer/_init_variable.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/toolbox/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/toolbox/graphic/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/graphic/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/toolbox/utilities/logging_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/logging_custom.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,6 +35,34 @@
       <recent name="$PROJECT_DIR$/geospacelab/toolbox" />
     </key>
   </component>
+  <component name="RunManager">
+    <configuration name="_init_variable" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="geospacelab" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/geospacelab/explorer" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/geospacelab/explorer/_init_variable.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python._init_variable" />
+        <item itemvalue="Python._init_variable" />
+        <item itemvalue="Python._init_variable" />
+        <item itemvalue="Python._init_variable" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -53,7 +79,14 @@
       <option name="project" value="LOCAL" />
       <updated>1615812677462</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="create Visual class">
+      <created>1615815305099</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1615815305099</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -69,6 +102,40 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Adjust directories" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adjust directories" />
+    <MESSAGE value="create Visual class" />
+    <option name="LAST_COMMIT_MESSAGE" value="create Visual class" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/geospacelab/explorer/_init_variable.py</url>
+          <line>218</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/geospacelab/explorer/_init_variable.py</url>
+          <line>37</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/geospacelab/explorer/_init_variable.py</url>
+          <line>152</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/geospacelab/explorer/_init_variable.py</url>
+          <line>119</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

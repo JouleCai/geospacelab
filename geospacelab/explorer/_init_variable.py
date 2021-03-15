@@ -3,6 +3,8 @@
 import weakref
 import numpy as np
 import numpy.lib.mixins as npmixin
+from geospacelab.toolbox import logger
+from geospacelab.toolbox.graphic import Visual
 
 __author__ = "Lei Cai"
 __copyright__ = "Copyright 2021, The GeoSpaceLab Project"
@@ -27,7 +29,8 @@ class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
         'name', 'label', 'description', 'group', 
         'error',
         'unit', 'quantity_type', 'cs',
-        'depends'
+        'depends',
+        'visual'
         ]
 
     def __new__(cls, array_in, **kwargs):
@@ -40,7 +43,7 @@ class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
             obj = np.array(array_in, copy=copy_arr)
             obj = obj.view(cls)
             # add the new attributes to the created instance
-            obj._init_attribues(obj, **kwargs)
+            obj._init_attributes(**kwargs)
         # Finally, we must return the newly created object:
         return obj
     
@@ -60,8 +63,8 @@ class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
     def __array_finalize__(self, obj):
         if obj is None:
             return
-        if issubclass(obj, BaseVariable):
-            self.copy_attrbutes(obj)
+        if issubclass(obj.__class__, BaseVariable):
+            self.copy_attributes(obj)
         else:
             return
 
@@ -93,7 +96,7 @@ class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
         attr_config = kwargs.pop('attr_config', None)
 
         for i, input_ in enumerate(inputs):
-            if issubclass(input_, BaseVariable):
+            if issubclass(input_.__class__, BaseVariable):
                 in_no.append(i)
                 args.append(input_.view(np.ndarray))
             else:
@@ -105,7 +108,7 @@ class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
         if outputs:
             out_args = []
             for j, output in enumerate(outputs):
-                if issubclass(output, BaseVariable):
+                if issubclass(output.__class__, BaseVariable):
                     out_no.append(j)
                     out_args.append(output.view(np.ndarray))
                 else:
@@ -147,10 +150,10 @@ class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
         if required_attributes is not None:
             attrs = required_attributes
         else:
-            attrs = obj._attributes_regitered
+            attrs = obj._attributes_registered
         for attr in attrs:
             if force:
-                self.add_attributes({attr: getattr(obj, attr)})
+                self.add_attributes(**{attr: getattr(obj, attr)})
             else:
                 if attr in self._attributes_registered:
                     setattr(self, attr, getattr(obj, attr))
@@ -191,6 +194,8 @@ class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
 
     @depends.setter
     def depends(self, dps):
+        if dps is None:
+            dps = []
         if not isinstance(dps, list):
             raise ValueError('The attribute "Depends" must be a list!')
         self._depends = dps
@@ -208,6 +213,7 @@ class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
 
 
 
-
-class Dataset(object):
+if __name__ == "__main__":
+    a = BaseVariable([1, 2, 3, 4])
+    b = a + 5
     pass
