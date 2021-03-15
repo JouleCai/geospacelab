@@ -1,19 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4ada4ff0-2cb9-4e76-9490-8e8e8c86c3b6" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/geospacelab/toolbox/graphic/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/__init__.py" afterDir="false" />
+    <list default="true" id="4ada4ff0-2cb9-4e76-9490-8e8e8c86c3b6" name="Default Changelist" comment="Adjust directories">
       <change beforePath="$PROJECT_DIR$/geospacelab/explorer/_init_variable.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/explorer/_init_variable.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/utilities/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/graphictoolbox/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/utilities/array_utilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/array_utilities.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/utilities/basic_utilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/basic_utilities.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/utilities/class_set_attr.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/class_set_attr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/utilities/datetime_utilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/datetime_utilities.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/utilities/geodesic_astronomy.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/geodesic_astronomy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/utilities/logging_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/logging_config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/utilities/physical_parameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/physical_parameters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/visualization/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/toolbox/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/toolbox/graphic/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/graphic/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/toolbox/utilities/logging_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/logging_custom.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,6 +32,11 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/geospacelab/toolbox" />
+    </key>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -49,6 +46,14 @@
       <option name="presentableId" value="Default" />
       <updated>1615777649972</updated>
     </task>
+    <task id="LOCAL-00001" summary="Adjust directories">
+      <created>1615812677462</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1615812677462</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -61,5 +66,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Adjust directories" />
+    <option name="LAST_COMMIT_MESSAGE" value="Adjust directories" />
   </component>
 </project>

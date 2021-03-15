@@ -207,67 +207,6 @@ class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
             self._label = r'{}'.format(self.str1)
 
 
-class Visual(object):
-    def __init__(self, attrs_obj, **kwargs):
-        self.plottype = kwargs.pop('plottype', None)
-        self.xdata = kwargs.pop('xdata', None)
-        self.ydata = kwargs.pop('ydata', None)
-        self.zdata = kwargs.pop('zdata', None)
-        self.xdata_scale = kwargs.pop('xdata_scale', 1.)
-        self.ydata_scale = kwargs.pop('ydata_scale', 1.)
-        self.zdata_scale = kwargs.pop('zdata_scale', 1.)
-        self.xdata_res = kwargs.pop('xdata_res', None)
-        self.ydata_res = kwargs.pop('ydata_res', None)
-        self.zdata_res = kwargs.pop('zdata_res', None)
-        self.xdata_err = kwargs.pop('xdata_err', None)
-        self.ydata_err = kwargs.pop('ydata_err', None)
-        self.zdata_err = kwargs.pop('zdata_err', None)
-        # self.xdata_mask = kwargs.pop('xdata_mask', None)
-        # self.ydata_mask = kwargs.pop('ydata_mask', None)
-        # self.zdata_mask = kwargs.pop('zdata_mask', None)
-        self.xaxis_lim = kwargs.pop('xaxis_lim', None)
-        self.yaxis_lim = kwargs.pop('yaxis_lim', None)
-        self.zaxis_lim = kwargs.pop('zaxis_lim', None)
-        self.xaxis_label = kwargs.pop('xaxis_label', None)
-        self.yaxis_label = kwargs.pop('yaxis_label', None)
-        self.zaxis_label = kwargs.pop('zaxis_label', None)
-        self.xaxis_scale = kwargs.pop('xaxis_scale', None)
-        self.yaxis_scale = kwargs.pop('yaxis_scale', None)
-        self.zaxis_scale = kwargs.pop('zaxis_scale', None)
-        self.xdata_unit = kwargs.pop('xdata_unit', None)
-        self.ydata_unit = kwargs.pop('ydata_unit', None)
-        self.zdata_unit = kwargs.pop('zdata_unit', None)
-        self.xaxis_ticks = kwargs.pop('xaxis_ticks', None)
-        self.yaxis_ticks = kwargs.pop('yaxis_ticks', None)
-        self.zaxis_ticks = kwargs.pop('zaxis_ticks', None)
-        self.xaxis_ticklabels = kwargs.pop('xaxis_ticklabels', None)
-        self.yaxis_ticklabels = kwargs.pop('yaxis_ticklabels', None)
-        self.zaxis_ticklabels = kwargs.pop('zaxis_ticklabels', None)
-
-        self.colormap = kwargs.pop('colormap', None)
-        self.visible = kwargs.pop('visible', True)
-        self.kwargs_plot = kwargs.pop('kwargs_draw', {})
-
-        # self.set_attr(**kwargs)
-
-    @property
-    def plottype(self):
-        return self._plottype
-
-    @plottype.setter
-    def plottype(self, code):
-        attrs_obj = self._attrs_obj_ref()
-        var_obj = attrs_obj.variable
-        ndim = var_obj.ndim
-        if code is None:
-            if attrs_obj.type == 'scalar':
-                self._plottype = str(ndim) + 'D'
-            elif attrs_obj.type == 'vector':
-                self._plottype = str(ndim - 1) + 'D'
-            elif attrs_obj.type == 'tensor':    # for future extension.
-                self._plottype = str(ndim - 2) + 'D'
-        else:
-            self._plottype = code
 
 
 class Dataset(object):
