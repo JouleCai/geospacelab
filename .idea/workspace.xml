@@ -1,11 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4ada4ff0-2cb9-4e76-9490-8e8e8c86c3b6" name="Default Changelist" comment="" />
+    <list default="true" id="4ada4ff0-2cb9-4e76-9490-8e8e8c86c3b6" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/geospacelab/toolbox/graphic/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/explorer/_init_variable.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/explorer/_init_variable.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/utilities/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/graphictoolbox/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/utilities/array_utilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/array_utilities.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/utilities/basic_utilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/basic_utilities.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/utilities/class_set_attr.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/class_set_attr.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/utilities/datetime_utilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/datetime_utilities.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/utilities/geodesic_astronomy.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/geodesic_astronomy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/utilities/logging_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/logging_config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/utilities/physical_parameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/physical_parameters.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/visualization/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/__init__.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -30,5 +50,16 @@
       <updated>1615777649972</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

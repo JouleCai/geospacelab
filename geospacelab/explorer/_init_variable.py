@@ -2,11 +2,7 @@
 """Variable model based on np.ndarray"""
 import weakref
 import numpy as np
-from numpy.lib.arraysetops import isin
 import numpy.lib.mixins as npmixin
-import copy
-
-import geospacelab.utilities.logging_config as mylog
 
 __author__ = "Lei Cai"
 __copyright__ = "Copyright 2021, The GeoSpaceLab Project"
@@ -18,6 +14,7 @@ __email__ = "lei.cai@oulu.fi"
 __status__ = "Developing"
 __revision__ = ""
 __docformat__ = "reStructureText"
+
 
 class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
     """ Set up geospace variables  
@@ -34,7 +31,7 @@ class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
         ]
 
     def __new__(cls, array_in, **kwargs):
-    # Input array is a list, truple, or np.ndarray, or SpPhyVariable instance
+        # Input array is a list, truple, or np.ndarray, or SpPhyVariable instance
         if isinstance(array_in, BaseVariable):
             obj = array_in
         else:
