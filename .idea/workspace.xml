@@ -96,7 +96,14 @@
       <option name="project" value="LOCAL" />
       <updated>1615876141090</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="update class Variable">
+      <created>1615878366941</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1615878366941</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -122,7 +129,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/geospacelab/explorer/_init_variable.py</url>
-          <line>286</line>
+          <line>309</line>
           <option name="timeStamp" value="15" />
         </line-breakpoint>
       </breakpoints>

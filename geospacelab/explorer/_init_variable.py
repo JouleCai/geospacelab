@@ -22,11 +22,10 @@ __docformat__ = "reStructureText"
 
 
 class Variable(np.ndarray, npmixin.NDArrayOperatorsMixin):
-    
     _attrs_registered = [
-        'dataset', 
-        'name', 'label', 'description', 'group', 
-        'error', 
+        'dataset',
+        'name', 'label', 'description', 'group',
+        'error',
         'depends', 'unit', 'quantity_type',
         'cs',
         'visual'
@@ -56,9 +55,10 @@ class Variable(np.ndarray, npmixin.NDArrayOperatorsMixin):
         return obj_out
 
     def __array_finalize__(self, obj):
-        if obj is None:
+        # nothing needed for new variable or np.ndarray.view()
+        if obj is None or isinstance(obj.__class__, np.ndarray):
             return None
-        
+
         if issubclass(obj.__class__, Variable):
             for attr in getattr(obj, '_attrs_registered'):
                 self.__setattr__(attr, cp.deepcopy(getattr(obj, attr)))
@@ -117,9 +117,31 @@ class Variable(np.ndarray, npmixin.NDArrayOperatorsMixin):
         else:
             return results
 
+    def __reduce__(self):
+        # patch to pickle Quantity objects (ndarray subclasses), see
+        # http://www.mail-archive.com/numpy-discussion@scipy.org/msg02446.html
+
+        object_state = list(super().__reduce__())
+        object_state[2] = (object_state[2], self.__dict__)
+        return tuple(object_state)
+
+    def __setstate__(self, state):
+        # patch to unpickle Quantity objects (ndarray subclasses), see
+        # http://www.mail-archive.com/numpy-discussion@scipy.org/msg02446.html
+
+        nd_state, own_state = state
+        super().__setstate__(nd_state)
+        self.__dict__.update(own_state)
+
+    def __repr__(self):
+        str_pref = '<Geospace ' + self.__class__.__name__ + ' '
+        str_arr = np.array2string(self.view(np.ndarray), separator=', ',
+                                  prefix=str_pref)
+        return f'{str_pref}{str_arr}{self.unit:s}>'
+
     def set_attr(self, **kwargs):
         # set values for the registered attributes
-        attr_add = kwargs.pop('attr_add', True) 
+        attr_add = kwargs.pop('attr_add', True)
         logging = kwargs.pop('logging', False)
         new_attrs = []
         for key, value in kwargs.items():
@@ -143,7 +165,7 @@ class Variable(np.ndarray, npmixin.NDArrayOperatorsMixin):
     @property
     def dataset(self):
         return self._dataset
-    
+
     @dataset.setter
     def dataset(self, obj):
         # Check the type:
@@ -284,4 +306,5 @@ if __name__ == "__main__":
     a = Variable([1, 2, 3, 4], name='a')
     b = 5 + a
     c = np.sum(a)
+    a = a.reshape((a.shape[0], 1))
     pass
