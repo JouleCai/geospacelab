@@ -1,8 +1,9 @@
+import numpy as np
 
 from geospacelab.dataexplorer._init_variable import Variable
 
 import geospacelab.toolbox.utilities.pyclass as myclass
-import geospacelab.utilities.pybasic as mybasic
+import geospacelab.toolbox.utilities.pybasic as mybasic
 
 
 # BaseClass with the "set_attr" method
@@ -39,9 +40,8 @@ class BaseClass(object):
 # Class Database
 class Database(BaseClass):
     def __init__(self, name='temporary', category='local', **kwargs):
-        self.name = name
-        self.category = category
-        super().__init__(name=self.name, category=self.category)
+
+        super().__init__(name=name, category=category)
         self.set_attr(logging=False, **kwargs)
 
     def __str__(self):
@@ -51,9 +51,7 @@ class Database(BaseClass):
 # Class Facility
 class Facility(BaseClass):
     def __init__(self, name=None, category=None, **kwargs):
-        self.name = name
-        self.category = category
-        super().__init__(name=self.name, category=self.category)
+        super().__init__(name=name, category=category)
         self.set_attr(logging=False, **kwargs)
 
     def __str__(self):
@@ -63,9 +61,7 @@ class Facility(BaseClass):
 # Class Instrument
 class Instrument(BaseClass):
     def __init__(self, name=None, category=None, **kwargs):
-        self.name = name
-        self.category = category
-        super().__init__(name=self.name, category=self.category)
+        super().__init__(name=name, category=category)
         self.set_attr(logging=False, **kwargs)
 
     def __str__(self):
@@ -75,9 +71,7 @@ class Instrument(BaseClass):
 # Class Experiment
 class Experiment(BaseClass):
     def __init__(self, name=None, category=None, **kwargs):
-        self.name = name
-        self.category = category
-        super().__init__(name=self.name, category=self.category)
+        super().__init__(name=name, category=category)
         self.set_attr(logging=False, **kwargs)
 
     def __str__(self):
@@ -90,29 +84,37 @@ class Dataset(object):
         self.data_path = kwargs.pop('data_path', None)
         self.dt_fr = kwargs.pop('dt_fr', None)
         self.dt_to = kwargs.pop('dt_to', None)
-        self.database = kwargs.pop('database', Database(name='temporary', category='local'))
-        self.facility = kwargs.pop('facility', Facility())
-        self.instrument = kwargs.pop('instrument_opt', Instrument())
-        self.experiment = kwargs.pop('experiment', Experiment())
-        self.variables = None
-        self._visual = kwargs.pop('visual', True)
+        database_config = kwargs.pop('database_config', {})
+        self.database = kwargs.pop('database', Database(name='temporary', category='local', **database_config))
+        facility_config = kwargs.pop('facility_config', {})
+        self.facility = kwargs.pop('facility', Facility(**facility_config))
+        instrument_config = kwargs.pop('instrument_config', {})
+        self.instrument = kwargs.pop('instrument_opt', Instrument(**instrument_config))
+        experiment_config = kwargs.pop('experiment_config', {})
+        self.experiment = kwargs.pop('experiment', Experiment(**experiment_config))
+        self._variables = {}
 
-    def add_variable(self, varname, **kwargs):
-        opt_visual = kwargs.pop('opt_visual', {})
-        self.variables[varname] = Variable(**kwargs)
-        if self._visual:
-            self.variables[varname].set_attr('visual', Visual(**opt_visual))
+    def __getitem__(self, key):
+        return self._variables[key]
 
-    def assign_data(self, Loader, opt_Loader=None):
-        load_obj = Loader(opt_Loader)
-        self.variables
-
-    def pickup_variable(self, **kwargs):
-        varname = kwargs.pop('varname', None)
-        if varname in self.variables.keys():
-            return self.variables[varname]
+    def __setitem__(self, key, value, Var_Class=Variable):
+        if issubclass(value.__class__, Var_Class):
+            self._variables[key] = value
+        elif isinstance(value, np.ndarray):
+            self._variables[key] = Var_Class(name=key, database=self)
         else:
-            raise KeyError(varname)
+            raise TypeError("Variable must be an instance of Geospace Variable or numpy ndarray!")
+
+    def add_variable(self, arr, **kwargs):
+
+        varname = kwargs.get('name')
+        variable = Variable(arr, **kwargs)
+
+        self.__setitem__(varname, variable)
+
+    def assign_data(self, Loader, loader_config=None):
+        load_obj = Loader(**loader_config)
+        self.variables
 
     def label(self):
         pass

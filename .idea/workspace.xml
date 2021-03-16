@@ -3,18 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4ada4ff0-2cb9-4e76-9490-8e8e8c86c3b6" name="Default Changelist" comment="update class Variable">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/explorer/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/dataexplorer/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/explorer/_init_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/dataexplorer/_init_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/explorer/_init_variable.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/dataexplorer/_init_variable.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/explorer/logging.log" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/dataexplorer/logging.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/toolbox/utilities/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/toolbox/utilities/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/toolbox/utilities/array_utilities.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/toolbox/utilities/basic_utilities.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/toolbox/utilities/class_set_attr.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/toolbox/utilities/datetime_utilities.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/toolbox/utilities/geodesic_astronomy.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/toolbox/utilities/logging_custom.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/toolbox/utilities/physical_parameters.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/dataexplorer/_init_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/dataexplorer/_init_dataset.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,7 +110,21 @@
       <option name="project" value="LOCAL" />
       <updated>1615879551522</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="update class Variable">
+      <created>1615883012544</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1615883012544</updated>
+    </task>
+    <task id="LOCAL-00007" summary="update class Variable">
+      <created>1615883231019</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1615883231019</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
