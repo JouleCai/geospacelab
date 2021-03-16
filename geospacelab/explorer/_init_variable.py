@@ -1,6 +1,8 @@
 """Variable model based on np.ndarray"""
 
 import weakref
+
+import copy
 import numpy as np
 import numpy.lib.mixins as npmixin
 from geospacelab.explorer._init_dataset import Dataset
@@ -19,20 +21,17 @@ __revision__ = ""
 __docformat__ = "reStructureText"
 
 
-class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
-    """ Set up geospace variables  
-    :date:  2021-03-14
-
-    To be implemented.
-    """
-    _attributes_registered = [
+class Variable(np.ndarray, npmixin.NDArrayOperatorsMixin):
+    
+    _attrs_registered = [
         'dataset', 
         'name', 'label', 'description', 'group', 
-        'error',
-        'unit', 'quantity_type', 'cs',
-        'depends',
+        'error', 
+        'depends', 'unit', 'quantity_type',
+        'cs',
         'visual'
-        ]
+    ]
+
     _dataset = None
     _name = ''
     _label = ''
@@ -45,18 +44,220 @@ class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
     _depends = []
     _visual = None
 
-    def __new__(cls, array_in, **kwargs):
-        # Input array is a list, truple, or np.ndarray, or SpPhyVariable instance
-        if isinstance(array_in, BaseVariable):
-            obj = array_in
+    def __new__(cls, arr, copy=True, dtype=None, order='C', subok=False, ndmin=0, **kwargs):
+        if isinstance(arr, BaseVariable):
+            obj_out = arr
         else:
-            # The input array is casted to the SpPHyVariable type, the default copy is False
-            # copy_arr = kwargs.pop('copy', False)
-            obj = np.asarray(array_in).view(cls)
-            # add the new attributes to the created instance
-            obj._init_attributes(**kwargs)
-        # Finally, we must return the newly created object:
-        return obj
+            obj_out = np.array(arr, copy=copy, dtype=dtype, order=order, subok=subok, ndmin=ndmin)
+            obj_out = obj_out.view(cls)
+
+        obj_out.set_attr(**kwargs)
+
+        return obj_out
+
+    def __array_finalize__(self, obj):
+        if obj is None:
+            return None
+        
+        if issubclass(obj.__class__, Variable):
+            for attr in obj._attrs_registered:
+                self.__setattr__(attr, getattr(obj, attr, None))
+        
+
+    def set_attr(self, **kwargs):
+        # set values for the registered attributes
+        attr_add = kwargs.pop('attr_add', True) 
+        logging = kwargs.pop('logging', False)
+        new_attrs = []
+        for key, value in kwargs.items():
+            if key in self._attributes_registered:
+                setattr(self, key, value)
+            elif attr_add:
+                setattr(self, key, value)
+                self._attrs_registered.append(key)
+                new_attrs.append(key)
+
+        if logging:
+            if attr_add:
+                logger.StreamLogger.info('Attrs: {} added!'.format(', '.join(new_attrs)))
+            else:
+                logger.warning('Attrs: {} not added!'.format(', '.join(new_attrs)))
+
+    def copy_attr(obj):
+        pass
+
+
+    @property
+    def dataset(self):
+        return self._dataset
+    
+    @dataset.setter
+    def dataset(self, obj):
+        # Check the type:
+        if obj is None:
+            self._dataset = None
+        elif not isinstance(obj, Dataset):
+            return ValueError
+        self._dataset = obj
+
+    
+    @property
+    def name(self):
+        return self._name
+    
+    @name.setter
+    def name(self, str_):
+        # Check the type:
+        if str_ is None:
+            str_ = ''
+        elif not isinstance(str_, str):
+            return ValueError
+        self._name = str_
+    
+    @property
+    def label(self):
+        return self._label
+    
+    @label.setter
+    def label(self, str_):
+        # Check the type:
+        if str_ is None:
+            str_ = ''
+        elif not isinstance(str_, str):
+            return ValueError
+        self._label = str_
+
+    @property
+    def description(self):
+        return self._description
+    
+    @description.setter
+    def description(self, str_):
+        # Check the type:
+        if str_ is None:
+            str_ = ''
+        elif not isinstance(str_, str):
+            return ValueError
+        self._description = str_
+    
+    @property
+    def group(self):
+        return self._group
+    
+    @group.setter
+    def group(self, str_):
+        # Check the type:
+        if str_ is None:
+            str_ = ''
+        elif not isinstance(str_, str):
+            return ValueError
+        self._group = str_
+    
+    @property
+    def error(self):
+        return self._error
+    
+    @error.setter
+    def error(self, err):
+        if err is None:
+            self._error = None
+        if isinstance(err, self.__class__):
+            self._error = err
+        elif isinstance(err, str):
+            self._error = self.dataset[err]
+
+    @property
+    def unit(self):
+        return self._unit
+    
+    @unit.setter
+    def unit(self, value):
+        # Check the type:
+        if value is None:
+            value = ''
+        elif not isinstance(value, str):
+            return ValueError
+        self._unit = value
+
+    @property
+    def quantity_type(self):
+        return self._quantity_type
+    
+    @quantity_type.setter
+    def quantity_type(self, str_):
+        # Check the type:
+        if str_ is None:
+            str_ = ''
+        elif not isinstance(str_, str):
+            return ValueError
+        self._quantity_type = str_
+
+    @property
+    def cs(self):
+        return self._cs
+    
+    @cs.setter
+    def cs(self, obj):
+        # Check the type:
+        self._cs = obj
+
+    @property
+    def depends(self):
+        return self._depends
+    
+    @depends.setter
+    def depends(self, value):
+        # Check the type:
+        if value is None:
+            value = []
+        elif not isinstance(value, list):
+            return ValueError
+        self._depends = value
+
+    @property
+    def visual(self):
+        return self._group
+    
+    @visual.setter
+    def visual(self, obj):
+        # Check the type:
+        if obj is None:
+            obj = None
+        elif not isinstance(obj, Visual):
+            return ValueError
+        self._visual = obj
+
+
+class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
+    """ Set up geospace variables  
+    :date:  2021-03-14
+
+    To be implemented.
+    """
+    _attrs_registered = ['unit', 'error', 'depends', 'dataset', 'name', 'type', 'coords', 'visual']
+    _dataset = None
+    _name = ''
+    _label = ''
+    _description = ''
+    _group = ''
+    _error = None
+    _unit = ''
+    _quantity_type = None
+    _cs = None
+    _depends = []
+    _visual = None
+
+    def __new__(cls, arr, copy=True, dtype=None, order='C', subok=False, ndmin=0, **kwargs):
+        if isinstance(arr, BaseVariable):
+            obj_out = arr
+        else:
+            obj_out = np.array(arr, copy=copy, dtype=dtype, order=order, subok=subok, ndmin=ndmin)
+            obj_out = obj_out.view(cls)
+
+        obj_out._extra_attrs = kwargs.pop('extra_attrs', False)
+        obj_out._attr_register(**kwargs)
+
+        return obj_out
     
     # set attributes for the variable
     def _init_attributes(self, **kwargs):
@@ -72,32 +273,9 @@ class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
                 
     def __array_finalize__(self, obj):
         if obj is None:
-            return
-        if issubclass(obj.__class__, BaseVariable):
-            self.copy_attributes(obj)
-        else:
-            return
-
-    def __reduce__(self):
-        """
-        This is called when pickling, see:
-        http://www.mail-archive.com/numpy-discussion@scipy.org/msg02446.html
-        for this particular example.
-        """
-        object_state = list(np.ndarray.__reduce__(self))
-        subclass_state = (self.attributes,)
-        object_state[2] = (object_state[2], subclass_state)
-        return tuple(object_state)
-
-    def __setstate__(self, state):
-        """
-        Used for unpickling after __reduce__
-        """
-        nd_state, own_state = state
-        np.ndarray.__setstate__(self, nd_state)
-
-        info, = own_state
-        self.attributes = info
+            return None
+        for attr in self._attributes_registered:
+            self.__setattr__(attr, copy.deepcopy(getattr(obj, attr, {})))
 
     def __array_ufunc__(self, ufunc, method, *inputs, out=None, **kwargs):
 
@@ -153,7 +331,7 @@ class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
     def add_attributes(self, **kwargs):
         # add attributes to object
         for key, value in kwargs.items():
-            setattr(self, key, value)
+            self.__setattr__(key, value)
             self._attributes_registered.append(key)
 
     def copy_attributes(self, obj, force=True, required_attributes=None):
@@ -167,7 +345,7 @@ class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
                 self.add_attributes(**{attr: getattr(obj, attr)})
             else:
                 if attr in self._attributes_registered:
-                    setattr(self, attr, getattr(obj, attr))
+                    self.__setattr__(attr, getattr(obj, attr))
             
     @property
     def dataset(self):
@@ -293,6 +471,6 @@ class BaseVariable(np.ndarray, npmixin.NDArrayOperatorsMixin):
 
 
 if __name__ == "__main__":
-    a = BaseVariable([1, 2, 3, 4])
+    a = Variable([1, 2, 3, 4])
     b = a + 5
     pass
