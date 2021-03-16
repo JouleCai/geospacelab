@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4ada4ff0-2cb9-4e76-9490-8e8e8c86c3b6" name="Default Changelist" comment="update class Variable">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/dataexplorer/_init_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/dataexplorer/_init_dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/dataexplorer/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/dataexplorer/__init__.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
