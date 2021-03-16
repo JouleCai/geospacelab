@@ -1,1 +1,1 @@
-import geospacelab.toolbox.utilities.logging_custom as logger
+import geospacelab.toolbox.utilities.pylogging as logger
