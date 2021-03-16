@@ -5,7 +5,7 @@ import weakref
 import copy as cp
 import numpy as np
 import numpy.lib.mixins as npmixin
-from geospacelab.explorer._init_dataset import Dataset
+from geospacelab.dataexplorer._init_dataset import Dataset
 from geospacelab.toolbox import logger
 from geospacelab.toolbox.graphic import Visual
 
@@ -304,7 +304,8 @@ class Variable(np.ndarray, npmixin.NDArrayOperatorsMixin):
 
 if __name__ == "__main__":
     a = Variable([1, 2, 3, 4], name='a')
+    a = a.reshape((a.shape[0], 1))
     b = 5 + a
     c = np.sum(a)
-    a = a.reshape((a.shape[0], 1))
+
     pass
