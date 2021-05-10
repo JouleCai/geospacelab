@@ -1,6 +1,6 @@
 import numpy as np
 
-from geospacelab.dataexplorer._init_variable import Variable
+from geospacelab.manager._init_variable import Variable
 
 import geospacelab.toolbox.utilities.pyclass as myclass
 import geospacelab.toolbox.utilities.pybasic as mybasic

@@ -1,6 +1,6 @@
-# import geospacelab.dataexplorer._init_variable as BaseVariable
+# import geospacelab.manager._init_variable as BaseVariable
 
-from geospacelab.dataexplorer._init_dataset import Dataset
+from geospacelab.manager._init_dataset import Dataset
 
 
 class DataExplorer(object):

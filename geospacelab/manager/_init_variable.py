@@ -1,13 +1,11 @@
 """Variable model based on np.ndarray"""
 
-import weakref
-
 import copy as cp
 import numpy as np
 import numpy.lib.mixins as npmixin
-from geospacelab.dataexplorer._init_dataset import Dataset
+from geospacelab.manager._init_dataset import Dataset
 from geospacelab.toolbox import logger
-from geospacelab.toolbox.graphic import Visual
+from geospacelab.visualization import Visual
 
 __author__ = "Lei Cai"
 __copyright__ = "Copyright 2021, The GeoSpaceLab Project"
