@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4ada4ff0-2cb9-4e76-9490-8e8e8c86c3b6" name="Default Changelist" comment="update class Variable">
-      <change beforePath="$PROJECT_DIR$/geospacelab/dataexplorer/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/dataexplorer/__init__.py" afterDir="false" />
+    <list default="true" id="4ada4ff0-2cb9-4e76-9490-8e8e8c86c3b6" name="Default Changelist" comment="update class DataExplorer">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -123,7 +123,14 @@
       <option name="project" value="LOCAL" />
       <updated>1615883231019</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="update class DataExplorer">
+      <created>1615886550402</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1615886550402</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -142,7 +149,8 @@
     <MESSAGE value="Adjust directories" />
     <MESSAGE value="create Visual class" />
     <MESSAGE value="update class Variable" />
-    <option name="LAST_COMMIT_MESSAGE" value="update class Variable" />
+    <MESSAGE value="update class DataExplorer" />
+    <option name="LAST_COMMIT_MESSAGE" value="update class DataExplorer" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
