@@ -3,9 +3,9 @@
 import copy as cp
 import numpy as np
 import numpy.lib.mixins as npmixin
-from geospacelab.manager._init_dataset import Dataset
+from geospacelab.datahub._init_dataset import Dataset
 from geospacelab.toolbox import logger
-from geospacelab.visualization import Visual
+from geospacelab.viewer import Visual
 
 __author__ = "Lei Cai"
 __copyright__ = "Copyright 2021, The GeoSpaceLab Project"
@@ -25,7 +25,7 @@ class Variable(np.ndarray, npmixin.NDArrayOperatorsMixin):
         'name', 'label', 'description', 'group',
         'error',
         'depends', 'unit', 'quantity_type',
-        'cs',
+        'coords',
         'visual'
     ]
 

@@ -1,9 +1,9 @@
-# import geospacelab.manager._init_variable as BaseVariable
+# import geospacelab.datahub._init_variable as BaseVariable
 
-from geospacelab.manager._init_dataset import Dataset
+from geospacelab.datahub._init_dataset import Dataset
 
 
-class DataExplorer(object):
+class DataHub(object):
 
     def __init__(self):
         self._datasets = {}

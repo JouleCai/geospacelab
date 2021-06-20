@@ -1,6 +1,6 @@
 import numpy as np
 
-from geospacelab.manager._init_variable import Variable
+from geospacelab.datahub._init_variable import Variable
 
 import geospacelab.toolbox.utilities.pyclass as myclass
 import geospacelab.toolbox.utilities.pybasic as mybasic
@@ -10,12 +10,12 @@ import geospacelab.toolbox.utilities.pybasic as mybasic
 class BaseClass(object):
     def __init__(self, **kwargs):
         self.name = kwargs.pop('name', None)
-        self.category = kwargs.pop('category', None)
+        self.category = kwargs.pop('kind', None)
         self.label = None
 
     def label(self, fields=None, fields_ignore=None, separator='_', lowercase=True):
         if fields_ignore is None:
-            fields_ignore = ['category', 'note']
+            fields_ignore = ['kind', 'note']
         sublabels = []
         if fields is None:
             attrs = myclass.get_object_attributes(self)
@@ -39,9 +39,9 @@ class BaseClass(object):
 
 # Class Database
 class Database(BaseClass):
-    def __init__(self, name='temporary', category='local', **kwargs):
+    def __init__(self, name='temporary', kind='local', **kwargs):
 
-        super().__init__(name=name, category=category)
+        super().__init__(name=name, kind=kind)
         self.set_attr(logging=False, **kwargs)
 
     def __str__(self):
@@ -81,11 +81,11 @@ class Experiment(BaseClass):
 # create the Dataset class
 class Dataset(object):
     def __init__(self, **kwargs):
-        self.data_path = kwargs.pop('data_path', None)
+        self.dataDir_root = kwargs.pop('dataDir_root', None)
         self.dt_fr = kwargs.pop('dt_fr', None)
         self.dt_to = kwargs.pop('dt_to', None)
         database_config = kwargs.pop('database_config', {})
-        self.database = kwargs.pop('database', Database(name='temporary', category='local', **database_config))
+        self.database = kwargs.pop('database', Database(**database_config))
         facility_config = kwargs.pop('facility_config', {})
         self.facility = kwargs.pop('facility', Facility(**facility_config))
         instrument_config = kwargs.pop('instrument_config', {})
@@ -97,11 +97,11 @@ class Dataset(object):
     def __getitem__(self, key):
         return self._variables[key]
 
-    def __setitem__(self, key, value, Var_Class=Variable):
-        if issubclass(value.__class__, Var_Class):
+    def __setitem__(self, key, value, var_class=Variable):
+        if issubclass(value.__class__, var_class):
             self._variables[key] = value
         elif isinstance(value, np.ndarray):
-            self._variables[key] = Var_Class(name=key, database=self)
+            self._variables[key] = var_class(name=key, database=self)
         else:
             raise TypeError("Variable must be an instance of Geospace Variable or numpy ndarray!")
 

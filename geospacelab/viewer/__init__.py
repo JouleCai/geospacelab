@@ -1,4 +1,4 @@
-""" Initial configuration for the visualization toolbox
+""" Initial configuration for the viewer toolbox
 """
 
 from geospacelab.toolbox import logger
