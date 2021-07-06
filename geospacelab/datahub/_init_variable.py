@@ -42,6 +42,7 @@ class Variable(np.ndarray, npmixin.NDArrayOperatorsMixin):
     _visual = None
 
     def __new__(cls, arr, copy=True, dtype=None, order='C', subok=False, ndmin=0, **kwargs):
+
         if issubclass(arr.__class__, Variable):
             obj_out = arr
         else:
@@ -49,7 +50,6 @@ class Variable(np.ndarray, npmixin.NDArrayOperatorsMixin):
             obj_out = obj_out.view(cls)
 
         obj_out.set_attr(**kwargs)
-
         return obj_out
 
     def __array_finalize__(self, obj):
@@ -124,7 +124,7 @@ class Variable(np.ndarray, npmixin.NDArrayOperatorsMixin):
         return tuple(object_state)
 
     def __setstate__(self, state):
-        # patch to unpickle Quantity objects (ndarray subclasses), see
+        # patch to unpickle Variable objects (ndarray subclasses), see
         # http://www.mail-archive.com/numpy-discussion@scipy.org/msg02446.html
 
         nd_state, own_state = state

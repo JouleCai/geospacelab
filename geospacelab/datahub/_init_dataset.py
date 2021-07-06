@@ -107,10 +107,10 @@ class Dataset(object):
 
     def add_variable(self, arr, **kwargs):
 
-        varname = kwargs.get('name')
+        var_name = kwargs.get('name')
         variable = Variable(arr, **kwargs)
 
-        self.__setitem__(varname, variable)
+        self.__setitem__(var_name, variable)
 
     def assign_data(self, Loader, loader_config=None):
         load_obj = Loader(**loader_config)
