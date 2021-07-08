@@ -12,7 +12,7 @@ import bs4
 import os
 
 import geospacelab.config.preferences as pfr
-import geospacelab.datahub.database.madrigal.madrigal_utilities as madrigal
+import geospacelab.datahub.sources.madrigal.madrigal_utilities as madrigal
 
 
 def test():

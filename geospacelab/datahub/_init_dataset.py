@@ -85,7 +85,7 @@ class Dataset(object):
         self.dt_fr = kwargs.pop('dt_fr', None)
         self.dt_to = kwargs.pop('dt_to', None)
         database_config = kwargs.pop('database_config', {})
-        self.database = kwargs.pop('database', Database(**database_config))
+        self.database = kwargs.pop('sources', Database(**database_config))
         facility_config = kwargs.pop('facility_config', {})
         self.facility = kwargs.pop('facility', Facility(**facility_config))
         instrument_config = kwargs.pop('instrument_config', {})

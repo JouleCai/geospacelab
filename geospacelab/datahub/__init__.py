@@ -1,28 +1,28 @@
 # import geospacelab.datahub._init_variable as BaseVariable
 import copy
+import importlib
+
+import pathlib
 
 import geospacelab.toolbox.utilities.pyclass as pyclass
 import geospacelab.toolbox.utilities.pybasic as pybasic
 from geospacelab.datahub._init_dataset import Dataset
 
+datahub_root_dir = pathlib.Path(__file__).parent.absolute()
 
 def example():
 
-    vc_list = []    # List of the variable configurations
+    var_config_list = []    # List of the variable configurations
 
-    database_config = {'name': 'madrigal'}  # configuration for the database, database's name if a string
-    facility_config = {'name': 'eiscat'}    # configuration for the facility
-    instrument_config = {'name': 'UHF'}     # configuration for the instrument
-    experiment_config = {'name': 'cp2'}     # configuration for the experiment
+    database_name = 'madrigal'
+    facility_name = 'eiscat'
+    assign_options = {'site': 'TRO', 'experiment': 'unknown', 'pulse_code': 'unknown', 'antenna':'UHF'}
 
-    var_config = VariableConfig(database=database_config, facility=facility_config, instrument=instrument_config,
-                                experiment=experiment_config)
+    var_config = VariableConfig(source_keys=[database_name, facility_name], assign_options=assign_options)
 
-    vc_list.extend([var_config.update(variable='n_e')])
-    vc_list.extend([var_config.update(variable='T_i')])
+    var_config_list.append(var_config.update(variable='n_e'))
+    var_config_list.append(var_config.update(variable='T_i'))
 
-    dh = DataHub()
-    dh.add_variables(vc_list)
 
 class Datasets(object):
     def __init__(self):
@@ -41,7 +41,16 @@ class Datasets(object):
     def __getitem__(self, key):
         return self._datasets[key]
 
-    def get(self, config_dict):
+    def get(self, **kwargs):
+        assign_keys = kwargs.pop('assign_keys', [])
+        module_keys = ['datahub']
+        module_keys.extend(assign_keys)
+        module = importlib.import_module('.'.join(module_keys) + '__init__.py')
+        dataset = module.set_dataset(**kwargs.pop('options'))
+
+
+
+
         dataset_key = pybasic.dict_key_tree_plain()
         dataset_hash = pybasic.string_to_hash(dataset_key)
         try:
@@ -55,19 +64,21 @@ class Datasets(object):
 
 
 class DataHub(object):
-    datasets = Datasets()
 
-    def __init__(self):
-        self._variables = {}
+    def __init__(self, dt_fr, dt_to, var_config_list=None):
+        self.variables = Variables()
+        self.datasets = Datasets()
 
-    def __setitem__(self, key, value):
-        if issubclass(value.__class__, Dataset):
-            self._variables[key] = value
-        else:
-            raise TypeError
+        self.dt_fr = dt_fr
+        self.dt_to = dt_to
 
-    def __getitem__(self, key):
-        return self._variables[key]
+        if var_config_list is not None:
+            self.assign_variables(var_config_list=var_config_list)
+
+    def assign_variables(self, var_config_list=None):
+
+        for var_config in var_config_list:
+            dataset = self.datasets.get(**var_config)
 
     def get_dataset(self, var_config):
         def generate_dataset_hash(var_config):
@@ -99,25 +110,11 @@ class DataHub(object):
 
 
 class VariableConfig(object):
-    def __init__(self, database=None, facility=None, instrument=None, experiment=None, variable=None):
-        if database is None:
-            database = {'name': 'temporary'}
+    def __init__(self, source_keys=None, var_name='', assign_options=None):
 
-        self.database = self.input_validation(database)
-        self.facility = self.input_validation(facility)
-        self.instrument = self.input_validation(instrument)
-        self.experiment = self.input_validation(experiment)
-        self.variable = self.input_validation(variable)
-
-    @staticmethod
-    def input_validation(value_in):
-        if isinstance(value_in, str):
-            value_in = {'name', value_in}
-        elif isinstance(value_in, dict):
-            value_in = value_in
-        else:
-            return ValueError('Input must be either a string or a dictionary')
-        return value_in
+        self.source_keys = source_keys
+        self.var_name = var_name
+        self.assign_options = assign_options
 
     def update(self, **kwargs):
         pyclass.set_object_attributes(self, **kwargs, append=False, logging=False)

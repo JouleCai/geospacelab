@@ -2,12 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4ada4ff0-2cb9-4e76-9490-8e8e8c86c3b6" name="Default Changelist" comment="Add EISCAT downloader">
+      <change afterPath="$PROJECT_DIR$/geospacelab/datahub/database/madrigal/eiscat/.config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/geospacelab/datahub/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/datahub/database/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/database/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/datahub/database/madrigal/eiscat/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/database/madrigal/eiscat/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/datahub/database/madrigal/eiscat/madrigal_eiscat_downloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/database/madrigal/eiscat/download_madrigal_eiscat.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/datahub/database/madrigal/eiscat/madrigal_eiscat_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/database/madrigal/eiscat/load_madrigal_eiscat.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -262,7 +259,14 @@
       <option name="project" value="LOCAL" />
       <updated>1625739204293</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Add EISCAT downloader">
+      <created>1625770712760</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1625770712760</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

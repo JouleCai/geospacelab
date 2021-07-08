@@ -12,19 +12,19 @@ default_madrigal_url = "http://cedar.openmadrigal.org/"
 
 
 """
-Functions for the Madrigal database
+Functions for the Madrigal sources
 """
 
 
 def list_all_instruments(madrigal_url=default_madrigal_url, database=None):
-    # list all the instruments from the madrigal database
-    # get database info
+    # list all the instruments from the madrigal sources
+    # get sources info
     if database is None:
         database = madrigalweb.MadrigalData(madrigal_url)
 
     # List all instruments
     inst_list = database.getAllInstruments()
-    mylog.simpleinfo.info("List all the instruments from the Madrigal database:\n")
+    mylog.simpleinfo.info("List all the instruments from the Madrigal sources:\n")
     for inst in inst_list:
         mylog.simpleinfo.info("%s: %s", str(inst.code), inst.name)
 
@@ -41,7 +41,7 @@ def list_experiments(instrument_code, dt_fr, dt_to, madrigal_url=default_madriga
     )
     if exp_list[0].id == -1:
         madrigal_url = exp_list[0].madrigalUrl
-        mylog.simpleinfo.info("Madrigal database has been relocated to %s", madrigal_url)
+        mylog.simpleinfo.info("Madrigal sources has been relocated to %s", madrigal_url)
         database = madrigalweb.MadrigalData(madrigal_url)
         exp_list = database.getExperiments(
             instrument_code,
