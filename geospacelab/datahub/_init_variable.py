@@ -3,7 +3,6 @@
 import copy as cp
 import numpy as np
 import numpy.lib.mixins as npmixin
-from geospacelab.datahub._init_dataset import Dataset
 from geospacelab.toolbox import logger
 from geospacelab.viewer import Visual
 
@@ -166,6 +165,7 @@ class Variable(np.ndarray, npmixin.NDArrayOperatorsMixin):
 
     @dataset.setter
     def dataset(self, obj):
+        from geospacelab.datahub import Dataset
         # Check the type:
         if obj is None:
             self._dataset = None

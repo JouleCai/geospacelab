@@ -1,9 +1,63 @@
 import h5py
 import os
+import madrigalWeb.madrigalWeb as madrigalweb
 import geospacelab.toolbox.utilities.pybasic as pybasic
+import geospacelab.toolbox.utilities.pylogging as mylog
 
 
-def show_structure(filename, filepath=''):
+default_user_fullname = 'Anonymous'
+default_user_email = 'public@gmail.com'
+default_user_affiliation = 'None'
+default_madrigal_url = "http://cedar.openmadrigal.org/"
+
+
+"""
+Functions for the Madrigal database
+"""
+
+
+def list_all_instruments(madrigal_url=default_madrigal_url, database=None):
+    # list all the instruments from the madrigal database
+    # get database info
+    if database is None:
+        database = madrigalweb.MadrigalData(madrigal_url)
+
+    # List all instruments
+    inst_list = database.getAllInstruments()
+    mylog.simpleinfo.info("List all the instruments from the Madrigal database:\n")
+    for inst in inst_list:
+        mylog.simpleinfo.info("%s: %s", str(inst.code), inst.name)
+
+
+def list_experiments(instrument_code, dt_fr, dt_to, madrigal_url=default_madrigal_url, database=None):
+    if database is None:
+        database = madrigalweb.MadrigalData(madrigal_url)
+
+    exp_list = database.getExperiments(
+        instrument_code,
+        dt_fr.year, dt_fr.month, dt_fr.day, dt_fr.hour, dt_fr.minute, dt_fr.second,
+        dt_to.year, dt_to.month, dt_to.day, dt_to.hour, dt_to.minute, dt_to.second,
+        local=0
+    )
+    if exp_list[0].id == -1:
+        madrigal_url = exp_list[0].madrigalUrl
+        mylog.simpleinfo.info("Madrigal database has been relocated to %s", madrigal_url)
+        database = madrigalweb.MadrigalData(madrigal_url)
+        exp_list = database.getExperiments(
+            instrument_code,
+            dt_fr.year, dt_fr.month, dt_fr.day, dt_fr.hour, dt_fr.minute, dt_fr.second,
+            dt_to.year, dt_to.month, dt_to.day, dt_to.hour, dt_to.minute, dt_to.second,
+            local=0
+        )
+    return exp_list, madrigal_url, database
+
+
+"""
+Functions for hdf5 files
+"""
+
+
+def show_hdf5_structure(filename, filepath=''):
     """
     Show madrigal hdf5 file structure in console.
     Example:
@@ -14,7 +68,7 @@ def show_structure(filename, filepath=''):
         pybasic.dict_print_tree(fh5, value_repr=True, dict_repr=True, max_level=None)
 
 
-def show_metadata(filename, filepath='', fields=None):
+def show_hdf5_metadata(filename, filepath='', fields=None):
     """
     Show madrigal hdf5 file metadata values.
     Example:
@@ -24,7 +78,7 @@ def show_metadata(filename, filepath='', fields=None):
     with h5py.File(os.path.join(filepath, filename), 'r') as fh5:
         if "metadata" in fh5.keys():
             metadata_key = "metadata"
-        elif "Metadata" in fih5.keys():
+        elif "Metadata" in fh5.keys():
             metadata_key = "Metadata"
         else:
             print("Cannot find the key either metadata or Metadata!")
@@ -42,7 +96,7 @@ def show_metadata(filename, filepath='', fields=None):
         pybasic.dict_print_tree(fh5[metadata_key], full_value=True)
 
 
-def show_group(filename, filepath='', group_name=""):
+def show_hdf5_group(filename, filepath='', group_name=""):
     """
     Show madrigal hdf5 file group information.
     Example:
@@ -64,8 +118,9 @@ def show_group(filename, filepath='', group_name=""):
 
 if __name__ == "__main__":
     fn = "/Users/lcai/Downloads/EISCAT_2021-03-10_beata_ant@uhfa.hdf5"
-    show_structure(fn)
-    show_metadata(fn)
-    show_group(fn, group_name="figures")
+    #show_hdf5_structure(fn)
+    #show_hdf5_metadata(fn)
+    #show_hdf5_group(fn, group_name="figures")
+    list_all_instruments()
 
 

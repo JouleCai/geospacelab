@@ -1,0 +1,345 @@
+fh5: <HDF5 file "EISCAT_2021-03-10_beata_ant@uhfa.hdf5" (mode r)>
+|---data: <HDF5 group "/data" (8 members)>
+|---|---par0d: <HDF5 dataset "par0d": shape (17, 1), type "<f4">
+|---|---par0d_sd: <HDF5 dataset "par0d_sd": shape (2, 1), type "<f8">
+|---|---par1d: <HDF5 dataset "par1d": shape (7, 121), type "<f4">
+|---|---par1d_sd: <HDF5 dataset "par1d_sd": shape (2, 72), type "<f8">
+|---|---par2d: <HDF5 dataset "par2d": shape (72, 5082), type "<f4">
+|---|---par2d_pp: <HDF5 dataset "par2d_pp": shape (4, 49703), type "<f4">
+|---|---utime: <HDF5 dataset "utime": shape (2, 121), type "<f8">
+|---|---utime_sd: <HDF5 dataset "utime_sd": shape (1, 72), type "<f8">
+|---figures: <HDF5 group "/figures" (4 members)>
+|---|---2021-03-10_beata2_0@T_plasmaline.png: <HDF5 group "/figures/2021-03-10_beata2_0@T_plasmaline.png" (3 members)>
+|---|---|---DataDescription: <HDF5 dataset "DataDescription": shape (1, 1), type "|S62">
+|---|---|---imagedata: <HDF5 dataset "imagedata": shape (3, 595, 842), type "|u1">
+|---|---|---imagemeta: <HDF5 group "/figures/2021-03-10_beata2_0@T_plasmaline.png/imagemeta" (3 members)>
+|---|---|---|---Copyright: <HDF5 dataset "Copyright": shape (1, 1), type "|S53">
+|---|---|---|---Experiment: <HDF5 dataset "Experiment": shape (1, 1), type "|S45">
+|---|---|---|---Figurename: <HDF5 dataset "Figurename": shape (1, 1), type "|S36">
+|---|---2021-03-10_beata_ant@uhfa.png: <HDF5 group "/figures/2021-03-10_beata_ant@uhfa.png" (3 members)>
+|---|---|---DataDescription: <HDF5 dataset "DataDescription": shape (1, 1), type "|S62">
+|---|---|---imagedata: <HDF5 dataset "imagedata": shape (3, 595, 842), type "|u1">
+|---|---|---imagemeta: <HDF5 group "/figures/2021-03-10_beata_ant@uhfa.png/imagemeta" (7 members)>
+|---|---|---|---Computer: <HDF5 dataset "Computer": shape (1, 1), type "|S30">
+|---|---|---|---Copyright: <HDF5 dataset "Copyright": shape (1, 1), type "|S53">
+|---|---|---|---Experiment: <HDF5 dataset "Experiment": shape (1, 1), type "|S30">
+|---|---|---|---Figurename: <HDF5 dataset "Figurename": shape (1, 1), type "|S29">
+|---|---|---|---Radar: <HDF5 dataset "Radar": shape (1, 1), type "|S16">
+|---|---|---|---Results: <HDF5 dataset "Results": shape (1, 1), type "|S14">
+|---|---|---|---Source: <HDF5 dataset "Source": shape (1, 1), type "|S67">
+|---|---2021-03-10_beata_ant_Nr@uhfa.png: <HDF5 group "/figures/2021-03-10_beata_ant_Nr@uhfa.png" (3 members)>
+|---|---|---DataDescription: <HDF5 dataset "DataDescription": shape (1, 1), type "|S62">
+|---|---|---imagedata: <HDF5 dataset "imagedata": shape (3, 595, 842), type "|u1">
+|---|---|---imagemeta: <HDF5 group "/figures/2021-03-10_beata_ant_Nr@uhfa.png/imagemeta" (7 members)>
+|---|---|---|---Computer: <HDF5 dataset "Computer": shape (1, 1), type "|S30">
+|---|---|---|---Copyright: <HDF5 dataset "Copyright": shape (1, 1), type "|S53">
+|---|---|---|---Experiment: <HDF5 dataset "Experiment": shape (1, 1), type "|S30">
+|---|---|---|---Figurename: <HDF5 dataset "Figurename": shape (1, 1), type "|S32">
+|---|---|---|---Radar: <HDF5 dataset "Radar": shape (1, 1), type "|S16">
+|---|---|---|---Results: <HDF5 dataset "Results": shape (1, 1), type "|S19">
+|---|---|---|---Source: <HDF5 dataset "Source": shape (1, 1), type "|S67">
+|---|---figure_links: <HDF5 dataset "figure_links": shape (1, 3), type "|S36">
+|---metadata: <HDF5 group "/metadata" (13 members)>
+|---|---comments: <HDF5 dataset "comments": shape (1, 1), type "|S329">
+|---|---header: <HDF5 dataset "header": shape (1, 7), type "|S21">
+|---|---names: <HDF5 dataset "names": shape (4, 3), type "|S42">
+|---|---par0d: <HDF5 dataset "par0d": shape (17, 7), type "|S66">
+|---|---par0d_sd: <HDF5 dataset "par0d_sd": shape (2, 7), type "|S66">
+|---|---par1d: <HDF5 dataset "par1d": shape (7, 7), type "|S70">
+|---|---par1d_sd: <HDF5 dataset "par1d_sd": shape (2, 7), type "|S55">
+|---|---par2d: <HDF5 dataset "par2d": shape (72, 7), type "|S109">
+|---|---par2d_pp: <HDF5 dataset "par2d_pp": shape (4, 7), type "|S49">
+|---|---schemes: <HDF5 group "/metadata/schemes" (1 members)>
+|---|---|---DataCite: <HDF5 group "/metadata/schemes/DataCite" (9 members)>
+|---|---|---|---Creator: <HDF5 dataset "Creator": shape (1, 1), type "|S4">
+|---|---|---|---Date: <HDF5 group "/metadata/schemes/DataCite/Date" (2 members)>
+|---|---|---|---|---Collected: <HDF5 dataset "Collected": shape (1, 1), type "|S39">
+|---|---|---|---|---Created: <HDF5 dataset "Created": shape (1, 1), type "|S10">
+|---|---|---|---GeoLocation: <HDF5 group "/metadata/schemes/DataCite/GeoLocation" (2 members)>
+|---|---|---|---|---PolygonLat: <HDF5 dataset "PolygonLat": shape (1, 4), type "|S7">
+|---|---|---|---|---PolygonLon: <HDF5 dataset "PolygonLon": shape (1, 4), type "|S7">
+|---|---|---|---GeoLocation_pp: <HDF5 group "/metadata/schemes/DataCite/GeoLocation_pp" (2 members)>
+|---|---|---|---|---PolygonLat: <HDF5 dataset "PolygonLat": shape (1, 4), type "|S7">
+|---|---|---|---|---PolygonLon: <HDF5 dataset "PolygonLon": shape (1, 4), type "|S7">
+|---|---|---|---Identifier: <HDF5 dataset "Identifier": shape (1, 1), type "|S44">
+|---|---|---|---PublicationYear: <HDF5 dataset "PublicationYear": shape (1, 1), type "|S4">
+|---|---|---|---Publisher: <HDF5 dataset "Publisher": shape (1, 1), type "|S29">
+|---|---|---|---ResourceType: <HDF5 group "/metadata/schemes/DataCite/ResourceType" (1 members)>
+|---|---|---|---|---Dataset: <HDF5 dataset "Dataset": shape (1, 1), type "|S19">
+|---|---|---|---Title: <HDF5 dataset "Title": shape (1, 1), type "|S32">
+|---|---software: <HDF5 group "/metadata/software" (5 members)>
+|---|---|---EISCAThdf5_ver: <HDF5 dataset "EISCAThdf5_ver": shape (1, 1), type "|S5">
+|---|---|---GUISDAP_ver: <HDF5 dataset "GUISDAP_ver": shape (1, 1), type "|S19">
+|---|---|---gfd: <HDF5 group "/metadata/software/gfd" (12 members)>
+|---|---|---|---data_path: <HDF5 dataset "data_path": shape (1, 1), type "|S27">
+|---|---|---|---expver: <HDF5 dataset "expver": shape (1, 1), type "|S1">
+|---|---|---|---extra: <HDF5 dataset "extra": shape (1, 1), type "|S17">
+|---|---|---|---figs: <HDF5 dataset "figs": shape (1, 1), type "|S13">
+|---|---|---|---intper: <HDF5 dataset "intper": shape (1, 1), type "|S1">
+|---|---|---|---name_expr: <HDF5 dataset "name_expr": shape (1, 1), type "|S5">
+|---|---|---|---path_exps: <HDF5 dataset "path_exps": shape (1, 1), type "|S24">
+|---|---|---|---result_path: <HDF5 dataset "result_path": shape (1, 1), type "|S22">
+|---|---|---|---rt: <HDF5 dataset "rt": shape (1, 1), type "|S1">
+|---|---|---|---siteid: <HDF5 dataset "siteid": shape (1, 1), type "|S1">
+|---|---|---|---t1: <HDF5 dataset "t1": shape (1, 1), type "|S34">
+|---|---|---|---t2: <HDF5 dataset "t2": shape (1, 1), type "|S34">
+|---|---|---software_link: <HDF5 dataset "software_link": shape (1, 1), type "|S34">
+|---|---|---strategy: <HDF5 dataset "strategy": shape (1, 1), type "|S3">
+|---|---utime: <HDF5 dataset "utime": shape (2, 7), type "|S47">
+|---|---utime_sd: <HDF5 dataset "utime_sd": shape (1, 7), type "|S50">
+
+
+#######################################################3
+fh5: <HDF5 file "MAD6300_2021-03-10_beata_ant@uhfa.hdf5" (mode r)>
+|---Data: <HDF5 group "/Data" (1 members)>
+|---|---Table Layout: <HDF5 dataset "Table Layout": shape (90600,), type "|V168">
+|---Metadata: <HDF5 group "/Metadata" (5 members)>
+|---|---Data Parameters: <HDF5 dataset "Data Parameters": shape (21,), type "|V97">
+|---|---Experiment Notes: <HDF5 dataset "Experiment Notes": shape (61,), type "|V8">
+|---|---Experiment Parameters: <HDF5 dataset "Experiment Parameters": shape (14,), type "|V16">
+|---|---Independent Spatial Parameters: <HDF5 dataset "Independent Spatial Parameters": shape (1,), type "|V10">
+|---|---_record_layout: <HDF5 dataset "_record_layout": shape (1,), type "|V168">
+fh5
+dict_in: <HDF5 group "/Metadata" (5 members)>
+|---Data Parameters: <HDF5 dataset "Data Parameters": shape (21,), type "|V97">
+[(b'YEAR', b'Year (universal time)', 0, b'y', b'Madrigal Hdf5 Prolog Parameters')
+ (b'MONTH', b'Month (universal time)', 0, b'm', b'Madrigal Hdf5 Prolog Parameters')
+ (b'DAY', b'Day (universal time)', 0, b'd', b'Madrigal Hdf5 Prolog Parameters')
+ (b'HOUR', b'Hour (universal time)', 0, b'h', b'Madrigal Hdf5 Prolog Parameters')
+ (b'MIN', b'Minute (universal time)', 0, b'm', b'Madrigal Hdf5 Prolog Parameters')
+ (b'SEC', b'Second (universal time)', 0, b's', b'Madrigal Hdf5 Prolog Parameters')
+ (b'RECNO', b'Logical Record Number', 0, b'N/A', b'Madrigal Hdf5 Prolog Parameters')
+ (b'KINDAT', b'Kind of data', 0, b'N/A', b'Madrigal Hdf5 Prolog Parameters')
+ (b'KINST', b'Instrument Code', 0, b'N/A', b'Madrigal Hdf5 Prolog Parameters')
+ (b'UT1_UNIX', b'Unix seconds (1/1/1970) at start', 0, b's', b'Madrigal Hdf5 Prolog Parameters')
+ (b'UT2_UNIX', b'Unix seconds (1/1/1970) at end', 0, b's', b'Madrigal Hdf5 Prolog Parameters')
+ (b'HSA', b'Half scattering angle (bistatic system)', 0, b'deg', b'Geographic Coordinate')
+ (b'TFREQ', b'Transmitted frequency', 0, b'Hz', b'Data Quality Parameter')
+ (b'AZM', b'Mean azimuth angle (0=geog N;90=east)', 0, b'deg', b'Geographic Coordinate')
+ (b'ELM', b'Elevation angle (0=horizontal;90=vert)', 0, b'deg', b'Geographic Coordinate')
+ (b'POWER', b'Peak power', 0, b'kW', b'Data Quality Parameter')
+ (b'SYSTMP', b'System temperature', 0, b'K', b'Data Quality Parameter')
+ (b'RANGE', b'Range', 0, b'km', b'Geographic Coordinate')
+ (b'POP', b'Uncorrected electron density (Te/Ti=1)', 0, b'm-3', b'I. S. Radar Basic Parameter')
+ (b'DPOP', b'Error in Uncorrected electron density (Te/Ti=1)', 1, b'm-3', b'I. S. Radar Basic Parameter')
+ (b'RGATE', b'Width of range gate', 0, b'km', b'Geographic Coordinate')]
+|---Experiment Notes: <HDF5 dataset "Experiment Notes": shape (61,), type "|V8">
+[(b'Catalog information from record 0:                                              ',)
+ (b'                                                                                ',)
+ (b'KRECC       2001 Catalogue Record, Version 1                                    ',)
+ (b'KINSTE     72 EISCAT Troms\xc3\xb8 UHF IS radar                                        ',)
+ (b'MODEXP    6300                                                                  ',)
+ (b'ALT1          89 km. Lowest altitude measured                                   ',)
+ (b'ALT2         738 km. Highest altitude measured                                  ',)
+ (b'GGLAT1        68 degrees. Lowest geographic latitude measured                   ',)
+ (b'GGLAT2        69 degrees. Highest geographic latitude measured                  ',)
+ (b'GGLON1        14 degrees. Westmost geographic longitude measured                ',)
+ (b'GGLON2        19 degrees. Eastmost geographic longitude measured                ',)
+ (b'CMODEXP  EISCAT uhfa pulse code beata integration time ant                      ',)
+ (b'CPURP    High power large aperture radar                                        ',)
+ (b'CPI      handle://20.500.12784                                                  ',)
+ (b'IBYRT               2021 Beginning year                                         ',)
+ (b'IBDTT               0310 Beginning month and day                                ',)
+ (b'IBHMT               0000 Beginning UT hour and minute                           ',)
+ (b'IBCST               1500 Beginning centisecond                                  ',)
+ (b'IEYRT               2021 Ending year                                            ',)
+ (b'IEDTT               0310 Ending month and day                                   ',)
+ (b'IEHMT               0301 Ending UT hour and minute                              ',)
+ (b'IECST               1500 Ending centisecond                                     ',)
+ (b'                                                                                ',)
+ (b'IBYRT               2021 Beginning year                                         ',)
+ (b'IBDTT               0310 Beginning month and day                                ',)
+ (b'IBHMT               0000 Beginning UT hour and minute                           ',)
+ (b'IBCST               1500 Beginning centisecond                                  ',)
+ (b'IEYRT               2021 Ending year                                            ',)
+ (b'IEDTT               0310 Ending month and day                                   ',)
+ (b'IEHMT               2359 Ending UT hour and minute                              ',)
+ (b'IECST               0000 Ending centisecond                                     ',)
+ (b'                                                                                ',)
+ (b'Header information from record 1:                                               ',)
+ (b'                                                                                ',)
+ (b'KRECH               3002 Header Record, Version 3                               ',)
+ (b'KINST     72 EISCAT Troms\xc3\xb8 UHF IS radar                                         ',)
+ (b'KINDAT    6300 GUISDAP pp resolution 0                                          ',)
+ (b'CKINDAT GUISDAP pp resolution 0                                                 ',)
+ (b'C 1D Parameters:                                                                ',)
+ (b'KODS(0)          130 Mean azimuth angle (0=geog N;90=east)            deg       ',)
+ (b'KODS(1)          140 Elevation angle (0=horizontal;90=vert)           deg       ',)
+ (b'KODS(2)          190 Half scattering angle (bistatic system)          deg       ',)
+ (b'KODS(3)          482 System temperature                               K         ',)
+ (b'KODS(4)          486 Peak power                                       kW        ',)
+ (b'KODS(5)          490 Transmitted frequency                            Hz        ',)
+ (b'C 2D Parameters:                                                                ',)
+ (b'KODM(0)          120 Range                                            km        ',)
+ (b'KODM(1)          125 Width of range gate                              km        ',)
+ (b'KODM(2)          500 Uncorrected electron density (Te/Ti=1)           m-3       ',)
+ (b'KODM(3)         -500 Error in Uncorrected electron density (Te/Ti=1)  m-3       ',)
+ (b'CANALYST handle://20.500.12784                                                  ',)
+ (b'CANDATE  Fri Mar 19 15:15:24 2021 UT                                            ',)
+ (b'IBYRT               2021 Beginning year                                         ',)
+ (b'IBDTT               0310 Beginning month and day                                ',)
+ (b'IBHMT               0000 Beginning UT hour and minute                           ',)
+ (b'IBCST               1500 Beginning centisecond                                  ',)
+ (b'IEYRT               2021 Ending year                                            ',)
+ (b'IEDTT               0310 Ending month and day                                   ',)
+ (b'IEHMT               2359 Ending UT hour and minute                              ',)
+ (b'IECST               0000 Ending centisecond                                     ',)
+ (b'                                                                                ',)]
+|---Experiment Parameters: <HDF5 dataset "Experiment Parameters": shape (14,), type "|V16">
+[(b'instrument', b'EISCAT Troms\xc3\xb8 UHF IS radar')
+ (b'instrument code(s)', b'72')
+ (b'kind of data file', b'GUISDAP pp resolution 0')
+ (b'kindat code(s)', b'6300') (b'start time', b'2021-03-10 00:00:15 UT')
+ (b'end time', b'2021-03-10 23:59:00 UT')
+ (b'Cedar file name', b'MAD6300_2021-03-10_beata_ant@uhfa.hdf5')
+ (b'status description', b'Unknown') (b'instrument latitude', b'69.583')
+ (b'instrument longitude', b'19.21') (b'instrument altitude', b'0.03')
+ (b'instrument category', b'Incoherent Scatter Radars')
+ (b'instrument PI', b'Ingemar H\xc3\xa4ggstr\xc3\xb6m')
+ (b'instrument PI email', b'ingemar@eiscat.se')]
+|---Independent Spatial Parameters: <HDF5 dataset "Independent Spatial Parameters": shape (1,), type "|V10">
+[(b'range', b'Range')]
+|---_record_layout: <HDF5 dataset "_record_layout": shape (1,), type "|V168">
+[(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 2, 2, 2)]
+fh5: <HDF5 file "MAD6400_2021-03-10_beata_ant@uhfa.hdf5" (mode r)>
+|---Data: <HDF5 group "/Data" (1 members)>
+|---|---Table Layout: <HDF5 dataset "Table Layout": shape (12600,), type "|V296">
+|---Metadata: <HDF5 group "/Metadata" (5 members)>
+|---|---Data Parameters: <HDF5 dataset "Data Parameters": shape (37,), type "|V99">
+|---|---Experiment Notes: <HDF5 dataset "Experiment Notes": shape (76,), type "|V8">
+|---|---Experiment Parameters: <HDF5 dataset "Experiment Parameters": shape (14,), type "|V16">
+|---|---Independent Spatial Parameters: <HDF5 dataset "Independent Spatial Parameters": shape (1,), type "|V10">
+|---|---_record_layout: <HDF5 dataset "_record_layout": shape (1,), type "|V296">
+fh5
+dict_in: <HDF5 group "/Metadata" (5 members)>
+|---Data Parameters: <HDF5 dataset "Data Parameters": shape (37,), type "|V99">
+[(b'YEAR', b'Year (universal time)', 0, b'y', b'Madrigal Hdf5 Prolog Parameters')
+ (b'MONTH', b'Month (universal time)', 0, b'm', b'Madrigal Hdf5 Prolog Parameters')
+ (b'DAY', b'Day (universal time)', 0, b'd', b'Madrigal Hdf5 Prolog Parameters')
+ (b'HOUR', b'Hour (universal time)', 0, b'h', b'Madrigal Hdf5 Prolog Parameters')
+ (b'MIN', b'Minute (universal time)', 0, b'm', b'Madrigal Hdf5 Prolog Parameters')
+ (b'SEC', b'Second (universal time)', 0, b's', b'Madrigal Hdf5 Prolog Parameters')
+ (b'RECNO', b'Logical Record Number', 0, b'N/A', b'Madrigal Hdf5 Prolog Parameters')
+ (b'KINDAT', b'Kind of data', 0, b'N/A', b'Madrigal Hdf5 Prolog Parameters')
+ (b'KINST', b'Instrument Code', 0, b'N/A', b'Madrigal Hdf5 Prolog Parameters')
+ (b'UT1_UNIX', b'Unix seconds (1/1/1970) at start', 0, b's', b'Madrigal Hdf5 Prolog Parameters')
+ (b'UT2_UNIX', b'Unix seconds (1/1/1970) at end', 0, b's', b'Madrigal Hdf5 Prolog Parameters')
+ (b'HSA', b'Half scattering angle (bistatic system)', 0, b'deg', b'Geographic Coordinate')
+ (b'TFREQ', b'Transmitted frequency', 0, b'Hz', b'Data Quality Parameter')
+ (b'AZM', b'Mean azimuth angle (0=geog N;90=east)', 0, b'deg', b'Geographic Coordinate')
+ (b'ELM', b'Elevation angle (0=horizontal;90=vert)', 0, b'deg', b'Geographic Coordinate')
+ (b'POWER', b'Peak power', 0, b'kW', b'Data Quality Parameter')
+ (b'SYSTMP', b'System temperature', 0, b'K', b'Data Quality Parameter')
+ (b'RANGE', b'Range', 0, b'km', b'Geographic Coordinate')
+ (b'GDALT', b'Geodetic altitude (height)', 0, b'km', b'Geographic Coordinate')
+ (b'NE', b'Electron density (Ne)', 0, b'm-3', b'I. S. Radar Basic Parameter')
+ (b'TI', b'Ion temperature (Ti)', 0, b'K', b'I. S. Radar Basic Parameter')
+ (b'TR', b'Temperature ratio (Te/Ti)', 0, b'N/A', b'I. S. Radar Basic Parameter')
+ (b'CO', b'Ion-neutral collision frequency', 0, b's-1', b'I. S. Radar Basic Parameter')
+ (b'VO', b'Line of sight ion velocity (pos = away)', 0, b'ms-1', b'I. S. Radar Basic Parameter')
+ (b'PM', b'Comp - (ions with mol wt 28 to 32)/Ne', 0, b'N/A', b'I. S. Radar Basic Parameter')
+ (b'PO+', b'Composition - [O+]/Ne', 0, b'N/A', b'I. S. Radar Basic Parameter')
+ (b'DNE', b'Error in Electron density (Ne)', 1, b'm-3', b'I. S. Radar Basic Parameter')
+ (b'DTI', b'Error in Ion temperature (Ti)', 1, b'K', b'I. S. Radar Basic Parameter')
+ (b'DTR', b'Error in Temperature ratio (Te/Ti)', 1, b'N/A', b'I. S. Radar Basic Parameter')
+ (b'DCO', b'Error in Ion-neutral collision frequency', 1, b's-1', b'I. S. Radar Basic Parameter')
+ (b'DVO', b'Error in Line of sight ion velocity (pos = away)', 1, b'ms-1', b'I. S. Radar Basic Parameter')
+ (b'DPM', b'Error in Comp - (ions with mol wt 28 to 32)/Ne', 1, b'N/A', b'I. S. Radar Basic Parameter')
+ (b'DPO+', b'Error in Composition - [O+]/Ne', 1, b'N/A', b'I. S. Radar Basic Parameter')
+ (b'DWN', b'Error in Wideband noise', 1, b'K', b'I. S. Radar Basic Parameter')
+ (b'DDC', b'Error in DC spike', 1, b'K', b'I. S. Radar Basic Parameter')
+ (b'GFIT', b'Goodness of fit', 0, b'N/A', b'Data Quality Parameter')
+ (b'CHISQ', b'Reduced-chi square of fit', 0, b'N/A', b'Data Quality Parameter')]
+|---Experiment Notes: <HDF5 dataset "Experiment Notes": shape (76,), type "|V8">
+[(b'Catalog information from record 0:                                              ',)
+ (b'                                                                                ',)
+ (b'KRECC       2001 Catalogue Record, Version 1                                    ',)
+ (b'KINSTE     72 EISCAT Troms\xc3\xb8 UHF IS radar                                        ',)
+ (b'MODEXP    6400                                                                  ',)
+ (b'ALT1          76 km. Lowest altitude measured                                   ',)
+ (b'ALT2         679 km. Highest altitude measured                                  ',)
+ (b'GGLAT1        68 degrees. Lowest geographic latitude measured                   ',)
+ (b'GGLAT2        69 degrees. Highest geographic latitude measured                  ',)
+ (b'GGLON1        15 degrees. Westmost geographic longitude measured                ',)
+ (b'GGLON2        19 degrees. Eastmost geographic longitude measured                ',)
+ (b'CMODEXP  EISCAT uhfa pulse code beata integration time ant                      ',)
+ (b'CPI      handle://20.500.12784                                                  ',)
+ (b'IBYRT               2021 Beginning year                                         ',)
+ (b'IBDTT               0310 Beginning month and day                                ',)
+ (b'IBHMT               0000 Beginning UT hour and minute                           ',)
+ (b'IBCST               1500 Beginning centisecond                                  ',)
+ (b'IEYRT               2021 Ending year                                            ',)
+ (b'IEDTT               0310 Ending month and day                                   ',)
+ (b'IEHMT               0301 Ending UT hour and minute                              ',)
+ (b'IECST               1500 Ending centisecond                                     ',)
+ (b'                                                                                ',)
+ (b'IBYRT               2021 Beginning year                                         ',)
+ (b'IBDTT               0310 Beginning month and day                                ',)
+ (b'IBHMT               0000 Beginning UT hour and minute                           ',)
+ (b'IBCST               1500 Beginning centisecond                                  ',)
+ (b'IEYRT               2021 Ending year                                            ',)
+ (b'IEDTT               0310 Ending month and day                                   ',)
+ (b'IEHMT               2359 Ending UT hour and minute                              ',)
+ (b'IECST               0000 Ending centisecond                                     ',)
+ (b'                                                                                ',)
+ (b'Header information from record 1:                                               ',)
+ (b'                                                                                ',)
+ (b'KRECH               3002 Header Record, Version 3                               ',)
+ (b'KINST     72 EISCAT Troms\xc3\xb8 UHF IS radar                                         ',)
+ (b'KINDAT    6400 GUISDAP params 0                                                 ',)
+ (b'CKINDAT GUISDAP params 0                                                        ',)
+ (b'C 1D Parameters:                                                                ',)
+ (b'KODS(0)          130 Mean azimuth angle (0=geog N;90=east)            deg       ',)
+ (b'KODS(1)          140 Elevation angle (0=horizontal;90=vert)           deg       ',)
+ (b'KODS(2)          190 Half scattering angle (bistatic system)          deg       ',)
+ (b'KODS(3)          482 System temperature                               K         ',)
+ (b'KODS(4)          486 Peak power                                       kW        ',)
+ (b'KODS(5)          490 Transmitted frequency                            Hz        ',)
+ (b'C 2D Parameters:                                                                ',)
+ (b'KODM(0)          110 Geodetic altitude (height)                       km        ',)
+ (b'KODM(1)          120 Range                                            km        ',)
+ (b'KODM(2)          420 Reduced-chi square of fit                        N/A       ',)
+ (b'KODM(3)          430 Goodness of fit                                  N/A       ',)
+ (b'KODM(4)          510 Electron density (Ne)                            m-3       ',)
+ (b'KODM(5)         -510 Error in Electron density (Ne)                   m-3       ',)
+ (b'KODM(6)         -538 Error in Wideband noise                          K         ',)
+ (b'KODM(7)         -539 Error in DC spike                                K         ',)
+ (b'KODM(8)          550 Ion temperature (Ti)                             K         ',)
+ (b'KODM(9)         -550 Error in Ion temperature (Ti)                    K         ',)
+ (b'KODM(10)         570 Temperature ratio (Te/Ti)                        N/A       ',)
+ (b'KODM(11)        -570 Error in Temperature ratio (Te/Ti)               N/A       ',)
+ (b'KODM(12)         580 Line of sight ion velocity (pos = away)          ms-1      ',)
+ (b'KODM(13)        -580 Error in Line of sight ion velocity (pos = away) ms-1      ',)
+ (b'KODM(14)         620 Composition - [O+]/Ne                            N/A       ',)
+ (b'KODM(15)        -620 Error in Composition - [O+]/Ne                   N/A       ',)
+ (b'KODM(16)         690 Comp - (ions with mol wt 28 to 32)/Ne            N/A       ',)
+ (b'KODM(17)        -690 Error in Comp - (ions with mol wt 28 to 32)/Ne   N/A       ',)
+ (b'KODM(18)         709 Ion-neutral collision frequency                  s-1       ',)
+ (b'KODM(19)        -709 Error in Ion-neutral collision frequency         s-1       ',)
+ (b'CANALYST handle://20.500.12784                                                  ',)
+ (b'CANDATE  Fri Mar 19 15:14:41 2021 UT                                            ',)
+ (b'IBYRT               2021 Beginning year                                         ',)
+ (b'IBDTT               0310 Beginning month and day                                ',)
+ (b'IBHMT               0000 Beginning UT hour and minute                           ',)
+ (b'IBCST               1500 Beginning centisecond                                  ',)
+ (b'IEYRT               2021 Ending year                                            ',)
+ (b'IEDTT               0310 Ending month and day                                   ',)
+ (b'IEHMT               2359 Ending UT hour and minute                              ',)
+ (b'IECST               0000 Ending centisecond                                     ',)
+ (b'                                                                                ',)]
+|---Experiment Parameters: <HDF5 dataset "Experiment Parameters": shape (14,), type "|V16">
+[(b'instrument', b'EISCAT Troms\xc3\xb8 UHF IS radar')
+ (b'instrument code(s)', b'72')
+ (b'kind of data file', b'GUISDAP params 0') (b'kindat code(s)', b'6400')
+ (b'start time', b'2021-03-10 00:00:15 UT')
+ (b'end time', b'2021-03-10 23:59:00 UT')
+ (b'Cedar file name', b'MAD6400_2021-03-10_beata_ant@uhfa.hdf5')
+ (b'status description', b'Unknown') (b'instrument latitude', b'69.583')
+ (b'instrument longitude', b'19.21') (b'instrument altitude', b'0.03')
+ (b'instrument category', b'Incoherent Scatter Radars')
+ (b'instrument PI', b'Ingemar H\xc3\xa4ggstr\xc3\xb6m')
+ (b'instrument PI email', b'ingemar@eiscat.se')]
+|---Independent Spatial Parameters: <HDF5 dataset "Independent Spatial Parameters": shape (1,), type "|V10">
+[(b'range', b'Range')]
+|---_record_layout: <HDF5 dataset "_record_layout": shape (1,), type "|V296">
+[(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2)]
