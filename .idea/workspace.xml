@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4ada4ff0-2cb9-4e76-9490-8e8e8c86c3b6" name="Default Changelist" comment="Add EISCAT downloader">
-      <change afterPath="$PROJECT_DIR$/geospacelab/datahub/database/madrigal/eiscat/.config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/config/preferences.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/config/preferences.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/geospacelab/datahub/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/__init__.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -117,6 +117,9 @@
       <module name="geospacelab" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/geospacelab/datahub/database/madrigal" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -135,6 +138,9 @@
       <module name="geospacelab" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/geospacelab/config" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -266,7 +272,14 @@
       <option name="project" value="LOCAL" />
       <updated>1625770712760</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Add EISCAT downloader">
+      <created>1625780002730</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1625780002730</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -299,27 +312,27 @@
           <option name="timeStamp" value="15" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/geospacelab/datahub/database/madrigal/eiscat/download_madrigal_eiscat.py</url>
+          <url>file://$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/download_madrigal_eiscat.py</url>
           <line>193</line>
           <option name="timeStamp" value="23" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/geospacelab/datahub/database/madrigal/eiscat/download_madrigal_eiscat.py</url>
+          <url>file://$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/download_madrigal_eiscat.py</url>
           <line>21</line>
           <option name="timeStamp" value="24" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/geospacelab/datahub/database/madrigal/eiscat/download_madrigal_eiscat.py</url>
+          <url>file://$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/download_madrigal_eiscat.py</url>
           <line>151</line>
           <option name="timeStamp" value="25" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/geospacelab/datahub/database/madrigal/eiscat/download_madrigal_eiscat.py</url>
+          <url>file://$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/download_madrigal_eiscat.py</url>
           <line>44</line>
           <option name="timeStamp" value="26" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/geospacelab/datahub/database/madrigal/eiscat/download_madrigal_eiscat.py</url>
+          <url>file://$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/download_madrigal_eiscat.py</url>
           <line>144</line>
           <option name="timeStamp" value="27" />
         </line-breakpoint>
