@@ -19,27 +19,32 @@ def example():
     database_name = 'madrigal'
     facility_name = 'eiscat'
 
-    config_d = DatasetConfiguration(source_labels=[database_name, facility_name],
-                                          site='TRO', antenna='UHF')
-    config_v = VariableConfiguration()
-
     dh = DataHub(dt_fr, dt_to)
-    dataset_label = dh.add_dataset(config_d)
-    v1 = dh.add_variable(config_v.replace('n_e'))
-    v2 = dh.add_variable(config_v.replace('T_i'))
+    ds_1 = dh.set_dataset(datasource_contents=['madrigal', 'eiscat'],
+                          site='TRO', antenna='UHF', file_type='eiscat_hdf5')
+    var_1 = dh.set_variable('n_e')
+    var_2 = dh.set_variable('T_i')
 
 
 class DataHub(object):
     def __init__(self, dt_fr=None, dt_to=None, **kwargs):
+        self.dt_fr = dt_fr
+        self.dt_to = dt_to
         self.datasets = []
         self.variables = []
 
     def set_dataset(self, **kwargs):
+        # set default starting and ending times
+        kwargs.setdefault('dt_fr', self.dt_fr)
+        kwargs.setdefault('dt_to', self.dt_to)
+
         mode = kwargs.pop('mode', 'sourced')
         dataset = kwargs.pop('dataset', None)
+        datasource_contents = kwargs.pop('datasource_contents', [])
+
         append = True
         if mode == 'sourced':
-            datasource_contents = kwargs.pop('datasource_contents', [])
+
             module_keys = [pfr.package_name, 'datahub', 'sources']
             module_keys.extend(datasource_contents)
             module = importlib.import_module('.'.join(module_keys))
