@@ -8,7 +8,7 @@ import pathlib
 import geospacelab.toolbox.utilities.pyclass as pyclass
 import geospacelab.toolbox.utilities.pybasic as pybasic
 import geospacelab.toolbox.utilities.pylogging as mylog
-from geospacelab.datahub._init_dataset import DatasetBase
+from geospacelab.datahub.__init_dataset import DatasetBase
 import geospacelab.config.preferences as pfr
 
 

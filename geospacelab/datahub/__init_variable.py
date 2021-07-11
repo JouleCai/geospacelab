@@ -136,6 +136,9 @@ class Variable(np.ndarray, npmixin.NDArrayOperatorsMixin):
                                   prefix=str_pref)
         return f'{str_pref}{str_arr}{self.unit:s}>'
 
+    def config(self, **kwargs):
+        self.set_attr(**kwargs)
+
     def set_attr(self, **kwargs):
         # set values for the registered attributes
         attr_add = kwargs.pop('attr_add', True)
