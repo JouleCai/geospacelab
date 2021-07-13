@@ -7,9 +7,9 @@ import geospacelab.toolbox.utilities.pybasic as pybasic
 
 
 class DatasetBase(object):
-""" Dateset template class
+    """ Template for the Dateset class
 
-"""
+    """
     def __init__(self, **kwargs):
         self._default_attributes = kwargs.pop('default_attributes', {})
         self._default_label_fields = kwargs.pop('default_label_fields', [])
@@ -32,6 +32,7 @@ class DatasetBase(object):
             else:
                 sublabels.append(attr_name)
         label = pybasic.str_join(sublabels, separator=separator, lowercase=lowercase)
+        return label
 
     def __setitem__(self, key, value):
         if not issubclass(value, Variable):
