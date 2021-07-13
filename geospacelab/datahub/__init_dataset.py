@@ -2,19 +2,34 @@ import numpy as np
 
 from geospacelab.datahub.__init_variable import Variable
 
-import geospacelab.toolbox.utilities.pyclass as myclass
-import geospacelab.toolbox.utilities.pybasic as mybasic
+import geospacelab.toolbox.utilities.pyclass as pyclass
+import geospacelab.toolbox.utilities.pybasic as pybasic
 
 
 class DatasetBase(object):
-    default_contents = ['database', 'facility', 'instrument']
 
     def __init__(self, **kwargs):
-        self.name = kwargs.pop('name', None)
-        self.category = kwargs.pop('category', None)
-        self.mode = kwargs.pop('mode', 'temporary')
-        self._variables = {}
-        #self.config(**kwargs)
+        self._default_attributes = kwargs.pop('default_attributes', {})
+        self._default_label_fields = kwargs.pop('default_label_fields', [])
+        self._loader_class = kwargs.pop('loader_class', None)
+        self.set_attr(add_attr=True, logging=True, **kwargs)
+
+    def set_attr(self, add_attr=False, logging=True, **kwargs):
+        for key in self._default_attributes.keys():
+            kwargs.setdefault(key, self._default_attributes[key])
+
+        pyclass.set_object_attributes(append=add_attr, logging=logging, **kwargs)
+
+    def label(self, fields = None, separator='_', lowercase=True):
+        if fields is None:
+            fields = self._default_label_fields
+        sublabels = []
+        for attr_name in fields:
+            if not str(attr_name):
+                sublabels.append('*')
+            else:
+                sublabels.append(attr_name)
+        label = pybasic.str_join(sublabels, separator=separator, lowercase=lowercase)
 
     def __setitem__(self, key, value):
         if not issubclass(value, Variable):
@@ -27,11 +42,6 @@ class DatasetBase(object):
     def __delitem__(self, key):
         del self._variables[key]
         pass
-
-    def config(self, **kwargs):
-        append = kwargs.pop('append', True)
-        logging = kwargs.pop('logging', False)
-        myclass.set_object_attributes(self, **kwargs, append=append, logging=logging)
 
     def add_variable(self, variable, name=None):
         self[name] = variable
