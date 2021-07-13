@@ -7,7 +7,9 @@ import geospacelab.toolbox.utilities.pybasic as pybasic
 
 
 class DatasetBase(object):
+""" Dateset template class
 
+"""
     def __init__(self, **kwargs):
         self._default_attributes = kwargs.pop('default_attributes', {})
         self._default_label_fields = kwargs.pop('default_label_fields', [])
