@@ -1,4 +1,7 @@
 import geospacelab.datahub as datahub
+import geospacelab.datahub.sources.madrigal.eiscat.load_madrigal_eiscat as loader
+import geospacelab.datahub.sources.madrigal.eiscat.config_variables_madrigal_eiscat as config_variables
+
 import geospacelab.toolbox.utilities.pyclass as pyclass
 import geospacelab.toolbox.utilities.pybasic as pybasic
 
@@ -29,5 +32,17 @@ class Dataset(datahub.DatasetBase):
     def _validate_attributes(self):
         pass
 
-    def load_data(self, **kwargs):
-        loader = self._loader_class
+    def assign_data(self):
+        config_load_data = {
+            'file_type': self.file_type,
+            ''
+        }
+        load_obj = loader.load_data(**kwargs)
+        for var_name in config_variables.items.keys():
+            variable = datahub.Variable(load_obj[var_name], **config_variables.items[var_name])
+            self.add_variable(variable)
+
+
+
+
+

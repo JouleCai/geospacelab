@@ -13,8 +13,14 @@ class DatasetBase(object):
     def __init__(self, **kwargs):
         self._default_attributes = kwargs.pop('default_attributes', {})
         self._default_label_fields = kwargs.pop('default_label_fields', [])
-        self._loader_class = kwargs.pop('loader_class', None)
+        self.input_mode = kwargs.pop('input_mode', 'AUTO') # ['AUTO'], 'dialog', 'assigned'
+        self.input_file_paths = kwargs.pop('input_file_paths', [])
+        self.input_file_names = kwargs.pop('input_file_names', [])
+
         self.set_attr(add_attr=True, logging=True, **kwargs)
+
+    def assign_data(self):
+        raise NotImplemented
 
     def set_attr(self, add_attr=False, logging=True, **kwargs):
         for key in self._default_attributes.keys():
@@ -47,7 +53,11 @@ class DatasetBase(object):
         pass
 
     def add_variable(self, variable, name=None):
-        self[name] = variable
+        if issubclass(variable, Variable):
+            pass
+        else:
+            variable = Variable(variable, name=name)
+        self[variable.name] = variable
 
     def remove_variable(self, name):
         del self[name]

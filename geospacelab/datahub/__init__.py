@@ -38,12 +38,12 @@ class DataHub(object):
         kwargs.setdefault('dt_fr', self.dt_fr)
         kwargs.setdefault('dt_to', self.dt_to)
 
-        mode = kwargs.pop('mode', 'sourced')
-        dataset = kwargs.pop('dataset', None)
+        datasource_mode = kwargs.pop('datasource_mode', 'sourced')  # ['sourced'], 'temporary', 'custom'
         datasource_contents = kwargs.pop('datasource_contents', [])
+        dataset = kwargs.pop('dataset', None)
 
         append = True
-        if mode == 'sourced':
+        if datasource_mode == 'sourced':
 
             module_keys = [pfr.package_name, 'datahub', 'sources']
             module_keys.extend(datasource_contents)
@@ -55,7 +55,7 @@ class DataHub(object):
                 append = False
             else:
                 dataset.load_data()
-        elif mode == 'temporary':
+        elif datasource_mode == 'temporary':
             if dataset is None:
                 dataset = DatasetBase(name='temporary')
             elif issubclass(dataset, DatasetBase):
