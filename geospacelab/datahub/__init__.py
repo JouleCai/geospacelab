@@ -69,7 +69,7 @@ class DataHub(object):
 
         return dataset
 
-    def set_variable(self, name, **kwargs):
+    def set_variable(self, var_name, **kwargs):
         dataset = kwargs.pop('dataset', None)
         if dataset is None:
             dataset = self.datasets[-1]  # the latest added dataset
@@ -78,8 +78,10 @@ class DataHub(object):
         else:
             raise TypeError
 
-        var = dataset.get_variable(name)
+        var = dataset.assign_variable(var_name)
         var.config(**kwargs)
+
+        self.variables.append(var)
 
         return var
 
