@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="5c86c9ff-0de4-4dd2-8c70-b0a0c5c32574" name="Default Changelist" comment="modify database class" />
+    <list default="true" id="5c86c9ff-0de4-4dd2-8c70-b0a0c5c32574" name="Default Changelist" comment="modify database class">
+      <change beforePath="$PROJECT_DIR$/.idea/geospacelab.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/geospacelab.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/datahub/__init_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/__init_dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/madrigal_eiscat_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/madrigal_eiscat_variable_config.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -32,6 +39,9 @@
       <module name="geospacelab" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -162,16 +172,6 @@
           <url>file://$PROJECT_DIR$/geospacelab/test/test_A.py</url>
           <line>8</line>
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/__init__.py</url>
-          <line>58</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/__init__.py</url>
-          <line>1</line>
-          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

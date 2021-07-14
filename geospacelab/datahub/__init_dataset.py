@@ -12,15 +12,20 @@ class DatasetBase(object):
     """
     def __init__(self, **kwargs):
         self._variables = {}
-        self.dt_fr = kwargs.pop('dt_fr', None)
-        self.dt_to = kwargs.pop('dt_to', None)
+        self.dt_fr = None
+        self.dt_to = None
 
         self._loader = kwargs.pop('loader', None)
+        self._variable_config = kwargs.pop('variable_config', None)
 
-        self.input_mode = kwargs.pop('input_mode', 'AUTO')  # ['AUTO'], 'dialog', 'assigned'
-        self.input_file_paths = kwargs.pop('input_file_paths', [])
-        self.input_file_names = kwargs.pop('input_file_names', [])
-        self.input_file_num = kwargs.pop('input_file_num', 0)
+        self.input_mode = 'AUTO'  # ['AUTO'], 'dialog', 'assigned'
+        self.input_file_paths = []
+        self.input_file_names = []
+        self.input_file_num = 0
+
+        self.attrs_for_output = []
+        self.attrs_for_label = []
+        self.attrs_for_loader = []
 
     def config(self, logging=True, **kwargs):
         pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
@@ -52,7 +57,7 @@ class DatasetBase(object):
         return label
 
     def __setitem__(self, key, value):
-        if not issubclass(value, Variable):
+        if not issubclass(value, VariableModel):
             raise TypeError
         self._variables[key] = value
 
@@ -75,6 +80,19 @@ class DatasetBase(object):
 
     def get_variable_names(self):
         return list(self._variables.keys())
+
+    def load_data(self):
+        load_config = self.attrs_to_dict(self.attrs_for_loader)
+        load_obj = self._loader.Loader(**load_config)
+        self._variables = load_obj.variables
+        attrs = {}
+        for key in self.attrs_for_loader:
+            attrs[key] = getattr(load_obj, key)
+        self.config(**attrs)
+
+    def assign_variable(self, var_name):
+        var_config = self._variable_config[var_name]
+        return VariableModel(**var_config)
 
 
 #
