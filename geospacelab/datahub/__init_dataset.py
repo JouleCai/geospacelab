@@ -64,10 +64,10 @@ class DatasetBase(object):
         pass
 
     def add_variable(self, variable, name=None):
-        if issubclass(variable, Variable):
+        if issubclass(variable, VariableModel):
             pass
         else:
-            variable = Variable(variable, name=name)
+            variable = VariableModel(variable, name=name)
         self[variable.name] = variable
 
     def remove_variable(self, name):
