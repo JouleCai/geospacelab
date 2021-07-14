@@ -1,6 +1,6 @@
 import numpy as np
 
-from geospacelab.datahub.__init_variable import Variable
+from geospacelab.datahub import VariableModel
 
 import geospacelab.toolbox.utilities.pyclass as pyclass
 import geospacelab.toolbox.utilities.pybasic as pybasic
@@ -11,26 +11,37 @@ class DatasetBase(object):
 
     """
     def __init__(self, **kwargs):
-        self._default_attributes = kwargs.pop('default_attributes', {})
-        self._default_label_fields = kwargs.pop('default_label_fields', [])
-        self.input_mode = kwargs.pop('input_mode', 'AUTO') # ['AUTO'], 'dialog', 'assigned'
+        self._variables = {}
+        self.dt_fr = kwargs.pop('dt_fr', None)
+        self.dt_to = kwargs.pop('dt_to', None)
+
+        self._loader = kwargs.pop('loader', None)
+
+        self.input_mode = kwargs.pop('input_mode', 'AUTO')  # ['AUTO'], 'dialog', 'assigned'
         self.input_file_paths = kwargs.pop('input_file_paths', [])
         self.input_file_names = kwargs.pop('input_file_names', [])
+        self.input_file_num = kwargs.pop('input_file_num', 0)
 
-        self.set_attr(add_attr=True, logging=True, **kwargs)
+    def config(self, logging=True, **kwargs):
+        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
+
+    def add_attr(self, logging=True, **kwargs):
+        pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
+
+    def attrs_to_dict(self, attr_names=None):
+        if attr_names is None:
+            attr_names = []
+        items = {}
+        for attr_name in attr_names:
+            items[attr_name] = getattr(self, attr_name)
+        return items
 
     def assign_data(self):
         raise NotImplemented
 
-    def set_attr(self, add_attr=False, logging=True, **kwargs):
-        for key in self._default_attributes.keys():
-            kwargs.setdefault(key, self._default_attributes[key])
-
-        pyclass.set_object_attributes(append=add_attr, logging=logging, **kwargs)
-
-    def label(self, fields = None, separator='_', lowercase=True):
+    def label(self, fields=None, separator='_', lowercase=True):
         if fields is None:
-            fields = self._default_label_fields
+            fields = self.attrs_labeled
         sublabels = []
         for attr_name in fields:
             if not str(attr_name):
