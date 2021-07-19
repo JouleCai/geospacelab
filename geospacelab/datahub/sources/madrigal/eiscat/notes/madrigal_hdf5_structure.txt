@@ -88,6 +88,850 @@ fh5: <HDF5 file "EISCAT_2021-03-10_beata_ant@uhfa.hdf5" (mode r)>
 |---|---utime: <HDF5 dataset "utime": shape (2, 7), type "|S47">
 |---|---utime_sd: <HDF5 dataset "utime_sd": shape (1, 7), type "|S50">
 
+fh5
+dict_in: <HDF5 group "/metadata" (13 members)>
+|---comments: <HDF5 dataset "comments": shape (1, 1), type "|S329">
+[[b'\n2021-03-10_beata_ant@uhfa-AA:  ----------------------\nWARNING! The Magic Constant used in the analysis was 0.95, differing from the usual 0.7. This value was based on analysis results from the days before this day, since the electron density here was too low for comparisons to either the dynasonde data or the plasma-line data.']]
+|---header: <HDF5 dataset "header": shape (1, 7), type "|S21">
+[[b'Parameter            ' b'Description          '
+  b'Unit                 ' b'Original parameter   '
+  b'Madrigal Mnemonic    ' b'Madrigal Parameter Id'
+  b'Identifier           ']]
+|---names: <HDF5 dataset "names": shape (4, 3), type "|S42">
+[[b'name_expr                                 '
+  b'beata                                     '
+  b'name of experiment                        ']
+ [b'name_site                                 '
+  b'T                                         '
+  b'code of receiving site                    ']
+ [b'name_ant                                  '
+  b'uhfa                                      '
+  b'name of receiving antenna                 ']
+ [b'name_sig                                  '
+  b'T culebra eiscat 11-Mar-2021 12:52:43     '
+  b'location/computer and time of the analysis']]
+|---par0d: <HDF5 dataset "par0d": shape (17, 7), type "|S66">
+[[b'Magic_const                                                       '
+  b'scale factor for rx power                                         '
+  b'N/A                                                               '
+  b'r_Magic_const                                                     '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'3                                                                 ']
+ [b'SCangle                                                           '
+  b'half scattering angle                                             '
+  b'rad                                                               '
+  b'r_SCangle                                                         '
+  b'hsa                                                               '
+  b'190                                                               '
+  b'7                                                                 ']
+ [b'XMITloc1                                                          '
+  b'transmitter location, latitude north                              '
+  b'deg                                                               '
+  b'r_XMITloc                                                         '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'8                                                                 ']
+ [b'XMITloc2                                                          '
+  b'transmitter location, longitude east                              '
+  b'deg                                                               '
+  b'r_XMITloc                                                         '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'8                                                                 ']
+ [b'XMITloc3                                                          '
+  b'transmitter location, altitude above sea level                    '
+  b'm                                                                 '
+  b'r_XMITloc                                                         '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'8                                                                 ']
+ [b'RECloc1                                                           '
+  b'receiver location, latitude                                       '
+  b'deg                                                               '
+  b'r_RECloc                                                          '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'9                                                                 ']
+ [b'RECloc2                                                           '
+  b'receiver location, longitude                                      '
+  b'deg                                                               '
+  b'r_RECloc                                                          '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'9                                                                 ']
+ [b'RECloc3                                                           '
+  b'receiver location, altitude                                       '
+  b'm                                                                 '
+  b'r_RECloc                                                          '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'9                                                                 ']
+ [b'code1                                                             '
+  b'code sets used (from initialisation)                              '
+  b'N/A                                                               '
+  b'r_code                                                            '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'11                                                                ']
+ [b'code2                                                             '
+  b'code sets used (from initialisation)                              '
+  b'N/A                                                               '
+  b'r_code                                                            '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'11                                                                ']
+ [b'om0                                                               '
+  b'scale factor for om frequency                                     '
+  b's-1                                                               '
+  b'r_om0                                                             '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'12                                                                ']
+ [b'm01                                                               '
+  b'ion masses in the fit                                             '
+  b'amu                                                               '
+  b'r_m0                                                              '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'14                                                                ']
+ [b'm02                                                               '
+  b'ion masses in the fit                                             '
+  b'amu                                                               '
+  b'r_m0                                                              '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'14                                                                ']
+ [b'gain                                                              '
+  b'antenna gain                                                      '
+  b'N/A                                                               '
+  b'r_gain                                                            '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'123                                                               ']
+ [b'fradar                                                            '
+  b'transmitted frequency                                             '
+  b's-1                                                               '
+  b'N/A                                                               '
+  b'tfreq                                                             '
+  b'490                                                               '
+  b'80                                                                ']
+ [b'nrec                                                              '
+  b'number of altitude intervals for each integration                 '
+  b'N/A                                                               '
+  b'N/A                                                               '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'76                                                                ']
+ [b'leaps                                                             '
+  b'leapseconds between UNX and TAI (constant over the whole analysis)'
+  b's                                                                 '
+  b'N/A                                                               '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'153                                                               ']]
+|---par0d_sd: <HDF5 dataset "par0d_sd": shape (2, 7), type "|S66">
+[[b'leaps                                                             '
+  b'leapseconds between UNX and TAI (constant over the whole analysis)'
+  b's                                                                 '
+  b'N/A                                                               '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'153                                                               ']
+ [b'lpg_sd                                                            '
+  b'lag profile group index                                           '
+  b'N/A                                                               '
+  b'r_sd                                                              '
+  b'N/A                                                               '
+  b'0                                                                 '
+  b'171                                                               ']]
+|---par1d: <HDF5 dataset "par1d": shape (7, 7), type "|S70">
+[[b'az                                                                    '
+  b'antenna mean azimuth angle, 0 to north                                '
+  b'deg                                                                   '
+  b'r_az                                                                  '
+  b'azm                                                                   '
+  b'130                                                                   '
+  b'4                                                                     ']
+ [b'el                                                                    '
+  b'antenna mean elevation angle, 90 to zenith                            '
+  b'deg                                                                   '
+  b'r_el                                                                  '
+  b'elm                                                                   '
+  b'140                                                                   '
+  b'5                                                                     ']
+ [b'Pt                                                                    '
+  b'peak power of transmitter                                             '
+  b'W                                                                     '
+  b'r_Pt                                                                  '
+  b'power                                                                 '
+  b'486                                                                   '
+  b'6                                                                     ']
+ [b'Tsys1                                                                 '
+  b'system temperatures, one for each calibrated code set used in analysis'
+  b'K                                                                     '
+  b'r_Tsys                                                                '
+  b'systmp                                                                '
+  b'482                                                                   '
+  b'10                                                                    ']
+ [b'Tsys2                                                                 '
+  b'system temperatures, one for each calibrated code set used in analysis'
+  b'K                                                                     '
+  b'r_Tsys                                                                '
+  b'systmp                                                                '
+  b'482                                                                   '
+  b'10                                                                    ']
+ [b'phasepush                                                             '
+  b'phase error in transmitter                                            '
+  b's-1                                                                   '
+  b'r_phasepush                                                           '
+  b'N/A                                                                   '
+  b'0                                                                     '
+  b'15                                                                    ']
+ [b'ppnrec                                                                '
+  b'number of range intervals for each integration (for power profiles)   '
+  b'N/A                                                                   '
+  b'N/A                                                                   '
+  b'N/A                                                                   '
+  b'0                                                                     '
+  b'77                                                                    ']]
+|---par1d_sd: <HDF5 dataset "par1d_sd": shape (2, 7), type "|S55">
+[[b'range_sd                                               '
+  b'range to space debris                                  '
+  b'm                                                      '
+  b'r_sd                                                   '
+  b'N/A                                                    '
+  b'0                                                      '
+  b'172                                                    ']
+ [b'power_sd                                               '
+  b'power expressed in unit of estimated standard deviation'
+  b'1                                                      '
+  b'r_sd                                                   '
+  b'N/A                                                    '
+  b'0                                                      '
+  b'173                                                    ']]
+|---par2d: <HDF5 dataset "par2d": shape (72, 7), type "|S109">
+[[b'h                                                                                                            '
+  b'weighted mean of the scattering volume altitude                                                              '
+  b'm                                                                                                            '
+  b'r_h                                                                                                          '
+  b'gdalt                                                                                                        '
+  b'110                                                                                                          '
+  b'18                                                                                                           ']
+ [b'range                                                                                                        '
+  b'weighted mean range to the scattering volume                                                                 '
+  b'm                                                                                                            '
+  b'r_range                                                                                                      '
+  b'range                                                                                                        '
+  b'120                                                                                                          '
+  b'19                                                                                                           ']
+ [b'Ne                                                                                                           '
+  b'electron density                                                                                             '
+  b'm-3                                                                                                          '
+  b'r_param                                                                                                      '
+  b'ne                                                                                                           '
+  b'510                                                                                                          '
+  b'20                                                                                                           ']
+ [b'Ti                                                                                                           '
+  b'ion temperature                                                                                              '
+  b'K                                                                                                            '
+  b'r_param                                                                                                      '
+  b'ti                                                                                                           '
+  b'550                                                                                                          '
+  b'21                                                                                                           ']
+ [b'Tr                                                                                                           '
+  b'electron to ion temperature ratio                                                                            '
+  b'1                                                                                                            '
+  b'r_param                                                                                                      '
+  b'tr                                                                                                           '
+  b'570                                                                                                          '
+  b'22                                                                                                           ']
+ [b'Collf                                                                                                        '
+  b'ion collision frequency                                                                                      '
+  b's-1                                                                                                          '
+  b'r_param                                                                                                      '
+  b'co                                                                                                           '
+  b'709                                                                                                          '
+  b'23                                                                                                           ']
+ [b'Vi                                                                                                           '
+  b'ion drift velocity, positive away from antenna                                                               '
+  b'm/s                                                                                                          '
+  b'r_param                                                                                                      '
+  b'vo                                                                                                           '
+  b'580                                                                                                          '
+  b'24                                                                                                           ']
+ [b'pm                                                                                                           '
+  b'composition \x13 ion mix [O2+,NO+]/Ne                                                                           '
+  b'1                                                                                                            '
+  b'r_param                                                                                                      '
+  b'pm                                                                                                           '
+  b'690                                                                                                          '
+  b'101                                                                                                          ']
+ [b'po+                                                                                                          '
+  b'composition \x13 [O+]/Ne                                                                                        '
+  b'1                                                                                                            '
+  b'r_param                                                                                                      '
+  b'po+                                                                                                          '
+  b'620                                                                                                          '
+  b'54                                                                                                           ']
+ [b'wn                                                                                                           '
+  b'broad band noise                                                                                             '
+  b'K                                                                                                            '
+  b'r_param                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'26                                                                                                           ']
+ [b'dc                                                                                                           '
+  b'DC spike                                                                                                     '
+  b'Ks-1                                                                                                         '
+  b'r_param                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'27                                                                                                           ']
+ [b'var_Ne                                                                                                       '
+  b'variance of electron density                                                                                 '
+  b'm-6                                                                                                          '
+  b'r_error                                                                                                      '
+  b'var_ne                                                                                                       '
+  b'2350                                                                                                         '
+  b'155                                                                                                          ']
+ [b'var_Ti                                                                                                       '
+  b'variance of ion temperature                                                                                  '
+  b'K2                                                                                                           '
+  b'r_error                                                                                                      '
+  b'var_ti                                                                                                       '
+  b'2355                                                                                                         '
+  b'156                                                                                                          ']
+ [b'var_Tr                                                                                                       '
+  b'variance of electron to ion temperature ratio                                                                '
+  b'1                                                                                                            '
+  b'r_error                                                                                                      '
+  b'var_tr                                                                                                       '
+  b'2359                                                                                                         '
+  b'157                                                                                                          ']
+ [b'var_Collf                                                                                                    '
+  b'variance of ion collision frequency                                                                          '
+  b's-2                                                                                                          '
+  b'r_error                                                                                                      '
+  b'var_co                                                                                                       '
+  b'2360                                                                                                         '
+  b'158                                                                                                          ']
+ [b'var_Vi                                                                                                       '
+  b'variance ion drift velocity                                                                                  '
+  b'm2/s2                                                                                                        '
+  b'r_error                                                                                                      '
+  b'var_vo                                                                                                       '
+  b'2370                                                                                                         '
+  b'159                                                                                                          ']
+ [b'var_pm                                                                                                       '
+  b'variance of ion mix content - [O2+,NO+]/Ne                                                                   '
+  b'1                                                                                                            '
+  b'N/A                                                                                                          '
+  b'var_pm                                                                                                       '
+  b'2395                                                                                                         '
+  b'166                                                                                                          ']
+ [b'var_po+                                                                                                      '
+  b'variance of O+ content - [O+]/Ne                                                                             '
+  b'1                                                                                                            '
+  b'N/A                                                                                                          '
+  b'var_po+                                                                                                      '
+  b'2390                                                                                                         '
+  b'167                                                                                                          ']
+ [b'var_wn                                                                                                       '
+  b'variance of broad band noise                                                                                 '
+  b'K2                                                                                                           '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'161                                                                                                          ']
+ [b'var_dc                                                                                                       '
+  b'variance of DC spike                                                                                         '
+  b'K2s-2                                                                                                        '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'162                                                                                                          ']
+ [b'crossvar_12                                                                                                  '
+  b'cross variance (p1,p2)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_23                                                                                                  '
+  b'cross variance (p2,p3)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_34                                                                                                  '
+  b'cross variance (p3,p4)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_45                                                                                                  '
+  b'cross variance (p4,p5)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_56                                                                                                  '
+  b'cross variance (p5,p6)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_67                                                                                                  '
+  b'cross variance (p6,p7)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_78                                                                                                  '
+  b'cross variance (p7,p8)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_13                                                                                                  '
+  b'cross variance (p1,p3)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_24                                                                                                  '
+  b'cross variance (p2,p4)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_35                                                                                                  '
+  b'cross variance (p3,p5)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_46                                                                                                  '
+  b'cross variance (p4,p6)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_57                                                                                                  '
+  b'cross variance (p5,p7)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_68                                                                                                  '
+  b'cross variance (p6,p8)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_14                                                                                                  '
+  b'cross variance (p1,p4)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_25                                                                                                  '
+  b'cross variance (p2,p5)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_36                                                                                                  '
+  b'cross variance (p3,p6)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_47                                                                                                  '
+  b'cross variance (p4,p7)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_58                                                                                                  '
+  b'cross variance (p5,p8)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_15                                                                                                  '
+  b'cross variance (p1,p5)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_26                                                                                                  '
+  b'cross variance (p2,p6)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_37                                                                                                  '
+  b'cross variance (p3,p7)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_48                                                                                                  '
+  b'cross variance (p4,p8)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_16                                                                                                  '
+  b'cross variance (p1,p6)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_27                                                                                                  '
+  b'cross variance (p2,p7)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_38                                                                                                  '
+  b'cross variance (p3,p8)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_17                                                                                                  '
+  b'cross variance (p1,p7)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_28                                                                                                  '
+  b'cross variance (p2,p8)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'crossvar_18                                                                                                  '
+  b'cross variance (p1,p8)                                                                                       '
+  b'N/A                                                                                                          '
+  b'r_error                                                                                                      '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'36                                                                                                           ']
+ [b'aprNe                                                                                                        '
+  b'a priori electron density                                                                                    '
+  b'm-3                                                                                                          '
+  b'r_apriori                                                                                                    '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'37                                                                                                           ']
+ [b'aprTi                                                                                                        '
+  b'a priori ion temperature                                                                                     '
+  b'K                                                                                                            '
+  b'r_apriori                                                                                                    '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'38                                                                                                           ']
+ [b'aprTr                                                                                                        '
+  b'a priori electron to ion temperature ratio                                                                   '
+  b'1                                                                                                            '
+  b'r_apriori                                                                                                    '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'39                                                                                                           ']
+ [b'aprCollf                                                                                                     '
+  b'a priori ion collision frequency                                                                             '
+  b's-1                                                                                                          '
+  b'r_apriori                                                                                                    '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'40                                                                                                           ']
+ [b'aprVi                                                                                                        '
+  b'a priori ion drift velocity, positive towards antenna                                                        '
+  b'm/s                                                                                                          '
+  b'r_apriori                                                                                                    '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'41                                                                                                           ']
+ [b'aprpm                                                                                                        '
+  b'a priori ion mix content - [O2+,NO+]/Ne                                                                      '
+  b'1                                                                                                            '
+  b'N/A                                                                                                          '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'174                                                                                                          ']
+ [b'aprpo+                                                                                                       '
+  b'a priori O+ content - [O+]/Ne                                                                                '
+  b'1                                                                                                            '
+  b'N/A                                                                                                          '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'175                                                                                                          ']
+ [b'aprwn                                                                                                        '
+  b'a priori broad band noise                                                                                    '
+  b'K                                                                                                            '
+  b'r_apriori                                                                                                    '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'43                                                                                                           ']
+ [b'aprdc                                                                                                        '
+  b'a priori DC spike                                                                                            '
+  b'Ks-1                                                                                                         '
+  b'r_apriori                                                                                                    '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'44                                                                                                           ']
+ [b'aprNe_error                                                                                                  '
+  b'a priori error electron density                                                                              '
+  b'm-3                                                                                                          '
+  b'r_apriorierror                                                                                               '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'45                                                                                                           ']
+ [b'aprTi_error                                                                                                  '
+  b'a priori error ion temperature                                                                               '
+  b'K                                                                                                            '
+  b'r_apriorierror                                                                                               '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'46                                                                                                           ']
+ [b'aprTr_error                                                                                                  '
+  b'a priori error electron to ion temperature ratio                                                             '
+  b'1                                                                                                            '
+  b'r_apriorierror                                                                                               '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'47                                                                                                           ']
+ [b'aprCollf_error                                                                                               '
+  b'a priori error ion collision frequency                                                                       '
+  b's-1                                                                                                          '
+  b'r_apriorierror                                                                                               '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'48                                                                                                           ']
+ [b'aprVi_error                                                                                                  '
+  b'a priori error ion drift velocity                                                                            '
+  b'm/s                                                                                                          '
+  b'r_apriorierror                                                                                               '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'49                                                                                                           ']
+ [b'aprpm_error                                                                                                  '
+  b'a priori error ion mix content - [O2+,NO+]/Ne                                                                '
+  b'1                                                                                                            '
+  b'N/A                                                                                                          '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'178                                                                                                          ']
+ [b'aprpo+_error                                                                                                 '
+  b'a priori error O+ content - [O+]/Ne                                                                          '
+  b'1                                                                                                            '
+  b'N/A                                                                                                          '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'179                                                                                                          ']
+ [b'aprwn_error                                                                                                  '
+  b'a priori error broad band noise                                                                              '
+  b'K                                                                                                            '
+  b'r_apriorierror                                                                                               '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'51                                                                                                           ']
+ [b'aprdc_error                                                                                                  '
+  b'a priori error DC spike                                                                                      '
+  b'Ks-1                                                                                                         '
+  b'r_apriorierror                                                                                               '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'52                                                                                                           ']
+ [b'status                                                                                                       '
+  b'status of the fit (0=fit ok, 1=max number of iterations exceeded, 2=No fit done, 3=fit fail (outside limits))'
+  b'N/A                                                                                                          '
+  b'r_status                                                                                                     '
+  b'gfit                                                                                                         '
+  b'430                                                                                                          '
+  b'53                                                                                                           ']
+ [b'res1                                                                                                         '
+  b'residual of the fit with standard deviation                                                                  '
+  b'N/A                                                                                                          '
+  b'r_res                                                                                                        '
+  b'chisq                                                                                                        '
+  b'420                                                                                                          '
+  b'55                                                                                                           ']
+ [b'res2                                                                                                         '
+  b'sqrt(2/#measurements)                                                                                        '
+  b'N/A                                                                                                          '
+  b'r_res                                                                                                        '
+  b'N/A                                                                                                          '
+  b'0                                                                                                            '
+  b'55                                                                                                           ']
+ [b'w1                                                                                                           '
+  b'range resolution (90% level)                                                                                 '
+  b'm                                                                                                            '
+  b'r_w                                                                                                          '
+  b'N/A                                                                                                          '
+  b'122                                                                                                          '
+  b'56                                                                                                           ']
+ [b'w2                                                                                                           '
+  b'range resolution (2nd moment)                                                                                '
+  b'm                                                                                                            '
+  b'r_w                                                                                                          '
+  b'N/A                                                                                                          '
+  b'122                                                                                                          '
+  b'56                                                                                                           ']
+ [b'w3                                                                                                           '
+  b'width of range gate (total)                                                                                  '
+  b'm                                                                                                            '
+  b'r_w                                                                                                          '
+  b'N/A                                                                                                          '
+  b'125                                                                                                          '
+  b'56                                                                                                           ']]
+|---par2d_pp: <HDF5 dataset "par2d_pp": shape (4, 7), type "|S49">
+[[b'pprange                                          '
+  b'power profile range to scattering volume         '
+  b'm                                                '
+  b'r_pprange                                        '
+  b'range                                            '
+  b'120                                              '
+  b'61                                               ']
+ [b'pp                                               '
+  b'uncorrected electron densities (Te/Ti=1)         '
+  b'm-3                                              '
+  b'r_pp                                             '
+  b'pop                                              '
+  b'500                                              '
+  b'62                                               ']
+ [b'pperr                                            '
+  b'error of uncorrected electron densities          '
+  b'm-3                                              '
+  b'r_pperror                                        '
+  b'dpop                                             '
+  b'-500                                             '
+  b'63                                               ']
+ [b'ppw                                              '
+  b'width of the range gate for uncorrected densities'
+  b'm                                                '
+  b'r_ppw                                            '
+  b'rgate                                            '
+  b'125                                              '
+  b'64                                               ']]
+|---schemes: <HDF5 group "/metadata/schemes" (1 members)>
+|---|---DataCite: <HDF5 group "/metadata/schemes/DataCite" (9 members)>
+|---|---|---Creator: <HDF5 dataset "Creator": shape (1, 1), type "|S4">
+[[b'uhfa']]
+|---|---|---Date: <HDF5 group "/metadata/schemes/DataCite/Date" (2 members)>
+|---|---|---|---Collected: <HDF5 dataset "Collected": shape (1, 1), type "|S39">
+[[b'2021-03-10T00:00:00/2021-03-11T00:00:00']]
+|---|---|---|---Created: <HDF5 dataset "Created": shape (1, 1), type "|S10">
+[[b'2021-03-11']]
+|---|---|---GeoLocation: <HDF5 group "/metadata/schemes/DataCite/GeoLocation" (2 members)>
+|---|---|---|---PolygonLat: <HDF5 dataset "PolygonLat": shape (1, 4), type "|S7">
+[[b'68.1426' b'68.4173' b'69.584 ' b'69.3093']]
+|---|---|---|---PolygonLon: <HDF5 dataset "PolygonLon": shape (1, 4), type "|S7">
+[[b'15.3807' b'19.2918' b'19.2098' b'15.2988']]
+|---|---|---GeoLocation_pp: <HDF5 group "/metadata/schemes/DataCite/GeoLocation_pp" (2 members)>
+|---|---|---|---PolygonLat: <HDF5 dataset "PolygonLat": shape (1, 4), type "|S7">
+[[b'68.0432' b'68.3363' b'69.5841' b'69.291 ']]
+|---|---|---|---PolygonLon: <HDF5 dataset "PolygonLon": shape (1, 4), type "|S7">
+[[b'15.135 ' b'19.2977' b'19.2099' b'15.0471']]
+|---|---|---Identifier: <HDF5 dataset "Identifier": shape (1, 1), type "|S44">
+[[b'doi://eiscat.se/3a/20210310235915/Y4h4NgrH77']]
+|---|---|---PublicationYear: <HDF5 dataset "PublicationYear": shape (1, 1), type "|S4">
+[[b'2021']]
+|---|---|---Publisher: <HDF5 dataset "Publisher": shape (1, 1), type "|S29">
+[[b'EISCAT Scientific Association']]
+|---|---|---ResourceType: <HDF5 group "/metadata/schemes/DataCite/ResourceType" (1 members)>
+|---|---|---|---Dataset: <HDF5 dataset "Dataset": shape (1, 1), type "|S19">
+[[b'Level 3a Ionosphere']]
+|---|---|---Title: <HDF5 dataset "Title": shape (1, 1), type "|S32">
+[[b'EISCAT_2021-03-10_beata_ant@uhfa']]
+|---software: <HDF5 group "/metadata/software" (5 members)>
+|---|---EISCAThdf5_ver: <HDF5 dataset "EISCAThdf5_ver": shape (1, 1), type "|S5">
+[[b'1.0.0']]
+|---|---GUISDAP_ver: <HDF5 dataset "GUISDAP_ver": shape (1, 1), type "|S19">
+[[b'9.2-2-g213f3bb-1213']]
+|---|---gfd: <HDF5 group "/metadata/software/gfd" (12 members)>
+|---|---|---data_path: <HDF5 dataset "data_path": shape (1, 1), type "|S27">
+[[b'/data/beata_ip2_2.1u_AA@uhf']]
+|---|---|---expver: <HDF5 dataset "expver": shape (1, 1), type "|S1">
+[[b'2']]
+|---|---|---extra: <HDF5 dataset "extra": shape (1, 1), type "|S17">
+[[b'Magic_const=0.95;']]
+|---|---|---figs: <HDF5 dataset "figs": shape (1, 1), type "|S13">
+[[b'0  1  0  0  1']]
+|---|---|---intper: <HDF5 dataset "intper": shape (1, 1), type "|S1">
+[[b'0']]
+|---|---|---name_expr: <HDF5 dataset "name_expr": shape (1, 1), type "|S5">
+[[b'beata']]
+|---|---|---path_exps: <HDF5 dataset "path_exps": shape (1, 1), type "|S24">
+[[b'/analysis/guisdap9/exps/']]
+|---|---|---result_path: <HDF5 dataset "result_path": shape (1, 1), type "|S22">
+[[b'/analysis/results/AUTO']]
+|---|---|---rt: <HDF5 dataset "rt": shape (1, 1), type "|S1">
+[[b'0']]
+|---|---|---siteid: <HDF5 dataset "siteid": shape (1, 1), type "|S1">
+[[b'3']]
+|---|---|---t1: <HDF5 dataset "t1": shape (1, 1), type "|S34">
+[[b'2021     3    10     0     0     0']]
+|---|---|---t2: <HDF5 dataset "t2": shape (1, 1), type "|S34">
+[[b'2021     3    10    24     0     0']]
+|---|---software_link: <HDF5 dataset "software_link": shape (1, 1), type "|S34">
+[[b'https://git.eiscat.se/cvs/guisdap9']]
+|---|---strategy: <HDF5 dataset "strategy": shape (1, 1), type "|S3">
+[[b'ant']]
+|---utime: <HDF5 dataset "utime": shape (2, 7), type "|S47">
+[[b'time1                                          '
+  b'start time of the integration period, unix time'
+  b's                                              '
+  b'r_time                                         '
+  b'ut1_unix                                       '
+  b'11                                             '
+  b'1                                              ']
+ [b'time2                                          '
+  b'end time of the integration period, unix time  '
+  b's                                              '
+  b'r_time                                         '
+  b'ut2_unix                                       '
+  b'12                                             '
+  b'1                                              ']]
+|---utime_sd: <HDF5 dataset "utime_sd": shape (1, 7), type "|S50">
+[[b'time_sd                                           '
+  b'dump end time of space debris detection, unix time'
+  b's                                                 '
+  b'r_sd                                              '
+  b'N/A                                               '
+  b'0                                                 '
+  b'170                                               ']]
+
 
 #######################################################3
 fh5: <HDF5 file "MAD6300_2021-03-10_beata_ant@uhfa.hdf5" (mode r)>
