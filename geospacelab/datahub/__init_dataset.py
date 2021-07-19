@@ -1,31 +1,104 @@
 import numpy as np
+import pathlib
 
-from geospacelab.datahub import VariableModel
+from geospacelab.datahub.__init_variable import VariableModel
+import geospacelab.config.preferences as pref
 
 import geospacelab.toolbox.utilities.pyclass as pyclass
 import geospacelab.toolbox.utilities.pybasic as pybasic
+import geospacelab.toolbox.utilities.pylogging as mylog
 
 
-class DatasetBase(object):
+class DatasetModel(object):
     """ Template for the Dateset class
 
     """
+
     def __init__(self, **kwargs):
         self._variables = {}
         self.dt_fr = None
         self.dt_to = None
 
-        self._loader = kwargs.pop('loader', None)
-        self._variable_config = kwargs.pop('variable_config', None)
+        self.load_func = 'default'
+        self.load_mode = 'AUTO'  # ['AUTO'], 'dialog', 'assigned'
+        self.data_root_dir = pref.datahub_data_root_dir
+        self.data_file_path_list = []
+        self.data_file_patterns = []
+        self.data_file_num = 0
+        self.data_file_ext = '*'
 
-        self.input_mode = 'AUTO'  # ['AUTO'], 'dialog', 'assigned'
-        self.input_file_paths = []
-        self.input_file_names = []
-        self.input_file_num = 0
+        self.label_fields = []
 
-        self.attrs_for_output = []
-        self.attrs_for_label = []
-        self.attrs_for_loader = []
+    def search_data_files(self, **kwargs):
+        done = False
+        initial_file_dir = kwargs.pop('initial_file_dir', self.data_root_dir)
+        search_pattern = kwargs.pop('search_pattern', '*')
+        if str(self.data_file_ext):
+            search_pattern = search_pattern + '.' + self.data_file_ext
+        files = initial_file_dir.glob(search_pattern)
+        if len(files) == 1:
+            done = True
+            self.data_file_path_list.append(files[0])
+        elif len(files) == 0:
+            mylog.StreamLogger.warning("Multiple files match!")
+            print(files)
+        else:
+            print('Cannot find the requested data file in {}'.format(initial_file_dir))
+        return done
+
+    def open_dialog(self, **kwargs):
+        initial_file_dir = kwargs.pop('initial_file_dir', self.data_root_dir)
+        title = kwargs.pop('title', 'Open a file:')
+
+        if initial_file_dir is None:
+            initial_file_dir = self.data_root_dir
+
+        import tkinter as tk
+        from tkinter import simpledialog
+        from tkinter import filedialog
+
+        root = tk.Tk()
+        root.withdraw()
+
+        if self.data_file_num == 0:
+            self.data_file_num = simpledialog.askinteger('Input dialog', 'Input the number of files:', initialvalue=1)
+
+        for nf in range(self.data_file_num):
+            file_types = (('eiscat files', '*.' + self.data_file_ext), ('all files', '*.*'))
+            file_name = filedialog.askopenfilename(
+                title=title,
+                initialdir=initial_file_dir
+            )
+            self.data_file_path_list.append(pathlib.Path(file_name))
+
+    def check_data_files(self):
+        if self.load_mode == 'AUTO':
+            self.search_data_files()
+        elif self.load_mode == 'dialog':
+            self.open_dialog()
+        elif self.load_mode == 'assigned':
+            if not list(self.data_file_path_list):
+                raise ValueError
+        else:
+            raise AttributeError
+
+    @staticmethod
+    def _set_default_attrs(kwargs: dict, default_attrs: dict):
+        for key, value in default_attrs:
+            kwargs.setdefault(key, value)
+        return kwargs
+
+    def label(self, fields=None, separator='_', lowercase=True):
+        if fields is None:
+            fields = self.label_fields
+        sublabels = []
+        for attr_name in fields:
+            if not str(attr_name):
+                sublabels.append('*')
+            else:
+                sublabels.append(attr_name)
+        label = pybasic.str_join(sublabels, separator=separator, lowercase=lowercase)
+        return label
 
     def config(self, logging=True, **kwargs):
         pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
@@ -40,21 +113,6 @@ class DatasetBase(object):
         for attr_name in attr_names:
             items[attr_name] = getattr(self, attr_name)
         return items
-
-    def assign_data(self):
-        raise NotImplemented
-
-    def label(self, fields=None, separator='_', lowercase=True):
-        if fields is None:
-            fields = self.attrs_labeled
-        sublabels = []
-        for attr_name in fields:
-            if not str(attr_name):
-                sublabels.append('*')
-            else:
-                sublabels.append(attr_name)
-        label = pybasic.str_join(sublabels, separator=separator, lowercase=lowercase)
-        return label
 
     def __setitem__(self, key, value):
         if not issubclass(value, VariableModel):
@@ -72,7 +130,7 @@ class DatasetBase(object):
         if issubclass(variable, VariableModel):
             pass
         else:
-            variable = VariableModel(variable, name=name)
+            variable = VariableModel(value=variable, name=name)
         self[variable.name] = variable
 
     def remove_variable(self, name):
@@ -81,20 +139,41 @@ class DatasetBase(object):
     def get_variable_names(self):
         return list(self._variables.keys())
 
-    def load_data(self):
-        load_config = self.attrs_to_dict(self.attrs_for_loader)
-        load_obj = self._loader.Loader(**load_config)
-        self._variables = load_obj.variables
-        attrs = {}
-        for key in self.attrs_for_loader:
-            attrs[key] = getattr(load_obj, key)
-        self.config(**attrs)
+    def set_variable(self, **kwargs):
+        var_name = kwargs.pop('var_name', '')
+        var_config = kwargs.pop('var_config', {})
+        if dict(var_config):
+            var_config.setdefault('name', var_name)
+        else:
+            var_configs = kwargs.pop('var_config_items', {})
+            var_config = var_configs[var_name]
+        var = VariableModel(**var_config)
+        var.dataset = self
 
-    def assign_variable(self, var_name):
-        var_config = self._variable_config[var_name]
-        return VariableModel(**var_config)
+    def _set_default_variables(self, default_variable_names):
+        for var_name in default_variable_names:
+            self[var_name] = None
 
 
+
+class LoaderBase(object):
+
+    def __init__(self):
+        self.dt_fr = None
+        self.dt_to = None
+        self.file_paths = None
+        self.file_names = None
+        self.file_num = 0
+        self.mode = 'AUTO'
+        self.save_pickle = False
+        self.load_pickle = False
+        self.download = False
+
+    def config(self, logging=True, **kwargs):
+        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
+
+    def add_attr(self, logging=True, **kwargs):
+        pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
 #
 #
 # # BaseClass with the "set_attr" method

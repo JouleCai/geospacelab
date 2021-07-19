@@ -1,6 +1,5 @@
 """Variable model based on np.ndarray"""
 
-import geospacelab.toolbox.utilities.pyclass as pyclass
 
 __author__ = "Lei Cai"
 __copyright__ = "Copyright 2021, The GeoSpaceLab Project"
@@ -14,16 +13,16 @@ __revision__ = ""
 __docformat__ = "reStructureText"
 
 
-from config.init_database_dataclass import *
-from utilities.logging_config import *
-import numpy
+import geospacelab.toolbox.utilities.pyclass as pyclass
 
 
 class VariableModel(object):
 
     def __init__(self, **kwargs):
-        self.var_name = kwargs.pop('var_name', '')
-        self.var_label = kwargs.pop('var_label', '')
+        self.name = kwargs.pop('var_name', '')
+        self.fullname = kwargs.pop('fullname', '')
+
+        self.label = kwargs.pop('label', '')
 
         self.category = kwargs.pop('category', '')  # 'support_data', 'data', 'metadata'
         self.group = kwargs.pop('group', '')
@@ -35,6 +34,9 @@ class VariableModel(object):
 
         self.value = kwargs.pop('value', None)
         self.error = kwargs.pop('error', None)
+
+        self.dim = kwargs.pop('dim', None)
+        self.depends = kwargs.pop('depends', {})
 
         self.dataset_label = kwargs.pop('dataset_label', '')
 
@@ -52,40 +54,40 @@ class VariableModel(object):
 
 class Visual(object):
     def __init__(self, **kwargs):
-        self.plottype = None
-        self.xdata = None
-        self.ydata = None
-        self.zdata = None
-        self.xdatascale = 1
-        self.ydatascale = 1
-        self.zdatascale = 1
-        self.xdatares = None
-        self.ydatares = None
-        self.zdatares = None
-        self.xerrdata = None
-        self.yerrdata = None
-        self.zerrdata = None
-        self.xdatamasks = None
-        self.ydatamasks = None
-        self.zdatamasks = None
-        self.xlim = None
-        self.ylim = None
-        self.zlim = None
-        self.xlabel = None
-        self.ylabel = None
-        self.zlabel = None
-        self.xscale = None
-        self.yscale = None
-        self.zscale = None
-        self.xunit = None
-        self.yunit = None
-        self.zunit = None
-        self.xticks = None
-        self.yticks = None
-        self.zticks = None
-        self.xticklabels = None
-        self.yticklabels = None
-        self.zticklabels = None
+        self.plot_type = None
+        self.x_data = None
+        self.y_data = None
+        self.z_data = None
+        self.x_data_scale = 1
+        self.y_data_scale = 1
+        self.z_data_scale = 1
+        self.x_data_res = None
+        self.y_data_res = None
+        self.z_data_res = None
+        self.x_err_data = None
+        self.y_err_data = None
+        self.z_err_data = None
+        self.x_data_masks = None
+        self.y_data_masks = None
+        self.z_data_masks = None
+        self.x_lim = None
+        self.y_lim = None
+        self.z_lim = None
+        self.x_label = None
+        self.y_label = None
+        self.z_label = None
+        self.x_scale = None
+        self.y_scale = None
+        self.z_scale = None
+        self.x_unit = None
+        self.y_unit = None
+        self.z_unit = None
+        self.x_ticks = None
+        self.y_ticks = None
+        self.z_ticks = None
+        self.x_tick_labels = None
+        self.y_tick_labels = None
+        self.z_tick_labels = None
         self.color = None
         self.visible = True
         self.plot_config = {}

@@ -1,172 +1,199 @@
 import h5py
 import datetime
+import pathlib
+from pathlib import Path, PurePath
 import numpy as np
 import pickle
+import pathlib
 
-from config.preferences import *
-from config.globals import *
-from utilities.logging_config import *
+from geospacelab.config.preferences import *
+from geospacelab.datahub import LoaderBase
+from geospacelab.datahub.sources.madrigal.eiscat import madrigal_eiscat_downloader as downloader
 
-from loaders import load_dmsp_madrigal_s as dmsp_read
-from downloaders import download_dmsp_madrigalweb as dmsp_download
+import geospacelab.toolbox.utilities.pydatetime as dttool
+import geospacelab.toolbox.utilities.pylogging as pylog
 
 if __name__ == "__main__":
-    dir_root = root_dir_data
-    dir_dmsp = dir_root + "/madrigal/DMSP/"
-    date_in = datetime.datetime(2015, 10, 31)
-    id_sat = "f19"
-    id_file = "s4"  # s1: ion velocity; s4: temperature, O+; e: partical energy - use load_dmsp_madrigal_e
+    dir_root = datahub_data_root_dir
 
-    opt_read = {
-        'dir':      dir_dmsp,
-        'date':     date_in,
-        'satID':    id_sat,
-        'fileID':   id_file,
-        'dtRange':  None,
-    }
-
-    # dmsp_read.list_hdf5_structure(None)
-
-    readObj = dmsp_read.ProcessData(opt=opt_read, readObjFile=False,
-                                    saveObjFile=False)
-    readObj.load_request_data()
-    if opt_read['dtRange'] is not None:
-        readObj.filter_request_data(opt_read['dtRange'])
+default_variable_names = [
+    'GB_DATETIME', 'GB_DATETIME_1', 'GB_DATETIME_2',
+    'magic_constant', 'half_scattering_angle',
+    'az', 'el', 'Tx_power', 'alt', 'range',
+    'n_e', 'T_i', 'T_e', 'nu_i', 'v_i_los', 'comp_mix', 'comp_O_p',
+    'n_e_err', 'T_i_err', 'T_e_err', 'nu_i_err', 'v_i_los_err', 'comp_mix_err', 'comp_O_p_err',
+    'status', 'residual'
+]
 
 
-class Loader(object):
-    def __init__(self, dt_fr, dt_to, save_pickle=True, )
+class Loader(LoaderBase):
+    database = 'madrigal'
+    facility = 'eiscat'
+    def __init__(self, **kwargs):
+        super().__init__()
+
+        kwargs.setdefault('datasource_path', datahub_data_root_dir / 'madrigal' / 'eiscat')
+        self.site = ''
+        self.site_location = []
+        self.antenna = ''
+        self.experiment = ''
+        self.modulation = ''
+        self.scan_mode = ''
+        self.pulse_code = ''
+        self.file_patterns = []
+        self.file_ext = ''
+        self.save_pickle = False
+        self.dates = []
+        self.variables = {}
+        # initialize vairables
+        for vn in default_variable_names:
+            self.variables.setdefault(vn, None)
+
+        self.config(**kwargs)
+        self.datasource_path = Path(self.datasource_path)
+
+        if list(self.file_names):
+            self.mode = 'assigned'
+
+        if self.mode != 'assigned':
+            self._search_files()
+
+        if self.file_ext == 'hdf5' and 'eiscat' in self.file_patterns:
+            self._load_eiscat_hdf5()
+        elif self.file_ext == 'hdf5' and 'mad' in self.file_patterns:
+            self._load_madrigal_hdf5()
+        elif self.file_ext == 'mat':
+            self._load_eiscat_mat()
+        elif self.file_ext == 'pickle':
+            self._load_pickle()
+
+    def _search_files(self):
+        dt_fr = self.dt_fr
+        dt_to = self.dt_to
+        diff_days = dttool.get_diff_days(dt_fr, dt_to)
+        day0 = dttool.get_start_of_the_day(dt_fr)
+        for i in range(diff_days + 1):
+            thisday = day0 + datetime.timedelta(days=i)
+            if self.mode == 'dialog':
+                import tkinter as tk
+                from tkinter import ttk
+                from tkinter import filedialog
+                from tkinter.messagebox import showinfo
+                # create the root window
+                root = tk.tk()
+                root.withdraw()
+                filetypes = (('eiscat files', '*.' + self.file_ext),('all files', '*.*'))
+                filename = filedialog.askopenfilename(
+                    title='open a file on' + thisday.strftime('%y-%m-%d'),
+                    initialdir = self.datasource_path
+                )
+                filename = Path(filename)
+                self.file_paths.append(filename.parent)
+                self.file_names.append(filename.name)
+            elif self.mode == 'auto':
+                key1 = self.site
+                key2 = self.antenna
+                if key2 == 'uhf':
+                    key1 = 'uhf'
+                if key2 == 'vhf':
+                    key2 = 'vhf'
+
+                file_path = self.datasource_path / thisday.strftime('%Y') / '_'.join((key1, thisday.strftime('%Y-%m-%d')))
+
+                file_name = '*' + '*'.join(self.file_patterns) + '*.' + self.file_ext
+                files = file_path.glob(file_name)
+                if len(files) == 0 and self.download:
+                    pylog.StreamLogger.warning(
+                        "The data file on %s may have not been downloaded!", thisday.strftime("%Y%m%d"))
+                    if self.download:
+                        pylog.StreamLogger.info("Calling downloader ...")
+                        downloadObj = downloader.Downloader(dt_fr=dt_fr, dt_to=dt_to)
+                    else:
+                        pylog.StreamLogger.info("Try to download the data using download=True.")
+                files = file_path.glob(file_name)
+                if len(files) == 0:
+                    raise FileExistsError
+
+                self.file_paths.append(files[0].parent)
+                self.file_names.append(files[0].name)
+                self.dates.append(thisday)
+
+    def _load_eiscat_hdf5(self):
+        def search_variable(fh5, vn, var_groups=None):
+            """
+            vn: variable name
+            """
+            rec = 0
+            ind_rec = None
+            var_groups_all = ['par0d', 'par0d_sd', 'par1d', 'par1d_sd', 'par2d', 'par2d_pp']
+            if var_groups is None:
+                var_groups = var_groups_all
+            for vg in var_groups:
+                var_name_list = fh5['metadata'][vg][:, 0]
+                var_name_list = [vn1.decode('UTF-8').strip() for vn1 in var_name_list]
+                try:
+                    ind_rec = var_name_list.index(vn)
+                    rec = 1
+                    break
+                except ValueError:
+                    pass
+
+            if rec == 0:
+                raise LookupError
+            return ind_rec
+        # az el tx_power t1 t2 ran height lat lon n_e ti te coll vel ',...
+        # 'ne_err ti_err te_err coll_err vel_err stat resid comp r_m0 ',...
+        # 'name_site r_XMITloc r_RECloc r_SCangle name_expr r_ver dates starttime stoptime']
+        var_info_list = [
+            ['az', 'az', 'par1d'],
+            ['el', 'el', 'par1d'],
+            ['Pt', 'Pt', 'par1d'],
+            ['h', 'h', 'par2d'],
+            ['range', 'range', 'par2d'],
+            ['n_e', 'Ne', 'par2d'],
+            ['T_i', 'Ti', 'par2d'],
+            ['T_r', 'Tr', 'par2d'],
+            ['nu_i', 'Collf', 'par2d'],
+            ['v_i_los', 'Vi', 'par2d'],
+            ['comp_mix', 'pm', 'par2d'],
+            ['comp_O_p', 'po+', 'par2d'],
+            ['n_e_err', 'var_Ne', 'par2d'],
+            ['T_i_err', 'var_Ti', 'par2d'],
+            ['T_r_err', 'var_Tr', 'par2d'],
+            ['nu_i_err', 'var_Collf', 'par2d'],
+            ['v_i_los_err', 'var_Vi', 'par2d'],
+            ['comp_mix_err', 'var_pm', 'par2d'],
+            ['comp_O_p_err', 'var_po+', 'par2d'],
+            ['status', 'status', 'par2d'],
+            ['residual', 'res1', 'par2d']
+        ]
+        vars = {}
+        for ind_f, file_name in enumerate(self.file_names):
+            with h5py.File(self.file_paths[ind_f] / file_name, 'r') as fh5:
+                h5_data = fh5['data']
+                h5_metadata = fh5['metadata']
+                num_gates = h5_data['par0d'][15]
+                num_times = len(h5_data['utime'][0, :])
+                for var_info in var_info_list:
+                    var_ind = search_variable(fh5, var_info[1], var_info[2])
+                    var_name = var_info[0]
+                    var = np.array(h5_data[var_info[2]][var_ind])
+                    nrow = num_times
+                    ncol = var.size / nrow
+                    var = var.reshape(nrow, ncol)
+                    vars
 
 
 
-class ProcessData(object):
 
-    def __init__(self, opt=None, readObjFile=False, saveObjFile=False):
-        if opt is None:
-            return
-        if readObjFile:
-            filepath_obj = opt['dir'] + opt['date'].strftime("%Y%m%d") + '/'
-            filename_obj = 'DMSP_' + opt['satID'].upper() + '_' \
-                           + opt['date'].strftime("%Y%m%d") + '_madrigal_' \
-                           + opt['fileID'] + '.pkl'
-            self.saveObj = {
-                'filepath':     filepath_obj,
-                'filename':     filename_obj,
-                'saveObj':      saveObjFile
-            }
+    def _load_madrigal_hdf5(self):
+        raise NotImplemented
 
-        self.date = opt['date']
-        self.satID = opt['satID']
-        self.fileID = opt['fileID']
-        self.filepath = opt['dir'] + self.date.strftime("%Y%m%d") + "/"
-        filekey = "_" + self.satID[1:] + self.fileID
-        isfile = self.isFile(filekey, self.filepath, filetype="hdf5")
-        if not isfile:
-            StreamLogger.warning("No data available!")
-            StreamLogger.info("Calling downloader ...")
-            dt_start = self.date
-            dt_stop = self.date
-            downloadObj = dmsp_download.DownloadProcess(
-                dt_start=dt_start,
-                dt_stop=dt_stop
-            )
-            downloadObj.download_files(filename_keys=[self.fileID], root_dir=root_dir_data)
-            isfile = self.isFile(filekey, self.filepath, filetype="hdf5")
-            if not isfile:
-                StreamLogger.warning("Data do not exist!")
+    def _load_eiscat_mat(self):
+        raise NotImplemented
 
-    def isFile(self, filekey, filepath, filetype = None):
-        for root, dirs, files in os.walk(filepath):
-            for fNum, fName in enumerate(files):
-                if filetype is not None:
-                    if "." + filetype != os.path.splitext(fName)[1]:
-                        continue
-
-                if filekey in fName:
-                    self.filename = fName
-                    return True
-        return False
-
-    def load_request_data(self):
-
-        if hasattr(self, 'saveObj'):
-            if not self.saveObj['saveObj']:
-                filepath_obj = self.saveObj['filepath']
-                filename_obj = self.saveObj['filename']
-                if os.path.isfile(filepath_obj + filename_obj):
-                    with open(filepath_obj + filename_obj, 'rb') as fparas:
-                        paras = pickle.load(fparas)
-                        self.paras = paras
-                        return
-                else:
-                    self.saveObj['saveObj'] = True
-
-        with h5py.File(self.filepath + self.filename, 'r') as fh5:
-
-            # show data file structure
-
-            data_params = ['YEAR', 'MONTH', 'DAY', 'HOUR', 'MIN', 'SEC', \
-                           'GDLAT', 'GLON', 'GDALT', 'MLT', 'MLAT', 'MLONG', \
-                           'SAT_ID', 'NE', 'HOR_ION_V', 'VERT_ION_V', \
-                           'BD', 'B_FORWARD', 'B_PERP', \
-                           'DIFF_BD', 'DIFF_B_FOR', 'DIFF_B_PERP']
-            # Split out the data
-            tablecolnames = fh5["Metadata"]["Data Parameters"][:]
-            datatable = fh5["Data"]["Table Layout"][:]
-
-            # Make dictionary to translate between coluumn names and numbers
-            param_name_to_colnum = {param[0].decode("utf-8"): colind
-                                    for colind, param in enumerate(tablecolnames)}
-            data_params = list(param_name_to_colnum)
-            colinds = [param_name_to_colnum[param_name] \
-                       for param_name in data_params]
-
-            nrows = datatable.shape[0]
-            ncols = len(data_params)
-
-            data = np.zeros((nrows, ncols))
-            data.fill(np.nan)
-
-            maxrowind = 0
-            for rowind, row in enumerate(datatable):
-                data[rowind, :] = [row[colind] for colind in colinds]
-                maxrowind = rowind
-                if rowind == 0:
-                    for icolind, colind in enumerate(colinds):
-                        simpleinfo.info("First value from column %d, name %s is %f",
-                                        colind, data_params[icolind], row[colind])
-
-
-            self.paras = {}
-
-            for pid, paraname in enumerate(data_params):
-                if paraname in ['YEAR', 'MONTH', 'DAY', 'HOUR', 'MIN', 'SEC']:
-                    continue
-                self.paras[paraname] = np.array(data[:maxrowind, pid]).reshape(maxrowind, 1)
-
-            dtlist = np.empty((0, 1))
-            for tid in range(maxrowind):
-                yy = int(data[tid, 0])
-                mm = int(data[tid, 1])
-                dd = int(data[tid, 2])
-                HH = int(data[tid, 3])
-                MM = int(data[tid, 4])
-                SS = int(data[tid, 5])
-                dt = datetime.datetime(yy, mm, dd, HH, MM, SS)
-                dtlist = np.vstack((dtlist, np.array(dt).reshape(1, 1)))
-
-            self.paras['datetime'] = dtlist
-            dt_delta = dtlist - self.date
-            sectime = np.array([dt_temp.total_seconds() \
-                                for dt_temp in dt_delta[:, 0]])
-            self.paras['sectime'] = sectime.reshape(maxrowind, 1)
-
-            if hasattr(self, 'saveObj'):
-                if self.saveObj['saveObj']:
-                    filepath_obj = self.saveObj['filepath']
-                    filename_obj = self.saveObj['filename']
-                    with open(filepath_obj + filename_obj, 'wb') as fparas:
-                        pickle.dump(self.paras, fparas, pickle.HIGHEST_PROTOCOL)
+    def _load_pickle(self):
+        raise NotImplemented
 
     def filter_request_data(self, dtRange):
         dtRange = np.array(dtRange)
@@ -178,33 +205,6 @@ class ProcessData(object):
         ind_dt = np.where((seclist >= secRange[0]) & (seclist <= secRange[1]))[0]
         for pkey in para_keys:
             self.paras[pkey] = self.paras[pkey][ind_dt, :]
-
-
-def list_hdf5_structure(fh5):
-    # example: /home/lcai/01_work/SPADAViewer/data/madrigal/DMSP/20151014/dms_20151014_16e.001.hdf5
-    if fh5 is None:
-        fn = "/home/lcai/01_work/SPADAViewer/data/madrigal/DMSP/20151031/dms_20151031_16e.002.hdf5"
-        fh5 = h5py.File(fn, 'r')
-
-    print(fh5.keys())
-    print(fh5['Metadata'].keys())
-    print(fh5['Metadata']['Data Parameters'][:])
-    print(fh5['Metadata']['Experiment Notes'][:])
-    print(fh5['Metadata']['Experiment Parameters'][:])
-    print(fh5['Metadata']['Independent Spatial Parameters'][:])
-    print(fh5['Metadata']['_record_layout'][:])
-    print(fh5['Data'].keys())
-    print(fh5['Data']['Array Layout'].keys())  # Note: s4 s1 files do not have 'Array Layout'
-    print(fh5['Data']['Array Layout']['1D Parameters'].keys())
-    print(fh5['Data']['Array Layout']['1D Parameters']['Data Parameters'][:])
-    print(fh5['Data']['Array Layout']['1D Parameters']['el_i_ener'][:])
-    print(fh5['Data']['Array Layout']['2D Parameters'].keys())
-    print(fh5['Data']['Array Layout']['Layout Description'][:])
-    print(fh5['Data']['Array Layout']['ch_energy'][:])
-    print(fh5['Data']['Array Layout']['timestamps'][:])
-    print(fh5['Data']['Table Layout'][:])
-
-
 
 
 

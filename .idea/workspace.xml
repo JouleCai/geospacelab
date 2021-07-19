@@ -2,12 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5c86c9ff-0de4-4dd2-8c70-b0a0c5c32574" name="Default Changelist" comment="modify database class">
-      <change beforePath="$PROJECT_DIR$/.idea/geospacelab.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/geospacelab.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/geospacelab/datahub/__init_metadata.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/geospacelab/toolbox/io/dialog.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/config/preferences.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/config/preferences.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/datahub/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/geospacelab/datahub/__init_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/__init_dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/datahub/__init_variable.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/__init_variable.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/madrigal_eiscat_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/madrigal_eiscat_variable_config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/madrigal_eiscat_downloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/madrigal_eiscat_downloader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/madrigal_eiscat_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/madrigal_eiscat_loader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/madrigal_eiscat_variable_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/madrigal_eiscat_variable_config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/geospacelab/test/test_B.py" beforeDir="false" afterPath="$PROJECT_DIR$/geospacelab/test/test_B.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,6 +30,14 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
   <component name="ProjectId" id="1vFNWgdr4YZSY1lpzfiCOzecGH1" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -34,7 +48,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
-  <component name="RunManager" selected="Python.__init__">
+  <component name="RunManager" selected="Python.madrigal_eiscat_downloader">
     <configuration name="__init__" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="geospacelab" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -48,6 +62,66 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/__init__.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="dialog" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="geospacelab" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/geospacelab/toolbox/io" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/geospacelab/toolbox/io/dialog.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="eiscat_hdf5_info" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="geospacelab" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/eiscat_hdf5_info.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="madrigal_eiscat_downloader" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="geospacelab" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/madrigal_eiscat_downloader.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -79,11 +153,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.madrigal_eiscat_downloader" />
         <item itemvalue="Python.__init__" />
-        <item itemvalue="Python.test_A" />
-        <item itemvalue="Python.test_A" />
-        <item itemvalue="Python.test_A" />
-        <item itemvalue="Python.test_A" />
+        <item itemvalue="Python.eiscat_hdf5_info" />
+        <item itemvalue="Python.dialog" />
+        <item itemvalue="Python.dialog" />
       </list>
     </recent_temporary>
   </component>
@@ -145,7 +219,14 @@
       <option name="project" value="LOCAL" />
       <updated>1626253724561</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="modify database class">
+      <created>1626287453191</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1626287453191</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -172,6 +253,16 @@
           <url>file://$PROJECT_DIR$/geospacelab/test/test_A.py</url>
           <line>8</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/eiscat_hdf5_info.py</url>
+          <line>4</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/geospacelab/datahub/sources/madrigal/eiscat/madrigal_eiscat_downloader.py</url>
+          <line>23</line>
+          <option name="timeStamp" value="12" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

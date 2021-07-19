@@ -10,15 +10,17 @@ import re
 import requests
 import bs4
 import os
+import pathlib
 
 import geospacelab.config.preferences as pfr
 import geospacelab.datahub.sources.madrigal.madrigal_utilities as madrigal
+import geospacelab.toolbox.utilities.pylogging as mylog
 
 
 def test():
-    sites = {'UHF', 'ESR'}
+    sites = ['UHF', 'ESR']
     dt_fr = datetime.datetime(2021, 3, 10)
-    dt_to = datetime.datetime(2021, 3, 11)
+    dt_to = datetime.datetime(2021, 3, 10)
     download_obj = Downloader(dt_fr, dt_to, sites=sites, kind_data="madrigal")
     # schedule = EISCATSchedule(dt_fr=dt_fr, dt_to=dt_to)
 
@@ -27,7 +29,7 @@ class Downloader(object):
     """Download the quickplots and archieved analyzed results from EISCAT schedule webpage
     """
 
-    def __init__(self, dt_fr, dt_to, sites=None, root_filepath=None, kind_data="EISCAT",
+    def __init__(self, dt_fr, dt_to, sites=None, data_file_root_dir=None, kind_data="EISCAT", download_pp=False,
                  user_fullname=madrigal.default_user_fullname,
                  user_email=madrigal.default_user_email,
                  user_affiliation=madrigal.default_user_affiliation):
@@ -35,6 +37,8 @@ class Downloader(object):
         self.user_email = user_email
         self.user_affiliation = user_affiliation
 
+        if dt_fr == dt_to:
+            dt_to = dt_to + datetime.timedelta(hours=23, minutes=59)
         self.dt_fr = dt_fr  # datetime from
         self.dt_to = dt_to  # datetime to
         if sites is None:
@@ -42,19 +46,19 @@ class Downloader(object):
                      'ESR']  # site list: default is the list of all the sites, use e.g., ['UHF'] for single site
         self.sites = sites
 
+        if data_file_root_dir is None:
+            self.data_file_root_dir = pfr.datahub_data_root_dir / 'Madrigal' / 'EISCAT'
+
+        self.done = False
+
         if kind_data.lower() == "madrigal":
             self.madrigal_url = "https://madrigal.eiscat.se/madrigal/"
-            self.download_madrigal_files()
-            return
-
-        self.url_base = 'http://portal.eiscat.se'  # EISCAT schedule webpage
-
-        self.urls = []
-        if root_filepath is None:
-            root_filepath = pfr.datahub_data_root_dir  # root path for the download files. Default: the current work directory + /results/
-        self.root_filepath = root_filepath
-        self.search_scheduled_url()
-        self.download_eiscat_files()
+            self.download_madrigal_files(download_pp=download_pp)
+        elif kind_data.lower() == "eiscat":
+            self.url_base = 'http://portal.eiscat.se'  # EISCAT schedule webpage
+            self.urls = []
+            self.search_scheduled_url()
+            self.download_eiscat_files()
 
     def search_scheduled_url(self):
         """
@@ -122,24 +126,33 @@ class Downloader(object):
                 href = link['href']
                 if any(href.endswith(s) for s in ['.png', '.tar.gz', '.hdf5']):
                     filename = href.split('/')[-1]
+
                     match = re.search('\d{4}-\d{2}-\d{2}', filename)
-                    current_dt = datetime.datetime.strptime(match.group(), '%Y-%m-%d')
-                    if current_dt < self.dt_fr or current_dt > self.dt_to:
+                    thisday = datetime.datetime.strptime(match.group(), '%Y-%m-%d')
+                    if thisday < self.dt_fr or thisday > self.dt_to:
                         continue
-                    # current_dt = datetime.datetime.strptime(filename.split('_')[0], '%Y-%m-%d')
-                    print('Downloading "{}"'.format(filename))
                     for key, value in locs.items():
                         if '/' + value + '/' in href:
-                            filepath = os.path.join(self.root_filepath,
-                                                    key, key + '_' + current_dt.strftime("%Y%m%d"))
-                    if not os.path.exists(filepath):
-                        os.makedirs(filepath)
+                            site = key
+
+                    #site1 = re.search("[@|_][a-zA-Z0-9]*[.]", filename).group(0)[1:-1]
+                    search_pattern = re.search("\d{4}-\d{2}-\d{2}_[a-zA-Z0-9]*", filename).group(0)
+                    sub_dir = search_pattern + '@' + site
+                    data_file_dir = self.data_file_root_dir / site / thisday.strftime('%Y') / sub_dir
+                    data_file_dir.mkdir(parents=True, exist_ok=True)
+
                     remote_file = requests.get(href)
-                    with open(os.path.join(filepath, filename), "wb") as eiscat:
+                    file_path = data_file_dir / filename
+                    if file_path.is_file():
+                        print("The file {} has been downloaded.".format(filename))
+                        continue
+                    print('Downloading "{} from EISCAT (portal.eiscat.se) ..."'.format(filename))
+                    with open(file_path, "wb") as eiscat:
                         eiscat.write(remote_file.content)
+                    print('Done!')
         return
 
-    def download_madrigal_files(self):
+    def download_madrigal_files(self, download_pp=False):
         icodes = []
         for site in self.sites:
             icodes.extend(instrument_codes[site])
@@ -148,8 +161,39 @@ class Downloader(object):
                                                               madrigal_url=self.madrigal_url)
             for exp in exp_list:
                 files = database.getExperimentFiles(exp.id)
+                for file in files:
+                    if not download_pp and 'GUISDAP pp' in file.kindatdesc:
+                        continue
+                    file_path = pathlib.Path(file.name)
+                    site = file_path.name.split("@")[1][0:3].upper()
+                    if '32' in site or '42' in site:
+                        site = 'ESR'
 
-            pass
+                    match = re.search('\d{4}-\d{2}-\d{2}', file_path.name)
+                    dt_str = match.group(0)
+                    thisday = datetime.datetime.strptime(dt_str, "%Y-%m-%d")
+                    if thisday < self.dt_fr or thisday > self.dt_to:
+                        continue
+
+                    # sub_dir = file_path.name.split('_', maxsplit=1)[1]
+                    search_pattern = re.search("\d{4}-\d{2}-\d{2}_[a-zA-Z0-9]*", file_path.name).group(0)
+                    sub_dir = search_pattern + '@' + site
+                    data_file_dir = self.data_file_root_dir / site / dt_str[0:4] / sub_dir
+                    data_file_dir.mkdir(parents=True, exist_ok=True)
+                    data_file_path = data_file_dir / file_path.name
+                    if data_file_path.is_file():
+                        mylog.simpleinfo.info("The file {} has been downloaded.".format(data_file_path.name))
+                        continue
+
+                    mylog.simpleinfo.info("Downloading  {} from the Madrigal database ...".format(file_path.name))
+                    database.downloadFile(
+                        file_path, data_file_path,
+                        self.user_fullname, self.user_email, self.user_affiliation,
+                        "hdf5"
+                    )
+                    self.done = True
+                    mylog.simpleinfo.info("Done!")
+
 
         # fhdf5 = h5py.File(outDir + fn, 'r')
 
