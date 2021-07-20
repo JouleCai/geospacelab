@@ -19,10 +19,12 @@ def set_object_attributes(obj, *args, **kwargs):
                                            mybasic.retrieve_name(obj), key)
                 append_rec = 1
                 continue
+            else:
+                if logging:
+                    mylog.simpleinfo.info("Object %s: The attribute '%s' is added!", mybasic.retrieve_name(obj), key)
 
         setattr(obj, key, value)
-        if logging:
-            mylog.simpleinfo.info("Object %s: The attribute '%s' is added!", mybasic.retrieve_name(obj), key)
+
     if append_rec:
         mylog.simpleinfo.info("Object %s: To add the new attribute, set append=True", mybasic.retrieve_name(obj))
 

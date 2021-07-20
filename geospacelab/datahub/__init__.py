@@ -17,13 +17,13 @@ import geospacelab.config.preferences as pfr
 def example():
 
     dt_fr = datetime.datetime.strptime('20210309' + '0000', '%Y%m%d%H%M')
-    dt_to = datetime.datetime.strptime('20210309' + '2400', '%Y%m%d%H%M')
+    dt_to = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')
     database_name = 'madrigal'
     facility_name = 'eiscat'
 
     dh = DataHub(dt_fr, dt_to)
     ds_1 = dh.set_dataset(datasource_contents=['madrigal', 'eiscat'],
-                          site='TRO', antenna='UHF', file_type='eiscat_hdf5')
+                          site='UHF', antenna='UHF', modulation='ant', data_file_type='eiscat-hdf5')
     var_1 = dh.set_variable('n_e')
     var_2 = dh.set_variable('T_i')
 
@@ -52,15 +52,15 @@ class DataHub(object):
             module = importlib.import_module('.'.join(module_keys))
             dataset = module.Dataset(**kwargs)
 
-            if dataset in self.datasets:
-                mylog.simpleinfo.warning('The same dataset has been added!')
+            if dataset.label() in [ds.label() for ds in self.datasets]:
+                mylog.simpleinfo.info('The same dataset has been added!')
                 append = False
             else:
                 dataset.load_data()
         elif datasource_mode == 'temporary':
             if dataset is None:
-                dataset = DatasetBase(name='temporary')
-            elif issubclass(dataset, DatasetBase):
+                dataset = DatasetModel(database='temporary')
+            elif issubclass(dataset, DatasetModel):
                 pass
             else:
                 raise TypeError
@@ -74,12 +74,12 @@ class DataHub(object):
         dataset = kwargs.pop('dataset', None)
         if dataset is None:
             dataset = self.datasets[-1]  # the latest added dataset
-        elif issubclass(dataset, DatasetBase):
+        elif issubclass(dataset.__class__, DatasetModel):
             dataset = self.set_dataset(mode='temporary', dataset=dataset)
         else:
             raise TypeError
 
-        var = dataset.assign_variable(var_name)
+        var = dataset.set_variable(var_name)
         var.config(**kwargs)
 
         self.variables.append(var)

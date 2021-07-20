@@ -96,7 +96,7 @@ class Downloader(object):
                 # print(stag.string)
                 content = r.text.split('\n')[tagline - 1]
                 # print(content)
-                soup_line = bs4.BeautifulSoup(content)
+                soup_line = bs4.BeautifulSoup(content, 'html.parser')
                 link = soup_line.find('a', href=True)['href']
                 if 'experiment_list' not in link:
                     print('No link for the existing experiment ({})'.format(link))
@@ -150,6 +150,7 @@ class Downloader(object):
                     with open(file_path, "wb") as eiscat:
                         eiscat.write(remote_file.content)
                     print('Done!')
+                    self.done = True
         return
 
     def download_madrigal_files(self, download_pp=False):

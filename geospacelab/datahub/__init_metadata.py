@@ -5,7 +5,7 @@ import geospacelab.toolbox.utilities.pyclass as pyclass
 
 class StrAttrBase(str):
     def __new__(cls, str_in):
-        if issubclass(str_in, StrAttrBase):
+        if issubclass(str_in.__class__, StrAttrBase):
             obj = str_in
         else:
             obj = str.__new__(cls, str_in)

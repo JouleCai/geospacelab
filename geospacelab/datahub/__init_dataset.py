@@ -19,7 +19,7 @@ class DatasetModel(object):
         self.dt_fr = None
         self.dt_to = None
 
-        self.load_func = 'default'
+        self.load_func = None
         self.load_mode = 'AUTO'  # ['AUTO'], 'dialog', 'assigned'
         self.data_root_dir = pref.datahub_data_root_dir
         self.data_file_paths = []
@@ -35,13 +35,14 @@ class DatasetModel(object):
         search_pattern = kwargs.pop('search_pattern', '*')
         if str(self.data_file_ext):
             search_pattern = search_pattern + '.' + self.data_file_ext
-        files = initial_file_dir.glob(search_pattern)
+        files = list(initial_file_dir.rglob(search_pattern))
         if len(files) == 1:
             done = True
             self.data_file_paths.append(files[0])
-        elif len(files) == 0:
-            mylog.StreamLogger.warning("Multiple files match!")
+        elif len(files) > 1:
+            mylog.StreamLogger.error("Multiple files match!")
             print(files)
+            raise FileExistsError
         else:
             print('Cannot find the requested data file in {}'.format(initial_file_dir))
         return done
@@ -84,11 +85,11 @@ class DatasetModel(object):
 
     @staticmethod
     def _set_default_attrs(kwargs: dict, default_attrs: dict):
-        for key, value in default_attrs:
+        for key, value in default_attrs.items():
             kwargs.setdefault(key, value)
         return kwargs
 
-    def label(self, fields=None, separator='_', lowercase=True):
+    def label(self, fields=None, separator=' | ', lowercase=True):
         if fields is None:
             fields = self.label_fields
         sublabels = []
@@ -96,8 +97,8 @@ class DatasetModel(object):
             if not str(attr_name):
                 sublabels.append('*')
             else:
-                sublabels.append(attr_name)
-        label = pybasic.str_join(sublabels, separator=separator, lowercase=lowercase)
+                sublabels.append(getattr(self, attr_name))
+        label = pybasic.str_join(*sublabels, separator=separator, lowercase=lowercase)
         return label
 
     def config(self, logging=True, **kwargs):
@@ -115,7 +116,9 @@ class DatasetModel(object):
         return items
 
     def __setitem__(self, key, value):
-        if not issubclass(value, VariableModel):
+        if value is None:
+            pass
+        elif not issubclass(value.__class__, VariableModel):
             raise TypeError
         self._variables[key] = value
 
@@ -149,6 +152,7 @@ class DatasetModel(object):
             var_config = var_configs[var_name]
         var = VariableModel(**var_config)
         var.dataset = self
+        return var
 
     def _set_default_variables(self, default_variable_names):
         for var_name in default_variable_names:

@@ -19,7 +19,7 @@ import geospacelab.toolbox.utilities.pyclass as pyclass
 class VariableModel(object):
 
     def __init__(self, **kwargs):
-        self.name = kwargs.pop('var_name', '')
+        self.name = kwargs.pop('name', '')
         self.fullname = kwargs.pop('fullname', '')
 
         self.label = kwargs.pop('label', '')

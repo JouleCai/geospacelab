@@ -17,7 +17,7 @@ import geospacelab.toolbox.utilities.numpyarray as arraytool
 default_variable_names = [
     'DATETIME', 'DATETIME_1', 'DATETIME_2',
     'magic_constant', 'r_SCangle', 'r_m0_1', 'r_m0_2'
-    'az', 'el', 'Tx_power', 'height', 'range',
+    'az', 'el', 'P_Tx', 'height', 'range',
     'n_e', 'T_i', 'T_e', 'nu_i', 'v_i_los', 'comp_mix', 'comp_O_p',
     'n_e_err', 'T_i_err', 'T_e_err', 'nu_i_err', 'v_i_los_err', 'comp_mix_err', 'comp_O_p_err',
     'status', 'residual'
@@ -70,8 +70,8 @@ def load_eiscat_hdf5(file_paths):
         ['r_m0_1', 'm01', 'par0d'],
         ['az', 'az', 'par1d'],
         ['el', 'el', 'par1d'],
-        ['Pt', 'Pt', 'par1d'],
-        ['h', 'h', 'par2d'],
+        ['P_Tx', 'Pt', 'par1d'],
+        ['height', 'h', 'par2d'],
         ['range', 'range', 'par2d'],
         ['n_e', 'Ne', 'par2d'],
         ['T_i', 'Ti', 'par2d'],
@@ -146,6 +146,8 @@ def load_eiscat_hdf5(file_paths):
 
     vars['DATETIME'] = vars['DATETIME_1'] + (vars['DATETIME_2'] - vars['DATETIME_1'])/2
     vars['T_e'] = vars['T_i'] * vars['T_r']
+    vars['T_e_err'] = vars['T_e'] * np.sqrt((vars['T_i_err']/vars['T_i'])**2
+                                            + (vars['T_r_err']/vars['T_r'])**2)
 
     load_obj = Loader(vars, metadata)
     return load_obj
