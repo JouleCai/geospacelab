@@ -156,24 +156,24 @@ class DatasetModel(object):
 
 
 
-class LoaderBase(object):
-
-    def __init__(self):
-        self.dt_fr = None
-        self.dt_to = None
-        self.file_paths = None
-        self.file_names = None
-        self.file_num = 0
-        self.mode = 'AUTO'
-        self.save_pickle = False
-        self.load_pickle = False
-        self.download = False
-
-    def config(self, logging=True, **kwargs):
-        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
-
-    def add_attr(self, logging=True, **kwargs):
-        pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
+# class LoaderBase(object):
+#
+#     def __init__(self):
+#         self.dt_fr = None
+#         self.dt_to = None
+#         self.file_paths = None
+#         self.file_names = None
+#         self.file_num = 0
+#         self.mode = 'AUTO'
+#         self.save_pickle = False
+#         self.load_pickle = False
+#         self.download = False
+#
+#     def config(self, logging=True, **kwargs):
+#         pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
+#
+#     def add_attr(self, logging=True, **kwargs):
+#         pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
 #
 #
 # # BaseClass with the "set_attr" method

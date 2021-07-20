@@ -199,3 +199,20 @@ def convert_doy_to_datetime(year, doys):
     elif 'numpy' in str(type_in):
         return dts
 
+
+def convert_unix_time_to_datetime(times):
+    type_in = type(times)
+
+    ts = numpy.array(times)
+    dts = numpy.empty_like(ts, dtype=datetime)
+
+    for ind, t in enumerate(ts.flatten()):
+        dts[ind] = datetime.utcfromtimestamp(t)
+
+    if type_in in (int, float):
+        return dts[0]
+    elif type_in is list:
+        return dts.tolist()
+    elif 'numpy' in str(type_in):
+        return dts
+

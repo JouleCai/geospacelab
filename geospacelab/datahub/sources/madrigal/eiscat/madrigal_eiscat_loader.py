@@ -7,23 +7,22 @@ import pickle
 import pathlib
 
 from geospacelab.config.preferences import *
-from geospacelab.datahub import LoaderBase
-from geospacelab.datahub.sources.madrigal.eiscat import madrigal_eiscat_downloader as downloader
+# from geospacelab.datahub.sources.madrigal.eiscat import madrigal_eiscat_downloader as downloader
 
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as pylog
+import geospacelab.toolbox.utilities.numpyarray as arraytool
 
-if __name__ == "__main__":
-    dir_root = datahub_data_root_dir
 
 default_variable_names = [
-    'GB_DATETIME', 'GB_DATETIME_1', 'GB_DATETIME_2',
-    'magic_constant', 'half_scattering_angle',
-    'az', 'el', 'Tx_power', 'alt', 'range',
+    'DATETIME', 'DATETIME_1', 'DATETIME_2',
+    'magic_constant', 'r_SCangle', 'r_m0_1', 'r_m0_2'
+    'az', 'el', 'Tx_power', 'height', 'range',
     'n_e', 'T_i', 'T_e', 'nu_i', 'v_i_los', 'comp_mix', 'comp_O_p',
     'n_e_err', 'T_i_err', 'T_e_err', 'nu_i_err', 'v_i_los_err', 'comp_mix_err', 'comp_O_p_err',
     'status', 'residual'
 ]
+
 
 def select_loader(file_type):
     load_func = None
@@ -61,14 +60,14 @@ def load_eiscat_hdf5(file_paths):
         if rec == 0:
             raise LookupError
         return ind_rec
-    # *az *el *tx_power t1 t2 *ran *height lat lon *n_e *ti *te *coll *vel ',...
+    # *az *el *tx_power *t1 *t2 *ran *height lat lon *n_e *ti *te *coll *vel ',...
     # '*ne_err *ti_err *te_err *coll_err *vel_err *stat *resid ?comp ?r_m0 ',...
     # 'name_site r_XMITloc r_RECloc r_SCangle name_expr r_ver dates starttime stoptime']
     var_info_list = [
         ['magic_constant', 'Magic_const', 'par0d'],
         ['r_SCangle', 'SCangle', 'par0d'],
-        ['r_m02', 'm02', 'par0d'],
-        ['r_m01', 'm01', 'par0d'],
+        ['r_m0_2', 'm02', 'par0d'],
+        ['r_m0_1', 'm01', 'par0d'],
         ['az', 'az', 'par1d'],
         ['el', 'el', 'par1d'],
         ['Pt', 'Pt', 'par1d'],
@@ -92,28 +91,63 @@ def load_eiscat_hdf5(file_paths):
         ['residual', 'res1', 'par2d']
     ]
 
+    site_info = {
+        'T': 'UHF',
+        'V': 'VHF',
+        'K': 'KIR',
+        'S': 'SOD',
+        'L': 'ESR'
+    }
+
     vars = {}
+    metadata = {}
     for ind_f, file_path in enumerate(file_paths):
         with h5py.File(file_path, 'r') as fh5:
             h5_data = fh5['data']
             h5_metadata = fh5['metadata']
-            num_gates = h5_data['par0d'][15]
+            num_gates = int(h5_data['par0d'][15, 0])
             num_row = h5_data['utime'][0].shape[0]
             for var_info in var_info_list:
-                var_ind = search_variable(fh5, var_info[1], var_info[2])
+                var_ind = search_variable(fh5, var_info[1], var_groups=[var_info[2]])
                 var_name = var_info[0]
                 var = h5_data[var_info[2]][var_ind]
                 if var.shape == (1, ):
                     vars.setdefault(var_name, var[0])
                 else:
-                    num_col = var.shape[1] / num_row
+                    num_col = int(var.shape[0] / num_row)
                     var = var.reshape(num_row, num_col)
-                vars.setdefault(var_name, var, None)
-                vars[var_name] = arraytool.numpy_array_join_vertical(
-                    (vars[var_name], var), axis=0)
+                    vars.setdefault(var_name, var)
+                    vars[var_name] = arraytool.numpy_array_join_vertical(vars[var_name], var)
 
             # unix time to datetime
             utime1 = h5_data['utime'][0]
+            dt1 = dttool.convert_unix_time_to_datetime(utime1)
+            var = dt1.reshape(num_row, 1)
+            var_name = 'DATETIME_1'
+            vars.setdefault(var_name, var)
+            vars[var_name] = arraytool.numpy_array_join_vertical(vars[var_name], var)
+
+            utime2 = h5_data['utime'][1]
+            dt2 = dttool.convert_unix_time_to_datetime(utime2)
+            var = dt2.reshape(num_row, 1)
+            var_name = 'DATETIME_2'
+            vars.setdefault(var_name, var)
+            vars[var_name] = arraytool.numpy_array_join_vertical(vars[var_name], var)
+
+            metadata['r_XMITloc'] = [h5_data['par0d'][2][0], h5_data['par0d'][3][0], h5_data['par0d'][4][0]]
+            metadata['r_RECloc'] = [h5_data['par0d'][5][0], h5_data['par0d'][6][0], h5_data['par0d'][7][0]]
+            metadata['site_name'] = site_info[h5_metadata['names'][1][1].decode('UTF-8').strip()]
+            metadata['pulse_code'] = h5_metadata['names'][0][1].decode('UTF-8').strip()
+            metadata['antenna'] = h5_metadata['names'][2][1].decode('UTF-8').strip()
+            metadata['GUISDAP_version'] = h5_metadata['software']['GUISDAP_ver'][0, 0].decode('UTF-8').strip()
+            metadata['rawdata_path'] = h5_metadata['software']['gfd']['data_path'][0, 0].decode('UTF-8').strip()
+            metadata['scan_mode'] = metadata['rawdata_path'].split('_')[1]
+            metadata['affiliation'] = metadata['rawdata_path'].split('@')[0].split('_')[-1]
+
+    vars['DATETIME'] = vars['DATETIME_1'] + (vars['DATETIME_2'] - vars['DATETIME_1'])/2
+
+    load_obj = Loader(vars, metadata)
+    return load_obj
 
 
 
@@ -123,7 +157,17 @@ def load_eiscat_mat():
 def load_madrigal_hdf5():
     raise NotImplemented
 
+class Loader:
+    def __init__(self, vars, metadata):
+        self.variables = vars
+        self.metadata = metadata
 
+if __name__ == "__main__":
+    dir_root = datahub_data_root_dir
+
+    filepath = pathlib.Path('./example') / "EISCAT_2021-03-10_beata_ant@uhfa.hdf5"
+
+    load_eiscat_hdf5([filepath])
 
 #
 # class Loader(LoaderBase):

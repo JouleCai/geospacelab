@@ -56,6 +56,7 @@ class Dataset(datahub.DatasetModel):
                 self.load_func = default_loader.select_loader(self.data_file_type)
             dataset = self.load_func(file_path)
             for var_name in self._variables.keys():
+                pass
 
 
     def search_data_files(self):
