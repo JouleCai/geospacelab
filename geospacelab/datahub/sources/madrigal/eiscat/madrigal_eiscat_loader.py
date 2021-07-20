@@ -145,6 +145,7 @@ def load_eiscat_hdf5(file_paths):
             metadata['affiliation'] = metadata['rawdata_path'].split('@')[0].split('_')[-1]
 
     vars['DATETIME'] = vars['DATETIME_1'] + (vars['DATETIME_2'] - vars['DATETIME_1'])/2
+    vars['T_e'] = vars['T_i'] * vars['T_r']
 
     load_obj = Loader(vars, metadata)
     return load_obj

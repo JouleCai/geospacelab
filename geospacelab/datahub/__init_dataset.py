@@ -22,7 +22,7 @@ class DatasetModel(object):
         self.load_func = 'default'
         self.load_mode = 'AUTO'  # ['AUTO'], 'dialog', 'assigned'
         self.data_root_dir = pref.datahub_data_root_dir
-        self.data_file_path_list = []
+        self.data_file_paths = []
         self.data_file_patterns = []
         self.data_file_num = 0
         self.data_file_ext = '*'
@@ -38,7 +38,7 @@ class DatasetModel(object):
         files = initial_file_dir.glob(search_pattern)
         if len(files) == 1:
             done = True
-            self.data_file_path_list.append(files[0])
+            self.data_file_paths.append(files[0])
         elif len(files) == 0:
             mylog.StreamLogger.warning("Multiple files match!")
             print(files)

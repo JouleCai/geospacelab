@@ -18,7 +18,7 @@ default_dataset_attrs = {
 }
 
 default_variable_names = [
-    'GB_DATETIME', 'GB_DATETIME_1', 'GB_DATETIME_2',
+    'DATETIME', 'DATETIME_1', 'DATETIME_2',
     'magic_constant', 'half_scattering_angle',
     'az', 'el', 'Tx_power', 'alt', 'range',
     'n_e', 'T_i', 'T_e', 'nu_i', 'v_i_los', 'comp_mix', 'comp_O_p',
@@ -38,6 +38,7 @@ class Dataset(datahub.DatasetModel):
         self.scan_mode = ''
         self.modulation = ''
         self.data_file_type = ''
+        self.affiliation = ''
         self.download = False
         self._thisday = None
 
@@ -51,12 +52,20 @@ class Dataset(datahub.DatasetModel):
 
     def load_data(self):
         self.check_data_files()
-        for file_path in self.data_file_path_list:
-            if self.load_func is None:
-                self.load_func = default_loader.select_loader(self.data_file_type)
-            dataset = self.load_func(file_path)
+
+        if self.load_func is None:
+            self.load_func = default_loader.select_loader(self.data_file_type)
+            load_obj = self.load_func(self.data_file_paths)
+
             for var_name in self._variables.keys():
-                pass
+                self._variables[var_name] = load_obj.variables[var_name]
+            self.site = load_obj.metadata['site_name']
+            self.antenna = load_obj.metadata['antenna']
+            self.pulse_code = load_obj.metadata['pulse_code']
+            self.scan_mode = load_obj.metadata['scan_mode']
+            self.modulation = load_obj.metadata['modulation']
+            self.experiment = load_obj.metadata['rawdata_path']
+            self.affiliation = load_obj.metadata['affiliation']
 
 
     def search_data_files(self):
