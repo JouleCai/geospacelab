@@ -7,6 +7,7 @@ import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_loader as default_loader
 import geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_downloader as downloader
 from geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_variable_config import items as default_var_configs
+from geospacelab.datahub.sources.madrigal.eiscat.__utilities import *
 
 default_dataset_attrs = {
     'database': 'Madrigal',

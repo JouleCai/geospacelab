@@ -15,7 +15,7 @@ import geospacelab.config.preferences as pfr
 
 
 def example():
-    # pfr.datahub_data_root_dir = '~/01-Work/00-Data'
+    pfr.datahub_data_root_dir = pathlib.Path('~/01-Work/00-Data')
     dt_fr = datetime.datetime.strptime('20210309' + '0000', '%Y%m%d%H%M')
     dt_to = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')
     database_name = 'madrigal'

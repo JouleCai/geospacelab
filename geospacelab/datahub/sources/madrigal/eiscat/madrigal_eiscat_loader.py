@@ -12,6 +12,7 @@ from geospacelab.config.preferences import *
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as pylog
 import geospacelab.toolbox.utilities.numpyarray as arraytool
+import geospacelab.datahub.sources.madrigal.eiscat as eiscat
 
 
 default_variable_names = [
@@ -63,33 +64,33 @@ def load_eiscat_hdf5(file_paths):
     # *az *el *tx_power *t1 *t2 *ran *height lat lon *n_e *ti *te *coll *vel ',...
     # '*ne_err *ti_err *te_err *coll_err *vel_err *stat *resid ?comp ?r_m0 ',...
     # 'name_site r_XMITloc r_RECloc r_SCangle name_expr r_ver dates starttime stoptime']
-    var_info_list = [
-        ['magic_constant', 'Magic_const', 'par0d'],
-        ['r_SCangle', 'SCangle', 'par0d'],
-        ['r_m0_2', 'm02', 'par0d'],
-        ['r_m0_1', 'm01', 'par0d'],
-        ['az', 'az', 'par1d'],
-        ['el', 'el', 'par1d'],
-        ['P_Tx', 'Pt', 'par1d'],
-        ['height', 'h', 'par2d'],
-        ['range', 'range', 'par2d'],
-        ['n_e', 'Ne', 'par2d'],
-        ['T_i', 'Ti', 'par2d'],
-        ['T_r', 'Tr', 'par2d'],
-        ['nu_i', 'Collf', 'par2d'],
-        ['v_i_los', 'Vi', 'par2d'],
-        ['comp_mix', 'pm', 'par2d'],
-        ['comp_O_p', 'po+', 'par2d'],
-        ['n_e_err', 'var_Ne', 'par2d'],
-        ['T_i_err', 'var_Ti', 'par2d'],
-        ['T_r_err', 'var_Tr', 'par2d'],
-        ['nu_i_err', 'var_Collf', 'par2d'],
-        ['v_i_los_err', 'var_Vi', 'par2d'],
-        ['comp_mix_err', 'var_pm', 'par2d'],
-        ['comp_O_p_err', 'var_po+', 'par2d'],
-        ['status', 'status', 'par2d'],
-        ['residual', 'res1', 'par2d']
-    ]
+    var_name_dict = {
+        'magic_constant': 'Magic_const',
+        'r_SCangle': 'SCangle',
+        'r_m0_2': 'm02',
+        'r_m0_1': 'm01',
+        'az': 'az',
+        'el': 'el',
+        'P_Tx': 'Pt',
+        'height': 'h',
+        'range': 'range',
+        'n_e': 'Ne',
+        'T_i': 'Ti',
+        'T_r': 'Tr',
+        'nu_i': 'Collf',
+        'v_i_los': 'Vi',
+        'comp_mix': 'pm',
+        'comp_O_p': 'po+',
+        'n_e_var': 'var_Ne',
+        'T_i_var': 'var_Ti',
+        'T_r_var': 'var_Tr',
+        'nu_i_var': 'var_Collf',
+        'v_i_los_var': 'var_Vi',
+        'comp_mix_var': 'var_pm',
+        'comp_O_p_var': 'var_po+',
+        'status': 'status',
+        'residual': 'res1'
+    }
 
     site_info = {
         'T': 'UHF',
@@ -103,20 +104,41 @@ def load_eiscat_hdf5(file_paths):
     metadata = {}
     for ind_f, file_path in enumerate(file_paths):
         with h5py.File(file_path, 'r') as fh5:
+            var_info_list = eiscat.list_eiscat_hdf5_variables(fh5)
             h5_data = fh5['data']
             h5_metadata = fh5['metadata']
-            num_gates = int(h5_data['par0d'][15, 0])
+            ind_nrec = var_info_list['var_name'].index('nrec')
+            nrec_group = var_info_list['var_group'][ind_nrec]
+            nrec_group_ind = var_info_list['var_ind'][ind_nrec]
+            nrec = h5_data[nrec_group][nrec_group_ind]
             num_row = h5_data['utime'][0].shape[0]
-            for var_info in var_info_list:
-                var_ind = search_variable(fh5, var_info[1], var_groups=[var_info[2]])
-                var_name = var_info[0]
-                var = h5_data[var_info[2]][var_ind]
-                if var.shape == (1, ):
-                    vars.setdefault(var_name, var[0])
-                else:
-                    num_col = int(var.shape[0] / num_row)
-                    var = var.reshape(num_row, num_col)
-                    vars.setdefault(var_name, var)
+            for vn1, vn2 in var_name_dict.items():
+                ind_v = var_info_list['var_name'].index(vn2)
+                var_group = var_info_list['var_group'][ind_v]
+                var = h5_data[var_group][ind_v]
+                if var_group == 'par0d':
+                    vars.setdefault(vn1, var[0])
+                elif var_group == 'par1d':
+                    var = var.reshape(num_row, 1)
+                    vars.setdefault(vn1, var)
+                    vars[var_name] = arraytool.numpy_array_join_vertical(vars[var_name], var)
+                elif var_group == 'par2d':
+                    if nrec_group == 'par0d':
+                        num_col = int(var.shape[0] / num_row)
+                        if num_col != nrec[0]:
+                            print("Note: the number of range gates doesn't match nrec!")
+                        var = var.reshape(num_row, num_col)
+                    elif nrec_group == 'par1d':
+                        num_gates = np.max(nrec)
+                        var_array = np.empty((num_row, num_gates))
+                        var_array[:, :] = np.nan
+                        rec_ind_1 = 0
+                        for i in range(num_row):
+                            rec_ind_2 = rec_ind_1 + nrec[i]
+                            var_array[i, :nrec[i]] = var[rec_ind_1:rec_ind_2]
+                            rec_ind_1 = rec_ind_2
+                        var = var_array
+                    vars.setdefault(vn1, var)
                     vars[var_name] = arraytool.numpy_array_join_vertical(vars[var_name], var)
 
             # unix time to datetime
@@ -143,6 +165,11 @@ def load_eiscat_hdf5(file_paths):
             metadata['rawdata_path'] = h5_metadata['software']['gfd']['data_path'][0, 0].decode('UTF-8').strip()
             metadata['scan_mode'] = metadata['rawdata_path'].split('_')[1]
             metadata['affiliation'] = metadata['rawdata_path'].split('@')[0].split('_')[-1]
+
+    for var_name, value in vars.items():
+        if '_var' in var_name:
+            var_name_err = var_name.replace('_var', '_err')
+            vars[var_name_err] = np.sqrt(vars[var_name])
 
     vars['DATETIME'] = vars['DATETIME_1'] + (vars['DATETIME_2'] - vars['DATETIME_1'])/2
     vars['T_e'] = vars['T_i'] * vars['T_r']
