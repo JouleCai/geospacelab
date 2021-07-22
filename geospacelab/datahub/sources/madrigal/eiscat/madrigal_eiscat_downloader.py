@@ -47,7 +47,7 @@ class Downloader(object):
         self.sites = sites
 
         if data_file_root_dir is None:
-            self.data_file_root_dir = pfr.datahub_data_root_dir / 'Madrigal' / 'EISCAT'
+            self.data_file_root_dir = pfr.datahub_data_root_dir / 'Madrigal' / 'EISCAT' / 'analyzed'
 
         self.done = False
 

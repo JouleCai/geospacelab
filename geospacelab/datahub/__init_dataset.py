@@ -33,9 +33,12 @@ class DatasetModel(object):
         done = False
         initial_file_dir = kwargs.pop('initial_file_dir', self.data_root_dir)
         search_pattern = kwargs.pop('search_pattern', '*')
+        recursive = kwargs.pop('recursive', False)
         if str(self.data_file_ext):
             search_pattern = search_pattern + '.' + self.data_file_ext
-        files = list(initial_file_dir.rglob(search_pattern))
+        if recursive:
+            search_pattern = '**/' + search_pattern
+        files = list(initial_file_dir.glob(search_pattern))
         if len(files) == 1:
             done = True
             self.data_file_paths.append(files[0])
@@ -151,7 +154,7 @@ class DatasetModel(object):
             var_configs = kwargs.pop('var_config_items', {})
             var_config = var_configs[var_name]
         var = VariableModel(**var_config)
-        var.dataset = self
+        var.config(dataset=self)
         return var
 
     def _set_default_variables(self, default_variable_names):

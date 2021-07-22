@@ -12,8 +12,9 @@ __status__ = "Developing"
 __revision__ = ""
 __docformat__ = "reStructureText"
 
-
+import numpy as np
 import geospacelab.toolbox.utilities.pyclass as pyclass
+import geospacelab.toolbox.utilities.pylogging as mylog
 
 
 class VariableModel(object):
@@ -38,7 +39,7 @@ class VariableModel(object):
         self.dim = kwargs.pop('dim', None)
         self.depends = kwargs.pop('depends', {})
 
-        self.dataset_label = kwargs.pop('dataset_label', '')
+        self.dataset = None
 
         visual = kwargs.pop('visual', 'off')
         if visual == 'on':
@@ -50,6 +51,40 @@ class VariableModel(object):
 
     def add_attr(self, logging=True, **kwargs):
         pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
+
+    @property
+    def value(self):
+        v = None
+        if isinstance(self._value, str):
+            v = self.dataset[self._value]
+        else:
+            v = self._value
+        if v is None:
+            mylog.StreamLogger.warning("The variable ({})'s value has not been not been assigned!".format(self.name))
+        return v
+
+    @value.setter
+    def value(self, v):
+        if isinstance(v, list):
+            v = np.array(v)
+        self._value = v
+
+    @property
+    def error(self):
+        v = None
+        if isinstance(self._value, str):
+            v = self.dataset[self._value]
+        else:
+            v = self._value
+        if v is None:
+            mylog.StreamLogger.warning("The variable ({})'s error has not been not been assigned!".format(self.name))
+        return v
+
+    @error.setter
+    def error(self, v):
+        if isinstance(v, list):
+            v = np.array(v)
+        self._value = v
 
 
 class Visual(object):

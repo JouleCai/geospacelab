@@ -13,7 +13,7 @@ default_dataset_attrs = {
     'facility': 'EISCAT',
     'data_file_type': 'eiscat-hdf5',
     'data_file_ext': 'hdf5',
-    'data_root_dir': prf.datahub_data_root_dir / 'Madrigal' / 'EISCAT',
+    'data_root_dir': prf.datahub_data_root_dir / 'Madrigal' / 'EISCAT' / 'analyzed',
     'download': True,
 }
 
@@ -28,6 +28,8 @@ default_variable_names = [
     'status', 'residual'
 ]
 
+default_data_search_recursive = True
+
 
 class Dataset(datahub.DatasetModel):
     def __init__(self, **kwargs):
@@ -41,6 +43,7 @@ class Dataset(datahub.DatasetModel):
         self.modulation = ''
         self.data_file_type = ''
         self.affiliation = ''
+        self.data_search_recursive = default_data_search_recursive
         self.download = False
         self._thisday = None
 
@@ -84,7 +87,7 @@ class Dataset(datahub.DatasetModel):
         for i in range(diff_days + 1):
             thisday = day0 + datetime.timedelta(days=i)
             self._thisday = thisday
-            initial_file_dir = self.data_root_dir / 'analyzed' / self.site / thisday.strftime('%Y')
+            initial_file_dir = self.data_root_dir / self.site / thisday.strftime('%Y')
             if not list(self.data_file_patterns):
                 if self.data_file_type == 'eiscat-hdf5':
                     self.data_file_patterns.append('EISCAT')
@@ -97,13 +100,17 @@ class Dataset(datahub.DatasetModel):
                 self.data_file_patterns.append(self.antenna.lower())
 
             search_pattern = '*' + '*'.join(self.data_file_patterns) + '*'
-
-            done = super().search_data_files(initial_file_dir=initial_file_dir, search_pattern=search_pattern)
+            recursive = self.data_search_recursive
+            done = super().search_data_files(
+                initial_file_dir=initial_file_dir, search_pattern=search_pattern, recursive=recursive
+            )
 
             if not done and self.download:
                 done = self.download_data()
                 if done:
-                    done = super().search_data_files(initial_file_dir=initial_file_dir, search_pattern=search_pattern)
+                    done = super().search_data_files(
+                initial_file_dir=initial_file_dir, search_pattern=search_pattern, recursive=recursive
+            )
                 else:
                     print('Cannot find files from the online database!')
 
