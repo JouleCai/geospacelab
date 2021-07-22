@@ -107,15 +107,15 @@ def load_eiscat_hdf5(file_paths):
             var_info_list = eiscat.list_eiscat_hdf5_variables(fh5)
             h5_data = fh5['data']
             h5_metadata = fh5['metadata']
-            ind_nrec = var_info_list['var_name'].index('nrec')
-            nrec_group = var_info_list['var_group'][ind_nrec]
-            nrec_group_ind = var_info_list['var_ind'][ind_nrec]
+            ind_nrec = var_info_list['name'].index('nrec')
+            nrec_group = var_info_list['group'][ind_nrec]
+            nrec_group_ind = var_info_list['index'][ind_nrec]
             nrec = h5_data[nrec_group][nrec_group_ind]
             num_row = h5_data['utime'][0].shape[0]
             for var_name, var_name_h5 in var_name_dict.items():
-                ind_v = var_info_list['var_name'].index(var_name_h5)
-                var_group = var_info_list['var_group'][ind_v]
-                var_ind = var_info_list['var_ind'][ind_v]
+                ind_v = var_info_list['name'].index(var_name_h5)
+                var_group = var_info_list['group'][ind_v]
+                var_ind = var_info_list['index'][ind_v]
                 var = h5_data[var_group][var_ind]
                 if var_group == 'par0d':
                     vars.setdefault(var_name, var[0])

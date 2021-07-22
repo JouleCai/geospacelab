@@ -10,12 +10,12 @@ def list_eiscat_hdf5_variables(fh5, var_groups=None, var_names_queried=None, dis
     if var_groups is None:
         var_groups = ['par0d', 'par1d', 'par2d']
     var_info = {
-        'var_name': [],
-        'var_unit': [],
-        'var_ind': [],
-        'var_group': [],
-        'var_name_GUISDAP': [],
-        'var_note': []
+        'name': [],
+        'unit': [],
+        'index': [],
+        'group': [],
+        'name_GUISDAP': [],
+        'note': []
     }
     for var_group in var_groups:
         metadata_var = fh5['metadata'][var_group]
@@ -29,14 +29,14 @@ def list_eiscat_hdf5_variables(fh5, var_groups=None, var_names_queried=None, dis
             var_unit = metadata_var[ind, 2].decode('UTF-8').strip()
             var_name_GUISDAP = metadata_var[ind, 3].decode('UTF-8').strip()
 
-            var_info['var_name'].append(var_name)
-            var_info['var_ind'].append(ind)
-            var_info['var_unit'].append(var_unit)
-            var_info['var_note'].append(var_note)
-            var_info['var_group'].append(var_group)
-            var_info['var_name_GUISDAP'].append(var_name_GUISDAP)
+            var_info['name'].append(var_name)
+            var_info['index'].append(ind)
+            var_info['unit'].append(var_unit)
+            var_info['note'].append(var_note)
+            var_info['group'].append(var_group)
+            var_info['name_GUISDAP'].append(var_name_GUISDAP)
 
-    len_vars = len(var_info['var_name'])
+    len_vars = len(var_info['name'])
     if len_vars == 0:
         print('Cannot find the queried variable!')
 
@@ -48,8 +48,8 @@ def list_eiscat_hdf5_variables(fh5, var_groups=None, var_names_queried=None, dis
         )
         for i in range(len_vars):
             print('{:20s}{:10s}{:<10d}{:20s}{:20s}{:60s}'.format(
-                var_info['var_name'][i], var_info['var_group'][i], var_info['var_ind'][i],
-                var_info['var_name_GUISDAP'][i], var_info['var_unit'][i], var_info['var_note'][i])
+                var_info['name'][i], var_info['group'][i], var_info['index'][i],
+                var_info['name_GUISDAP'][i], var_info['unit'][i], var_info['note'][i])
             )
     return var_info
 
