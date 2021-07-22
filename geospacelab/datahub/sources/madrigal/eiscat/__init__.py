@@ -84,7 +84,7 @@ class Dataset(datahub.DatasetModel):
         for i in range(diff_days + 1):
             thisday = day0 + datetime.timedelta(days=i)
             self._thisday = thisday
-            initial_file_dir = self.data_root_dir / self.site / thisday.strftime('%Y')
+            initial_file_dir = self.data_root_dir / 'analyzed' / self.site / thisday.strftime('%Y')
             if not list(self.data_file_patterns):
                 if self.data_file_type == 'eiscat-hdf5':
                     self.data_file_patterns.append('EISCAT')
