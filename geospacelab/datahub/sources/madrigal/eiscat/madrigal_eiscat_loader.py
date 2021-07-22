@@ -112,15 +112,16 @@ def load_eiscat_hdf5(file_paths):
             nrec_group_ind = var_info_list['var_ind'][ind_nrec]
             nrec = h5_data[nrec_group][nrec_group_ind]
             num_row = h5_data['utime'][0].shape[0]
-            for vn1, vn2 in var_name_dict.items():
-                ind_v = var_info_list['var_name'].index(vn2)
+            for var_name, var_name_h5 in var_name_dict.items():
+                ind_v = var_info_list['var_name'].index(var_name_h5)
                 var_group = var_info_list['var_group'][ind_v]
-                var = h5_data[var_group][ind_v]
+                var_ind = var_info_list['var_ind'][ind_v]
+                var = h5_data[var_group][var_ind]
                 if var_group == 'par0d':
-                    vars.setdefault(vn1, var[0])
+                    vars.setdefault(var_name, var[0])
                 elif var_group == 'par1d':
                     var = var.reshape(num_row, 1)
-                    vars.setdefault(vn1, var)
+                    vars.setdefault(var_name, None)
                     vars[var_name] = arraytool.numpy_array_join_vertical(vars[var_name], var)
                 elif var_group == 'par2d':
                     if nrec_group == 'par0d':
@@ -129,16 +130,16 @@ def load_eiscat_hdf5(file_paths):
                             print("Note: the number of range gates doesn't match nrec!")
                         var = var.reshape(num_row, num_col)
                     elif nrec_group == 'par1d':
-                        num_gates = np.max(nrec)
+                        num_gates = int(np.max(nrec))
                         var_array = np.empty((num_row, num_gates))
                         var_array[:, :] = np.nan
                         rec_ind_1 = 0
                         for i in range(num_row):
-                            rec_ind_2 = rec_ind_1 + nrec[i]
-                            var_array[i, :nrec[i]] = var[rec_ind_1:rec_ind_2]
+                            rec_ind_2 = int(rec_ind_1 + nrec[i])
+                            var_array[i, :int(nrec[i])] = var[rec_ind_1:rec_ind_2]
                             rec_ind_1 = rec_ind_2
                         var = var_array
-                    vars.setdefault(vn1, var)
+                    vars.setdefault(var_name, None)
                     vars[var_name] = arraytool.numpy_array_join_vertical(vars[var_name], var)
 
             # unix time to datetime
@@ -146,14 +147,14 @@ def load_eiscat_hdf5(file_paths):
             dt1 = dttool.convert_unix_time_to_datetime(utime1)
             var = dt1.reshape(num_row, 1)
             var_name = 'DATETIME_1'
-            vars.setdefault(var_name, var)
+            vars.setdefault(var_name, None)
             vars[var_name] = arraytool.numpy_array_join_vertical(vars[var_name], var)
 
             utime2 = h5_data['utime'][1]
             dt2 = dttool.convert_unix_time_to_datetime(utime2)
             var = dt2.reshape(num_row, 1)
             var_name = 'DATETIME_2'
-            vars.setdefault(var_name, var)
+            vars.setdefault(var_name, None)
             vars[var_name] = arraytool.numpy_array_join_vertical(vars[var_name], var)
 
             metadata['r_XMITloc'] = [h5_data['par0d'][2][0], h5_data['par0d'][3][0], h5_data['par0d'][4][0]]
@@ -166,15 +167,19 @@ def load_eiscat_hdf5(file_paths):
             metadata['scan_mode'] = metadata['rawdata_path'].split('_')[1]
             metadata['affiliation'] = metadata['rawdata_path'].split('@')[0].split('_')[-1]
 
+    vars_add = {}
     for var_name, value in vars.items():
         if '_var' in var_name:
             var_name_err = var_name.replace('_var', '_err')
-            vars[var_name_err] = np.sqrt(vars[var_name])
+            vars_add[var_name_err] = np.sqrt(vars[var_name])
+    vars.update(vars_add)
 
     vars['DATETIME'] = vars['DATETIME_1'] + (vars['DATETIME_2'] - vars['DATETIME_1'])/2
     vars['T_e'] = vars['T_i'] * vars['T_r']
     vars['T_e_err'] = vars['T_e'] * np.sqrt((vars['T_i_err']/vars['T_i'])**2
                                             + (vars['T_r_err']/vars['T_r'])**2)
+    vars['height'] = vars['height'] / 1000.
+    vars['range'] = vars['range'] / 1000.
 
     load_obj = Loader(vars, metadata)
     return load_obj
@@ -195,7 +200,7 @@ class Loader:
 if __name__ == "__main__":
     dir_root = datahub_data_root_dir
 
-    filepath = pathlib.Path('./example') / "EISCAT_2021-03-10_beata_ant@uhfa.hdf5"
+    filepath = pathlib.Path('./example') / "EISCAT_2005-09-01_steffe_64@32m.hdf5"
 
     load_eiscat_hdf5([filepath])
 
