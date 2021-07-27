@@ -39,6 +39,14 @@ def select_loader(file_type):
 
 
 def load_eiscat_hdf5(file_paths):
+    """
+    Load EISCAT hdf5 file.
+    :param file_paths: a list of the file fullpaths for the hdf5 files
+    :return:
+        load_obj: instance of Loader
+            .variables: queried variables
+            .metadata: metadata
+    """
     def search_variable(fh5, vn, var_groups=None):
         """
         vn: variable name
