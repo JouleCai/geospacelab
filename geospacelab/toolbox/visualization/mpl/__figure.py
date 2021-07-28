@@ -1,4 +1,4 @@
-from matplotlib.pyplot import Figure
+import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy
 import graphtoolbox.my_figures as fig
@@ -7,7 +7,7 @@ import graphtoolbox.fig_utilities as figtool
 import graphtoolbox.my_panels as mypanel
 
 
-class MyFigure(Figure):
+class Figure(Figure):
 
     def __init__(self, *args, **kwargs):
         """
@@ -29,7 +29,7 @@ class MyFigure(Figure):
         self.figureSize = kwargs['figureSize']
         self.figureSizeUnit = kwargs['figureSizeUnit']
         self.figurePosition = kwargs['figurePosition']
-        self.panels = []
+        self.dashboards = {}
         self.axesOutPanels = []
         super(MyFigure, self).__init__(*args, **kwargs['kwargs_fig'])
 
@@ -42,7 +42,7 @@ class MyFigure(Figure):
         self.figurePosition = position
         figtool.move_figure(position)
 
-    def add_panel(self, nrows, ncols, **kwargs):
+    def add_dashboard(self, nrows, ncols, **kwargs):
         panelObj = mypanel.MyPanel(nrows, ncols, **kwargs)
         self.panels.append(panelObj)
         panel_ind = len(self.panels) - 1
@@ -67,6 +67,9 @@ class MyFigure(Figure):
 
         self.set_figure_size(figsize=kwargs['figureSize'], unit=kwargs['figureSizeUnit'])
         self.move_figure(kwargs['figurePosition'])
+
+
+
 
 
 

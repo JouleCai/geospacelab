@@ -91,7 +91,8 @@ class Dashboard(object):
         kwargs.setdefault('verticalalignment', 'bottom')
         if x is None:
             x = self.gs.left + (self.gs.right - self.gs.left) / 2
-        if y  is None:
+        if y is None:
             y = self.gs.top + (1 - self.gs.top) / 10
         plt.gcf().text(x, y, self.title, **kwargs)
+
 
