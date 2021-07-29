@@ -7,7 +7,7 @@ import graphtoolbox.fig_utilities as figtool
 import graphtoolbox.my_panels as mypanel
 
 
-class Figure(Figure):
+class Figure(plt.Figure):
 
     def __init__(self, *args, **kwargs):
         """
@@ -24,14 +24,14 @@ class Figure(Figure):
         kwargs.setdefault('figurePosition', None)
         kwargs.setdefault('kwargs_fig', dict())
 
-        self.title = kwargs['figureTitle']
-        self.note = kwargs['figureNote']
-        self.figureSize = kwargs['figureSize']
+        self.title = kwargs.pop('title', None)
+        self.note = kwargs.pop('note', None)
+        self.figureSize = kwargs
         self.figureSizeUnit = kwargs['figureSizeUnit']
-        self.figurePosition = kwargs['figurePosition']
+        self.position = kwargs.pop('position', [500, 500])
         self.dashboards = {}
         self.axesOutPanels = []
-        super(MyFigure, self).__init__(*args, **kwargs['kwargs_fig'])
+        super().__init__(*args, **kwargs)
 
     def set_figure_size(self, figsize=None, unit="inches"):
         self.figureSize = figsize
@@ -68,7 +68,19 @@ class Figure(Figure):
         self.set_figure_size(figsize=kwargs['figureSize'], unit=kwargs['figureSizeUnit'])
         self.move_figure(kwargs['figurePosition'])
 
+    @property
+    def position(self):
+        return self._position
 
+    @position.setter
+    def position(self, value):
+        if value is None:
+            self._position = figtool.get_figure_position()
+        elif isinstance(value, tuple):
+            self._position = value
+            figtool.move_figure(self._position)
+        else:
+            raise TypeError("The position argument must be a 2-element tuple, e.g., (500, 200)!")
 
 
 
