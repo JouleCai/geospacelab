@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy
 import datetime
 import matplotlib as mpl
+import matplotlib.dates as mdates
 import pathlib
 
 import numpy as np
@@ -9,13 +10,38 @@ from scipy.interpolate import interp1d
 
 
 from geospacelab.datahub import DataHub, VariableModel
+import geospacelab.config.preferences as pfr
 from geospacelab.visualization.mpl_toolbox.dashboard import Dashboard
 # from geospacelab.visualization.mpl_toolbox.figure import Figure
 import geospacelab.visualization.mpl_toolbox.colormaps as mycmap
 import geospacelab.toolbox.utilities.numpyarray as arraytool
+import geospacelab.toolbox.utilities.pydatetime as dttool
+import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pybasic as basic
+import geospacelab.visualization.mpl_toolbox.axes as axtool
+import geospacelab.visualization.mpl_toolbox.axis_ticks as ticktool
+
 
 def test():
+    pfr.datahub_data_root_dir = pathlib.Path('~/01-Work/00-Data')
+    dt_fr = datetime.datetime.strptime('20210309' + '0000', '%Y%m%d%H%M')
+    dt_to = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')
+    database_name = 'madrigal'
+    facility_name = 'eiscat'
+
+    ts = TS(dt_fr=dt_fr, dt_to=dt_to)
+    ts_1 = ts.set_dataset(datasource_contents=['madrigal', 'eiscat'],
+                          site='UHF', antenna='UHF', modulation='ant', data_file_type='eiscat-hdf5')
+    n_e = ts.assign_variable('n_e')
+    T_i = ts.assign_variable('T_i')
+    T_e = ts.assign_variable('T_e')
+    az = ts.assign_variable('az')
+    el = ts.assign_variable('el')
+
+    layout = [[n_e], [T_i], [T_e], [az, el]]
+    ts.set_layout(layout=layout)
+    ts.show()
+    ts.save_figure()
     pass
 
 class TS(DataHub, Dashboard):
@@ -25,7 +51,11 @@ class TS(DataHub, Dashboard):
         self.plot_types = None
         new_figure = kwargs.pop('new_figure', True)
         self.resample_time = kwargs.pop('resample_time', True)
+        self.major_timeline = kwargs.pop('major_timeline', 'UT')
+        self.timeline_extra_labels = kwargs.pop('timeline_extra_labels', [])    # e.g., ['MLT', 'GLAT']
         super().__init__(visual='on', new_figure=new_figure, **kwargs)
+
+        self._xlim = [self.dt_fr, self.dt_to]
 
     def set_layout(self, layout=None, plot_types = None, gs_row_heights=1, gs_config=None):
         if gs_config is None:
@@ -62,9 +92,9 @@ class TS(DataHub, Dashboard):
     def show(self, dt_fr=None, dt_to=None):
 
         if dt_fr is not None:
-            self.xlim[0] = dt_fr
+            self._xlim[0] = dt_fr
         if dt_to is not None:
-            self.xlim[0] = dt_to
+            self._xlim[0] = dt_to
 
         bottom = False
         for ind, panel in enumerate(self.panels.values()):
@@ -73,6 +103,7 @@ class TS(DataHub, Dashboard):
             self._set_panel(panel, plot_type, plot_layout)
             if ind == len(self.panels.keys()):
                 bottom = True
+            self._set_xaxis(panel.axes['major'], plot_layout, bottom=bottom)
 
     def _validate_plot_layout(self, layout_in):
         from geospacelab.datahub import VariableModel
@@ -105,19 +136,199 @@ class TS(DataHub, Dashboard):
         ax = panel.axes['major']
         if plot_type in ['1', '1E']:
             valid = self._plot_lines(ax, plot_layout, errorbar='on')
+            self._set_yaxis(ax, plot_layout)
             # ax.grid(True, which='both', linewidth=0.2)
         elif plot_type == '1noE':
             valid = self._plot_lines(ax, plot_layout, errorbar='off')
+
         elif plot_type == '1S':
             valid = self._scatter(ax, plot_layout)
         elif plot_type in ['2', '2P']:
             valid = self._pcolormesh(ax, plot_layout)
+            self._set_ylim(ax, plot_layout)
         elif plot_type == '2V':
             valid = self._vector(ax, plot_layout)
         elif plot_type == '1Ly+':
             valid = self._plot_lines_with_additional_y_axis(ax, plot_layout)
         elif plot_type == '1Lyy':
             valid = self._plot_lines_yy(ax, plot_layout)
+
+    def _set_ylim(self, ax, plot_layout, zero_line='on'):
+        plot_layout_flatten = basic.list_flatten(plot_layout)
+        var_for_config = plot_layout_flatten[0]
+
+        ylim = var_for_config.visual.y_lim
+
+        ylim_current = ax.get_ylim()
+        if ylim is None:
+            ylim = ylim_current
+        elif ylim[0] == -numpy.inf and ylim[1] == numpy.inf:
+            maxlim = numpy.max(numpy.abs(ylim_current))
+            ylim = [-maxlim, maxlim]
+        else:
+            if ylim[0] is None:
+                ylim[0] = ylim_current[0]
+            if ylim[1] is None:
+                ylim[1] = ylim_current[1]
+        if zero_line == 'on':
+            if (ylim[0] < 0) and (ylim[1] > 0):
+                ax.plot(ax.get_xlim(), [0, 0], 'k--', linewidth=0.5)
+        ax.set_ylim(ylim)
+        return
+
+    def _set_yaxis(self, ax, plot_layout):
+        ax.tick_params(axis='y', which='major', labelsize=11)
+
+        plot_layout_flatten = basic.list_flatten(plot_layout)
+        var_for_config = plot_layout_flatten[0]
+
+        self._set_ylim(ax, plot_layout)
+        # set y labels and alignment two methods: fig.align_ylabels(axs[:, 1]) or yaxis.set_label_coords
+        ylabel = var_for_config.get_visual_attr('y_label')
+        yunit = var_for_config.get_visual_attr('y_unit')
+        if yunit is None:
+            ylabel = ylabel
+        else:
+            ylabel = ylabel + "\n" + '(' + yunit + ')'
+        pos_label = [-0.1, 0.5]
+        ax.set_ylabel(ylabel, va='bottom', fontsize=14)
+        ax.yaxis.set_label_coords(pos_label[0], pos_label[1])
+        ylim = ax.get_ylim()
+        # set yscale
+        yscale = var_for_config.visual.y_scale
+        ax.set_yscale(yscale)
+        # set yticks and yticklabels, usually do not change the matplotlib default
+        yticks = var_for_config.visual.yticks
+        yticklabels = var_for_config.visual.yticklabels
+        if yticks is not None:
+            ax.set_yticks(yticks)
+            if yticklabels is not None:
+                ax.set_yticklabels(yticklabels)
+        if yscale == 'linear':
+            ax.yaxis.set_major_locator(mpl.ticker.MaxNLocator(8))
+            ax.yaxis.set_minor_locator(mpl.ticker.MaxNLocator(40))
+        if yscale == 'log':
+
+            locmin = mpl.ticker.LogLocator(base=10.0,
+                                           subs=(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
+                                           numticks=12
+                                           )
+            ax.yaxis.set_minor_locator(locmin)
+            ax.xaxis.set_minor_formatter(mpl.ticker.NullFormatter())
+        ax.set_ylim(ylim)
+
+    def _set_xaxis(self, ax, plot_layout, bottom=False):
+        plot_layout_flatten = basic.list_flatten(plot_layout)
+        var_for_config = plot_layout_flatten[0]
+        ax.set_xlim(self._xlim)
+        # reverse the x axis
+        # ax.set_xlim(self.dt_range[1], self.dt_range[0])
+        ax.xaxis.set_tick_params(labelsize='small')
+        ax.xaxis.set_tick_params(which='both', direction='inout', bottom=True, top=True)
+        ax.xaxis.set_tick_params(which='major', length=8)
+        ax.xaxis.set_tick_params(which='minor', length=4)
+
+        # use date locators
+        majorlocator, minorlocator, majorformatter = ticktool.set_timeline(self.dt_range[0], self.dt_range[1])
+        if not bottom:
+            majorformatter = mpl.ticker.NullFormatter()
+        ax.xaxis.set_major_locator(majorlocator)
+        ax.xaxis.set_major_formatter(majorformatter)
+        ax.xaxis.set_minor_locator(minorlocator)
+        if bottom:
+            self._set_xaxis_ticklabels(ax, var_for_config, majorformatter=majorformatter)
+
+    def _set_xaxis_ticklabels(self, ax, var_for_config, majorformatter=None):
+
+        # set UT timeline
+        if not list(self.timeline_extra_labels):
+            ax.set_xlabel('UT')
+            return
+
+        figlength = self.figure.get_size_inches()[1]*2.54
+        if figlength>20:
+            yoffset = 0.02
+        else:
+            yoffset = 0.04
+        ticks = ax.get_xticks()
+        ylim0, _ = ax.get_ylim()
+        xy_fig = []
+        # transform from data coords to figure coords
+        for tick in ticks:
+            px = ax.transData.transform([tick, ylim0])
+            xy = self.figure.transFigure.inverted().transform(px)
+            xy_fig.append(xy)
+
+        xlabels = ['UT']
+        x_depend = var_for_config.get_depend(axis=0, retrieve_data=True)
+        x0 = numpy.array(mdates.date2num(x_depend['UT'])).flatten()
+        x1 = numpy.array(ticks)
+        ys = [x1]       # list of tick labels
+        for ind, label in enumerate(self.timeline_extra_labels):
+            if label in x_depend.keys():
+                y0 = x_depend[label].flatten()
+            elif label in var_for_config.dataset.keys():
+                    y0 = var_for_config.dataset[label]
+            else:
+                raise KeyError
+            if label == 'MLT':
+                mlt_ind = ind + 1
+                y0_sin = numpy.sin(y0 / 24. * 2 * numpy.pi)
+                y0_cos = numpy.cos(y0 / 24. * 2 * numpy.pi)
+                itpf_sin = interp1d(x0, y0_sin, bounds_error=False, fill_value='extrapolate')
+                itpf_cos = interp1d(x0, y0_cos, bounds_error=False, fill_value="extrapolate")
+                y0_sin_i = itpf_sin(x1)
+                y0_cos_i = itpf_cos(x1)
+                rad = numpy.sign(y0_sin_i) * (numpy.pi / 2 - numpy.arcsin(y0_cos_i))
+                rad = numpy.where((rad >= 0), rad, rad + 2 * numpy.pi)
+                y1 = rad / 2. / numpy.pi * 24.
+            else:
+                itpf = interp1d(x0, y0, bounds_error=False, fill_value='extrapolate')
+                y1 = itpf(x1)
+            ys.append(y1)
+            xlabels.append(label)
+
+        ax.xaxis.set_major_formatter(mpl.ticker.NullFormatter())
+
+        # if self.major_timeline == 'MLT':
+        #     for ind_pos, xtick in enumerate(ys[mlt_ind]):
+        #         if xtick == numpy.nan:
+        #             continue
+        #         text = (datetime.datetime(1970, 1, 1) + datetime.timedelta(hours=xtick)).strftime('%H:%M')
+        #         plt.text(
+        #             xy_fig[ind_pos][0], xy_fig[ind_pos][1] - yoffset * ind - 0.15,
+        #             text,
+        #             fontsize=9,
+        #             horizontalalignment='center', verticalalignment='top',
+        #             transform=self.figure.transFigure
+        #         )
+        #     ax.set_xlabel('MLT')
+        #     return
+
+        for ind, xticks in enumerate(ys):
+            plt.text(
+                0.1, xy_fig[0][1] - yoffset * ind - 0.013,
+                xlabels[ind],
+                fontsize=14, fontweight='normal',
+                horizontalalignment='right', verticalalignment='top',
+                transform=self.figure.transFigure
+            )
+            for ind_pos, xtick in enumerate(xticks):
+                if numpy.isnan(xtick):
+                    continue
+                if ind == 0:
+                    text = majorformatter.format_data(xtick)
+                elif xlabels[ind] == 'MLT':
+                    text = (datetime.datetime(1970, 1, 1) + datetime.timedelta(hours=xtick)).strftime('%H:%M')
+                else:
+                    text = '%.1f' % xtick
+                plt.text(
+                    xy_fig[ind_pos][0], xy_fig[ind_pos][1] - yoffset * ind - 0.013,
+                    text,
+                    fontsize=14,
+                    horizontalalignment='center', verticalalignment='top',
+                    transform=self.figure.transFigure
+                )
 
     def _plot_lines(self, ax, plot_layout, errorbar='on', **kwargs):
         default_plot_config = {
@@ -133,8 +344,6 @@ class TS(DataHub, Dashboard):
             'fontsize': 'medium'
         }
         # set color circle, colormap is None use 'krbcmg', others: 'Set1', 'tab10', ...
-        plot_layout_flatten = basic.list_flatten(plot_layout)
-        var_for_config = plot_layout_flatten[0]
         # colormap = var_for_config.visual.color
         # cc = mycmap.get_discrete_colors(len(para_inds), colormap) # color circle
         # ax.set_prop_cycle(color=cs)
@@ -201,34 +410,21 @@ class TS(DataHub, Dashboard):
             return False
         hlgd = ax.legend(handles=hls, **legend_config)  # this return a handle
 
-        # set ylim
-        ylim = var_for_config.visual.ylim
+        # set default ylim
         ymin = numpy.nanmin(yy)
         if numpy.isnan(ymin):
             ymin = -1
         ymax = numpy.nanmax(yy)
         if numpy.isnan(ymax):
             ymax = 1
-        if ylim is None:
-            ylim = [ymin, ymax]
-        if ylim[0] == -numpy.inf and ylim[1] == numpy.inf:
-            max = numpy.max(numpy.abs([ymin, ymax]))
-            ylim = [-max, max]
-        else:
-            if ylim[0] is None:
-                ylim[0] = ymin
-            if ylim[1] is None:
-                ylim[1] = ymax
 
-        if (ylim[0] < 0) and (ylim[1] > 0):
-            ax.plot(ax.get_xlim(), [0, 0], 'k--', linewidth=0.5)
+        ax.set_ylim([ymin-(ymax-ymin)*0.05, ymax+(ymax-ymin)*0.05])
 
-        ax.set_ylim(ylim)
         return True
 
-    def _pcolormesh(self, ax, var):
+    def _pcolormesh(self, ax, plot_layout):
         import geospacelab.visualization.mpl_toolbox.plot2d as plot2d
-
+        var = plot_layout[0]
         x_data = var.visual.x_data
         if x_data is None:
             x_data = var.get_depend(axis=0, retrieve_data=True)
@@ -288,8 +484,8 @@ class TS(DataHub, Dashboard):
         mconditions.append(numpy.nan)
         z = arraytool.numpy_array_self_mask(z, conditions=mconditions)
         im = plot2d.pcolormesh(x=x.T, y=y.T, z=z.T, ax=ax, **pcolormesh_config)
-        ax.objects.setdefault('pcolormesh', [])
-        ax.objects['pcolormesh'].append(im)
+        #ax.objects.setdefault('pcolormesh', [])
+        #ax.objects['pcolormesh'].append(im)
 
         z_label = var.get_visual_attr('z_label')
         z_unit = var.get_visual_attr('z_unit')
@@ -333,9 +529,7 @@ class TS(DataHub, Dashboard):
         cax.yaxis.set_tick_params(labelsize='x-small')
         return [cax, cb, cax_ind]
 
-
-
-    def save(self):
+    def save_figure(self):
         pass
 
 

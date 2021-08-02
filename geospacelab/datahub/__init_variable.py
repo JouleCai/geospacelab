@@ -65,9 +65,9 @@ class VariableModel(object):
         depend_new = copy.deepcopy(depend)
         if retrieve_data:
             for key, value in depend.items():
-                if value is None:
+                if isinstance(value, str):
                     try:
-                        value = self.dataset[key]
+                        value = self.dataset[value]
                     except KeyError:
                         print('The variable {} has not been assigned!'.format(key))
                         value = None
