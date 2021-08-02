@@ -24,24 +24,35 @@ class Figure(plt.Figure):
 
         self.title = kwargs.pop('title', None)
         self.note = kwargs.pop('note', None)
-        self.figure_size = kwargs.pop('figure_size', (10, 10))
-        self.figure_size_unit = kwargs.pop('figure_size_unit', 'inches')
+        self.size = kwargs.pop('size', (10, 10))
+        self.size_unit = kwargs.pop('size_unit', 'inches')
         self.position = kwargs.pop('position', (300, 100))
         self.dashboards = {}
         super().__init__(*args, **kwargs)
 
-        self.set_figure_size(self.figure_size, self.figure_size_unit)
+        self.set_figure_size(self.size, self.size_unit)
 
     def set_figure_size(self, size=None, unit="inches"):
-        self.figure_size = size
-        self.figure_size_unit = unit
+        self.size = size
+        self.size_unit = unit
         set_figure_size(size=size, unit=unit)
 
-    def add_dashboard(self, index=None, gs_num_rows=None, gs_num_cols=None, **kwargs):
-        dashboard = Dashboard(gs_num_rows=gs_num_rows, gs_num_cols=gs_num_cols, **kwargs)
+    def add_dashboard(self, dashboard=None, index=None, gs_num_rows=None, gs_num_cols=None, **kwargs):
+        if dashboard is None:
+            dashboard = Dashboard(**kwargs)
+        elif not isinstance(dashboard, Dashboard):
+            raise TypeError
+
         if index is None:
             index = len(self.dashboards.keys()) + 1
+
+        if gs_num_rows is not None:
+            dashboard.set_grid_layout(gs_num_rows, gs_num_cols)
+
         self.dashboards[index] = dashboard
+
+
+
         return index
 
     @property
@@ -85,7 +96,6 @@ def move_figure(x, y, fig=None):
             fig.canvas.manager.window.move(x, y)
         except:
             print('Fail to set the figure position. Backend: ' + backend)
-
 
 
 if __name__ == "__main__":

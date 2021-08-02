@@ -110,8 +110,8 @@ class Dataset(datahub.DatasetModel):
                 done = self.download_data()
                 if done:
                     done = super().search_data_files(
-                initial_file_dir=initial_file_dir, search_pattern=search_pattern, recursive=recursive
-            )
+                        initial_file_dir=initial_file_dir, search_pattern=search_pattern, recursive=recursive
+                    )
                 else:
                     print('Cannot find files from the online database!')
 

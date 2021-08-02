@@ -12,6 +12,8 @@ __status__ = "Developing"
 __revision__ = ""
 __docformat__ = "reStructureText"
 
+import copy
+
 import numpy as np
 import geospacelab.toolbox.utilities.pyclass as pyclass
 import geospacelab.toolbox.utilities.pylogging as mylog
@@ -41,9 +43,11 @@ class VariableModel(object):
 
         self.dataset = None
 
+        self.visual = None
+
         visual = kwargs.pop('visual', 'off')
         if visual == 'on':
-            self.add_attr(visual=Visual())
+            self.visual = Visual()
             self.visual.config(**kwargs.pop('visual_config', {}))
 
     def config(self, logging=True, **kwargs):
@@ -51,6 +55,35 @@ class VariableModel(object):
 
     def add_attr(self, logging=True, **kwargs):
         pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
+
+    def get_depend(self, axis=None, retrieve_data=True):
+        # axis = 0, 1, 2
+        if axis in self.depends.keys():
+            depend = self.depends[axis]
+        else:
+            return None
+        depend_new = copy.deepcopy(depend)
+        if retrieve_data:
+            for key, value in depend.items():
+                if value is None:
+                    try:
+                        value = self.dataset[key]
+                    except KeyError:
+                        print('The variable {} has not been assigned!'.format(key))
+                        value = None
+                depend_new[key] = value
+        return depend_new
+
+    def set_depend(self, axis, depend_dict):
+        if not isinstance(depend_dict, dict):
+            raise TypeError
+        self.depends[axis] = depend_dict
+
+    def get_visual_attr(self, attr_name):
+        value = getattr(self.visual, attr_name)
+        if isinstance(value, tuple):
+            value = getattr(self, value[0])
+        return value
 
     @property
     def value(self):
@@ -129,6 +162,7 @@ class Visual(object):
         self.axis_config = {}
         self.legend_config = {}
         self.colorbar_config = {}
+        self.errorbar_config = {}
         self.config(**kwargs)
 
     def config(self, logging=True, **kwargs):

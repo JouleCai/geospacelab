@@ -82,3 +82,12 @@ def str_join(*args, separator='_', uppercase=False, lowercase=False):
     return separator.join(strList_new)
 
 
+def list_flatten(l_in, l_out=None):
+    if l_out is None:
+        l_out = []
+    for ind, elem in enumerate(l_in):
+        if type(elem) == list:
+            list_flatten(l_in, l_out=l_out)
+        else:
+            l_out.append(elem)
+    return l_out

@@ -26,6 +26,7 @@ class DatasetModel(object):
         self.data_file_patterns = []
         self.data_file_num = 0
         self.data_file_ext = '*'
+        self.visual = kwargs.pop('visual', 'off')
 
         self.label_fields = []
 
@@ -132,12 +133,12 @@ class DatasetModel(object):
         del self._variables[key]
         pass
 
-    def add_variable(self, variable, name=None):
-        if issubclass(variable, VariableModel):
-            pass
-        else:
-            variable = VariableModel(value=variable, name=name)
-        self[variable.name] = variable
+    # def add_variable(self, variable, name=None):
+    #     if issubclass(variable, VariableModel):
+    #         pass
+    #     else:
+    #         variable = VariableModel(value=variable, name=name, visual=self.visual)
+    #     self[variable.name] = variable
 
     def remove_variable(self, name):
         del self[name]
@@ -148,6 +149,7 @@ class DatasetModel(object):
     def set_variable(self, **kwargs):
         var_name = kwargs.pop('var_name', '')
         var_config = kwargs.pop('var_config', {})
+        var_config.setdefault('visual', self.visual)
         if dict(var_config):
             var_config.setdefault('name', var_name)
         else:

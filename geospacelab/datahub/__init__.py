@@ -24,21 +24,25 @@ def example():
     dh = DataHub(dt_fr, dt_to)
     ds_1 = dh.set_dataset(datasource_contents=['madrigal', 'eiscat'],
                           site='UHF', antenna='UHF', modulation='ant', data_file_type='eiscat-hdf5')
-    var_1 = dh.set_variable('n_e')
-    var_2 = dh.set_variable('T_i')
+    var_1 = dh.assign_variable('n_e')
+    var_2 = dh.assign_variable('T_i')
 
 
 class DataHub(object):
-    def __init__(self, dt_fr=None, dt_to=None, **kwargs):
+    def __init__(self, dt_fr=None, dt_to=None, visual='off', **kwargs):
         self.dt_fr = dt_fr
         self.dt_to = dt_to
+        self.visual = visual
         self.datasets = []
         self.variables = []
+
+        super().__init__(**kwargs)
 
     def set_dataset(self, **kwargs):
         # set default starting and ending times
         kwargs.setdefault('dt_fr', self.dt_fr)
         kwargs.setdefault('dt_to', self.dt_to)
+        kwargs.setdefault('visual', self.visual)
 
         datasource_mode = kwargs.pop('datasource_mode', 'sourced')  # ['sourced'], 'temporary', 'custom'
         datasource_contents = kwargs.pop('datasource_contents', [])
@@ -59,7 +63,7 @@ class DataHub(object):
                 dataset.load_data()
         elif datasource_mode == 'temporary':
             if dataset is None:
-                dataset = DatasetModel(database='temporary')
+                dataset = DatasetModel(database='temporary', **kwargs)
             elif issubclass(dataset, DatasetModel):
                 pass
             else:
@@ -70,21 +74,25 @@ class DataHub(object):
 
         return dataset
 
-    def set_variable(self, var_name, **kwargs):
+    def assign_variable(self, var_name, **kwargs):
         dataset = kwargs.pop('dataset', None)
         if dataset is None:
             dataset = self.datasets[-1]  # the latest added dataset
-        elif issubclass(dataset.__class__, DatasetModel):
-            dataset = self.set_dataset(mode='temporary', dataset=dataset)
-        else:
+        elif not issubclass(dataset.__class__, DatasetModel):
             raise TypeError
 
-        var = dataset.set_variable(var_name)
+        var = dataset.set_variable_(var_name)
         var.config(**kwargs)
 
         self.variables.append(var)
 
         return var
+
+    def save_to_pickle(self):
+        pass
+
+    def save_to_cdf(self):
+        pass
 
 
 # class DataHub(object):

@@ -1,9 +1,11 @@
 import string
 
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
 import numpy
 
+import geospacelab.visualization.mpl_toolbox.figure as mpl_figure
+import geospacelab.visualization.mpl_toolbox.panel as mpl_panel
+import geospacelab.toolbox.utilities.pybasic as basic
 
 default_gs_config = {
         'left':     0.15,
@@ -19,59 +21,42 @@ default_dashboard_fontsize = 12
 class Dashboard(object):
 
     def __init__(self, **kwargs):
-
-        self.figure = kwargs.pop('figure', plt.gcf())
-        self.gs_num_rows = kwargs.pop('gs_num_rows', None)
-        self.gs_num_cols = kwargs.pop('gs_num_cols', None)
+        new_figure = kwargs.pop('new_figure', False)
+        figure_config = kwargs.pop('figure_config', {})
+        if new_figure:
+            figure = plt.figure(**figure_config)
+        else:
+            figure = kwargs.pop('figure', plt.gcf())
+        self.figure = figure
         self.panels = {}
         self.title = kwargs.pop('title', None)
         self.label = kwargs.pop('label', None)
 
-        self.gs = self.figure.add_gridspec(self.gs_num_rows, self.gs_num_cols)
-        self.gs.update(**kwargs.pop('gs_config', default_gs_config))
+        self.gs = None
 
-    def add_panel(self, row_ind=None, col_ind=None, index=None, kind='base', **kwargs):
+        super().__init__(**kwargs)
+
+    def set_gridspec(self, num_rows, num_cols, **kwargs):
+        basic.dict_set_default(kwargs, **default_gs_config)
+        self.gs = self.figure.add_gridspec(num_rows, num_cols)
+        self.gs.update(**kwargs)
+
+    def add_panel(self, row_ind=None, col_ind=None, index=None, label=None, plot_type=None, **kwargs):
         if isinstance(row_ind, int):
             row_ind = [row_ind, row_ind+1]
         if isinstance(col_ind, int):
             col_ind = [col_ind, col_ind+1]
 
-        axes_config = kwargs.pop('axes_config', {})
-        panel = self.figure.add_subplot(self.gs[row_ind[0]:row_ind[1], col_ind[0]:col_ind[1]], **axes_config)
-        setattr(panel, 'label', label)
-        setattr(panel, 'kind', kind)
-        setattr(panel, 'objects', {})
+        ax = self.figure.add_subplot(self.gs[row_ind[0]:row_ind[1], col_ind[0]:col_ind[1]], **kwargs)
+        panel = mpl_panel.Panel(label=label)
+        panel.axes['major'] = ax
 
         if index is None:
             index = len(self.panels.keys()) + 1
+        elif index in self.panels.keys():
+            raise ValueError('The panel index has been occupied. Change to a new one!')
         self.panels[index] = panel
         return index
-
-    def add_panels(self, row_inds=None, col_inds=None, max_num_panels=None, axis=0, **kwargs):
-        # axis: 0 - along rows first, 1 - along cols first
-        if max_num_panels is None:
-            max_num_panels = self.gs_num_rows * self.gs_num_cols
-        if row_inds is None:
-            row_inds = range(max_num_panels)
-        if col_inds is None:
-            col_inds = [0] * max_num_panels
-
-        if axis == 0:
-            m = self.gs_num_cols
-            n = self.gs_num_rows
-        elif axis == 1:
-            m = self.gs_num_rows
-            n = self.gs_num_cols
-
-        nax = 0
-        for i in range(m):
-            for j in range(n):
-                nax = nax + 1
-                if nax > max_num_panels:
-                    continue
-                row_ind = row_inds[nax-1]
-                col_ind = col_inds[nax-1]
-                self.add_panel(row_ind, col_ind, **kwargs)
 
     def remove_panel(self, index):
         self.panels[index].remove()
@@ -98,23 +83,32 @@ class Dashboard(object):
             y = self.gs.top + (1 - self.gs.top) / 10
         self.figure.text(x, y, self.title, **kwargs)
 
-    def add_panel_labels(self, indices=None, style='alphabets', **kwargs):
-        if indices is None:
-            indices = range(len(self.panels.keys()))
+    def show_panel_labels(self, panel_indices=None, style='alphabets', **kwargs):
+        if panel_indices is None:
+            panel_indices = self.panels.keys()
 
         if style == 'alphabets':
             label_list = string.ascii_lowercase
         else:
             raise NotImplemented
 
-        position = kwargs.pop('position', (0.1, 0.9))
-        kwargs.setdefault('horizontalalignment', 'left')
-        kwargs.setdefault('verticalalignment', 'center')
+        if 'position' in kwargs.keys():
+            pos = kwargs['position']
+            x = pos[0]
+            y = pos[1]
+        else:
+            raise KeyError
 
-        for ind, p_index in enumerate(indices):
-            ax = self.panels[p_index]
-            label = "({})".format(label_list[p_index])
-            ax.text(position[0], position[1], label,  transform=ax.transAxes, **kwargs)
+        kwargs.setdefault('ha', 'left')     # horizontal alignment
+        kwargs.setdefault('va', 'center') # vertical alignment
+
+        for ind, p_index in enumerate(panel_indices):
+            panel = self.panels[p_index]
+            if panel.label is None:
+                label = "({})".format(label_list[ind])
+            else:
+                label = panel.label
+            panel.label(x, y, label, **kwargs)
 
     def add_vertical_lines(self):
         pass
