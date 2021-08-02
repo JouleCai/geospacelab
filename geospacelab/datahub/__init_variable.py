@@ -82,7 +82,13 @@ class VariableModel(object):
     def get_visual_attr(self, attr_name):
         value = getattr(self.visual, attr_name)
         if isinstance(value, tuple):
-            value = getattr(self, value[0])
+            try:
+                value = getattr(self, value[0])
+            except AttributeError:
+                value_new = []
+                for elem in value:
+                    value_new.append(self.dataset[elem])
+                value = value_new
         return value
 
     @property
@@ -105,10 +111,10 @@ class VariableModel(object):
     @property
     def error(self):
         v = None
-        if isinstance(self._value, str):
-            v = self.dataset[self._value]
+        if isinstance(self._error, str):
+            v = self.dataset[self._error]
         else:
-            v = self._value
+            v = self._error
         if v is None:
             mylog.StreamLogger.warning("The variable ({})'s error has not been not been assigned!".format(self.name))
         return v
@@ -117,7 +123,29 @@ class VariableModel(object):
     def error(self, v):
         if isinstance(v, list):
             v = np.array(v)
-        self._value = v
+        self._error = v
+
+    @property
+    def unit_label(self):
+        label = self._unit_label
+        if label is None:
+            label = self.unit
+        return label
+
+    @unit_label.setter
+    def unit_label(self, label):
+        self._unit_label = label
+
+    @property
+    def label(self):
+        lb = self._label
+        if lb is None:
+            lb = self.name
+        return lb
+
+    @label.setter
+    def label(self, lb):
+        self._label = lb
 
 
 class Visual(object):
@@ -163,6 +191,7 @@ class Visual(object):
         self.legend_config = {}
         self.colorbar_config = {}
         self.errorbar_config = {}
+        self.pcolormesh_config = {}
         self.config(**kwargs)
 
     def config(self, logging=True, **kwargs):

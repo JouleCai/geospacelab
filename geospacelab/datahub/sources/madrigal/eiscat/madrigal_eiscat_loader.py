@@ -165,6 +165,17 @@ def load_eiscat_hdf5(file_paths):
             vars.setdefault(var_name, None)
             vars[var_name] = arraytool.numpy_array_join_vertical(vars[var_name], var)
 
+            vars['DATETIME'] = vars['DATETIME_1'] + (vars['DATETIME_2'] - vars['DATETIME_2']) / 2
+
+            if type(vars['az']) in [int, float]:
+                az = np.empty((vars['DATETIME_1'].shape[0], 1))
+                az[:, :] = vars['az']
+                vars['az'] = az
+            if type(vars['el']) in [int, float]:
+                el = np.empty((vars['DATETIME_1'].shape[0], 1))
+                el[:, :] = vars['el']
+                vars['el'] = el
+
             metadata['r_XMITloc'] = [h5_data['par0d'][2][0], h5_data['par0d'][3][0], h5_data['par0d'][4][0]]
             metadata['r_RECloc'] = [h5_data['par0d'][5][0], h5_data['par0d'][6][0], h5_data['par0d'][7][0]]
             metadata['site_name'] = site_info[h5_metadata['names'][1][1].decode('UTF-8').strip()]

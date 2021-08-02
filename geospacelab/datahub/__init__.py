@@ -81,7 +81,7 @@ class DataHub(object):
         elif not issubclass(dataset.__class__, DatasetModel):
             raise TypeError
 
-        var = dataset.set_variable_(var_name)
+        var = dataset.set_variable(var_name)
         var.config(**kwargs)
 
         self.variables.append(var)

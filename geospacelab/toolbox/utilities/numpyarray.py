@@ -77,10 +77,10 @@ def data_resample(
         # dt0 = datetime.datetime(1970, 1, 1)
         sectime, dt0 = dttool.convert_datetime_to_sectime(x1)
         x1 = sectime
-    if xres is None:
-        xres = numpy.median(numpy.diff(x1))
-    diff_x1 = numpy.diff(x1.flatten())
 
+    diff_x1 = numpy.diff(x1.flatten())
+    if xres is None:
+        xres = numpy.median(diff_x1)
     inds = numpy.where(diff_x1 > xres * xresscale)[0]
 
     if len(inds) == 0:

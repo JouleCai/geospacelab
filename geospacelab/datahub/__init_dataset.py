@@ -150,11 +150,10 @@ class DatasetModel(object):
         var_name = kwargs.pop('var_name', '')
         var_config = kwargs.pop('var_config', {})
         var_config.setdefault('visual', self.visual)
-        if dict(var_config):
-            var_config.setdefault('name', var_name)
-        else:
+        var_config.setdefault('name', var_name)
+        if 'var_config_items' in kwargs.keys():
             var_configs = kwargs.pop('var_config_items', {})
-            var_config = var_configs[var_name]
+            var_config.update(var_configs[var_name])
         var = VariableModel(**var_config)
         var.config(dataset=self)
         return var

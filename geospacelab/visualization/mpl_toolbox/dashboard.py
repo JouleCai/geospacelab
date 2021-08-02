@@ -3,7 +3,7 @@ import string
 import matplotlib.pyplot as plt
 import numpy
 
-import geospacelab.visualization.mpl_toolbox.figure as mpl_figure
+# import geospacelab.visualization.mpl_toolbox.figure as mpl_figure
 import geospacelab.visualization.mpl_toolbox.panel as mpl_panel
 import geospacelab.toolbox.utilities.pybasic as basic
 
@@ -37,7 +37,7 @@ class Dashboard(object):
         super().__init__(**kwargs)
 
     def set_gridspec(self, num_rows, num_cols, **kwargs):
-        basic.dict_set_default(kwargs, **default_gs_config)
+        kwargs = basic.dict_set_default(kwargs, **default_gs_config)
         self.gs = self.figure.add_gridspec(num_rows, num_cols)
         self.gs.update(**kwargs)
 

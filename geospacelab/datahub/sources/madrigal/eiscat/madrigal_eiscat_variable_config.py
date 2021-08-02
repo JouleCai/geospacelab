@@ -11,36 +11,55 @@ coords = {
     'APEX': ['APEX_LAT', 'APEX_LON', 'APEX_ALT', 'APEX_MLT']
 }
 
+default_colormap = "nipy_spectral"
+
 plot_config = {
-    'linestyle':        '',
+    'linestyle':        '-',
     'linewidth':        1.5,
     'marker':           '.',
     'markersize':       3,
 }
 
 visual_config_1 = {
-    'plottype':     '1',
-    'xdata':        ['DATETIME', 'AACGM_MLT'],
-    'xdatares':     1,  # in seconds
-    'xlabel':       ['UT', 'MLT'],
-    'ydata':        tuple(['value']),
-    'ylabel':       tuple(['label']),
-    'yunit':        tuple(['unit']),
-    'ylim':         [1e8, 1e13],
-    'yscale':       'log',
+    'plot_type':     '1',
+    'x_data':        None,
+    'x_data_res':     None,  # in seconds
+    'x_label':       None,
+    'y_data':        None,
+    'y_label':       ('label', ),
+    'y_unit':        ('unit_label', ),
+    'y_lim':         None,
+    'y_scale':       'linear',
     'plot_config':  dict(plot_config)
 }
 
-depend_0 = ['DATETIME', 'AACGM_MLT']
-depend_1 = ['ALT']
+visual_config_2 = {
+    'plot_type':     '2',
+    'x_data':        None,
+    'x_data_res':     None,  # in seconds
+    'x_label':       None,
+    'y_data':        ('height', ),
+    'z_label':       tuple(['label']),
+    'z_unit':        tuple(['unit_label']),
+    'z_lim':         [1e8, 1e13],
+    'z_scale':       'log',
+    'color':        default_colormap,
+    'plot_config':  dict(plot_config)
+}
+
+depend_0 = {'UT': 'DATETIME', 'TIME_1': 'DATETIME_1', 'TIME_2': 'DATETIME_2'}
+depend_1 = {'height': 'height', 'range': 'range', 'GEO_LAT': 'GEO_LAT', 'GEO_LON': 'GEO_LON'}
 
 ##################################################################################
 items = {}
 ##################################################################################
 var_name = 'n_e'
-visual_in = dict(visual_config_1)
+visual_in = dict(visual_config_2)
 visual_in['z_label'] = 'Electron density'
-visual_in['z_lim'] = [1e9, 1e12]
+visual_in['z_lim'] = [8e9, 9e11]
+visual_in['y_label'] = 'h'
+visual_in['y_unit'] = 'km'
+visual_in['y_lim'] = [90, 350]
 items[var_name] = {
     'name':     var_name,
     'fullname':     'electron density',
@@ -49,19 +68,23 @@ items[var_name] = {
     'unit_label':   r'm$^{-3}$',
     'group':        '',
     'value':        var_name,
-    'error':        None,
+    'error':        var_name + '_err',
     'dim':          2,
     'depends':      {0: depend_0, 1: depend_1},
     'timestamps':   timestamps,
     'positions':    coords,
-    'visual':       visual_in
+    'visual_config':       visual_in
 }
 
 ##################################################################################
 var_name = 'T_e'
-visual_in = dict(visual_config_1)
+visual_in = dict(visual_config_2)
 visual_in['z_label'] = 'Electron temperature'
-visual_in['z_lim'] = [0, 3000]
+visual_in['z_lim'] = [100, 3000]
+visual_in['z_scale'] = 'linear'
+visual_in['y_label'] = 'h'
+visual_in['y_unit'] = 'km'
+visual_in['y_lim'] = [90, 350]
 items[var_name] = {
     'name':     var_name,
     'fullname':     'electron temperature',
@@ -70,19 +93,23 @@ items[var_name] = {
     'unit_label':   None,
     'group':        '',
     'value':        var_name,
-    'error':        None,
+    'error':        var_name + '_err',
     'dim':          2,
     'depends':      {0: depend_0, 1: depend_1},
     'timestamps':   timestamps,
     'positions':    coords,
-    'visual':       visual_in
+    'visual_config':       visual_in
 }
 
 ##################################################################################
 var_name = 'T_i'
-visual_in = dict(visual_config_1)
+visual_in = dict(visual_config_2)
 visual_in['z_label'] = 'Ion density'
-visual_in['z_lim'] = [0, 2500]
+visual_in['z_lim'] = [100, 2500]
+visual_in['z_scale'] = 'linear'
+visual_in['y_label'] = 'h'
+visual_in['y_unit'] = 'km'
+visual_in['y_lim'] = [90, 350]
 items[var_name] = {
     'name':     var_name,
     'fullname':     'ion temperature',
@@ -91,19 +118,23 @@ items[var_name] = {
     'unit_label':   None,
     'group':        '',
     'value':        var_name,
-    'error':        None,
+    'error':        var_name + '_err',
     'dim':          2,
     'depends':      {0: depend_0, 1: depend_1},
     'timestamps':   timestamps,
     'positions':    coords,
-    'visual':       visual_in
+    'visual_config':       visual_in
 }
 
 ##################################################################################
 var_name = 'v_i_los'
-visual_in = dict(visual_config_1)
+visual_in = dict(visual_config_2)
 visual_in['z_label'] = ''
 visual_in['z_lim'] = [-400, 400]
+visual_in['z_scale'] = 'linear'
+visual_in['y_label'] = 'h'
+visual_in['y_unit'] = 'km'
+visual_in['y_lim'] = [90, 350]
 items[var_name] = {
     'name':     var_name,
     'fullname':     'electron density',
@@ -112,39 +143,41 @@ items[var_name] = {
     'unit_label':   r'm$^{-3}$',
     'group':        '',
     'value':        var_name,
-    'error':        None,
+    'error':        var_name + '_err',
     'dim':          2,
     'depends':      {0: depend_0, 1: depend_1},
     'timestamps':   timestamps,
     'positions':    coords,
-    'visual':       visual_in
+    'visual_config':       visual_in
 }
 
 ##################################################################################
-var_name = 'beam_az'
+var_name = 'az'
 visual_in = dict(visual_config_1)
-visual_in['z_label'] = ''
+visual_in['z_label'] = 'az'
+visual_in['y_label'] = ('group', )
 visual_in['z_lim'] = None
+visual_in['plot_type'] = '1E'
 items[var_name] = {
     'name':     var_name,
     'fullname':     'Azimuth',
     'label':        r'az',
     'unit':         None,
     'unit_label':   None,
-    'group':        '',
+    'group':        'radar parameters',
     'value':        var_name,
     'error':        None,
     'dim':          1,
     'depends':      {0: depend_0},
     'timestamps':   timestamps,
     'positions':    coords,
-    'visual':       visual_in
+    'visual_config':       visual_in
 }
 
 ##################################################################################
-var_name = 'beam_el'
+var_name = 'el'
 visual_in = dict(visual_config_1)
-visual_in['z_label'] = ''
+visual_in['z_label'] = 'el'
 visual_in['z_lim'] = None
 items[var_name] = {
     'name':     var_name,
@@ -152,13 +185,13 @@ items[var_name] = {
     'label':        r'el',
     'unit':         None,
     'unit_label':   None,
-    'group':        '',
+    'group':        'radar parameters',
     'value':        var_name,
     'error':        None,
     'dim':          1,
     'depends':      {0: depend_0},
     'timestamps':   timestamps,
     'positions':    coords,
-    'visual':       visual_in
+    'visual_config':       visual_in
 }
 

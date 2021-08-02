@@ -11,7 +11,7 @@ from scipy.interpolate import interp1d
 
 from geospacelab.datahub import DataHub, VariableModel
 import geospacelab.config.preferences as pfr
-from geospacelab.visualization.mpl_toolbox.dashboard import Dashboard
+import geospacelab.visualization.mpl_toolbox.dashboard as dashboard
 # from geospacelab.visualization.mpl_toolbox.figure import Figure
 import geospacelab.visualization.mpl_toolbox.colormaps as mycmap
 import geospacelab.toolbox.utilities.numpyarray as arraytool
@@ -23,14 +23,15 @@ import geospacelab.visualization.mpl_toolbox.axis_ticks as ticktool
 
 
 def test():
-    pfr.datahub_data_root_dir = pathlib.Path('~/01-Work/00-Data')
+    #pfr.datahub_data_root_dir = pathlib.Path('~/01-Work/00-Data')
+
     dt_fr = datetime.datetime.strptime('20210309' + '0000', '%Y%m%d%H%M')
     dt_to = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')
     database_name = 'madrigal'
     facility_name = 'eiscat'
 
     ts = TS(dt_fr=dt_fr, dt_to=dt_to)
-    ts_1 = ts.set_dataset(datasource_contents=['madrigal', 'eiscat'],
+    ds_1 = ts.set_dataset(datasource_contents=['madrigal', 'eiscat'],
                           site='UHF', antenna='UHF', modulation='ant', data_file_type='eiscat-hdf5')
     n_e = ts.assign_variable('n_e')
     T_i = ts.assign_variable('T_i')
@@ -38,22 +39,26 @@ def test():
     az = ts.assign_variable('az')
     el = ts.assign_variable('el')
 
-    layout = [[n_e], [T_i], [T_e], [az, el]]
+    layout = [[n_e], [T_e], [T_i], [az, el]]
     ts.set_layout(layout=layout)
-    ts.show()
+    dt_fr_1 = datetime.datetime.strptime('20210309' + '2300', '%Y%m%d%H%M')
+    dt_to_1 = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')
+    ts.show(dt_fr=dt_fr_1, dt_to=dt_to_1)
     ts.save_figure()
     pass
 
-class TS(DataHub, Dashboard):
+
+class TS(DataHub, dashboard.Dashboard):
 
     def __init__(self, **kwargs):
         self.layout = []
         self.plot_types = None
         new_figure = kwargs.pop('new_figure', True)
-        self.resample_time = kwargs.pop('resample_time', True)
+        figure_config = kwargs.pop('figure_config', default_figure_config)
+        self.time_gap = kwargs.pop('time_gap', True)
         self.major_timeline = kwargs.pop('major_timeline', 'UT')
         self.timeline_extra_labels = kwargs.pop('timeline_extra_labels', [])    # e.g., ['MLT', 'GLAT']
-        super().__init__(visual='on', new_figure=new_figure, **kwargs)
+        super().__init__(visual='on', new_figure=new_figure, figure_config=figure_config, **kwargs)
 
         self._xlim = [self.dt_fr, self.dt_to]
 
@@ -70,6 +75,7 @@ class TS(DataHub, Dashboard):
 
         num_cols = 1
         num_rows = len(layout)
+        self.layout = layout
         if plot_types is None:
             self.plot_types = [None] * num_rows
 
@@ -88,20 +94,21 @@ class TS(DataHub, Dashboard):
             row_ind = [rec, rec+height]
             col_ind = [0, 1]
             self.add_panel(row_ind=row_ind, col_ind=col_ind)
+            rec = rec + height
 
     def show(self, dt_fr=None, dt_to=None):
 
         if dt_fr is not None:
             self._xlim[0] = dt_fr
         if dt_to is not None:
-            self._xlim[0] = dt_to
+            self._xlim[1] = dt_to
 
         bottom = False
         for ind, panel in enumerate(self.panels.values()):
             plot_layout = self.layout[ind]
             plot_type = self.plot_types[ind]
             self._set_panel(panel, plot_type, plot_layout)
-            if ind == len(self.panels.keys()):
+            if ind == len(self.panels.keys())-1:
                 bottom = True
             self._set_xaxis(panel.axes['major'], plot_layout, bottom=bottom)
 
@@ -143,9 +150,10 @@ class TS(DataHub, Dashboard):
 
         elif plot_type == '1S':
             valid = self._scatter(ax, plot_layout)
+            self._set_yaxis(ax, plot_layout)
         elif plot_type in ['2', '2P']:
             valid = self._pcolormesh(ax, plot_layout)
-            self._set_ylim(ax, plot_layout)
+            self._set_yaxis(ax, plot_layout)
         elif plot_type == '2V':
             valid = self._vector(ax, plot_layout)
         elif plot_type == '1Ly+':
@@ -196,10 +204,12 @@ class TS(DataHub, Dashboard):
         ylim = ax.get_ylim()
         # set yscale
         yscale = var_for_config.visual.y_scale
+        if yscale is None:
+            yscale = 'linear'
         ax.set_yscale(yscale)
         # set yticks and yticklabels, usually do not change the matplotlib default
-        yticks = var_for_config.visual.yticks
-        yticklabels = var_for_config.visual.yticklabels
+        yticks = var_for_config.visual.y_ticks
+        yticklabels = var_for_config.visual.y_tick_labels
         if yticks is not None:
             ax.set_yticks(yticks)
             if yticklabels is not None:
@@ -229,7 +239,7 @@ class TS(DataHub, Dashboard):
         ax.xaxis.set_tick_params(which='minor', length=4)
 
         # use date locators
-        majorlocator, minorlocator, majorformatter = ticktool.set_timeline(self.dt_range[0], self.dt_range[1])
+        majorlocator, minorlocator, majorformatter = ticktool.set_timeline(self._xlim[0], self._xlim[1])
         if not bottom:
             majorformatter = mpl.ticker.NullFormatter()
         ax.xaxis.set_major_locator(majorlocator)
@@ -239,10 +249,11 @@ class TS(DataHub, Dashboard):
             self._set_xaxis_ticklabels(ax, var_for_config, majorformatter=majorformatter)
 
     def _set_xaxis_ticklabels(self, ax, var_for_config, majorformatter=None):
-
+        ax.tick_params(axis='x', labelsize=12)
         # set UT timeline
         if not list(self.timeline_extra_labels):
-            ax.set_xlabel('UT')
+
+            ax.set_xlabel('UT', fontsize=12, fontweight='normal')
             return
 
         figlength = self.figure.get_size_inches()[1]*2.54
@@ -352,10 +363,12 @@ class TS(DataHub, Dashboard):
 
         yy = numpy.empty((0, 1)) # for setting ylim
         for ind, var in enumerate(plot_layout):
-            x_data = var.visual.x_data
+            x_data = var.get_visual_attr('x_data')
+            if type(x_data) == list:
+                x_data = x_data[0]
             if x_data is None:
                 depend_0 = var.get_depend(axis=0)
-                x_data = depend_0['Time']   # numpy array, type=datetime
+                x_data = depend_0['UT']   # numpy array, type=datetime
 
             y_data = var.visual.y_data
             if y_data is None:
@@ -379,7 +392,7 @@ class TS(DataHub, Dashboard):
             yy = numpy.vstack((yy, y + y_err))
 
             # resample time if needed
-            if self.resample_time:
+            if self.time_gap:
                 x, y = arraytool.data_resample(
                     x, y, xtype='datetime', xres=x_data_res, method='Null', axis=0)
 
@@ -390,21 +403,23 @@ class TS(DataHub, Dashboard):
             plot_config = var.visual.plot_config
             legend_config = var.visual.legend_config
             # get color
-            basic.dict_set_default(plot_config, **default_plot_config)
-            basic.dict_set_default(legend_config, **default_legend_config)
-            label = var.get_visual_atrr('z_label')
+            plot_config = basic.dict_set_default(plot_config, **default_plot_config)
+            legend_config = basic.dict_set_default(legend_config, **default_legend_config)
+            label = var.get_visual_attr('z_label')
             plot_config.update({'label': label})
             plot_config.update({'visible': var.visual.visible})
             errorbar_config = dict(plot_config)
             errorbar_config.update(var.visual.errorbar_config)
             option = {'plot_config': plot_config, 'errorbar_config': errorbar_config}
             if errorbar == 'on':
-                hl = ax.errorbar(x, y, yerr=y_err, **errorbar_config)
+                hl = ax.errorbar(x, y, yerr=y_err.flatten(), **errorbar_config)
             else:
                 hl = ax.plot(x, y, **plot_config)
             # set legends, default: outside the axis right upper
-
-            hls.extend(hl)  # note plot return a list of handles not a handle
+            if type(hl) == list:
+                hls.extend(hl)
+            else:
+                hls.append(hl)
 
         if not list(hls):
             return False
@@ -422,15 +437,25 @@ class TS(DataHub, Dashboard):
 
         return True
 
+    def _plot_yys(self, ax, plot_layout):
+        pass
+
     def _pcolormesh(self, ax, plot_layout):
         import geospacelab.visualization.mpl_toolbox.plot2d as plot2d
         var = plot_layout[0]
-        x_data = var.visual.x_data
+        x_data = var.get_visual_attr('x_data')
+        if type(x_data) == list:
+            x_data = x_data[0]
         if x_data is None:
             x_data = var.get_depend(axis=0, retrieve_data=True)
-        y_data = var.visual.y_data
+            x_data = x_data['UT']
+        y_data = var.get_visual_attr('y_data')
+        if type(y_data) == list:
+            y_data = y_data[0]
         if y_data is None:
             y_data = var.get_depend(axis=1, retrieve_data=True)
+            y_data_keys = list(y_data.keys())
+            y_data = y_data[y_data_keys[0]]
         z_data = var.visual.z_data
         if z_data is None:
             z_data = var.value
@@ -438,7 +463,7 @@ class TS(DataHub, Dashboard):
             raise ValueError
 
         x_data_res = var.visual.x_data_res
-        if self.resample_time:
+        if self.time_gap:
             x, y = arraytool.data_resample(
                 x_data, y_data, xtype='datetime', xres=x_data_res, method='linear', axis=0)
             _, z = arraytool.data_resample(
@@ -448,18 +473,28 @@ class TS(DataHub, Dashboard):
             y = y_data
             z = z_data
         if x.shape[0] == z.shape[0]:
-            timedelta = datetime.timedelta(seconds=x_data_res)
-            x = numpy.vstack(
-                (x, numpy.array([x[-1] + timedelta]).reshape((1, 1)))
-            )
-            x = x - timedelta / 2.
+            delta_x = numpy.diff(x_data, axis=0)
+            x[:-1, :] = x[:-1, :] + delta_x/2
+            x = numpy.vstack((
+                numpy.array(x[0, 0] - delta_x[0, 0] / 2).reshape((1, 1)),
+                x[:-1, :],
+                numpy.array(x[-1, 0] + delta_x[-1, 0] / 2).reshape((1, 1))
+            ))
+
         if y.shape[1] == z.shape[1]:
-            y_data_res = var.visual.y_data_res
-            if y_data_res is None:
-                y_data_res = numpy.mean(y[:, -1] - y[:, -2])
-            y_append = y[:, -1] + y_data_res
-            y = numpy.hstack((y, y_append.reshape((y.shape[0], 1))))
-            y = y - y_data_res / 2.
+            delta_y = numpy.diff(y_data, axis=1)
+            y[:, :-1] = y[:, :-1] + delta_y/2
+            y = numpy.hstack((
+                numpy.array(y[:, 0] - delta_y[:, 0]/2).reshape((y.shape[0], 1)),
+                y[:, :-1],
+                numpy.array(y[:, -1] + delta_y[:, -1]/2).reshape((y.shape[0], 1)),
+            ))
+            # y_data_res = var.visual.y_data_res
+            # if y_data_res is None:
+            #     y_data_res = numpy.mean(y[:, -1] - y[:, -2])
+            # y_append = y[:, -1] + y_data_res
+            # y = numpy.hstack((y, y_append.reshape((y.shape[0], 1))))
+            # y = y - y_data_res / 2.
         if y.shape[0] == z.shape[0]:
             y = numpy.vstack((y, y[-1, :].reshape((1, y.shape[1]))))
 
@@ -473,12 +508,12 @@ class TS(DataHub, Dashboard):
             pcolormesh_config.update(norm=norm)
         else:
             pcolormesh_config.update(vmin=z_lim[0])
-            pcolormesh_config.update(vmin=z_lim[1])
-        colormap = mycmap.get_colormap(var.visual.colormap)
+            pcolormesh_config.update(vmax=z_lim[1])
+        colormap = mycmap.get_colormap(var.visual.color)
         pcolormesh_config.update(cmap=colormap)
 
         # mask zdata
-        mconditions = var.visual.zdatamasks
+        mconditions = var.visual.z_data_masks
         if mconditions is None:
             mconditions = []
         mconditions.append(numpy.nan)
@@ -495,8 +530,8 @@ class TS(DataHub, Dashboard):
             c_label = z_label
         z_ticks = var.visual.z_ticks
         z_tick_labels = var.visual.z_tick_labels
-        cax = self.__add_colorbar(ax, im, cscale=z_scale, clabel=c_label, cticks=z_ticks, cticklabels=z_ticklabels)
-        ax.subaxes.append(cax)
+        cax = self.__add_colorbar(ax, im, cscale=z_scale, clabel=c_label, cticks=z_ticks, cticklabels=z_tick_labels)
+        # ax.subaxes.append(cax)
 
         return True
 
@@ -506,7 +541,7 @@ class TS(DataHub, Dashboard):
         bottom = pos.y0
         width = 0.02
         height = pos.y1 - pos.y0 - 0.03
-        cax, cax_ind = self.figure.add_axes([left, bottom, width, height])
+        cax = self.figure.add_axes([left, bottom, width, height])
         cb = self.figure.colorbar(im, cax=cax)
         ylim = cax.get_ylim()
 
@@ -527,18 +562,14 @@ class TS(DataHub, Dashboard):
                 cax.yaxis.set_minor_locator(minorlocator)
                 cax.yaxis.set_minor_formatter(mpl.ticker.NullFormatter())
         cax.yaxis.set_tick_params(labelsize='x-small')
-        return [cax, cb, cax_ind]
+        return [cax, cb]
 
     def save_figure(self):
         pass
 
 
-
 default_figure_config = {
-    'title': None,
-    'size': (15, 10),    # (width, height)
-    'size_unit': 'centimeter',
-    'position': (50, 50),   # (left, top)
+    'figsize': (12, 12),    # (width, height)
 }
 
 default_plt_style_label = 'seaborn-darkgrid'
