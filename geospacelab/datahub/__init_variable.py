@@ -147,6 +147,10 @@ class VariableModel(object):
     def label(self, lb):
         self._label = lb
 
+    @property
+    def ndim(self):
+        ndim_0 = len(self.depends.keys())
+        return ndim_0
 
 class Visual(object):
     def __init__(self, **kwargs):

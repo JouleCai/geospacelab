@@ -341,6 +341,53 @@ class TS(DataHub, dashboard.Dashboard):
                     transform=self.figure.transFigure
                 )
 
+    def retrieve_data(self, var):
+        data_dict = {'x_data': None, 'y_data': None, 'y_err_data': None, 'z_data': None, 'z_err_data': None}
+
+        x_data = var.get_visual_attr('x_data')
+        if type(x_data) == list:
+            x_data = x_data[0]
+        if x_data is None:
+            depend_0 = var.get_depend(axis=0)
+            x_data = depend_0['UT']  # numpy array, type=datetime
+
+        y_data = var.get_visual_attr('y_data')
+        if type(y_data) == list:
+            y_data = y_data[0]
+        if y_data is None:
+            if var.ndim == 1:
+                y_data = var.value
+            else:
+                depend = var.get_depend(axis=1)
+                keys = list(depend.keys())
+                y_data = depend[keys[0]]
+
+        y_err_data = var.get_visual_attr('y_err_data')
+        if type(y_data) == list:
+            y_err_data = y_err_data[0]
+        if y_err_data is None:
+            if var.ndim == 1:
+                y_err_data = var.error
+
+        z_data = var.get_visual_attr('z_data')
+        if type(z_data) == list:
+            z_data = z_data[0]
+        if z_data is None:
+            if var.ndim == 2:
+                
+        x_data_res = var.visual.x_data_res
+        x = x_data
+        y = y_data * var.visual.y_data_scale
+        if y_err_data is None:
+            y_err = numpy.empty_like(y)
+            y_err[:] = 0
+        else:
+            y_err = y_err_data * var.visual.y_data_scale
+
+        y_err = y_err * var.visual.y_data_scale
+        yy = numpy.vstack((yy, y - y_err))
+        yy = numpy.vstack((yy, y + y_err))
+
     def _plot_lines(self, ax, plot_layout, errorbar='on', **kwargs):
         default_plot_config = {
             'linestyle': '-',
