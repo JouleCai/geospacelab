@@ -194,17 +194,19 @@ def set_timeline(dt_start, dt_stop, **kwargs):
         majorlocator = majorlocatorclass(byhour=by1, interval=1)
         if dt_start.month != dt_stop.month:
             fmt = "%d/%m %H"
-        else:
+        elif dt_start.day != dt_stop.day:
             fmt = "%d %H:%M"
+        else:
+            fmt = "%H:%M"
 
         def formatter_hour(x, pos):
             dtx = mpl.dates.num2date(x)
             dtx = dtx.replace(tzinfo=None)
-            delta = dtx - dt.datetime(dtx.year, dtx.month, 1)
+            delta = dtx - dt.datetime(dtx.year, dtx.month, dtx.day)
             if delta.total_seconds() == 0:
-                fmt1 = "%d/%m %H:%M"
+                fmt1 = "%b %d"
             else:
-                fmt1 = "%d %H:%M"
+                fmt1 = "%H:%M"
             return dtx.strftime(fmt1)
         func_formatter = mpl.ticker.FuncFormatter(formatter_hour)
     if minorlocatorclass is mdates.HourLocator:

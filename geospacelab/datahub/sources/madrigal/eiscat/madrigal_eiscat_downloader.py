@@ -15,6 +15,7 @@ import pathlib
 import geospacelab.config.preferences as pfr
 import geospacelab.datahub.sources.madrigal.madrigal_utilities as madrigal
 import geospacelab.toolbox.utilities.pylogging as mylog
+import geospacelab.toolbox.utilities.pydatetime as dttool
 
 
 def test():
@@ -37,6 +38,8 @@ class Downloader(object):
         self.user_email = user_email
         self.user_affiliation = user_affiliation
 
+        dt_fr = dttool.get_start_of_the_day(dt_fr)
+        dt_to = dttool.get_start_of_the_day(dt_to)
         if dt_fr == dt_to:
             dt_to = dt_to + datetime.timedelta(hours=23, minutes=59)
         self.dt_fr = dt_fr  # datetime from
@@ -110,7 +113,7 @@ class Downloader(object):
         Download the files
         """
         if not list(self.urls):
-            print("No experiments available!")
+            mylog.StreamLogger.info("No experiments available!")
             return None
 
         for url in self.urls:
@@ -146,10 +149,12 @@ class Downloader(object):
                     if file_path.is_file():
                         print("The file {} has been downloaded.".format(filename))
                         continue
-                    print('Downloading "{} from EISCAT (portal.eiscat.se) ..."'.format(filename))
+                    mylog.simpleinfo.info(
+                        'Downloading "{} from portal.eiscat.se to {} ..."'.format(filename, data_file_dir)
+                    )
                     with open(file_path, "wb") as eiscat:
                         eiscat.write(remote_file.content)
-                    print('Done!')
+                    mylog.simpleinfo.info('Done!')
                     self.done = True
         return
 

@@ -67,9 +67,9 @@ def numpy_array_self_mask(data, conditions=None):
 
 
 def data_resample(
-        x=None, y=None, xtype=None, xres=None, xresscale=1.5,
+        x=None, y=None, xtype=None, xres=None, xresscale=1.1,
         method='Null',  # Null - insert NaN, 'linear', 'cubic', ... (interpolation method)
-        axis=0
+        axis=0, forward=True
 ):
 
     x1 = x
@@ -93,7 +93,10 @@ def data_resample(
         res = xres
         if xtype == 'datetime':
             res = datetime.timedelta(seconds=xres)
-        value.append(x[ind - 1] + res)
+        if forward:
+            value.append(x[ind - 1] + res/10)
+        else:
+            value.append(x[ind] - res/10)
     xnew = numpy.insert(x, inds, value, axis=axis)
 
     # for y
@@ -107,4 +110,72 @@ def data_resample(
             x_p, dt0 = dttool.convert_datetime_to_sectime(xnew)
         ynew = ifunc(x_p.flatten())
 
+    if method == 'Null':
+        xnew, ynew = data_resample(
+        x=xnew, y=ynew, xtype=xtype, xres=xres, xresscale=xresscale,
+        method='Null',  # Null - insert NaN, 'linear', 'cubic', ... (interpolation method)
+        axis=axis, forward=False
+)
+
     return xnew, ynew
+
+
+def data_resample_2d(
+        x=None, y=None, z=None, xtype=None, xres=None, xresscale=1.1,
+        method='Null',  # Null - insert NaN, 'linear', 'cubic', ... (interpolation method)
+        axis=0, forward=True
+):
+
+    x1 = x
+    if xtype == 'datetime':
+        # dt0 = datetime.datetime(1970, 1, 1)
+        sectime, dt0 = dttool.convert_datetime_to_sectime(x1)
+        x1 = sectime
+
+    diff_x1 = numpy.diff(x1.flatten())
+    if xres is None:
+        xres = numpy.median(diff_x1)
+    inds = numpy.where(diff_x1 > xres * xresscale)[0]
+
+    if len(inds) == 0:
+        return x, y, z
+
+    inds = [i+1 for i in inds]
+    # for x
+    value = []
+    for ind in inds:
+        res = xres
+        if xtype == 'datetime':
+            res = datetime.timedelta(seconds=xres)
+        if forward:
+            value.append(x[ind - 1] + res/10)
+        else:
+            value.append(x[ind] - res/10)
+    xnew = numpy.insert(x, inds, value, axis=axis)
+
+    # for y
+    method_y = 'nearest'
+    ifunc = interp1d(x1.flatten(), y, kind=method_y, axis=axis, fill_value="extrapolate")
+    x_p = xnew
+    if xtype == 'datetime':
+        x_p, dt0 = dttool.convert_datetime_to_sectime(xnew)
+    ynew = ifunc(x_p.flatten())
+
+    # for z
+    if method == 'Null':
+        value = numpy.nan
+        znew = numpy.insert(z, inds, value, axis=axis)
+    else:
+        ifunc = interp1d(x1.flatten(), z, kind=method, axis=axis)
+        x_p = xnew
+        if xtype == 'datetime':
+            x_p, dt0 = dttool.convert_datetime_to_sectime(xnew)
+        znew = ifunc(x_p.flatten())
+    if method == 'Null':
+        xnew, ynew, znew = data_resample_2d(
+            x=xnew, y=ynew, z=znew, xtype=xtype, xres=xres, xresscale=xresscale,
+            method='Null',  # Null - insert NaN, 'linear', 'cubic', ... (interpolation method)
+            axis=axis, forward=False
+        )
+
+    return xnew, ynew, znew

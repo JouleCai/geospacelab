@@ -88,6 +88,26 @@ class DataHub(object):
 
         return var
 
+    def list_datasets(self):
+        # print header
+        mylog.simpleinfo.info("Listing datasets ...")
+        mylog.simpleinfo.info('{:^20s}{:60s}'.format('Index', 'Dataset'))
+        for ind, dataset in enumerate(self.datasets):
+            dataset_label = dataset.label()
+            mylog.simpleinfo.info('{:^20d}{:60s}'.format(ind, dataset_label))
+        print()
+
+    def list_assigned_variables(self):
+        # print header
+        mylog.simpleinfo.info("Listing the assigned variables ...")
+
+        mylog.simpleinfo.info('{:^20s}{:30s}{:60s}'.format('Index', 'Variable name', 'Dataset'))
+        for ind, var in enumerate(self.variables):
+            dataset_label = var.dataset.label()
+            var_name = var.name
+            mylog.simpleinfo.info('{:^20d}{:30s}{:60s}'.format(ind, var_name, dataset_label))
+        print()
+
     def save_to_pickle(self):
         pass
 

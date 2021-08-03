@@ -11,7 +11,7 @@ coords = {
     'APEX': ['APEX_LAT', 'APEX_LON', 'APEX_ALT', 'APEX_MLT']
 }
 
-default_colormap = "nipy_spectral"
+default_colormap = "gist_ncar"
 
 plot_config = {
     'linestyle':        '-',
@@ -129,18 +129,17 @@ items[var_name] = {
 ##################################################################################
 var_name = 'v_i_los'
 visual_in = dict(visual_config_2)
-visual_in['z_label'] = ''
-visual_in['z_lim'] = [-400, 400]
+visual_in['z_lim'] = [-200, 200]
 visual_in['z_scale'] = 'linear'
 visual_in['y_label'] = 'h'
 visual_in['y_unit'] = 'km'
 visual_in['y_lim'] = [90, 350]
 items[var_name] = {
     'name':     var_name,
-    'fullname':     'electron density',
-    'label':        r'$n_e$',
-    'unit':         'm-3',
-    'unit_label':   r'm$^{-3}$',
+    'fullname':     'LOS ion velocity',
+    'label':        r'$v_i$',
+    'unit':         'm/s',
+    'unit_label':   r'm$/$s',
     'group':        '',
     'value':        var_name,
     'error':        var_name + '_err',
@@ -157,7 +156,14 @@ visual_in = dict(visual_config_1)
 visual_in['z_label'] = 'az'
 visual_in['y_label'] = ('group', )
 visual_in['z_lim'] = None
-visual_in['plot_type'] = '1E'
+visual_in['y_lim'] = [0, 360]
+visual_in['plot_type'] = '1noE'
+visual_in['plot_config'] = {
+    'linestyle':        '',
+    'linewidth':        1.5,
+    'marker':           '.',
+    'markersize':       3,
+}
 items[var_name] = {
     'name':     var_name,
     'fullname':     'Azimuth',
@@ -179,6 +185,14 @@ var_name = 'el'
 visual_in = dict(visual_config_1)
 visual_in['z_label'] = 'el'
 visual_in['z_lim'] = None
+visual_in['plot_type'] = '1noE'
+visual_in['plot_config'] = {
+    'linestyle':        '',
+    'linewidth':        1.5,
+    'marker':           '.',
+    'markersize':       3,
+}
+
 items[var_name] = {
     'name':     var_name,
     'fullname':     'Elevation',

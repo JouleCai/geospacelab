@@ -21,28 +21,49 @@ import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.visualization.mpl_toolbox.axes as axtool
 import geospacelab.visualization.mpl_toolbox.axis_ticks as ticktool
 
+# plt.style.use('seaborn')
+
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = 'Ubuntu'
+plt.rcParams['font.monospace'] = 'Ubuntu Mono'
+plt.rcParams['font.size'] = 12
+plt.rcParams['axes.labelsize'] = 12
+plt.rcParams['axes.labelweight'] = 'medium'
+plt.rcParams['axes.titlesize'] = 12
+plt.rcParams['xtick.labelsize'] = 10
+plt.rcParams['ytick.labelsize'] = 10
+plt.rcParams['legend.fontsize'] = 12
+plt.rcParams['figure.titlesize'] = 14
+
 
 def test():
     #pfr.datahub_data_root_dir = pathlib.Path('~/01-Work/00-Data')
 
-    dt_fr = datetime.datetime.strptime('20210309' + '0000', '%Y%m%d%H%M')
-    dt_to = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')
+    dt_fr = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
+    dt_to = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
     database_name = 'madrigal'
     facility_name = 'eiscat'
 
     ts = TS(dt_fr=dt_fr, dt_to=dt_to)
     ds_1 = ts.set_dataset(datasource_contents=['madrigal', 'eiscat'],
-                          site='UHF', antenna='UHF', modulation='ant', data_file_type='eiscat-hdf5')
+                          site='UHF', antenna='UHF', modulation='60', data_file_type='eiscat-hdf5')
+
     n_e = ts.assign_variable('n_e')
     T_i = ts.assign_variable('T_i')
     T_e = ts.assign_variable('T_e')
+    v_i= ts.assign_variable('v_i_los')
     az = ts.assign_variable('az')
     el = ts.assign_variable('el')
 
-    layout = [[n_e], [T_e], [T_i], [az, el]]
+    ds_1.list_all_variables()
+    ts.list_assigned_variables()
+    ts.list_datasets()
+
+    layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
     ts.set_layout(layout=layout)
-    dt_fr_1 = datetime.datetime.strptime('20210309' + '2300', '%Y%m%d%H%M')
-    dt_to_1 = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')
+    # plt.style.use('dark_background')
+    dt_fr_1 = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
+    dt_to_1 = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
     ts.show(dt_fr=dt_fr_1, dt_to=dt_to_1)
     ts.save_figure()
     pass
@@ -69,7 +90,7 @@ class TS(DataHub, dashboard.Dashboard):
                 'right': 0.8,
                 'bottom': 0.15,
                 'top': 0.88,
-                'hspace': 0.0,
+                'hspace': 0.1,
                 'wspace': 0.0
             }
 
@@ -147,6 +168,7 @@ class TS(DataHub, dashboard.Dashboard):
             # ax.grid(True, which='both', linewidth=0.2)
         elif plot_type == '1noE':
             valid = self._plot_lines(ax, plot_layout, errorbar='off')
+            self._set_yaxis(ax, plot_layout)
 
         elif plot_type == '1S':
             valid = self._scatter(ax, plot_layout)
@@ -341,53 +363,6 @@ class TS(DataHub, dashboard.Dashboard):
                     transform=self.figure.transFigure
                 )
 
-    def retrieve_data(self, var):
-        data_dict = {'x_data': None, 'y_data': None, 'y_err_data': None, 'z_data': None, 'z_err_data': None}
-
-        x_data = var.get_visual_attr('x_data')
-        if type(x_data) == list:
-            x_data = x_data[0]
-        if x_data is None:
-            depend_0 = var.get_depend(axis=0)
-            x_data = depend_0['UT']  # numpy array, type=datetime
-
-        y_data = var.get_visual_attr('y_data')
-        if type(y_data) == list:
-            y_data = y_data[0]
-        if y_data is None:
-            if var.ndim == 1:
-                y_data = var.value
-            else:
-                depend = var.get_depend(axis=1)
-                keys = list(depend.keys())
-                y_data = depend[keys[0]]
-
-        y_err_data = var.get_visual_attr('y_err_data')
-        if type(y_data) == list:
-            y_err_data = y_err_data[0]
-        if y_err_data is None:
-            if var.ndim == 1:
-                y_err_data = var.error
-
-        z_data = var.get_visual_attr('z_data')
-        if type(z_data) == list:
-            z_data = z_data[0]
-        if z_data is None:
-            if var.ndim == 2:
-                
-        x_data_res = var.visual.x_data_res
-        x = x_data
-        y = y_data * var.visual.y_data_scale
-        if y_err_data is None:
-            y_err = numpy.empty_like(y)
-            y_err[:] = 0
-        else:
-            y_err = y_err_data * var.visual.y_data_scale
-
-        y_err = y_err * var.visual.y_data_scale
-        yy = numpy.vstack((yy, y - y_err))
-        yy = numpy.vstack((yy, y + y_err))
-
     def _plot_lines(self, ax, plot_layout, errorbar='on', **kwargs):
         default_plot_config = {
             'linestyle': '-',
@@ -439,12 +414,15 @@ class TS(DataHub, dashboard.Dashboard):
             yy = numpy.vstack((yy, y + y_err))
 
             # resample time if needed
+            x_data = x
+            y_data = y
+            y_err_data = y_err
             if self.time_gap:
                 x, y = arraytool.data_resample(
-                    x, y, xtype='datetime', xres=x_data_res, method='Null', axis=0)
+                    x_data, y_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
 
                 x, y_err = arraytool.data_resample(
-                    x, y_err, xtype='datetime', xres=x_data_res, method='Null', axis=0)
+                    x_data, y_err_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
 
             # set default
             plot_config = var.visual.plot_config
@@ -458,6 +436,7 @@ class TS(DataHub, dashboard.Dashboard):
             errorbar_config = dict(plot_config)
             errorbar_config.update(var.visual.errorbar_config)
             option = {'plot_config': plot_config, 'errorbar_config': errorbar_config}
+
             if errorbar == 'on':
                 hl = ax.errorbar(x, y, yerr=y_err.flatten(), **errorbar_config)
             else:
@@ -511,16 +490,20 @@ class TS(DataHub, dashboard.Dashboard):
 
         x_data_res = var.visual.x_data_res
         if self.time_gap:
-            x, y = arraytool.data_resample(
-                x_data, y_data, xtype='datetime', xres=x_data_res, method='linear', axis=0)
-            _, z = arraytool.data_resample(
-                x_data, z_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
+            # x, y = arraytool.data_resample(
+            #     x_data, y_data, xtype='datetime', xres=x_data_res, method='linear', axis=0)
+            # _, z = arraytool.data_resample(
+            #     x_data, z_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
+
+            x, y, z = arraytool.data_resample_2d(
+                x=x_data, y=y_data, z=z_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
+
         else:
             x = x_data
             y = y_data
             z = z_data
         if x.shape[0] == z.shape[0]:
-            delta_x = numpy.diff(x_data, axis=0)
+            delta_x = numpy.diff(x, axis=0)
             x[:-1, :] = x[:-1, :] + delta_x/2
             x = numpy.vstack((
                 numpy.array(x[0, 0] - delta_x[0, 0] / 2).reshape((1, 1)),
@@ -529,7 +512,7 @@ class TS(DataHub, dashboard.Dashboard):
             ))
 
         if y.shape[1] == z.shape[1]:
-            delta_y = numpy.diff(y_data, axis=1)
+            delta_y = numpy.diff(y, axis=1)
             y[:, :-1] = y[:, :-1] + delta_y/2
             y = numpy.hstack((
                 numpy.array(y[:, 0] - delta_y[:, 0]/2).reshape((y.shape[0], 1)),
@@ -559,12 +542,6 @@ class TS(DataHub, dashboard.Dashboard):
         colormap = mycmap.get_colormap(var.visual.color)
         pcolormesh_config.update(cmap=colormap)
 
-        # mask zdata
-        mconditions = var.visual.z_data_masks
-        if mconditions is None:
-            mconditions = []
-        mconditions.append(numpy.nan)
-        z = arraytool.numpy_array_self_mask(z, conditions=mconditions)
         im = plot2d.pcolormesh(x=x.T, y=y.T, z=z.T, ax=ax, **pcolormesh_config)
         #ax.objects.setdefault('pcolormesh', [])
         #ax.objects['pcolormesh'].append(im)
@@ -617,6 +594,7 @@ class TS(DataHub, dashboard.Dashboard):
 
 default_figure_config = {
     'figsize': (12, 12),    # (width, height)
+    'dpi': 100,
 }
 
 default_plt_style_label = 'seaborn-darkgrid'

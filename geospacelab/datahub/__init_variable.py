@@ -38,7 +38,8 @@ class VariableModel(object):
         self.value = kwargs.pop('value', None)
         self.error = kwargs.pop('error', None)
 
-        self.dim = kwargs.pop('dim', None)
+        self.variable_type = kwargs.pop('variable_type', None)    # scalar, vector, tensor, ...
+        self.ndim = kwargs.pop('ndim', None)
         self.depends = kwargs.pop('depends', {})
 
         self.dataset = None
@@ -78,6 +79,15 @@ class VariableModel(object):
         if not isinstance(depend_dict, dict):
             raise TypeError
         self.depends[axis] = depend_dict
+
+    # def get_visual_data(self, attr_name):
+    #     data = []
+    #     if 'data' not in attr_name:
+    #         raise AttributeError("Input must be a data attribute in the visual instance!")
+    #
+    #     attr = getattr(self.visual, attr_name)
+    #     axis = ord('z') - ord(attr[0])
+    #     if attr is None:
 
     def get_visual_attr(self, attr_name):
         value = getattr(self.visual, attr_name)
@@ -148,13 +158,105 @@ class VariableModel(object):
         self._label = lb
 
     @property
+    def variable_type(self):
+        return self._variable_type
+
+    @variable_type.setter
+    def variable_type(self, value):
+        if value is None:
+            self._variable_type = None
+        elif value.lower() not in ['scalar', 'vector', 'matrix']:
+            raise ValueError
+        else:
+            self._variable_type = value.lower()
+
+    @property
     def ndim(self):
-        ndim_0 = len(self.depends.keys())
-        return ndim_0
+        if self._ndim is None:
+            var_type = self.variable_type
+            if var_type is None:
+                mylog.StreamLogger.warning('the variable type has not been defined! Use default type "Scalar"...')
+                var_type = "scalar"
+            value = self.value
+            if value is None:
+                mylog.StreamLogger.warning("return None!")
+                return None
+            shape = value.shape
+            if var_type == 'scalar':
+                offset = 0
+            if var_type == 'vector':
+                offset = -1
+            if var_type == 'matrix':
+                offset = -2
+            if len(shape) == 2 and shape[1] == 1:
+                nd = 1
+            else:
+                nd = len(shape) - offset
+            if nd <= 0:
+                raise ValueError("ndim cannot be a non-positive integer")
+        return nd
+
+    @ndim.setter
+    def ndim(self, value):
+        if value is not None and type(value) is not int:
+            raise TypeError
+        self._ndim = value
+
+    @property
+    def depends(self):
+        return self._depends
+
+    @depends.setter
+    def depends(self, d_dict):
+        self._depends = {}
+        if not dict(d_dict):
+            self._depends = {}
+        else:
+            self._depends = {}
+            for key, value in d_dict.items():
+                if type(key) is not int:
+                    raise KeyError
+                if value is None:
+                    self._depends[key] = {}
+                else:
+                    self._depends[key] = value
+
+
+class Visual_new(object):
+    def __init__(self, **kwargs):
+        self.plot_type = None   # None for setting automatically
+        self.data = {}       # data dict depend on axis, keys: 0, 1, 2, ...
+        self.data_scale = {}    # data scale dict in the same format as data dict, values are numeric numbers, for unit conversion
+        self.data_res = {}  # data resolution
+        self.data_error = {}    # error data
+        self.axis_labels = {}
+        self.axis_units = {}    # unit
+        self.axis_lims = {}
+        self.axis_ticks = {}
+        self.axis_tick_labels = {}
+        self.color = None
+        self.plot_config = {'line': {}, 'errorbar': {}, 'pcolormesh': {}, 'imshow': {}, 'scatter': {}}
+        self.visible = 1
+
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, d_dict):
+        if not dict(d_dict):
+            self._data = {}
+        else:
+            self._data = {}
+            for key, value in d_dict.items():
+                self._data[key] = value
+
+
 
 class Visual(object):
     def __init__(self, **kwargs):
         self.plot_type = None
+        self.data_0 = None
         self.x_data = None
         self.y_data = None
         self.z_data = None

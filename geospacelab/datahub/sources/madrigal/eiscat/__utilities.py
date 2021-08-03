@@ -1,5 +1,6 @@
 import h5py
 import pathlib
+import geospacelab.toolbox.utilities.pylogging as mylog
 
 
 def list_eiscat_hdf5_variables(fh5, var_groups=None, var_names_queried=None, display=True):
@@ -41,16 +42,18 @@ def list_eiscat_hdf5_variables(fh5, var_groups=None, var_names_queried=None, dis
         print('Cannot find the queried variable!')
 
     if display:
-        print(
-            '{:20s}{:10s}{:10s}{:20s}{:20s}{:^60s}'.format(
-                'Name', 'Group', 'Index', 'Unit', 'Name (GUISDAP)', 'Note'
+        mylog.simpleinfo.info("Listing the variables in the ESICAT hdf5 file ({})".format(fh5))
+        mylog.simpleinfo.info(
+            '{:<4s}{:20s}{:10s}{:10s}{:20s}{:20s}{:^60s}'.format(
+                '', 'Name', 'Group', 'Index', 'Unit', 'Name (GUISDAP)', 'Note'
             )
         )
         for i in range(len_vars):
-            print('{:20s}{:10s}{:<10d}{:20s}{:20s}{:60s}'.format(
-                var_info['name'][i], var_info['group'][i], var_info['index'][i],
+            mylog.simpleinfo.info('{:<4s}{:20s}{:10s}{:<10d}{:20s}{:20s}{:60s}'.format(
+                '', var_info['name'][i], var_info['group'][i], var_info['index'][i],
                 var_info['name_GUISDAP'][i], var_info['unit'][i], var_info['note'][i])
             )
+        print()
     return var_info
 
 

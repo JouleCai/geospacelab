@@ -23,7 +23,6 @@ class DatasetModel(object):
         self.load_mode = 'AUTO'  # ['AUTO'], 'dialog', 'assigned'
         self.data_root_dir = pref.datahub_data_root_dir
         self.data_file_paths = []
-        self.data_file_patterns = []
         self.data_file_num = 0
         self.data_file_ext = '*'
         self.visual = kwargs.pop('visual', 'off')
@@ -118,6 +117,16 @@ class DatasetModel(object):
         for attr_name in attr_names:
             items[attr_name] = getattr(self, attr_name)
         return items
+
+    def list_all_variables(self):
+        # print header
+        label = self.label()
+        mylog.simpleinfo.info("Dataset: {}".format(label))
+        mylog.simpleinfo.info("Printing all of the variables ...")
+        mylog.simpleinfo.info('{:^20s}{:^30s}'.format('No.', 'Variable name'))
+        for ind, var_name in enumerate(self._variables.keys()):
+            mylog.simpleinfo.info('{:^20d}{:30s}'.format(ind+1, var_name))
+        print()
 
     def __setitem__(self, key, value):
         if value is None:

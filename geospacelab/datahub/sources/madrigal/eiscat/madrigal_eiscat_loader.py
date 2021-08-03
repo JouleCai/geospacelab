@@ -167,15 +167,6 @@ def load_eiscat_hdf5(file_paths):
 
             vars['DATETIME'] = vars['DATETIME_1'] + (vars['DATETIME_2'] - vars['DATETIME_2']) / 2
 
-            if type(vars['az']) in [int, float]:
-                az = np.empty((vars['DATETIME_1'].shape[0], 1))
-                az[:, :] = vars['az']
-                vars['az'] = az
-            if type(vars['el']) in [int, float]:
-                el = np.empty((vars['DATETIME_1'].shape[0], 1))
-                el[:, :] = vars['el']
-                vars['el'] = el
-
             metadata['r_XMITloc'] = [h5_data['par0d'][2][0], h5_data['par0d'][3][0], h5_data['par0d'][4][0]]
             metadata['r_RECloc'] = [h5_data['par0d'][5][0], h5_data['par0d'][6][0], h5_data['par0d'][7][0]]
             metadata['site_name'] = site_info[h5_metadata['names'][1][1].decode('UTF-8').strip()]
@@ -199,6 +190,17 @@ def load_eiscat_hdf5(file_paths):
                                             + (vars['T_r_err']/vars['T_r'])**2)
     vars['height'] = vars['height'] / 1000.
     vars['range'] = vars['range'] / 1000.
+
+    vars['az'] = np.mod(vars['az'], 360)
+    vars['el'] = np.mod(vars['el'], 360)
+    if len(vars['az'].shape) == 0:
+        az = np.empty((vars['DATETIME_1'].shape[0], 1))
+        az[:, :] = vars['az']
+        vars['az'] = az
+    if len(vars['el'].shape) == 0:
+        el = np.empty((vars['DATETIME_1'].shape[0], 1))
+        el[:, :] = vars['el']
+        vars['el'] = el
 
     load_obj = Loader(vars, metadata)
     return load_obj

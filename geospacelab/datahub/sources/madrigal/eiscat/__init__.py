@@ -62,7 +62,8 @@ class Dataset(datahub.DatasetModel):
 
     def label(self, **kwargs):
         self.label_fields = default_label_fields
-        super().label()
+        label = super().label()
+        return label
 
     def load_data(self):
         self.check_data_files()
@@ -77,7 +78,8 @@ class Dataset(datahub.DatasetModel):
             self.antenna = load_obj.metadata['antenna']
             self.pulse_code = load_obj.metadata['pulse_code']
             self.scan_mode = load_obj.metadata['scan_mode']
-            self.experiment = load_obj.metadata['rawdata_path']
+            rawdata_path = load_obj.metadata['rawdata_path']
+            self.experiment = rawdata_path.split('/')[-1].split('@')[0]
             self.affiliation = load_obj.metadata['affiliation']
 
     def search_data_files(self):
@@ -89,18 +91,19 @@ class Dataset(datahub.DatasetModel):
             thisday = day0 + datetime.timedelta(days=i)
             self._thisday = thisday
             initial_file_dir = self.data_root_dir / self.site / thisday.strftime('%Y')
-            if not list(self.data_file_patterns):
-                if self.data_file_type == 'eiscat-hdf5':
-                    self.data_file_patterns.append('EISCAT')
-                elif self.data_file_type == 'madrigal-hdf5':
-                    self.data_file_patterns.append('MAD6400')
-                elif self.data_file_type == 'eiscat-mat':
-                    pass
-                self.data_file_patterns.append(thisday.strftime('%Y-%m-%d'))
-                self.data_file_patterns.append(self.modulation)
-                self.data_file_patterns.append(self.antenna.lower())
 
-            search_pattern = '*' + '*'.join(self.data_file_patterns) + '*'
+            file_patterns = []
+            if self.data_file_type == 'eiscat-hdf5':
+                file_patterns.append('EISCAT')
+            elif self.data_file_type == 'madrigal-hdf5':
+                self.data_file_patterns.append('MAD6400')
+            elif self.data_file_type == 'eiscat-mat':
+                pass
+            file_patterns.append(thisday.strftime('%Y-%m-%d'))
+            file_patterns.append(self.modulation)
+            file_patterns.append(self.antenna.lower())
+
+            search_pattern = '*' + '*'.join(file_patterns) + '*'
             recursive = self.data_search_recursive
             done = super().search_data_files(
                 initial_file_dir=initial_file_dir, search_pattern=search_pattern, recursive=recursive

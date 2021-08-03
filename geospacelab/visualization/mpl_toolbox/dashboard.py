@@ -41,6 +41,21 @@ class Dashboard(object):
         self.gs = self.figure.add_gridspec(num_rows, num_cols)
         self.gs.update(**kwargs)
 
+    def add_indicators(self, x=None, y=None, style='lines', panel_index=None, **kwargs):
+        pass
+
+    def add_lines(self, x=None, y=None, panel_index=None, **kwargs):
+        pass
+
+    def add_patches(self, x=None, y=None, panel_index=None, **kwargs):
+        pass
+
+    def add_top_horizontal_bar(self, x=None, y=None, panel_index=None, **kwargs):
+        pass
+
+    def add_arrows(self, **kwargs):
+        pass
+
     def add_panel(self, row_ind=None, col_ind=None, index=None, label=None, plot_type=None, **kwargs):
         if isinstance(row_ind, int):
             row_ind = [row_ind, row_ind+1]
