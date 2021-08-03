@@ -37,7 +37,7 @@ plt.rcParams['figure.titlesize'] = 14
 
 
 def test():
-    #pfr.datahub_data_root_dir = pathlib.Path('~/01-Work/00-Data')
+    pfr.datahub_data_root_dir = pathlib.Path('/Users/lcai/01-Work/00-Data')
 
     dt_fr = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
     dt_to = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
@@ -66,6 +66,7 @@ def test():
     dt_to_1 = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
     ts.show(dt_fr=dt_fr_1, dt_to=dt_to_1)
     ts.save_figure()
+    plt.show()
     pass
 
 
@@ -362,6 +363,9 @@ class TS(DataHub, dashboard.Dashboard):
                     horizontalalignment='center', verticalalignment='top',
                     transform=self.figure.transFigure
                 )
+
+    def get_visual_data(self, var):
+        pass
 
     def _plot_lines(self, ax, plot_layout, errorbar='on', **kwargs):
         default_plot_config = {

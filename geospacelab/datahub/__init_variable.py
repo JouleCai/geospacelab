@@ -13,6 +13,7 @@ __revision__ = ""
 __docformat__ = "reStructureText"
 
 import copy
+import weakref
 
 import numpy as np
 import geospacelab.toolbox.utilities.pyclass as pyclass
@@ -42,7 +43,7 @@ class VariableModel(object):
         self.ndim = kwargs.pop('ndim', None)
         self.depends = kwargs.pop('depends', {})
 
-        self.dataset = None
+        self.dataset = kwargs.pop('dataset', None)
 
         self.visual = None
 
@@ -100,6 +101,15 @@ class VariableModel(object):
                     value_new.append(self.dataset[elem])
                 value = value_new
         return value
+
+    @property
+    def dataset(self):
+        return self._dataset_proxy
+
+    @dataset.setter
+    def dataset(self, dataset_obj):
+        if dataset_obj is not None:
+            self._dataset_proxy = weakref.proxy(dataset_obj)
 
     @property
     def value(self):
@@ -175,7 +185,7 @@ class VariableModel(object):
         if self._ndim is None:
             var_type = self.variable_type
             if var_type is None:
-                mylog.StreamLogger.warning('the variable type has not been defined! Use default type "Scalar"...')
+                # mylog.StreamLogger.warning('the variable type has not been defined! Use default type "Scalar"...')
                 var_type = "scalar"
             value = self.value
             if value is None:
@@ -222,35 +232,90 @@ class VariableModel(object):
                     self._depends[key] = value
 
 
-class Visual_new(object):
-    def __init__(self, **kwargs):
-        self.plot_type = None   # None for setting automatically
-        self.data = {}       # data dict depend on axis, keys: 0, 1, 2, ...
-        self.data_scale = {}    # data scale dict in the same format as data dict, values are numeric numbers, for unit conversion
-        self.data_res = {}  # data resolution
-        self.data_error = {}    # error data
-        self.axis_labels = {}
-        self.axis_units = {}    # unit
-        self.axis_lims = {}
-        self.axis_ticks = {}
-        self.axis_tick_labels = {}
+class Visual_Data:
+    def __init__(self):
+        self.data = None
+        self.error = None
+        self.scale = 1.
+        self.res = None     # resolution
+
+
+class Axis:
+    def __init__(self):
+        self.label = None
+        self.unit = None
+        self.limit = None
+        self.invert = False
+        self.ticks = None
+        self.tick_labels = None
+        self.visible = True
+
+
+class Plot_Config:
+    def __init__(self):
         self.color = None
-        self.plot_config = {'line': {}, 'errorbar': {}, 'pcolormesh': {}, 'imshow': {}, 'scatter': {}}
-        self.visible = 1
+        self.visible = True
+        self.line = {}
+        self.errorbar = {}
+        self.pcolormesh = {}
+        self.imshow = {}
+        self.scatter = {}
+        self.mask_gap = True
+
+
+class Visual_new(object):
+    _data = {}
+    _axis = {}
+    _variable_proxy = VariableModel()
+
+    def __init__(self, **kwargs):
+        self.variable = kwargs.pop('variable', None)
+        self.data = None
+        self.axis = None
+        self.plot = None
+
+    @property
+    def variable(self):
+        return self._variable_proxy
+
+    @variable.setter
+    def variable(self, var_obj):
+        if var_obj is not None:
+            self._variable_proxy = weakref.proxy(var_obj)
 
     @property
     def data(self):
+        if not dict(self._data):
+            try:
+                for ind in range(self.variable.ndim + 1):
+                    self._data[ind] = Visual_Data()
+            except:
+                self._data = {}
         return self._data
 
     @data.setter
     def data(self, d_dict):
-        if not dict(d_dict):
-            self._data = {}
-        else:
-            self._data = {}
-            for key, value in d_dict.items():
-                self._data[key] = value
+        if dict(d_dict):
+            self._data = d_dict
+        elif d_dict is not None:
+            raise TypeError
 
+    @property
+    def axis(self):
+        if not dict(self._axis):
+            try:
+                for ind in range(self.variable.ndim + 1):
+                    self._axis[ind] = Visual_Data()
+            except:
+                self._axis = {}
+        return self._axis
+
+    @axis.setter
+    def axis(self, a_dict):
+        if dict(a_dict):
+            self._axis = a_dict
+        elif a_dict is not None:
+            raise TypeError
 
 
 class Visual(object):
@@ -269,9 +334,6 @@ class Visual(object):
         self.x_err_data = None
         self.y_err_data = None
         self.z_err_data = None
-        self.x_data_masks = None
-        self.y_data_masks = None
-        self.z_data_masks = None
         self.x_lim = None
         self.y_lim = None
         self.z_lim = None

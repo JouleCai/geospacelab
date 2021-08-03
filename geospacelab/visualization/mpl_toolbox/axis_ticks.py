@@ -4,7 +4,7 @@ import matplotlib.dates as mdates
 import numpy as np
 import datetime as dt
 from matplotlib.ticker import LogFormatterSciNotation
-import utilities.datetime_utilities as dttool
+import geospacelab.toolbox.utilities.pydatetime as dttool
 import os
 
 

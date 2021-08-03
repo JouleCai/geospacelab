@@ -164,7 +164,7 @@ class DatasetModel(object):
             var_configs = kwargs.pop('var_config_items', {})
             var_config.update(var_configs[var_name])
         var = VariableModel(**var_config)
-        var.config(dataset=self)
+        var.dataset = self
         return var
 
     def _set_default_variables(self, default_variable_names):
