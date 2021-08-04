@@ -21,14 +21,14 @@ import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.visualization.mpl_toolbox.axes as axtool
 import geospacelab.visualization.mpl_toolbox.axis_ticks as ticktool
 
-# plt.style.use('seaborn')
+# plt.style.use('ggplot')
 
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = 'Ubuntu'
 plt.rcParams['font.monospace'] = 'Ubuntu Mono'
 plt.rcParams['font.size'] = 12
 plt.rcParams['axes.labelsize'] = 12
-plt.rcParams['axes.labelweight'] = 'medium'
+plt.rcParams['axes.labelweight'] = 'book'
 plt.rcParams['axes.titlesize'] = 12
 plt.rcParams['xtick.labelsize'] = 10
 plt.rcParams['ytick.labelsize'] = 10
@@ -37,7 +37,7 @@ plt.rcParams['figure.titlesize'] = 14
 
 
 def test():
-    pfr.datahub_data_root_dir = pathlib.Path('/Users/lcai/01-Work/00-Data')
+    # pfr.datahub_data_root_dir = pathlib.Path('/Users/lcai/01-Work/00-Data')
 
     dt_fr = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
     dt_to = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
@@ -45,7 +45,7 @@ def test():
     facility_name = 'eiscat'
 
     ts = TS(dt_fr=dt_fr, dt_to=dt_to)
-    ds0 = ts.set_dataset(datasource_contents=['madrigal', 'eiscat'])
+    # ds0 = ts.set_dataset(datasource_contents=['madrigal', 'eiscat'])
     ds_1 = ts.set_dataset(datasource_contents=['madrigal', 'eiscat'],
                           site='UHF', antenna='UHF', modulation='60', data_file_type='eiscat-hdf5', load_data=True)
 
@@ -65,9 +65,13 @@ def test():
     # plt.style.use('dark_background')
     dt_fr_1 = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
     dt_to_1 = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
-    ts.show(dt_fr=dt_fr_1, dt_to=dt_to_1)
-    ts.save_figure()
-    plt.show()
+
+    ts.plotting(dt_fr=dt_fr_1, dt_to=dt_to_1)
+    title = ', '.join([ds_1.facility, ds_1.site, ds_1.experiment])
+    ts.add_title(x=0.5, y=1.03, title=title)
+
+    ts.save_figure(file_name=title.replace(', ', '_'))
+    ts.show()
     pass
 
 
@@ -85,7 +89,7 @@ class TS(DataHub, dashboard.Dashboard):
 
         self._xlim = [self.dt_fr, self.dt_to]
 
-    def set_layout(self, layout=None, plot_types = None, gs_row_heights=1, gs_config=None):
+    def set_layout(self, layout=None, plot_types=None, gs_row_heights=1, gs_config=None):
         if gs_config is None:
             gs_config = {
                 'left': 0.15,
@@ -99,8 +103,10 @@ class TS(DataHub, dashboard.Dashboard):
         num_cols = 1
         num_rows = len(layout)
         self.layout = layout
-        if plot_types is None:
+        if type(plot_types) is not list:
             self.plot_types = [None] * num_rows
+        elif len(plot_types) != num_rows:
+            raise ValueError
 
         if type(gs_row_heights) == int:
             gs_row_heights = [gs_row_heights] * num_rows
@@ -119,7 +125,7 @@ class TS(DataHub, dashboard.Dashboard):
             self.add_panel(row_ind=row_ind, col_ind=col_ind)
             rec = rec + height
 
-    def show(self, dt_fr=None, dt_to=None):
+    def plotting(self, dt_fr=None, dt_to=None, display=True):
 
         if dt_fr is not None:
             self._xlim[0] = dt_fr
@@ -164,19 +170,23 @@ class TS(DataHub, dashboard.Dashboard):
             plot_type = var.visual.plot_type
 
         ax = panel.axes['major']
+
         if plot_type in ['1', '1E']:
             valid = self._plot_lines(ax, plot_layout, errorbar='on')
             self._set_yaxis(ax, plot_layout)
-            # ax.grid(True, which='both', linewidth=0.2)
+            ax.grid(True, which='major', linewidth=0.5, alpha=0.5)
+            ax.grid(True, which='minor', linewidth=0.1, alpha=0.5)
         elif plot_type == '1noE':
             valid = self._plot_lines(ax, plot_layout, errorbar='off')
             self._set_yaxis(ax, plot_layout)
-
+            ax.grid(True, which='major', linewidth=0.5, alpha=0.5)
+            ax.grid(True, which='minor', linewidth=0.1, alpha=0.5)
         elif plot_type == '1S':
             valid = self._scatter(ax, plot_layout)
             self._set_yaxis(ax, plot_layout)
         elif plot_type in ['2', '2P']:
             valid = self._pcolormesh(ax, plot_layout)
+            ax.grid(True, which='major', linewidth=0.5, alpha=0.5)
             self._set_yaxis(ax, plot_layout)
         elif plot_type == '2V':
             valid = self._vector(ax, plot_layout)
@@ -593,8 +603,58 @@ class TS(DataHub, dashboard.Dashboard):
         cax.yaxis.set_tick_params(labelsize='x-small')
         return [cax, cb]
 
-    def save_figure(self):
-        pass
+    def save_figure(self, file_dir=None, file_name=None, append_time=True, dpi=300, file_format='png', **kwargs):
+        if file_dir is None:
+            file_dir = pathlib.Path().cwd()
+        else:
+            file_dir = pathlib.Path(file_dir)
+        if type(file_name) is not str:
+            raise ValueError
+
+        if append_time:
+            dt_range_str = self.get_dt_range_str(style='filename')
+            file_name = '_'.join([file_name, dt_range_str])
+
+        file_name = file_name + '.' + file_format
+
+        plt.savefig(file_dir / file_name, dpi=dpi, format=file_format, **kwargs)
+
+
+    @staticmethod
+    def show():
+        plt.show()
+
+    def add_title(self, x=None, y=None, title=None, **kwargs):
+        append_time = kwargs.pop('append_time', True)
+        kwargs.setdefault('fontsize', plt.rcParams['figure.titlesize'])
+        kwargs.setdefault('fontweight', 'roman')
+        if append_time:
+            dt_range_str = self.get_dt_range_str(style='title')
+            title = title + ', ' + dt_range_str
+        super().add_text(x=None, y=None, text=title, **kwargs)
+
+    def get_dt_range_str(self, style='title'):
+        dt_fr = self._xlim[0]
+        dt_to = self._xlim[1]
+        if style == 'title':
+            diff_days = dttool.get_diff_days(dt1=dt_fr, dt2=dt_to)
+            if diff_days == 0:
+                fmt1 = "%Y-%m-%dT%H:%M:%S"
+                fmt2 = "%H:%M:%S"
+            else:
+                fmt1 = "%Y-%m-%dT%H:%M:%S"
+                fmt2 = fmt1
+            dt_range_str = dt_fr.strftime(fmt1) + ' - ' + dt_to.strftime(fmt2)
+        elif style == 'filename':
+            diff_days = dttool.get_diff_days(dt1=dt_fr, dt2=dt_to)
+            if diff_days == 0:
+                fmt1 = "%Y%m%d-%H%M%S"
+                fmt2 = "%H%M%S"
+            else:
+                fmt1 = "%Y%m%d-%H%M%S"
+                fmt2 = fmt1
+            dt_range_str = dt_fr.strftime(fmt1) + '-' + dt_to.strftime(fmt2)
+        return dt_range_str
 
 
 default_figure_config = {

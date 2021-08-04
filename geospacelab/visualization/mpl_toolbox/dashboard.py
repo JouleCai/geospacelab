@@ -85,18 +85,25 @@ class Dashboard(object):
         panel.set_position(position)
         self.panels[index] = panel
 
-    def add_title(self, x=None, y=None, title=None, **kwargs):
-        if title is not None:
-            self.title = title
+    def add_text(self, x=None, y=None, text=None, **kwargs):
+        # add text in dashboard coords
+        if text is not None:
+            self.title = text
 
         kwargs.setdefault('fontsize', default_dashboard_fontsize)
         kwargs.setdefault('horizontalalignment', 'center')
         kwargs.setdefault('verticalalignment', 'bottom')
         if x is None:
-            x = self.gs.left + (self.gs.right - self.gs.left) / 2
+            x = 0.5
         if y is None:
-            y = self.gs.top + (1 - self.gs.top) / 10
-        self.figure.text(x, y, self.title, **kwargs)
+            y = 1.05
+
+        # set in dashboard coords
+        x_new = self.gs.left + x * (self.gs.right - self.gs.left)
+
+        y_new = self.gs.bottom + y * (self.gs.top - self.gs.bottom)
+
+        self.figure.text(x_new, y_new, self.title, **kwargs)
 
     def show_panel_labels(self, panel_indices=None, style='alphabets', **kwargs):
         if panel_indices is None:
