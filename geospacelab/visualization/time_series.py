@@ -89,7 +89,8 @@ def test():
     title = ', '.join([ds_1.facility, ds_1.site, ds_1.experiment])
     ts.add_title(x=0.5, y=1.03, title=title)
     ts.add_panel_labels()
-    ts.add_vertical_lines()
+    dt_in = datetime.datetime.strptime('20201209' + '2100', "%Y%m%d%H%M")
+    ts.add_vertical_line(dt_in)
     ts.save_figure(file_name=title.replace(', ', '_'))
     ts.show()
     pass
@@ -666,11 +667,28 @@ class TS(DataHub, dashboard.Dashboard):
                 fmt1 = "%Y%m%d-%H%M%S"
                 fmt2 = fmt1
             dt_range_str = dt_fr.strftime(fmt1) + '-' + dt_to.strftime(fmt2)
-        return dt_range_str
+        return dt_range_str   
 
-    def indicate_by_line(self, dt_in, panel_index=0, **kwargs):
-        if panel_index == 0:
-            self.add_dashboard_line(dt_in, **kwargs)
+    def add_vertical_line(self, dt_in, **kwargs):
+        if type(dt_in) is not datetime.datetime:
+            return
+        
+        if 'major' not in self.axes.keys():
+            ax = self.add_major_axes()
+        else:
+            ax = self.axes['major']
+        xlim = self.panels[1].axes['major'].get_xlim()
+        diff_xlim = xlim[1] - xlim[0]
+        x = mdates.num2date(dt_in)
+        x = (x - xlim[0]) / diff_xlim
+        
+        kwargs.setdefault('linewidth', 2)
+        kwargs.setdefault('linestyle', '--')
+        kwargs.setdefault('color', 'b')
+        kwargs.setdefault('alpha', 0.8)
+        line = mpl.lines.Line2D([x, x], [-0.1, 1], lw=5., color='r', alpha=0.4)
+        line.set_clip_on(False)
+        ax.add_line(line)
 
 
 if __name__ == "__main__":

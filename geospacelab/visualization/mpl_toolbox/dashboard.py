@@ -1,5 +1,5 @@
 import string
-
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy
 
@@ -158,14 +158,7 @@ class Dashboard(object):
         ax.set_xlim([0, 1])
         ax.set_ylim([0, 1])
 
-        import matplotlib.lines as lines
-        line = lines.Line2D([0.5, 0.5], [-0.1, 1], lw=5., color='r', alpha=0.4)
-        line.set_clip_on(False)
-        ax.add_line(line)
-
-    def add_vertical_lines(self):
-        if 'major' not in self.axes.keys():
-            self.add_major_axes()
+    
 
     def add_shadings(self):
         pass

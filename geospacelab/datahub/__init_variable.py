@@ -119,7 +119,7 @@ class VariableModel(object):
         else:
             v = self._value
         if v is None:
-            mylog.StreamLogger.warning("The variable ({})'s value has not been not been assigned!".format(self.name))
+            mylog.StreamLogger.warning("The variable ({})'s value has not been assigned!".format(self.name))
         return v
 
     @value.setter
@@ -136,7 +136,7 @@ class VariableModel(object):
         else:
             v = self._error
         if v is None:
-            mylog.StreamLogger.warning("The variable ({})'s error has not been not been assigned!".format(self.name))
+            mylog.StreamLogger.warning("The variable ({})'s error has not been assigned!".format(self.name))
         return v
 
     @error.setter
