@@ -84,10 +84,12 @@ class DatasetModel(object):
         elif self.load_mode == 'dialog':
             self.open_dialog(**kwargs)
         elif self.load_mode == 'assigned':
+            self.data_file_paths = kwargs.pop('data_file_paths', self.data_file_paths)
             if not list(self.data_file_paths):
                 raise ValueError
         else:
             raise AttributeError
+        self.data_file_num = len(self.data_file_paths)
 
     @staticmethod
     def _set_default_attrs(kwargs: dict, default_attrs: dict):

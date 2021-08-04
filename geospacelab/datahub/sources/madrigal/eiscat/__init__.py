@@ -137,6 +137,9 @@ class Dataset(datahub.DatasetModel):
                 else:
                     print('Cannot find files from the online database!')
 
+        return done
+
+
     def download_data(self):
         if self.data_file_type == 'eiscat-hdf5':
             download_obj = downloader.Downloader(dt_fr=self.dt_fr, dt_to=self.dt_to,
