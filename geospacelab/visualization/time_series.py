@@ -51,18 +51,18 @@ default_plt_style_label = 'seaborn-darkgrid'
 
 
 def test():
-    # pfr.datahub_data_root_dir = pathlib.Path('/Users/lcai/01-Work/00-Data')
-    pfr.datahub_data_root_dir = '/data/afys-ionosphere/data'
+    pfr.datahub_data_root_dir = pathlib.Path('/Users/lcai/01-Work/00-Data')
+    # pfr.datahub_data_root_dir = '/data/afys-ionosphere/data'
 
-    dt_fr = datetime.datetime.strptime('20201121' + '1800', '%Y%m%d%H%M')
-    dt_to = datetime.datetime.strptime('20201122' + '0100', '%Y%m%d%H%M')
+    dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
+    dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
     database_name = 'madrigal'
     facility_name = 'eiscat'
 
     ts = TS(dt_fr=dt_fr, dt_to=dt_to)
     # ds0 = ts.set_dataset(datasource_contents=['madrigal', 'eiscat'])
     ds_1 = ts.set_dataset(datasource_contents=[database_name, facility_name],
-                          site='UHF', antenna='UHF', modulation='ant', data_file_type='eiscat-hdf5', load_data=False)
+                          site='UHF', antenna='UHF', modulation='60', data_file_type='eiscat-hdf5', load_data=False)
     ds_1.load_data(load_mode='AUTO')
 
     default_gs_config['hspace'] = 0.1
@@ -89,8 +89,13 @@ def test():
     title = ', '.join([ds_1.facility, ds_1.site, ds_1.experiment])
     ts.add_title(x=0.5, y=1.03, title=title)
     ts.add_panel_labels()
-    dt_in = datetime.datetime.strptime('20201209' + '2100', "%Y%m%d%H%M")
-    ts.add_vertical_line(dt_in)
+    dt_fr_2 = datetime.datetime.strptime('20201209' + '2030', "%Y%m%d%H%M")
+    dt_to_2 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
+    ts.add_vertical_line(dt_fr_2, bottom_extend=0, top_extend=0.02, label='Line 1', label_position='top')
+    ts.add_shading(dt_fr_2, dt_to_2, bottom_extend=0, top_extend=0.02, label='Shading 1', label_position='top')
+    dt_fr_3 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
+    dt_to_3 = datetime.datetime.strptime('20201210' + '0430', "%Y%m%d%H%M")
+    ts.add_top_bar(dt_fr_3, dt_to_3, bottom=0., top=0.02, label='Top bar 1')
     ts.save_figure(file_name=title.replace(', ', '_'))
     ts.show()
     pass
@@ -669,26 +674,117 @@ class TS(DataHub, dashboard.Dashboard):
             dt_range_str = dt_fr.strftime(fmt1) + '-' + dt_to.strftime(fmt2)
         return dt_range_str   
 
-    def add_vertical_line(self, dt_in, **kwargs):
+    def add_vertical_line(self, dt_in, panel_index=0,
+                          label=None, label_position=None, top_extend=0., bottom_extend=0., **kwargs):
         if type(dt_in) is not datetime.datetime:
             return
-        
-        if 'major' not in self.axes.keys():
-            ax = self.add_major_axes()
-        else:
-            ax = self.axes['major']
-        xlim = self.panels[1].axes['major'].get_xlim()
-        diff_xlim = xlim[1] - xlim[0]
-        x = mdates.num2date(dt_in)
-        x = (x - xlim[0]) / diff_xlim
-        
+
+        if label_position is None:
+            label_position = 'top'
+        text_config = kwargs.pop('text_config', {})
         kwargs.setdefault('linewidth', 2)
         kwargs.setdefault('linestyle', '--')
-        kwargs.setdefault('color', 'b')
+        kwargs.setdefault('color', 'k')
         kwargs.setdefault('alpha', 0.8)
-        line = mpl.lines.Line2D([x, x], [-0.1, 1], lw=5., color='r', alpha=0.4)
+
+        if panel_index == 0:
+            if 'major' not in self.axes.keys():
+                ax = self.add_major_axes()
+            else:
+                ax = self.axes['major']
+        else:
+            ax = self.panels[panel_index].axes['major']
+
+        xlim = self.panels[1].axes['major'].get_xlim()
+        ylim = ax.get_ylim()
+        diff_xlim = xlim[1] - xlim[0]
+        diff_ylim = ylim[1] - ylim[0]
+        x = mdates.date2num(dt_in)
+        x = (x - xlim[0]) / diff_xlim
+
+        y0 = 0 - bottom_extend
+        y1 = 1. + top_extend
+        line = mpl.lines.Line2D([x, x], [y0, y1], transform=ax.transAxes, **kwargs)
         line.set_clip_on(False)
         ax.add_line(line)
+
+        if type(label) is str:
+            if label_position == 'top':
+                y = y1
+                text_config.setdefault('va', 'bottom')
+            elif label_position == 'bottom':
+                y = y0
+                text_config.setdefault('va', 'top')
+            else:
+                x = label_position[0]
+                y = label_position[1]
+                text_config.setdefault('va', 'center')
+            text_config.setdefault('ha', 'center')
+            text_config.setdefault('fontsize', 14)
+            text_config.setdefault('fontweight', 'medium')
+            text_config.setdefault('clip_on', False)
+            ax.text(x, y, label, transform=ax.transAxes, **text_config)
+
+    def add_shading(self, dt_fr, dt_to, panel_index=0,
+                    label=None, label_position=None, top_extend=0., bottom_extend=0., **kwargs):
+        if type(dt_fr) is not datetime.datetime:
+            return
+
+        if label_position is None:
+            label_position = 'top'
+        text_config = kwargs.pop('text_config', {})
+        kwargs.setdefault('edgecolor', 'none')
+        kwargs.setdefault('facecolor', 'yellow')
+        kwargs.setdefault('alpha', 0.4)
+
+        if panel_index == 0:
+            if 'major' not in self.axes.keys():
+                ax = self.add_major_axes()
+            else:
+                ax = self.axes['major']
+        else:
+            ax = self.panels[panel_index].axes['major']
+
+        xlim = self.panels[1].axes['major'].get_xlim()
+        ylim = ax.get_ylim()
+        diff_xlim = xlim[1] - xlim[0]
+        diff_ylim = ylim[1] - ylim[0]
+        x0 = mdates.date2num(dt_fr)
+        x0 = (x0 - xlim[0]) / diff_xlim
+        x1 = mdates.date2num(dt_to)
+        x1 = (x1 - xlim[0]) / diff_xlim
+
+        y0 = 0 - bottom_extend
+        y1 = 1. + top_extend
+
+        rectangle = mpl.patches.Rectangle((x0, y0), x1-x0, y1-y0, transform=ax.transAxes, **kwargs)
+        rectangle.set_clip_on(False)
+        ax.add_patch(rectangle)
+
+        if type(label) is str:
+            x = (x0 + x1) / 2
+            if label_position == 'top':
+                y = y1
+                text_config.setdefault('va', 'bottom')
+            elif label_position == 'bottom':
+                y = y0
+                text_config.setdefault('va', 'top')
+            else:
+                x = label_position[0]
+                y = label_position[1]
+                text_config.setdefault('va', 'center')
+            text_config.setdefault('ha', 'center')
+            text_config.setdefault('fontsize', 14)
+            text_config.setdefault('fontweight', 'medium')
+            text_config.setdefault('clip_on', False)
+            ax.text(x, y, label, transform=ax.transAxes, **text_config)
+
+    def add_top_bar(self, dt_fr, dt_to, bottom=0, top=0.02, **kwargs):
+        bottom_extend = -1. - bottom
+        top_extend = top
+        kwargs.setdefault('alpha', 1.)
+        kwargs.setdefault('facecolor', 'orange')
+        self.add_shading(dt_fr, dt_to, bottom_extend=bottom_extend, top_extend=top_extend, **kwargs)
 
 
 if __name__ == "__main__":

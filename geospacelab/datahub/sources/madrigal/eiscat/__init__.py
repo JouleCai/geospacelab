@@ -22,7 +22,6 @@ default_label_fields = ['database', 'facility', 'site', 'antenna', 'experiment']
 
 default_variable_names = [
     'DATETIME', 'DATETIME_1', 'DATETIME_2',
-    'magic_constant', 'r_SCangle', 'r_m0_1', 'r_m0_2',
     'az', 'el', 'P_Tx', 'height', 'range',
     'n_e', 'T_i', 'T_e', 'nu_i', 'v_i_los', 'comp_mix', 'comp_O_p',
     'n_e_err', 'T_i_err', 'T_e_err', 'nu_i_err', 'v_i_los_err', 'comp_mix_err', 'comp_O_p_err',
@@ -49,6 +48,7 @@ class Dataset(datahub.DatasetModel):
         self.data_search_recursive = default_data_search_recursive
         self.download = False
         self._thisday = None
+        self.metadata = None
 
         load_data = kwargs.pop('load_data', False)
 
@@ -82,17 +82,21 @@ class Dataset(datahub.DatasetModel):
 
         if self.load_func is None:
             self.load_func = default_loader.select_loader(self.data_file_type)
-            load_obj = self.load_func(self.data_file_paths)
 
-            for var_name in self._variables.keys():
-                self._variables[var_name] = load_obj.variables[var_name]
-            self.site = load_obj.metadata['site_name']
-            self.antenna = load_obj.metadata['antenna']
-            self.pulse_code = load_obj.metadata['pulse_code']
-            self.scan_mode = load_obj.metadata['scan_mode']
-            rawdata_path = load_obj.metadata['rawdata_path']
-            self.experiment = rawdata_path.split('/')[-1].split('@')[0]
-            self.affiliation = load_obj.metadata['affiliation']
+            for file_path in self.data_file_paths:
+                load_obj = self.load_func(file_path)
+
+                for var_name in self._variables.keys():
+                    self._variables[var_name].join(load_obj.variables[var_name])
+
+                self.site = load_obj.metadata['site_name']
+                self.antenna = load_obj.metadata['antenna']
+                self.pulse_code = load_obj.metadata['pulse_code']
+                self.scan_mode = load_obj.metadata['scan_mode']
+                rawdata_path = load_obj.metadata['rawdata_path']
+                self.experiment = rawdata_path.split('/')[-1].split('@')[0]
+                self.affiliation = load_obj.metadata['affiliation']
+                self.metadata = load_obj.metadata
 
     def search_data_files(self, **kwargs):
         dt_fr = self.dt_fr
@@ -138,7 +142,6 @@ class Dataset(datahub.DatasetModel):
                     print('Cannot find files from the online database!')
 
         return done
-
 
     def download_data(self):
         if self.data_file_type == 'eiscat-hdf5':

@@ -1,7 +1,7 @@
 import numpy as np
 import pathlib
 
-from geospacelab.datahub.__init_variable import VariableModel
+from geospacelab.datahub.__init_variable import *
 from geospacelab.config import preferences as pref
 
 import geospacelab.toolbox.utilities.pyclass as pyclass
@@ -168,13 +168,12 @@ class DatasetModel(object):
         if 'var_config_items' in kwargs.keys():
             var_configs = kwargs.pop('var_config_items', {})
             var_config.update(var_configs[var_name])
-        var = VariableModel(**var_config)
-        var.dataset = self
-        return var
+        self._variables[var_name].config(**var_config)
+        return self._variables[var_name]
 
     def _set_default_variables(self, default_variable_names):
         for var_name in default_variable_names:
-            self[var_name] = None
+            self[var_name] = VariableModel(dataset=self, visual=self.visual)
 
     @property
     def data_root_dir(self):

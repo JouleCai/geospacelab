@@ -12,6 +12,7 @@ __status__ = "Developing"
 __revision__ = ""
 __docformat__ = "reStructureText"
 
+
 import copy
 import weakref
 
@@ -45,11 +46,8 @@ class VariableModel(object):
 
         self.dataset = kwargs.pop('dataset', None)
 
-        self.visual = None
-
-        visual = kwargs.pop('visual', 'off')
-        if visual == 'on':
-            self.visual = Visual()
+        self.visual = kwargs.pop('visual', 'off')
+        if isinstance(self.visual, Visual):
             self.visual.config(**kwargs.pop('visual_config', {}))
 
     def config(self, logging=True, **kwargs):
@@ -69,7 +67,7 @@ class VariableModel(object):
             for key, value in depend.items():
                 if isinstance(value, str):
                     try:
-                        value = self.dataset[value]
+                        value = self.dataset[value].value
                     except KeyError:
                         print('The variable {} has not been assigned!'.format(key))
                         value = None
@@ -98,9 +96,36 @@ class VariableModel(object):
             except AttributeError:
                 value_new = []
                 for elem in value:
-                    value_new.append(self.dataset[elem])
+                    value_new.append(self.dataset[elem].value)
                 value = value_new
         return value
+
+    def join(self, var_new):
+        if isinstance(var_new, VariableModel):
+            value = var_new.value
+        else:
+            value = var_new
+
+        if self.value is None:
+            self.value = value
+        else:
+            self.value = np.concatenate((self.value, var_new), axis=0)
+
+    @property
+    def visual(self):
+        return self._visual
+
+    @visual.setter
+    def visual(self, value):
+        if value == 'on':
+            self._visual = Visual()
+        elif isinstance(value, Visual):
+            self._visual = value
+        elif value == 'off':
+            self._visual = None
+
+        if type(value) is dict:
+            pyclass.set_object_attributes(self.visual, append=False, logging=True, **value)
 
     @property
     def dataset(self):
@@ -115,34 +140,26 @@ class VariableModel(object):
     def value(self):
         v = None
         if isinstance(self._value, str):
-            v = self.dataset[self._value]
+            v = self.dataset[self._value].value
         else:
             v = self._value
-        if v is None:
-            mylog.StreamLogger.warning("The variable ({})'s value has not been assigned!".format(self.name))
         return v
 
     @value.setter
     def value(self, v):
-        if isinstance(v, list):
-            v = np.array(v)
         self._value = v
 
     @property
     def error(self):
         v = None
         if isinstance(self._error, str):
-            v = self.dataset[self._error]
+            v = self.dataset[self._error].value
         else:
             v = self._error
-        if v is None:
-            mylog.StreamLogger.warning("The variable ({})'s error has not been assigned!".format(self.name))
         return v
 
     @error.setter
     def error(self, v):
-        if isinstance(v, list):
-            v = np.array(v)
         self._error = v
 
     @property
@@ -263,59 +280,59 @@ class Plot_Config:
         self.mask_gap = True
 
 
-class Visual_new(object):
-    _data = {}
-    _axis = {}
-    _variable_proxy = VariableModel()
-
-    def __init__(self, **kwargs):
-        self.variable = kwargs.pop('variable', None)
-        self.data = None
-        self.axis = None
-        self.plot = None
-
-    @property
-    def variable(self):
-        return self._variable_proxy
-
-    @variable.setter
-    def variable(self, var_obj):
-        if var_obj is not None:
-            self._variable_proxy = weakref.proxy(var_obj)
-
-    @property
-    def data(self):
-        if not dict(self._data):
-            try:
-                for ind in range(self.variable.ndim + 1):
-                    self._data[ind] = Visual_Data()
-            except:
-                self._data = {}
-        return self._data
-
-    @data.setter
-    def data(self, d_dict):
-        if dict(d_dict):
-            self._data = d_dict
-        elif d_dict is not None:
-            raise TypeError
-
-    @property
-    def axis(self):
-        if not dict(self._axis):
-            try:
-                for ind in range(self.variable.ndim + 1):
-                    self._axis[ind] = Visual_Data()
-            except:
-                self._axis = {}
-        return self._axis
-
-    @axis.setter
-    def axis(self, a_dict):
-        if dict(a_dict):
-            self._axis = a_dict
-        elif a_dict is not None:
-            raise TypeError
+# class Visual_new(object):
+#     _data = {}
+#     _axis = {}
+#     _variable_proxy = VariableModel()
+#
+#     def __init__(self, **kwargs):
+#         self.variable = kwargs.pop('variable', None)
+#         self.data = None
+#         self.axis = None
+#         self.plot = None
+#
+#     @property
+#     def variable(self):
+#         return self._variable_proxy
+#
+#     @variable.setter
+#     def variable(self, var_obj):
+#         if var_obj is not None:
+#             self._variable_proxy = weakref.proxy(var_obj)
+#
+#     @property
+#     def data(self):
+#         if not dict(self._data):
+#             try:
+#                 for ind in range(self.variable.ndim + 1):
+#                     self._data[ind] = Visual_Data()
+#             except:
+#                 self._data = {}
+#         return self._data
+#
+#     @data.setter
+#     def data(self, d_dict):
+#         if dict(d_dict):
+#             self._data = d_dict
+#         elif d_dict is not None:
+#             raise TypeError
+#
+#     @property
+#     def axis(self):
+#         if not dict(self._axis):
+#             try:
+#                 for ind in range(self.variable.ndim + 1):
+#                     self._axis[ind] = Visual_Data()
+#             except:
+#                 self._axis = {}
+#         return self._axis
+#
+#     @axis.setter
+#     def axis(self, a_dict):
+#         if dict(a_dict):
+#             self._axis = a_dict
+#         elif a_dict is not None:
+#             raise TypeError
 
 
 class Visual(object):

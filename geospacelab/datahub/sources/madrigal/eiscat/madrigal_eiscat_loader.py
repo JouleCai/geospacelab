@@ -38,7 +38,7 @@ def select_loader(file_type):
     return load_func
 
 
-def load_eiscat_hdf5(file_paths):
+def load_eiscat_hdf5(file_path):
     """
     Load EISCAT hdf5 file.
     :param file_paths: a list of the file fullpaths for the hdf5 files
@@ -110,72 +110,68 @@ def load_eiscat_hdf5(file_paths):
 
     vars = {}
     metadata = {}
-    for ind_f, file_path in enumerate(file_paths):
-        with h5py.File(file_path, 'r') as fh5:
-            var_info_list = eiscat.list_eiscat_hdf5_variables(fh5)
-            h5_data = fh5['data']
-            h5_metadata = fh5['metadata']
-            ind_nrec = var_info_list['name'].index('nrec')
-            nrec_group = var_info_list['group'][ind_nrec]
-            nrec_group_ind = var_info_list['index'][ind_nrec]
-            nrec = h5_data[nrec_group][nrec_group_ind]
-            num_row = h5_data['utime'][0].shape[0]
-            for var_name, var_name_h5 in var_name_dict.items():
-                ind_v = var_info_list['name'].index(var_name_h5)
-                var_group = var_info_list['group'][ind_v]
-                var_ind = var_info_list['index'][ind_v]
-                var = h5_data[var_group][var_ind]
-                if var_group == 'par0d':
-                    vars.setdefault(var_name, var[0])
-                elif var_group == 'par1d':
-                    var = var.reshape(num_row, 1)
-                    vars.setdefault(var_name, None)
-                    vars[var_name] = arraytool.numpy_array_join_vertical(vars[var_name], var)
-                elif var_group == 'par2d':
-                    if nrec_group == 'par0d':
-                        num_col = int(var.shape[0] / num_row)
-                        if num_col != nrec[0]:
-                            print("Note: the number of range gates doesn't match nrec!")
-                        var = var.reshape(num_row, num_col)
-                    elif nrec_group == 'par1d':
-                        num_gates = int(np.max(nrec))
-                        var_array = np.empty((num_row, num_gates))
-                        var_array[:, :] = np.nan
-                        rec_ind_1 = 0
-                        for i in range(num_row):
-                            rec_ind_2 = int(rec_ind_1 + nrec[i])
-                            var_array[i, :int(nrec[i])] = var[rec_ind_1:rec_ind_2]
-                            rec_ind_1 = rec_ind_2
-                        var = var_array
-                    vars.setdefault(var_name, None)
-                    vars[var_name] = arraytool.numpy_array_join_vertical(vars[var_name], var)
 
-            # unix time to datetime
-            utime1 = h5_data['utime'][0]
-            dt1 = dttool.convert_unix_time_to_datetime(utime1)
-            var = dt1.reshape(num_row, 1)
-            var_name = 'DATETIME_1'
-            vars.setdefault(var_name, None)
-            vars[var_name] = arraytool.numpy_array_join_vertical(vars[var_name], var)
+    with h5py.File(file_path, 'r') as fh5:
+        var_info_list = eiscat.list_eiscat_hdf5_variables(fh5)
+        h5_data = fh5['data']
+        h5_metadata = fh5['metadata']
+        ind_nrec = var_info_list['name'].index('nrec')
+        nrec_group = var_info_list['group'][ind_nrec]
+        nrec_group_ind = var_info_list['index'][ind_nrec]
+        nrec = h5_data[nrec_group][nrec_group_ind]
+        num_row = h5_data['utime'][0].shape[0]
+        for var_name, var_name_h5 in var_name_dict.items():
+            ind_v = var_info_list['name'].index(var_name_h5)
+            var_group = var_info_list['group'][ind_v]
+            var_ind = var_info_list['index'][ind_v]
+            var = h5_data[var_group][var_ind]
+            if var_group == 'par0d':
+                metadata[var_name] = var[0]
+            elif var_group == 'par1d':
+                var = var.reshape(num_row, 1)
+                vars[var_name] = var
+            elif var_group == 'par2d':
+                if nrec_group == 'par0d':
+                    num_col = int(var.shape[0] / num_row)
+                    if num_col != nrec[0]:
+                        print("Note: the number of range gates doesn't match nrec!")
+                    var = var.reshape(num_row, num_col)
+                elif nrec_group == 'par1d':
+                    num_gates = int(np.max(nrec))
+                    var_array = np.empty((num_row, num_gates))
+                    var_array[:, :] = np.nan
+                    rec_ind_1 = 0
+                    for i in range(num_row):
+                        rec_ind_2 = int(rec_ind_1 + nrec[i])
+                        var_array[i, :int(nrec[i])] = var[rec_ind_1:rec_ind_2]
+                        rec_ind_1 = rec_ind_2
+                    var = var_array
+                vars[var_name] = var
 
-            utime2 = h5_data['utime'][1]
-            dt2 = dttool.convert_unix_time_to_datetime(utime2)
-            var = dt2.reshape(num_row, 1)
-            var_name = 'DATETIME_2'
-            vars.setdefault(var_name, None)
-            vars[var_name] = arraytool.numpy_array_join_vertical(vars[var_name], var)
+        # unix time to datetime
+        utime1 = h5_data['utime'][0]
+        dt1 = dttool.convert_unix_time_to_datetime(utime1)
+        var = dt1.reshape(num_row, 1)
+        var_name = 'DATETIME_1'
+        vars[var_name] = var
 
-            vars['DATETIME'] = vars['DATETIME_1'] + (vars['DATETIME_2'] - vars['DATETIME_2']) / 2
+        utime2 = h5_data['utime'][1]
+        dt2 = dttool.convert_unix_time_to_datetime(utime2)
+        var = dt2.reshape(num_row, 1)
+        var_name = 'DATETIME_2'
+        vars[var_name] = var
 
-            metadata['r_XMITloc'] = [h5_data['par0d'][2][0], h5_data['par0d'][3][0], h5_data['par0d'][4][0]]
-            metadata['r_RECloc'] = [h5_data['par0d'][5][0], h5_data['par0d'][6][0], h5_data['par0d'][7][0]]
-            metadata['site_name'] = site_info[h5_metadata['names'][1][1].decode('UTF-8').strip()]
-            metadata['pulse_code'] = h5_metadata['names'][0][1].decode('UTF-8').strip()
-            metadata['antenna'] = h5_metadata['names'][2][1].decode('UTF-8').strip()
-            metadata['GUISDAP_version'] = h5_metadata['software']['GUISDAP_ver'][0, 0].decode('UTF-8').strip()
-            metadata['rawdata_path'] = h5_metadata['software']['gfd']['data_path'][0, 0].decode('UTF-8').strip()
-            metadata['scan_mode'] = metadata['rawdata_path'].split('_')[1]
-            metadata['affiliation'] = metadata['rawdata_path'].split('@')[0].split('_')[-1]
+        vars['DATETIME'] = vars['DATETIME_1'] + (vars['DATETIME_2'] - vars['DATETIME_2']) / 2
+
+        metadata['r_XMITloc'] = [h5_data['par0d'][2][0], h5_data['par0d'][3][0], h5_data['par0d'][4][0]]
+        metadata['r_RECloc'] = [h5_data['par0d'][5][0], h5_data['par0d'][6][0], h5_data['par0d'][7][0]]
+        metadata['site_name'] = site_info[h5_metadata['names'][1][1].decode('UTF-8').strip()]
+        metadata['pulse_code'] = h5_metadata['names'][0][1].decode('UTF-8').strip()
+        metadata['antenna'] = h5_metadata['names'][2][1].decode('UTF-8').strip()
+        metadata['GUISDAP_version'] = h5_metadata['software']['GUISDAP_ver'][0, 0].decode('UTF-8').strip()
+        metadata['rawdata_path'] = h5_metadata['software']['gfd']['data_path'][0, 0].decode('UTF-8').strip()
+        metadata['scan_mode'] = metadata['rawdata_path'].split('_')[1]
+        metadata['affiliation'] = metadata['rawdata_path'].split('@')[0].split('_')[-1]
 
     vars_add = {}
     for var_name, value in vars.items():
@@ -191,32 +187,34 @@ def load_eiscat_hdf5(file_paths):
     vars['height'] = vars['height'] / 1000.
     vars['range'] = vars['range'] / 1000.
 
-    vars['az'] = np.mod(vars['az'], 360)
-    vars['el'] = np.mod(vars['el'], 360)
-    if len(vars['az'].shape) == 0:
+    if 'az' in metadata.keys():
         az = np.empty((vars['DATETIME_1'].shape[0], 1))
         az[:, :] = vars['az']
         vars['az'] = az
-    if len(vars['el'].shape) == 0:
+    if 'el' in metadata.keys():
         el = np.empty((vars['DATETIME_1'].shape[0], 1))
         el[:, :] = vars['el']
         vars['el'] = el
+    vars['az'] = np.mod(vars['az'], 360)
+    vars['el'] = np.mod(vars['el'], 360)
 
     load_obj = Loader(vars, metadata)
     return load_obj
 
 
-
 def load_eiscat_mat():
     raise NotImplemented
 
+
 def load_madrigal_hdf5():
     raise NotImplemented
+
 
 class Loader:
     def __init__(self, vars, metadata):
         self.variables = vars
         self.metadata = metadata
+
 
 if __name__ == "__main__":
     dir_root = prf.datahub_data_root_dir

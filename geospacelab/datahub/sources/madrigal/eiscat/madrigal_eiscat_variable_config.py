@@ -67,13 +67,12 @@ items[var_name] = {
     'unit':         'm-3',
     'unit_label':   r'm$^{-3}$',
     'group':        '',
-    'value':        var_name,
     'error':        var_name + '_err',
     'dim':          2,
     'depends':      {0: depend_0, 1: depend_1},
     'timestamps':   timestamps,
     'positions':    coords,
-    'visual_config':       visual_in
+    'visual':       visual_in
 }
 
 ##################################################################################
@@ -92,13 +91,12 @@ items[var_name] = {
     'unit':         'K',
     'unit_label':   None,
     'group':        '',
-    'value':        var_name,
     'error':        var_name + '_err',
     'dim':          2,
     'depends':      {0: depend_0, 1: depend_1},
     'timestamps':   timestamps,
     'positions':    coords,
-    'visual_config':       visual_in
+    'visual':       visual_in
 }
 
 ##################################################################################
@@ -117,13 +115,12 @@ items[var_name] = {
     'unit':         'K',
     'unit_label':   None,
     'group':        '',
-    'value':        var_name,
     'error':        var_name + '_err',
     'dim':          2,
     'depends':      {0: depend_0, 1: depend_1},
     'timestamps':   timestamps,
     'positions':    coords,
-    'visual_config':       visual_in
+    'visual':       visual_in
 }
 
 ##################################################################################
@@ -141,13 +138,12 @@ items[var_name] = {
     'unit':         'm/s',
     'unit_label':   r'm$/$s',
     'group':        '',
-    'value':        var_name,
     'error':        var_name + '_err',
     'dim':          2,
     'depends':      {0: depend_0, 1: depend_1},
     'timestamps':   timestamps,
     'positions':    coords,
-    'visual_config':       visual_in
+    'visual':       visual_in
 }
 
 ##################################################################################
@@ -171,13 +167,12 @@ items[var_name] = {
     'unit':         None,
     'unit_label':   None,
     'group':        'radar parameters',
-    'value':        var_name,
     'error':        None,
     'dim':          1,
     'depends':      {0: depend_0},
     'timestamps':   timestamps,
     'positions':    coords,
-    'visual_config':       visual_in
+    'visual':       visual_in
 }
 
 ##################################################################################
@@ -200,12 +195,11 @@ items[var_name] = {
     'unit':         None,
     'unit_label':   None,
     'group':        'radar parameters',
-    'value':        var_name,
     'error':        None,
     'dim':          1,
     'depends':      {0: depend_0},
     'timestamps':   timestamps,
     'positions':    coords,
-    'visual_config':       visual_in
+    'visual':       visual_in
 }
 

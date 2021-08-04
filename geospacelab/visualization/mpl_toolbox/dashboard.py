@@ -88,8 +88,8 @@ class Dashboard(object):
             self.title = text
 
         kwargs.setdefault('fontsize', default_dashboard_fontsize)
-        kwargs.setdefault('horizontalalignment', 'center')
-        kwargs.setdefault('verticalalignment', 'bottom')
+        kwargs.setdefault('ha', 'center')
+        kwargs.setdefault('va', 'bottom')
         if x is None:
             x = 0.5
         if y is None:
@@ -152,11 +152,12 @@ class Dashboard(object):
             w = self.gs.right - self.gs.left
             h = self.gs.top - self.gs.bottom
             rect = [x, y, w, h]
-        ax = self.add_axes(rect, label='major', facecolor='none', visible=False)
-        #ax.get_xaxis().set_visible(False)
-        #ax.get_yaxis().set_visible(False)
+        ax = self.add_axes(rect, label='major', facecolor='none')
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
         ax.set_xlim([0, 1])
         ax.set_ylim([0, 1])
+        return ax
 
     
 
