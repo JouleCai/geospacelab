@@ -31,6 +31,7 @@ class Dashboard(object):
         self.panels = {}
         self.title = kwargs.pop('title', None)
         self.label = kwargs.pop('label', None)
+        self.axes = {}
 
         self.gs = None
 
@@ -41,10 +42,7 @@ class Dashboard(object):
         self.gs = self.figure.add_gridspec(num_rows, num_cols)
         self.gs.update(**kwargs)
 
-    def add_indicators(self, x=None, y=None, style='lines', panel_index=None, **kwargs):
-        pass
-
-    def add_lines(self, x=None, y=None, panel_index=None, **kwargs):
+    def add_dashboard_line(self, x=None, y=None, panel_index=None, **kwargs):
         pass
 
     def add_patches(self, x=None, y=None, panel_index=None, **kwargs):
@@ -104,7 +102,7 @@ class Dashboard(object):
 
         self.figure.text(x_new, y_new, self.title, **kwargs)
 
-    def show_panel_labels(self, panel_indices=None, style='alphabets', **kwargs):
+    def add_panel_labels(self, panel_indices=None, style='alphabets', **kwargs):
         if panel_indices is None:
             panel_indices = self.panels.keys()
 
@@ -118,7 +116,8 @@ class Dashboard(object):
             x = pos[0]
             y = pos[1]
         else:
-            raise KeyError
+            x = 0.02
+            y = 0.9
 
         kwargs.setdefault('ha', 'left')     # horizontal alignment
         kwargs.setdefault('va', 'center') # vertical alignment
@@ -129,10 +128,44 @@ class Dashboard(object):
                 label = "({})".format(label_list[ind])
             else:
                 label = panel.label
-            panel.label(x, y, label, **kwargs)
+            kwargs.setdefault('fontsize', plt.rcParams['axes.labelsize'])
+            kwargs.setdefault('fontweight', 'book')
+            bbox_config = {'facecolor': 'yellow', 'alpha': 0.3, 'edgecolor': 'none'}
+            kwargs.setdefault('bbox', bbox_config)
+            panel.add_label(x, y, label, **kwargs)
+
+    def add_axes(self, rect, label=None, **kwargs):
+        if label is None:
+            label = len(self.axes.keys())
+            label_str = 'ax_' + str(label)
+        else:
+            label_str = label
+        kwargs.setdefault('facecolor', 'none')
+        ax = self.figure.add_axes(rect, label=label_str, **kwargs)
+        self.axes[label] = ax
+        return ax
+
+    def add_major_axes(self, rect=None):
+        if rect is None:
+            x = self.gs.left
+            y = self.gs.bottom
+            w = self.gs.right - self.gs.left
+            h = self.gs.top - self.gs.bottom
+            rect = [x, y, w, h]
+        ax = self.add_axes(rect, label='major', facecolor='none', visible=False)
+        #ax.get_xaxis().set_visible(False)
+        #ax.get_yaxis().set_visible(False)
+        ax.set_xlim([0, 1])
+        ax.set_ylim([0, 1])
+
+        import matplotlib.lines as lines
+        line = lines.Line2D([0.5, 0.5], [-0.1, 1], lw=5., color='r', alpha=0.4)
+        line.set_clip_on(False)
+        ax.add_line(line)
 
     def add_vertical_lines(self):
-        pass
+        if 'major' not in self.axes.keys():
+            self.add_major_axes()
 
     def add_shadings(self):
         pass

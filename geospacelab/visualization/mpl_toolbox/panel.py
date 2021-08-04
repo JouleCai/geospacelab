@@ -50,11 +50,11 @@ class Panel(object):
         self.axes[label] = ax
 
     def add_label(self, x, y, label, ha='left', va='center', **kwargs):
-        ax = self.axes[0]
+        ax = self.axes['major']
         if label is None:
             label = ''
         transform = kwargs.pop('transform', ax.transAxes)
         ax.text(x, y, label, transform=transform, ha=ha, va=va, **kwargs)
 
     def add_title(self, *args, **kwargs):
-        self.axes[0].set_title(*args, **kwargs)
+        self.axes['major'].set_title(*args, **kwargs)

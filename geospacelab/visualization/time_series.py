@@ -25,7 +25,7 @@ plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = 'Ubuntu'
 plt.rcParams['font.monospace'] = 'Ubuntu Mono'
 plt.rcParams['font.size'] = 12
-plt.rcParams['axes.labelsize'] = 12
+plt.rcParams['axes.labelsize'] = 14
 plt.rcParams['axes.labelweight'] = 'book'
 plt.rcParams['axes.titlesize'] = 12
 plt.rcParams['xtick.labelsize'] = 10
@@ -41,6 +41,14 @@ default_gs_config = {
     'hspace': 0.5,
     'wspace': 0.0
 }
+
+default_figure_config = {
+    'figsize': (12, 12),    # (width, height)
+    'dpi': 100,
+}
+
+default_plt_style_label = 'seaborn-darkgrid'
+
 
 def test():
     # pfr.datahub_data_root_dir = pathlib.Path('/Users/lcai/01-Work/00-Data')
@@ -80,7 +88,8 @@ def test():
     ts.draw(dt_fr=dt_fr_1, dt_to=dt_to_1)
     title = ', '.join([ds_1.facility, ds_1.site, ds_1.experiment])
     ts.add_title(x=0.5, y=1.03, title=title)
-
+    ts.add_panel_labels()
+    ts.add_vertical_lines()
     ts.save_figure(file_name=title.replace(', ', '_'))
     ts.show()
     pass
@@ -623,7 +632,6 @@ class TS(DataHub, dashboard.Dashboard):
 
         plt.savefig(file_dir / file_name, dpi=dpi, format=file_format, **kwargs)
 
-
     @staticmethod
     def show():
         plt.show()
@@ -660,13 +668,10 @@ class TS(DataHub, dashboard.Dashboard):
             dt_range_str = dt_fr.strftime(fmt1) + '-' + dt_to.strftime(fmt2)
         return dt_range_str
 
+    def indicate_by_line(self, dt_in, panel_index=0, **kwargs):
+        if panel_index == 0:
+            self.add_dashboard_line(dt_in, **kwargs)
 
-default_figure_config = {
-    'figsize': (12, 12),    # (width, height)
-    'dpi': 100,
-}
-
-default_plt_style_label = 'seaborn-darkgrid'
 
 if __name__ == "__main__":
     test()
