@@ -59,8 +59,7 @@ class DataHub(object):
             if dataset.label() in [ds.label() for ds in self.datasets]:
                 mylog.simpleinfo.info('The same dataset has been added!')
                 append = False
-            else:
-                dataset.load_data()
+
         elif datasource_mode == 'temporary':
             if dataset is None:
                 dataset = DatasetModel(database='temporary', **kwargs)

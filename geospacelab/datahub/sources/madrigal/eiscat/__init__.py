@@ -31,6 +31,8 @@ default_variable_names = [
 
 default_data_search_recursive = True
 
+default_attrs_required = ['site', 'antenna', 'modulation']
+
 
 class Dataset(datahub.DatasetModel):
     def __init__(self, **kwargs):
@@ -48,6 +50,8 @@ class Dataset(datahub.DatasetModel):
         self.download = False
         self._thisday = None
 
+        load_data = kwargs.pop('load_data', False)
+
         super().__init__()
         kwargs = self._set_default_attrs(kwargs, default_dataset_attrs)
         self.config(**kwargs)
@@ -56,7 +60,15 @@ class Dataset(datahub.DatasetModel):
 
         self._validate_attrs()
 
+        if load_data:
+            self.load_data()
+
     def _validate_attrs(self):
+        for attr_name in default_attrs_required:
+            attr = getattr(self, attr_name)
+            if not str(attr):
+                mylog.StreamLogger.warning("The parameter {} is required before loading data!".format(attr_name))
+
         if list(self.data_file_type):
             self.data_file_ext = self.data_file_type.split('-')[1]
 
@@ -96,18 +108,25 @@ class Dataset(datahub.DatasetModel):
             if self.data_file_type == 'eiscat-hdf5':
                 file_patterns.append('EISCAT')
             elif self.data_file_type == 'madrigal-hdf5':
-                self.data_file_patterns.append('MAD6400')
+                file_patterns.append('MAD6400')
             elif self.data_file_type == 'eiscat-mat':
                 pass
             file_patterns.append(thisday.strftime('%Y-%m-%d'))
             file_patterns.append(self.modulation)
             file_patterns.append(self.antenna.lower())
 
+            # remove empty str
+            file_patterns = [pattern for pattern in file_patterns if str(pattern)]
+
             search_pattern = '*' + '*'.join(file_patterns) + '*'
+            if self.data_file_type == 'eiscat-mat':
+                search_pattern = search_pattern + '/'
             recursive = self.data_search_recursive
             done = super().search_data_files(
                 initial_file_dir=initial_file_dir, search_pattern=search_pattern, recursive=recursive
             )
+
+            # Validate file paths
 
             if not done and self.download:
                 done = self.download_data()
@@ -157,6 +176,8 @@ class Dataset(datahub.DatasetModel):
 
     @site.setter
     def site(self, value):
+        if value == 'TRO':
+            value = 'UHF'
         self._site = Site(value)
 
 

@@ -38,16 +38,18 @@ class DatasetModel(object):
             search_pattern = search_pattern + '.' + self.data_file_ext
         if recursive:
             search_pattern = '**/' + search_pattern
-        files = list(initial_file_dir.glob(search_pattern))
-        if len(files) == 1:
+        paths = list(initial_file_dir.glob(search_pattern))
+
+        if len(paths) == 1:
             done = True
-            self.data_file_paths.append(files[0])
-        elif len(files) > 1:
-            mylog.StreamLogger.error("Multiple files match!")
-            print(files)
+            self.data_file_paths.append(paths[0])
+        elif len(paths) > 1:
+            mylog.StreamLogger.error("Multiple files found! Restrict the search condition.")
+            print(paths)
             raise FileExistsError
         else:
             print('Cannot find the requested data file in {}'.format(initial_file_dir))
+
         return done
 
     def open_dialog(self, **kwargs):

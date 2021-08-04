@@ -45,8 +45,9 @@ def test():
     facility_name = 'eiscat'
 
     ts = TS(dt_fr=dt_fr, dt_to=dt_to)
+    ds0 = ts.set_dataset(datasource_contents=['madrigal', 'eiscat'])
     ds_1 = ts.set_dataset(datasource_contents=['madrigal', 'eiscat'],
-                          site='UHF', antenna='UHF', modulation='60', data_file_type='eiscat-hdf5')
+                          site='UHF', antenna='UHF', modulation='60', data_file_type='eiscat-hdf5', load_data=True)
 
     n_e = ts.assign_variable('n_e')
     T_i = ts.assign_variable('T_i')
