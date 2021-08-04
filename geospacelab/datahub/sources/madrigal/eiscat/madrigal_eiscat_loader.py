@@ -6,7 +6,7 @@ import numpy as np
 import pickle
 import pathlib
 
-from geospacelab.config.preferences import *
+from geospacelab.config import preferences as prf
 # from geospacelab.datahub.sources.madrigal.eiscat import madrigal_eiscat_downloader as downloader
 
 import geospacelab.toolbox.utilities.pydatetime as dttool
@@ -219,7 +219,7 @@ class Loader:
         self.metadata = metadata
 
 if __name__ == "__main__":
-    dir_root = datahub_data_root_dir
+    dir_root = prf.datahub_data_root_dir
 
     filepath = pathlib.Path('./example') / "EISCAT_2005-09-01_steffe_64@32m.hdf5"
 

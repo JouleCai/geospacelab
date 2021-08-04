@@ -12,7 +12,7 @@ import bs4
 import os
 import pathlib
 
-import geospacelab.config.preferences as pfr
+from geospacelab.config import preferences as pfr
 import geospacelab.datahub.sources.madrigal.madrigal_utilities as madrigal
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool

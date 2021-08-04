@@ -5,21 +5,19 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 import pathlib
 
-import numpy as np
 from scipy.interpolate import interp1d
 
 
-from geospacelab.datahub import DataHub, VariableModel
-import geospacelab.config.preferences as pfr
+from geospacelab.datahub import DataHub
+from geospacelab.config import preferences as pfr
 import geospacelab.visualization.mpl_toolbox.dashboard as dashboard
 # from geospacelab.visualization.mpl_toolbox.figure import Figure
 import geospacelab.visualization.mpl_toolbox.colormaps as mycmap
 import geospacelab.toolbox.utilities.numpyarray as arraytool
 import geospacelab.toolbox.utilities.pydatetime as dttool
-import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pybasic as basic
-import geospacelab.visualization.mpl_toolbox.axes as axtool
 import geospacelab.visualization.mpl_toolbox.axis_ticks as ticktool
+
 
 # plt.style.use('ggplot')
 
@@ -35,19 +33,31 @@ plt.rcParams['ytick.labelsize'] = 10
 plt.rcParams['legend.fontsize'] = 12
 plt.rcParams['figure.titlesize'] = 14
 
+default_gs_config = {
+    'left': 0.15,
+    'right': 0.8,
+    'bottom': 0.15,
+    'top': 0.88,
+    'hspace': 0.5,
+    'wspace': 0.0
+}
 
 def test():
     # pfr.datahub_data_root_dir = pathlib.Path('/Users/lcai/01-Work/00-Data')
+    pfr.datahub_data_root_dir = '/data/afys-ionosphere/data'
 
-    dt_fr = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
-    dt_to = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
+    dt_fr = datetime.datetime.strptime('20201121' + '1800', '%Y%m%d%H%M')
+    dt_to = datetime.datetime.strptime('20201122' + '0100', '%Y%m%d%H%M')
     database_name = 'madrigal'
     facility_name = 'eiscat'
 
     ts = TS(dt_fr=dt_fr, dt_to=dt_to)
     # ds0 = ts.set_dataset(datasource_contents=['madrigal', 'eiscat'])
-    ds_1 = ts.set_dataset(datasource_contents=['madrigal', 'eiscat'],
-                          site='UHF', antenna='UHF', modulation='60', data_file_type='eiscat-hdf5', load_data=True)
+    ds_1 = ts.set_dataset(datasource_contents=[database_name, facility_name],
+                          site='UHF', antenna='UHF', modulation='ant', data_file_type='eiscat-hdf5', load_data=False)
+    ds_1.load_data(load_mode='AUTO')
+
+    default_gs_config['hspace'] = 0.1
 
     n_e = ts.assign_variable('n_e')
     T_i = ts.assign_variable('T_i')
@@ -63,10 +73,11 @@ def test():
     layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
     ts.set_layout(layout=layout)
     # plt.style.use('dark_background')
-    dt_fr_1 = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
-    dt_to_1 = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
-
-    ts.plotting(dt_fr=dt_fr_1, dt_to=dt_to_1)
+    #dt_fr_1 = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
+    #dt_to_1 = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
+    dt_fr_1 = dt_fr
+    dt_to_1 = dt_to
+    ts.draw(dt_fr=dt_fr_1, dt_to=dt_to_1)
     title = ', '.join([ds_1.facility, ds_1.site, ds_1.experiment])
     ts.add_title(x=0.5, y=1.03, title=title)
 
@@ -91,14 +102,7 @@ class TS(DataHub, dashboard.Dashboard):
 
     def set_layout(self, layout=None, plot_types=None, gs_row_heights=1, gs_config=None):
         if gs_config is None:
-            gs_config = {
-                'left': 0.15,
-                'right': 0.8,
-                'bottom': 0.15,
-                'top': 0.88,
-                'hspace': 0.1,
-                'wspace': 0.0
-            }
+            gs_config = default_gs_config
 
         num_cols = 1
         num_rows = len(layout)
@@ -125,7 +129,7 @@ class TS(DataHub, dashboard.Dashboard):
             self.add_panel(row_ind=row_ind, col_ind=col_ind)
             rec = rec + height
 
-    def plotting(self, dt_fr=None, dt_to=None, display=True):
+    def draw(self, dt_fr=None, dt_to=None, axis_minor_grid=False, axis_major_grid=True):
 
         if dt_fr is not None:
             self._xlim[0] = dt_fr

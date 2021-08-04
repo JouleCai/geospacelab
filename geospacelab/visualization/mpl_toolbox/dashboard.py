@@ -56,14 +56,13 @@ class Dashboard(object):
     def add_arrows(self, **kwargs):
         pass
 
-    def add_panel(self, row_ind=None, col_ind=None, index=None, label=None, plot_type=None, **kwargs):
+    def add_panel(self, row_ind=None, col_ind=None, index=None, label=None, panel_class=mpl_panel.Panel, **kwargs):
         if isinstance(row_ind, int):
             row_ind = [row_ind, row_ind+1]
         if isinstance(col_ind, int):
             col_ind = [col_ind, col_ind+1]
-
+        panel = mpl_panel.Panel(label=label, **kwargs)
         ax = self.figure.add_subplot(self.gs[row_ind[0]:row_ind[1], col_ind[0]:col_ind[1]], **kwargs)
-        panel = mpl_panel.Panel(label=label)
         panel.axes['major'] = ax
 
         if index is None:

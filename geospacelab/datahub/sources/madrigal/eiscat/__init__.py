@@ -2,7 +2,7 @@ import datetime
 
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, SiteModel
-import geospacelab.config.preferences as prf
+from geospacelab.config import preferences as prf
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_loader as default_loader
 import geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_downloader as downloader
@@ -77,8 +77,8 @@ class Dataset(datahub.DatasetModel):
         label = super().label()
         return label
 
-    def load_data(self):
-        self.check_data_files()
+    def load_data(self, **kwargs):
+        self.check_data_files(**kwargs)
 
         if self.load_func is None:
             self.load_func = default_loader.select_loader(self.data_file_type)
@@ -94,7 +94,7 @@ class Dataset(datahub.DatasetModel):
             self.experiment = rawdata_path.split('/')[-1].split('@')[0]
             self.affiliation = load_obj.metadata['affiliation']
 
-    def search_data_files(self):
+    def search_data_files(self, **kwargs):
         dt_fr = self.dt_fr
         dt_to = self.dt_to
         diff_days = dttool.get_diff_days(dt_fr, dt_to)

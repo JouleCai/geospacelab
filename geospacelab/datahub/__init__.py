@@ -11,7 +11,7 @@ import geospacelab.toolbox.utilities.pylogging as mylog
 from geospacelab.datahub.__init_metadata import *
 from geospacelab.datahub.__init_dataset import DatasetModel
 from geospacelab.datahub.__init_variable import VariableModel
-import geospacelab.config.preferences as pfr
+from geospacelab.config import preferences as pfr
 
 
 def example():

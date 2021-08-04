@@ -2,7 +2,7 @@ import numpy as np
 import pathlib
 
 from geospacelab.datahub.__init_variable import VariableModel
-import geospacelab.config.preferences as pref
+from geospacelab.config import preferences as pref
 
 import geospacelab.toolbox.utilities.pyclass as pyclass
 import geospacelab.toolbox.utilities.pybasic as pybasic
@@ -65,7 +65,7 @@ class DatasetModel(object):
 
         root = tk.Tk()
         root.withdraw()
-
+        self.data_file_num = kwargs.pop('data_file_num', self.data_file_num)
         if self.data_file_num == 0:
             self.data_file_num = simpledialog.askinteger('Input dialog', 'Input the number of files:', initialvalue=1)
 
@@ -75,15 +75,16 @@ class DatasetModel(object):
                 title=title,
                 initialdir=initial_file_dir
             )
-            self.data_file_path_list.append(pathlib.Path(file_name))
+            self.data_file_paths.append(pathlib.Path(file_name))
 
-    def check_data_files(self):
+    def check_data_files(self, **kwargs):
+        self.load_mode = kwargs.pop('load_mode', self.load_mode)
         if self.load_mode == 'AUTO':
-            self.search_data_files()
+            self.search_data_files(**kwargs)
         elif self.load_mode == 'dialog':
-            self.open_dialog()
+            self.open_dialog(**kwargs)
         elif self.load_mode == 'assigned':
-            if not list(self.data_file_path_list):
+            if not list(self.data_file_paths):
                 raise ValueError
         else:
             raise AttributeError
@@ -172,6 +173,14 @@ class DatasetModel(object):
     def _set_default_variables(self, default_variable_names):
         for var_name in default_variable_names:
             self[var_name] = None
+
+    @property
+    def data_root_dir(self):
+        return self._data_root_dir
+
+    @data_root_dir.setter
+    def data_root_dir(self, path):
+        self._data_root_dir = pathlib.Path(path)
 
 
 
