@@ -31,14 +31,14 @@ plt.rcParams['axes.titlesize'] = 12
 plt.rcParams['xtick.labelsize'] = 10
 plt.rcParams['ytick.labelsize'] = 10
 plt.rcParams['legend.fontsize'] = 12
-plt.rcParams['figure.titlesize'] = 14
+plt.rcParams['figure.titlesize'] = 16
 
 default_gs_config = {
     'left': 0.15,
     'right': 0.8,
     'bottom': 0.15,
     'top': 0.88,
-    'hspace': 0.5,
+    'hspace': 0.1,
     'wspace': 0.0
 }
 
@@ -52,7 +52,7 @@ default_plt_style_label = 'seaborn-darkgrid'
 
 def test():
     pfr.datahub_data_root_dir = pathlib.Path('/Users/lcai/01-Work/00-Data')
-    # pfr.datahub_data_root_dir = '/data/afys-ionosphere/data'
+    pfr.datahub_data_root_dir = '/data/afys-ionosphere/data'
 
     dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
     dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
@@ -79,7 +79,7 @@ def test():
     ts.list_datasets()
 
     layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
-    ts.set_layout(layout=layout)
+    ts.set_layout(layout=layout, gs_row_heights=[5, 5 , 5 , 5 , 3])
     # plt.style.use('dark_background')
     #dt_fr_1 = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
     #dt_to_1 = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
@@ -115,9 +115,12 @@ class TS(DataHub, dashboard.Dashboard):
 
         self._xlim = [self.dt_fr, self.dt_to]
 
-    def set_layout(self, layout=None, plot_types=None, gs_row_heights=1, gs_config=None):
+    def set_layout(self, layout=None, plot_types=None, gs_row_heights=None, gs_config=None):
+        if gs_row_heights is None:
+            gs_row_heights = 1
         if gs_config is None:
-            gs_config = default_gs_config
+            gs_config = {}
+        basic.dict_set_default(gs_config, **default_gs_config)
 
         num_cols = 1
         num_rows = len(layout)
@@ -127,13 +130,15 @@ class TS(DataHub, dashboard.Dashboard):
         elif len(plot_types) != num_rows:
             raise ValueError
 
-        if type(gs_row_heights) == int:
-            gs_row_heights = [gs_row_heights] * num_rows
-        else:
-            raise TypeError
-        if len(gs_row_heights) != num_rows:
+        if type(gs_row_heights) is not list:
+            if type(gs_row_heights) == int:
+                gs_row_heights = [gs_row_heights] * num_rows
+            else:
+                raise TypeError
+        elif len(gs_row_heights) != num_rows:
             raise ValueError
 
+        gs_config['hspace'] = gs_config['hspace'] * gs_row_heights[0]
         gs_num_rows = sum(gs_row_heights)
         gs_num_cols = 1
         self.set_gridspec(num_rows=gs_num_rows, num_cols=gs_num_cols, **gs_config)
@@ -247,7 +252,7 @@ class TS(DataHub, dashboard.Dashboard):
         # set y labels and alignment two methods: fig.align_ylabels(axs[:, 1]) or yaxis.set_label_coords
         ylabel = var_for_config.get_visual_attr('y_label')
         yunit = var_for_config.get_visual_attr('y_unit')
-        if yunit is None:
+        if not str(yunit):
             ylabel = ylabel
         else:
             ylabel = ylabel + "\n" + '(' + yunit + ')'
@@ -582,7 +587,7 @@ class TS(DataHub, dashboard.Dashboard):
 
         z_label = var.get_visual_attr('z_label')
         z_unit = var.get_visual_attr('z_unit')
-        if z_unit is not None:
+        if str(z_unit):
             c_label = z_label + '\n' + '(' + z_unit + ')'
         else:
             c_label = z_label

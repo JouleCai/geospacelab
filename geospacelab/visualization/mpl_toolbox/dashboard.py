@@ -122,8 +122,10 @@ class Dashboard(object):
         kwargs.setdefault('ha', 'left')     # horizontal alignment
         kwargs.setdefault('va', 'center') # vertical alignment
 
+        pos_0 = self.panels[1].axes['major'].get_position()  # adjust y in case of different gs_row_heights
         for ind, p_index in enumerate(panel_indices):
             panel = self.panels[p_index]
+            pos_1 = panel.axes['major'].get_position()
             if panel.label is None:
                 label = "({})".format(label_list[ind])
             else:
@@ -132,7 +134,8 @@ class Dashboard(object):
             kwargs.setdefault('fontweight', 'book')
             bbox_config = {'facecolor': 'yellow', 'alpha': 0.3, 'edgecolor': 'none'}
             kwargs.setdefault('bbox', bbox_config)
-            panel.add_label(x, y, label, **kwargs)
+            y_new = 1 - pos_0.height/pos_1.height + y * pos_0.height / pos_1.height
+            panel.add_label(x, y_new, label, **kwargs)
 
     def add_axes(self, rect, label=None, **kwargs):
         if label is None:

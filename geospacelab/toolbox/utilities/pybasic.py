@@ -1,3 +1,8 @@
+import numpy as np
+
+
+def isnumeric(v):
+    return np.issubdtype(type(v), (np.floating, np.integer))
 
 
 def input_with_default(prompt, default=''):

@@ -1,3 +1,4 @@
+from geospacelab.datahub import VariableModel as Var
 
 database = 'Madrigal'
 
@@ -11,6 +12,9 @@ coords = {
     'APEX': ['APEX_LAT', 'APEX_LON', 'APEX_ALT', 'APEX_MLT']
 }
 
+depend_0 = {'UT': 'DATETIME', 'TIME_1': 'DATETIME_1', 'TIME_2': 'DATETIME_2'}
+depend_1 = {'height': 'height', 'range': 'range', 'GEO_LAT': 'GEO_LAT', 'GEO_LON': 'GEO_LON'}
+
 default_colormap = "gist_ncar"
 
 plot_config = {
@@ -20,186 +24,175 @@ plot_config = {
     'markersize':       3,
 }
 
-visual_config_1 = {
-    'plot_type':     '1',
-    'x_data':        None,
-    'x_data_res':     None,  # in seconds
-    'x_label':       None,
-    'y_data':        None,
-    'y_label':       ('label', ),
-    'y_unit':        ('unit_label', ),
-    'y_lim':         None,
-    'y_scale':       'linear',
-    'plot_config':  dict(plot_config)
-}
+vars = {}
+visual = 'on'
 
-visual_config_2 = {
-    'plot_type':     '2',
-    'x_data':        None,
-    'x_data_res':     None,  # in seconds
-    'x_label':       None,
-    'y_data':        ('height', ),
-    'z_label':       tuple(['label']),
-    'z_unit':        tuple(['unit_label']),
-    'z_lim':         [1e8, 1e13],
-    'z_scale':       'log',
-    'color':        default_colormap,
-    'plot_config':  dict(plot_config)
-}
-
-depend_0 = {'UT': 'DATETIME', 'TIME_1': 'DATETIME_1', 'TIME_2': 'DATETIME_2'}
-depend_1 = {'height': 'height', 'range': 'range', 'GEO_LAT': 'GEO_LAT', 'GEO_LON': 'GEO_LON'}
-
-##################################################################################
-items = {}
-##################################################################################
+########################################################################################################################
 var_name = 'n_e'
-visual_in = dict(visual_config_2)
-visual_in['z_label'] = 'Electron density'
-visual_in['z_lim'] = [8e9, 9e11]
-visual_in['y_label'] = 'h'
-visual_in['y_unit'] = 'km'
-visual_in['y_lim'] = [90, 350]
-items[var_name] = {
-    'name':     var_name,
-    'fullname':     'electron density',
-    'label':        r'$n_e$',
-    'unit':         'm-3',
-    'unit_label':   r'm$^{-3}$',
-    'group':        '',
-    'error':        var_name + '_err',
-    'dim':          2,
-    'depends':      {0: depend_0, 1: depend_1},
-    'timestamps':   timestamps,
-    'positions':    coords,
-    'visual':       visual_in
-}
+var = Var(ndim=2, variable_type='scalar', visual=visual)
+#set variable attrs
+var.name = var_name
+var.fullname = 'electron density'
+var.label = r'$n_e$'
+var.unit = 'm-3'
+var.unit_label = r'm$^{-3}$'
+var.error = var_name + '_err'
+var.depends = {0: depend_0, 1: depend_1}
+# set plot attrs
+plot = var.visual.plot
+plot.style = '2P'
+plot.color = default_colormap
+# set data attrs
+data = var.visual.data
+data[1].data = "@d.height.value"
+data[2].data = "@v.value"
+# set axis attrs
+axis = var.visual.axis
+axis[1].lim = [90, 350]
+axis[1].label = 'h'
+axis[1].unit = 'km'
+axis[2].lim = [8e9, 9e11]
+axis[2].scale = 'log'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
 
-##################################################################################
-var_name = 'T_e'
-visual_in = dict(visual_config_2)
-visual_in['z_label'] = 'Electron temperature'
-visual_in['z_lim'] = [100, 3000]
-visual_in['z_scale'] = 'linear'
-visual_in['y_label'] = 'h'
-visual_in['y_unit'] = 'km'
-visual_in['y_lim'] = [90, 350]
-items[var_name] = {
-    'name':     var_name,
-    'fullname':     'electron temperature',
-    'label':        r'$T_e$',
-    'unit':         'K',
-    'unit_label':   None,
-    'group':        '',
-    'error':        var_name + '_err',
-    'dim':          2,
-    'depends':      {0: depend_0, 1: depend_1},
-    'timestamps':   timestamps,
-    'positions':    coords,
-    'visual':       visual_in
-}
+vars[var_name] = var
 
-##################################################################################
+########################################################################################################################
 var_name = 'T_i'
-visual_in = dict(visual_config_2)
-visual_in['z_label'] = 'Ion density'
-visual_in['z_lim'] = [100, 2500]
-visual_in['z_scale'] = 'linear'
-visual_in['y_label'] = 'h'
-visual_in['y_unit'] = 'km'
-visual_in['y_lim'] = [90, 350]
-items[var_name] = {
-    'name':     var_name,
-    'fullname':     'ion temperature',
-    'label':        r'$T_i$',
-    'unit':         'K',
-    'unit_label':   None,
-    'group':        '',
-    'error':        var_name + '_err',
-    'dim':          2,
-    'depends':      {0: depend_0, 1: depend_1},
-    'timestamps':   timestamps,
-    'positions':    coords,
-    'visual':       visual_in
-}
+var = Var(name=var_name, ndim=2, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'ion temperature'
+var.label = r'$T_i$'
+var.unit = 'K'
+var.error = var_name + '_err'
+var.depends = {0: depend_0, 1: depend_1}
+# set plot attrs
+plot = var.visual.plot
+plot.style = '2P'
+plot.color = default_colormap
+# set data attrs
+data = var.visual.data
+data[1].data = "@d.height.value"
+data[2].data = "@v.value"
+# set axis attrs
+axis = var.visual.axis
+axis[1].lim = [90, 350]
+axis[1].label = 'h'
+axis[1].unit = 'km'
+axis[2].lim = [100, 2500]
+axis[2].scale = 'linear'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
 
-##################################################################################
+vars[var_name] = var
+
+########################################################################################################################
+var_name = 'T_e'
+var = Var(name=var_name, ndim=2, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'electron temperature'
+var.label = r'$T_e$'
+var.unit = 'K'
+var.error = var_name + '_err'
+var.depends = {0: depend_0, 1: depend_1}
+# set plot attrs
+plot = var.visual.plot
+plot.style = '2P'
+plot.color = default_colormap
+# set data attrs
+data = var.visual.data
+data[1].data = "@d.height.value"
+data[2].data = "@v.value"
+# set axis attrs
+axis = var.visual.axis
+axis[1].lim = [90, 350]
+axis[1].label = 'h'
+axis[1].unit = 'km'
+axis[2].lim = [100, 3500]
+axis[2].scale = 'linear'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
+
+vars[var_name] = var
+
+########################################################################################################################
 var_name = 'v_i_los'
-visual_in = dict(visual_config_2)
-visual_in['z_lim'] = [-200, 200]
-visual_in['z_scale'] = 'linear'
-visual_in['y_label'] = 'h'
-visual_in['y_unit'] = 'km'
-visual_in['y_lim'] = [90, 350]
-items[var_name] = {
-    'name':     var_name,
-    'fullname':     'LOS ion velocity',
-    'label':        r'$v_i$',
-    'unit':         'm/s',
-    'unit_label':   r'm$/$s',
-    'group':        '',
-    'error':        var_name + '_err',
-    'dim':          2,
-    'depends':      {0: depend_0, 1: depend_1},
-    'timestamps':   timestamps,
-    'positions':    coords,
-    'visual':       visual_in
-}
+var = Var(name=var_name, ndim=2, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Line-of-sight ion velocity'
+var.label = r'$v_i^{los}$'
+var.unit = 'm/s'
+var.error = var_name + '_err'
+var.depends = {0: depend_0, 1: depend_1}
+# set plot attrs
+plot = var.visual.plot
+plot.style = '2P'
+plot.color = default_colormap
+# set data attrs
+data = var.visual.data
+data[1].data = "@d.height.value"
+data[2].data = "@v.value"
+# set axis attrs
+axis = var.visual.axis
+axis[1].lim = [90, 350]
+axis[1].label = 'h'
+axis[1].unit = 'km'
+axis[2].lim = [100, 3500]
+axis[2].scale = 'linear'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
 
-##################################################################################
+vars[var_name] = var
+
+########################################################################################################################
 var_name = 'az'
-visual_in = dict(visual_config_1)
-visual_in['z_label'] = 'az'
-visual_in['y_label'] = ('group', )
-visual_in['z_lim'] = None
-visual_in['y_lim'] = [0, 360]
-visual_in['plot_type'] = '1noE'
-visual_in['plot_config'] = {
-    'linestyle':        '',
-    'linewidth':        1.5,
-    'marker':           '.',
-    'markersize':       3,
-}
-items[var_name] = {
-    'name':     var_name,
-    'fullname':     'Azimuth',
-    'label':        r'az',
-    'unit':         None,
-    'unit_label':   None,
-    'group':        'radar parameters',
-    'error':        None,
-    'dim':          1,
-    'depends':      {0: depend_0},
-    'timestamps':   timestamps,
-    'positions':    coords,
-    'visual':       visual_in
-}
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'azimuthal angle'
+var.label = 'az'
+var.error = var_name + '_err'
+var.depends = {0: depend_0, 1: depend_1}
+# set plot attrs
+plot = var.visual.plot
+plot.style = '1noE'
+# set data attrs
+data = var.visual.data
+data[1].data = "@v.value"
+# set axis attrs
+axis = var.visual.axis
+axis[1].lim = [0, 360]
+axis[1].label = '@v.group'
+axis[1].unit = ''
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
 
-##################################################################################
+vars[var_name] = var
+
+########################################################################################################################
 var_name = 'el'
-visual_in = dict(visual_config_1)
-visual_in['z_label'] = 'el'
-visual_in['z_lim'] = None
-visual_in['plot_type'] = '1noE'
-visual_in['plot_config'] = {
-    'linestyle':        '',
-    'linewidth':        1.5,
-    'marker':           '.',
-    'markersize':       3,
-}
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'elevation angle'
+var.label = 'el'
+var.error = var_name + '_err'
+var.depends = {0: depend_0, 1: depend_1}
+# set plot attrs
+plot = var.visual.plot
+plot.style = '1noE'
+# set data attrs
+data = var.visual.data
+data[1].data = "@v.value"
+# set axis attrs
+axis = var.visual.axis
+axis[1].lim = [0, 180]
+axis[1].label = '@v.group'
+axis[1].unit = ''
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
 
-items[var_name] = {
-    'name':     var_name,
-    'fullname':     'Elevation',
-    'label':        r'el',
-    'unit':         None,
-    'unit_label':   None,
-    'group':        'radar parameters',
-    'error':        None,
-    'dim':          1,
-    'depends':      {0: depend_0},
-    'timestamps':   timestamps,
-    'positions':    coords,
-    'visual':       visual_in
-}
+vars[var_name] = var
+
+########################################################################################################################
+
 

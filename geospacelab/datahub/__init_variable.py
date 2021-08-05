@@ -15,40 +15,61 @@ __docformat__ = "reStructureText"
 
 import copy
 import weakref
+import re
 
 import numpy as np
 import geospacelab.toolbox.utilities.pyclass as pyclass
 import geospacelab.toolbox.utilities.pylogging as mylog
+import geospacelab.toolbox.utilities.pybasic as basic
 
 
 class VariableModel(object):
 
     def __init__(self, **kwargs):
-        self.name = kwargs.pop('name', '')
-        self.fullname = kwargs.pop('fullname', '')
+        # set default values
+        self._name = ''
+        self._fullname = ''
+        self._label = ''
+        self._data_type = None
+        self._group = ''
+        self._unit = ''
+        self._unit_label = ''
+        self._quantity = None
 
-        self.label = kwargs.pop('label', '')
+        self._value = None
+        self._error = None
+        self._variable_type = None
 
-        self.category = kwargs.pop('category', '')  # 'support_data', 'data', 'metadata'
-        self.group = kwargs.pop('group', '')
+        self._ndim = None
+        self._depends = {}
 
-        self.unit = kwargs.pop('unit', '')
-        self.unit_label = kwargs.pop('unit_label', '')
+        self._dataset_proxy = None
 
-        self.quantity = kwargs.pop('quantity', None)
+        self._visual = None
 
-        self.value = kwargs.pop('value', None)
-        self.error = kwargs.pop('error', None)
+        self.name = kwargs.pop('name', self._name)
+        self.fullname = kwargs.pop('fullname', self._fullname)
 
-        self.variable_type = kwargs.pop('variable_type', None)    # scalar, vector, tensor, ...
-        self.ndim = kwargs.pop('ndim', None)
-        self.depends = kwargs.pop('depends', {})
+        self.label = kwargs.pop('label', self._label)
+
+        self.data_type = kwargs.pop('data_type', self._data_type)  # 'support_data', 'data', 'metadata'
+        self.group = kwargs.pop('group', self._group)
+
+        self.unit = kwargs.pop('unit', self._unit)
+        self.unit_label = kwargs.pop('unit_label', self._unit_label)
+
+        self.quantity = kwargs.pop('quantity', self._quantity)
+
+        self.value = kwargs.pop('value', self._value)
+        self.error = kwargs.pop('error', self._error)
+
+        self.variable_type = kwargs.pop('variable_type', self._variable_type)    # scalar, vector, tensor, ...
+        self.ndim = kwargs.pop('ndim', self._ndim)
+        self.depends = kwargs.pop('depends', self._depends)
 
         self.dataset = kwargs.pop('dataset', None)
 
         self.visual = kwargs.pop('visual', 'off')
-        if isinstance(self.visual, Visual):
-            self.visual.config(**kwargs.pop('visual_config', {}))
 
     def config(self, logging=True, **kwargs):
         pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
@@ -87,21 +108,71 @@ class VariableModel(object):
     #     attr = getattr(self.visual, attr_name)
     #     axis = ord('z') - ord(attr[0])
     #     if attr is None:
+    def get_visual_data_attr(self, axis, attr_name):
+        attr = getattr(self.visual.data[axis], attr_name)
+        if type(attr) is str:
+            if attr[0] == '@':
+                splits = attr[1:].split('.')
+                if splits[0] in ['v']:
+                    result = getattr(self, splits[1])
+                elif splits[0] in ['d']:
+                    result = getattr(self.dataset[splits[1]], splits[2])
+                else:
+                    raise ValueError
+            else:
+                result = attr
+        else:
+            result = attr
+        return result
+
+    def get_visual_axis_attr(self, axis, attr_name):
+        attr = getattr(self.visual.axis[axis], attr_name)
+        if type(attr) is str:
+            if attr[0] == '@':
+                splits = attr[1:].split('.')
+                if splits[0] in ['v']:
+                    result = getattr(self, splits[1])
+                elif splits[0] in ['d']:
+                    result = getattr(self.dataset[splits[1]], splits[2])
+                else:
+                    raise ValueError
+            else:
+                result = attr
+        else:
+            result = attr
+        return result
+
+    def get_visual_plot_attr(self, attr_name):
+        attr = getattr(self.visual.plot, attr_name)
+        return attr
 
     def get_visual_attr(self, attr_name):
-        value = getattr(self.visual, attr_name)
-        if isinstance(value, tuple):
-            try:
-                value = getattr(self, value[0])
-            except AttributeError:
-                value_new = []
-                for elem in value:
-                    value_new.append(self.dataset[elem].value)
-                value = value_new
-        return value
+        attr = getattr(self.visual, attr_name)
+        type_attr = type(attr)
+        if type_attr is not list:
+            attr = [attr]
+
+        results = []
+        for a in attr:
+            if type(a) is str:
+                if a[0] == '@':
+                    splits = a[1:].split('.')
+                    if splits[0] in ['v']:
+                        result = getattr(self, splits[1])
+                    elif splits[0] in ['d']:
+                        result = getattr(self.dataset[splits[1]], splits[2])
+                else:
+                    result = a
+            else:
+                result = a
+            results.append(result)
+
+        if type_attr is not list:
+            results = results[0]
+        return results
 
     def join(self, var_new):
-        if isinstance(var_new, VariableModel):
+        if issubclass(var_new.__class__, VariableModel):
             value = var_new.value
         else:
             value = var_new
@@ -117,15 +188,21 @@ class VariableModel(object):
 
     @visual.setter
     def visual(self, value):
-        if value == 'on':
-            self._visual = Visual()
+        if value == 'new':
+            self._visual = Visual(variable=self)
+        elif value == 'on':
+            if not isinstance(self._visual, Visual):
+                self.visual = 'new'
         elif isinstance(value, Visual):
             self._visual = value
+        elif type(value) is dict:
+            if not isinstance(self._visual, Visual):
+                self.visual = 'new'
+            pyclass.set_object_attributes(self.visual, append=False, logging=True, **value)
         elif value == 'off':
             self._visual = None
-
-        if type(value) is dict:
-            pyclass.set_object_attributes(self.visual, append=False, logging=True, **value)
+        else:
+            raise ValueError
 
     @property
     def dataset(self):
@@ -133,8 +210,14 @@ class VariableModel(object):
 
     @dataset.setter
     def dataset(self, dataset_obj):
-        if dataset_obj is not None:
+        if dataset_obj is None:
+            return
+
+        from geospacelab.datahub.__init_dataset import DatasetModel
+        if issubclass(dataset_obj.__class__, DatasetModel):
             self._dataset_proxy = weakref.proxy(dataset_obj)
+        else:
+            raise TypeError
 
     @property
     def value(self):
@@ -147,6 +230,19 @@ class VariableModel(object):
 
     @value.setter
     def value(self, v):
+        # type check
+        if v is None:
+            return
+        if not isinstance(v, np.ndarray):
+            if basic.isnumeric(v):
+                v = np.array([v])
+            elif isinstance(v, (list, tuple)):
+                v = np.array(v)
+            else:
+                raise TypeError
+        # reshape np.array with shape like (m,) m>1
+        if len(v.shape) == 1 and v.shape != (1,):
+            v = v.reshape((v.shape[0], 1))
         self._value = v
 
     @property
@@ -160,28 +256,50 @@ class VariableModel(object):
 
     @error.setter
     def error(self, v):
+        if v is None:
+            return
+        # type check
+        if type(v) is str:
+            self._error = v
+            return
+        if v is None:
+            return
+        if not isinstance(v, np.ndarray):
+            if basic.isnumeric(v):
+                v = np.array([v])
+            elif isinstance(v, (list, tuple)):
+                v = np.array(v)
+            else:
+                raise TypeError
+        # reshape np.array with shape like (m,) m>1
+        if len(v.shape) == 1 and v.shape != (1,):
+            v = v.reshape((v.shape[0], 1))
         self._error = v
 
     @property
     def unit_label(self):
         label = self._unit_label
-        if label is None:
+        if not str(label):
             label = self.unit
         return label
 
     @unit_label.setter
     def unit_label(self, label):
+        if type(label) is not str:
+            raise TypeError
         self._unit_label = label
 
     @property
     def label(self):
         lb = self._label
-        if lb is None:
+        if not str(lb):
             lb = self.name
         return lb
 
     @label.setter
     def label(self, lb):
+        if type(lb) is not str:
+            raise TypeError
         self._label = lb
 
     @property
@@ -191,41 +309,44 @@ class VariableModel(object):
     @variable_type.setter
     def variable_type(self, value):
         if value is None:
-            self._variable_type = None
-        elif value.lower() not in ['scalar', 'vector', 'matrix']:
-            raise ValueError
-        else:
-            self._variable_type = value.lower()
+            return
+        if value.lower() not in ['scalar', 'vector', 'matrix', 'tensor']:
+            raise AttributeError
+        self._variable_type = value.lower()
 
     @property
     def ndim(self):
         if self._ndim is None:
             var_type = self.variable_type
             if var_type is None:
-                # mylog.StreamLogger.warning('the variable type has not been defined! Use default type "Scalar"...')
+                mylog.StreamLogger.warning('the variable type has not been defined! Use default type "Scalar"...')
                 var_type = "scalar"
             value = self.value
             if value is None:
-                mylog.StreamLogger.warning("return None!")
+                mylog.StreamLogger.warning("Variable's value was not assigned. Return None!")
                 return None
             shape = value.shape
+            offset = 0
             if var_type == 'scalar':
-                offset = 0
-            if var_type == 'vector':
                 offset = -1
-            if var_type == 'matrix':
+            elif var_type == 'vector':
+                offset = -1
+            elif var_type == 'matrix':
                 offset = -2
-            if len(shape) == 2 and shape[1] == 1:
-                nd = 1
+            if shape == (1,):
+                nd = 0
             else:
-                nd = len(shape) - offset
+                nd = len(shape) + offset
             if nd <= 0:
                 raise ValueError("ndim cannot be a non-positive integer")
-        return nd
+            self._ndim = nd
+        return self._ndim
 
     @ndim.setter
     def ndim(self, value):
-        if value is not None and type(value) is not int:
+        if value is None:
+            return
+        if type(value) is not int:
             raise TypeError
         self._ndim = value
 
@@ -235,40 +356,47 @@ class VariableModel(object):
 
     @depends.setter
     def depends(self, d_dict):
-        self._depends = {}
-        if not dict(d_dict):
-            self._depends = {}
-        else:
-            self._depends = {}
-            for key, value in d_dict.items():
-                if type(key) is not int:
-                    raise KeyError
-                if value is None:
-                    self._depends[key] = {}
-                else:
-                    self._depends[key] = value
+        if type(d_dict) is not dict:
+            raise TypeError
+
+        for key, value in d_dict.items():
+            if type(key) is not int:
+                raise KeyError
+            if value is None:
+                self._depends[key] = {}
+            else:
+                self._depends[key] = value
 
 
-class Visual_Data:
+class VisualData(object):
     def __init__(self):
-        self.data = None
-        self.error = None
+        self.data = '@v.value'
+        self.error = '@v.error'
         self.scale = 1.
-        self.res = None     # resolution
+        self.resolution = None
+
+    def config(self, logging=True, **kwargs):
+        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
 
 
-class Axis:
+class VisualAxis(object):
     def __init__(self):
         self.label = None
         self.unit = None
-        self.limit = None
+        self.lim = None
+        self.scale = 'linear'
         self.invert = False
         self.ticks = None
         self.tick_labels = None
+        self.minor_ticks = None
+        self.minor_tick_labels = None
         self.visible = True
 
+    def config(self, logging=True, **kwargs):
+        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
 
-class Plot_Config:
+
+class VisualPlot(object):
     def __init__(self):
         self.color = None
         self.visible = True
@@ -278,67 +406,142 @@ class Plot_Config:
         self.imshow = {}
         self.scatter = {}
         self.mask_gap = True
+        self.style = None
 
-
-# class Visual_new(object):
-#     _data = {}
-#     _axis = {}
-#     _variable_proxy = VariableModel()
-#
-#     def __init__(self, **kwargs):
-#         self.variable = kwargs.pop('variable', None)
-#         self.data = None
-#         self.axis = None
-#         self.plot = None
-#
-#     @property
-#     def variable(self):
-#         return self._variable_proxy
-#
-#     @variable.setter
-#     def variable(self, var_obj):
-#         if var_obj is not None:
-#             self._variable_proxy = weakref.proxy(var_obj)
-#
-#     @property
-#     def data(self):
-#         if not dict(self._data):
-#             try:
-#                 for ind in range(self.variable.ndim + 1):
-#                     self._data[ind] = Visual_Data()
-#             except:
-#                 self._data = {}
-#         return self._data
-#
-#     @data.setter
-#     def data(self, d_dict):
-#         if dict(d_dict):
-#             self._data = d_dict
-#         elif d_dict is not None:
-#             raise TypeError
-#
-#     @property
-#     def axis(self):
-#         if not dict(self._axis):
-#             try:
-#                 for ind in range(self.variable.ndim + 1):
-#                     self._axis[ind] = Visual_Data()
-#             except:
-#                 self._axis = {}
-#         return self._axis
-#
-#     @axis.setter
-#     def axis(self, a_dict):
-#         if dict(a_dict):
-#             self._axis = a_dict
-#         elif a_dict is not None:
-#             raise TypeError
+    def config(self, logging=True, **kwargs):
+        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
 
 
 class Visual(object):
+
+    def __init__(self, **kwargs):
+        self._data = {}
+        self._axis = {}
+        self._variable_proxy = None
+        self._ndim = None
+
+        self.variable = kwargs.pop('variable', None)
+        self.data = kwargs.pop('data', None)
+        self.axis = kwargs.pop('axis', None)
+        self.plot = kwargs.pop('plot', VisualPlot())
+        self.ndim = kwargs.pop('ndim', self._ndim)
+
+    def config(self, logging=True, **kwargs):
+        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
+
+    def add_attr(self, logging=True, **kwargs):
+        pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
+
+    @property
+    def variable(self):
+        return self._variable_proxy
+
+    @variable.setter
+    def variable(self, var_obj):
+        if var_obj is None:
+            return
+        if issubclass(var_obj.__class__, VariableModel):
+            self._variable_proxy = weakref.proxy(var_obj)
+        else:
+            raise TypeError
+
+    @property
+    def ndim(self):
+        _ndim = self._ndim
+        if _ndim is None:
+            if self.variable is not None:
+                _ndim = self.variable.ndim
+        return _ndim
+
+    @ndim.setter
+    def ndim(self, value):
+        self._ndim = value
+
+    @property
+    def data(self):
+        if not dict(self._data):
+            ndim = self.ndim
+            if ndim is None:
+                try:
+                    ndim = self.variable.ndim
+                    if ndim is None:
+                        return None
+                    self.ndim = ndim
+                except AttributeError:
+                    return None
+            for ind in range(ndim + 1):
+                self._data[ind] = VisualAxis()
+        return self._data
+
+    @data.setter
+    def data(self, d):
+        if d is None:
+            return
+        if type(d) is dict:
+            for key, value in d.items():
+                if value is None:
+                    self._data[key] = VisualData()
+                elif type(value) is dict:
+                    self._data[key].config(**value)
+                else:
+                    raise TypeError
+            self.ndim = len(d.keys()) - 1
+        else:
+            raise TypeError
+
+    @property
+    def axis(self):
+        if not dict(self._axis):
+            ndim = self.ndim
+            if ndim is None:
+                try:
+                    ndim = self.variable.ndim
+                    if ndim is None:
+                        return None
+                    self.ndim = ndim
+                except AttributeError:
+                    return None
+            if ndim < 2:
+                ndim = 2
+            for ind in range(ndim + 1):
+                self._axis[ind] = VisualAxis()
+        return self._axis
+
+    @axis.setter
+    def axis(self, a_dict):
+        if a_dict is None:
+            return
+        if type(a_dict) is dict:
+            for key, value in a_dict.items():
+                if value is None:
+                    self._axis[key] = VisualAxis()
+                elif type(value) is dict:
+                    self._axis[key].config(**value)
+                else:
+                    raise TypeError
+        else:
+            raise TypeError
+
+    @property
+    def plot(self):
+        return self._plot
+
+    @plot.setter
+    def plot(self, value):
+        if value is None:
+            self._plot = VisualPlot
+            return
+        if isinstance(value, VisualPlot):
+            self._plot = value
+        elif type(value) is dict:
+            self._plot.config(**value)
+        else:
+            raise TypeError
+
+
+class Visual_1(object):
     def __init__(self, **kwargs):
         self.plot_type = None
-        self.data_0 = None
         self.x_data = None
         self.y_data = None
         self.z_data = None
