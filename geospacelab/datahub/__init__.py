@@ -15,7 +15,7 @@ from geospacelab.config import preferences as pfr
 
 
 def example():
-    # pfr.datahub_data_root_dir = pathlib.Path('~/01-Work/00-Data')
+    pfr.datahub_data_root_dir = pathlib.Path('~/01-Work/00-Data')
     dt_fr = datetime.datetime.strptime('20210309' + '0000', '%Y%m%d%H%M')
     dt_to = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')
     database_name = 'madrigal'
@@ -24,6 +24,7 @@ def example():
     dh = DataHub(dt_fr, dt_to)
     ds_1 = dh.set_dataset(datasource_contents=['madrigal', 'eiscat'],
                           site='UHF', antenna='UHF', modulation='ant', data_file_type='eiscat-hdf5')
+    ds_1.load_data()
     var_1 = dh.assign_variable('n_e')
     var_2 = dh.assign_variable('T_i')
 
@@ -73,14 +74,19 @@ class DataHub(object):
 
         return dataset
 
-    def assign_variable(self, var_name, **kwargs):
+    def assign_variable(self, var_name, add_new=False, **kwargs):
         dataset = kwargs.pop('dataset', None)
         if dataset is None:
             dataset = self.datasets[-1]  # the latest added dataset
         elif not issubclass(dataset.__class__, DatasetModel):
             raise TypeError
 
-        var = dataset.set_variable(var_name)
+        if dataset.exist(var_name):
+            var = dataset[var_name]
+        elif add_new:
+            var = dataset.add_variable(var_name)
+        else:
+            raise ValueError
         var.config(**kwargs)
 
         self.variables.append(var)

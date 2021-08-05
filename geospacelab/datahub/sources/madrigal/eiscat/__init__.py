@@ -4,9 +4,10 @@ import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, SiteModel
 from geospacelab.config import preferences as prf
 import geospacelab.toolbox.utilities.pydatetime as dttool
+import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_loader as default_loader
 import geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_downloader as downloader
-from geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_variable_config import vars
+from geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_variable_config import variables_assigned
 from geospacelab.datahub.sources.madrigal.eiscat.__utilities import *
 
 default_dataset_attrs = {
@@ -53,10 +54,10 @@ class Dataset(datahub.DatasetModel):
         load_data = kwargs.pop('load_data', False)
 
         super().__init__()
-        kwargs = self._set_default_attrs(kwargs, default_dataset_attrs)
+        kwargs = basic.dict_set_default(kwargs, **default_dataset_attrs)
         self.config(**kwargs)
 
-        self._set_default_variables(default_variable_names)
+        self._set_default_variables(default_variable_names, variables_assigned=variables_assigned)
 
         self._validate_attrs()
 
@@ -154,11 +155,6 @@ class Dataset(datahub.DatasetModel):
             download_obj = downloader.Downloader(dt_fr=self.dt_fr, dt_to=self.dt_to,
                                                  sites=[self.site], kind_data='eiscat')
         return download_obj.done
-
-    def set_variable(self, var_name, **kwargs):
-        var_config_items = kwargs.pop('var_config_items', default_var_configs)
-        var = super().set_variable(var_name=var_name, var_config_items=var_config_items)
-        return var
 
     @property
     def database(self):

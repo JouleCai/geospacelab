@@ -52,7 +52,7 @@ default_plt_style_label = 'seaborn-darkgrid'
 
 def test():
     pfr.datahub_data_root_dir = pathlib.Path('/Users/lcai/01-Work/00-Data')
-    pfr.datahub_data_root_dir = '/data/afys-ionosphere/data'
+    # pfr.datahub_data_root_dir = '/data/afys-ionosphere/data'
 
     dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
     dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
@@ -105,7 +105,7 @@ class TS(DataHub, dashboard.Dashboard):
 
     def __init__(self, **kwargs):
         self.layout = []
-        self.plot_types = None
+        self.plot_styles = None
         new_figure = kwargs.pop('new_figure', True)
         figure_config = kwargs.pop('figure_config', default_figure_config)
         self.time_gap = kwargs.pop('time_gap', True)
@@ -115,7 +115,7 @@ class TS(DataHub, dashboard.Dashboard):
 
         self._xlim = [self.dt_fr, self.dt_to]
 
-    def set_layout(self, layout=None, plot_types=None, gs_row_heights=None, gs_config=None):
+    def set_layout(self, layout=None, plot_styles=None, gs_row_heights=None, gs_config=None):
         if gs_row_heights is None:
             gs_row_heights = 1
         if gs_config is None:
@@ -125,9 +125,9 @@ class TS(DataHub, dashboard.Dashboard):
         num_cols = 1
         num_rows = len(layout)
         self.layout = layout
-        if type(plot_types) is not list:
-            self.plot_types = [None] * num_rows
-        elif len(plot_types) != num_rows:
+        if type(plot_styles) is not list:
+            self.plot_styles = [None] * num_rows
+        elif len(plot_styles) != num_rows:
             raise ValueError
 
         if type(gs_row_heights) is not list:
@@ -159,11 +159,15 @@ class TS(DataHub, dashboard.Dashboard):
         bottom = False
         for ind, panel in enumerate(self.panels.values()):
             plot_layout = self.layout[ind]
-            plot_type = self.plot_types[ind]
-            self._set_panel(panel, plot_type, plot_layout)
+            plot_style = self.plot_styles[ind]
+            plot_layout_flatten = basic.list_flatten(plot_layout)
+            var = plot_layout_flatten[0]
+            if plot_style is None:
+                plot_style = var.visual.plot_config.style
+            self._set_panel(panel, plot_style, plot_layout, var_for_config=var)
             if ind == len(self.panels.keys())-1:
                 bottom = True
-            self._set_xaxis(panel.axes['major'], plot_layout, bottom=bottom)
+            self._set_xaxis(panel.axes['major'], var_for_config=var, bottom=bottom)
 
     def _validate_plot_layout(self, layout_in):
         from geospacelab.datahub import VariableModel
@@ -185,45 +189,118 @@ class TS(DataHub, dashboard.Dashboard):
                 raise TypeError
         return layout_out
 
-    def _set_panel(self, panel, plot_type, plot_layout):
+    def _set_panel(self, panel, plot_style, plot_layout, var_for_config=None):
         plot_layout = self._validate_plot_layout(plot_layout)
-
-        if plot_type is None:
-            plot_layout_flatten = basic.list_flatten(plot_layout)
-            var = plot_layout_flatten[0]
-            plot_type = var.visual.plot_type
 
         ax = panel.axes['major']
 
-        if plot_type in ['1', '1E']:
+        if plot_style in ['1', '1E']:
             valid = self._plot_lines(ax, plot_layout, errorbar='on')
-            self._set_yaxis(ax, plot_layout)
+            self._set_yaxis(ax, var_for_config=var_for_config)
             ax.grid(True, which='major', linewidth=0.5, alpha=0.5)
             ax.grid(True, which='minor', linewidth=0.1, alpha=0.5)
-        elif plot_type == '1noE':
+        elif plot_style == '1noE':
             valid = self._plot_lines(ax, plot_layout, errorbar='off')
-            self._set_yaxis(ax, plot_layout)
+            self._set_yaxis(ax, var_for_config=var_for_config)
             ax.grid(True, which='major', linewidth=0.5, alpha=0.5)
             ax.grid(True, which='minor', linewidth=0.1, alpha=0.5)
-        elif plot_type == '1S':
+        elif plot_style == '1S':
             valid = self._scatter(ax, plot_layout)
-            self._set_yaxis(ax, plot_layout)
-        elif plot_type in ['2', '2P']:
+            self._set_yaxis(ax, var_for_config=var_for_config)
+        elif plot_style in ['2', '2P']:
             valid = self._pcolormesh(ax, plot_layout)
             ax.grid(True, which='major', linewidth=0.5, alpha=0.5)
-            self._set_yaxis(ax, plot_layout)
-        elif plot_type == '2V':
+            self._set_yaxis(ax, var_for_config=var_for_config)
+        elif plot_style == '2V':
             valid = self._vector(ax, plot_layout)
-        elif plot_type == '1Ly+':
-            valid = self._plot_lines_with_additional_y_axis(ax, plot_layout)
-        elif plot_type == '1Lyy':
-            valid = self._plot_lines_yy(ax, plot_layout)
+        elif plot_style == 'y+':
+            valid = self._plot_additional_y_axis(ax, plot_layout)
 
-    def _set_ylim(self, ax, plot_layout, zero_line='on'):
-        plot_layout_flatten = basic.list_flatten(plot_layout)
-        var_for_config = plot_layout_flatten[0]
+    def _prepare_data_1d(self, var):
+        x_data = var.get_visual_axis_attr(axis=0, attr_name='data')
+        if type(x_data) == list:
+            x_data = x_data[0]
+        if x_data is None:
+            depend_0 = var.get_depend(axis=0)
+            x_data = depend_0['UT']  # numpy array, type=datetime
 
-        ylim = var_for_config.visual.y_lim
+        y_data = var.get_visual_axis_attr(axis=1, attr_name='data')
+        if y_data is None:
+            y_data = var.value
+
+        y_err_data = var.get_visual_axis_attr(axis=1, attr_name='data_err')
+        if y_err_data is None:
+            y_err_data = var.error
+
+        x_data_res = var.visual.axis[0].data_res
+        x = x_data
+        y = y_data * var.visual.axis[1].data_scale
+        if y_err_data is None:
+            y_err = numpy.empty_like(y)
+            y_err[:] = 0
+        else:
+            y_err = y_err_data * var.visual.axis[1].data_scale
+
+        # resample time if needed
+        x_data = x
+        y_data = y
+        y_err_data = y_err
+        time_gap = var.visual.axis[0].mask_gap
+        if time_gap is None:
+            time_gap = self.time_gap
+        if time_gap:
+            x, y = arraytool.data_resample(
+                x_data, y_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
+
+            x, y_err = arraytool.data_resample(
+                x_data, y_err_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
+        data = {'x': x, 'y': y, 'y_err': y_err}
+        return data
+
+    def _prepare_data_2d(self, var):
+        x_data = var.get_visual_axis_attr(axis=0, attr_name='data')
+        if type(x_data) == list:
+            x_data = x_data[0]
+        if x_data is None:
+            depend_0 = var.get_depend(axis=0)
+            x_data = depend_0['UT']  # numpy array, type=datetime
+
+        y_data = var.get_visual_axis_attr(axis=1, attr_name='data')
+        if type(y_data) == list:
+            y_data = y_data[0]
+        if y_data is None:
+            y_data = var.get_depend(axis=1, retrieve_data=True)
+            y_data_keys = list(y_data.keys())
+            y_data = y_data[y_data_keys[0]]
+        y_data = y_data * var.visual.axis[1].data_scale
+
+        z_data = var.get_visual_axis_attr(axis=2, attr_name='data')
+        if type(z_data) == list:
+            z_data = z_data[0]
+        if z_data is None:
+            z_data = var.value
+        if (x_data is None) or (z_data is None):
+            raise ValueError
+
+        z_data = z_data * var.visual.axis[2].data_scale
+        x_data_res = var.visual.axis[0].data_res
+        time_gap = var.visual.axis[0].mask_gap
+        if time_gap is None:
+            time_gap = self.time_gap
+        if time_gap:
+            x, y, z = arraytool.data_resample_2d(
+                x=x_data, y=y_data, z=z_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
+        else:
+            x = x_data
+            y = y_data
+            z = z_data
+
+        data = {'x': x, 'y': y, 'z': z}
+        return data
+
+    def _set_ylim(self, ax, var_for_config=None, zero_line='on'):
+
+        ylim = var_for_config.visual.axis[1].lim
 
         ylim_current = ax.get_ylim()
         if ylim is None:
@@ -242,41 +319,53 @@ class TS(DataHub, dashboard.Dashboard):
         ax.set_ylim(ylim)
         return
 
-    def _set_yaxis(self, ax, plot_layout):
+    @staticmethod
+    def generate_label(label, unit='', style='double'):
+        label = label
+        if str(unit):
+            if style == 'single':
+                label = label + " " + '(' + unit + ')'
+            elif style == 'double':
+                label = label + "\n" + '(' + unit + ')'
+            else:
+                raise NotImplementedError
+        return label
+
+    def _set_yaxis(self, ax, var_for_config=None):
         ax.tick_params(axis='y', which='major', labelsize=11)
+        # Set y axis lim
+        self._set_ylim(ax, var_for_config=var_for_config)
 
-        plot_layout_flatten = basic.list_flatten(plot_layout)
-        var_for_config = plot_layout_flatten[0]
-
-        self._set_ylim(ax, plot_layout)
         # set y labels and alignment two methods: fig.align_ylabels(axs[:, 1]) or yaxis.set_label_coords
-        ylabel = var_for_config.get_visual_attr('y_label')
-        yunit = var_for_config.get_visual_attr('y_unit')
-        if not str(yunit):
-            ylabel = ylabel
-        else:
-            ylabel = ylabel + "\n" + '(' + yunit + ')'
-        pos_label = [-0.1, 0.5]
-        ax.set_ylabel(ylabel, va='bottom', fontsize=14)
-        ax.yaxis.set_label_coords(pos_label[0], pos_label[1])
+        ylabel = var_for_config.get_visual_axis_attr('label', axis=1)
+        yunit = var_for_config.get_visual_axis_attr('unit', axis=1)
+        ylabel_style = var_for_config.get_visual_axis_attr('label_style', axis=1)
+
+        ylabel = self.generate_label(ylabel, unit=yunit, style=ylabel_style)
+        label_pos = var_for_config.visual.axis[1].label_pos
+        if label_pos is None:
+            label_pos = [-0.1, 0.5]
+        ax.set_ylabel(ylabel, va='bottom', fontsize=plt.rcParams['axes.labelsize'])
+        ax.yaxis.set_label_coords(label_pos[0], label_pos[1])
         ylim = ax.get_ylim()
-        # set yscale
-        yscale = var_for_config.visual.y_scale
-        if yscale is None:
-            yscale = 'linear'
+
+        # set yaxis scale
+        yscale = var_for_config.visual.axis[1].scale
         ax.set_yscale(yscale)
+
         # set yticks and yticklabels, usually do not change the matplotlib default
-        yticks = var_for_config.visual.y_ticks
-        yticklabels = var_for_config.visual.y_tick_labels
+        yticks = var_for_config.visual.axis[1].ticks
+        yticklabels = var_for_config.visual.axis[1].tick_labels
         if yticks is not None:
             ax.set_yticks(yticks)
             if yticklabels is not None:
                 ax.set_yticklabels(yticklabels)
         if yscale == 'linear':
-            ax.yaxis.set_major_locator(mpl.ticker.MaxNLocator(8))
-            ax.yaxis.set_minor_locator(mpl.ticker.MaxNLocator(40))
+            major_max = var_for_config.visual.axis[1].major_tick_max
+            minor_max = var_for_config.visual.axis[1].minor_tick_max
+            ax.yaxis.set_major_locator(mpl.ticker.MaxNLocator(major_max))
+            ax.yaxis.set_minor_locator(mpl.ticker.MaxNLocator(minor_max))
         if yscale == 'log':
-
             locmin = mpl.ticker.LogLocator(base=10.0,
                                            subs=(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
                                            numticks=12
@@ -285,9 +374,7 @@ class TS(DataHub, dashboard.Dashboard):
             ax.xaxis.set_minor_formatter(mpl.ticker.NullFormatter())
         ax.set_ylim(ylim)
 
-    def _set_xaxis(self, ax, plot_layout, bottom=False):
-        plot_layout_flatten = basic.list_flatten(plot_layout)
-        var_for_config = plot_layout_flatten[0]
+    def _set_xaxis(self, ax, var_for_config, bottom=False):
         ax.set_xlim(self._xlim)
         # reverse the x axis
         # ax.set_xlim(self.dt_range[1], self.dt_range[0])
@@ -337,7 +424,7 @@ class TS(DataHub, dashboard.Dashboard):
             if label in x_depend.keys():
                 y0 = x_depend[label].flatten()
             elif label in var_for_config.dataset.keys():
-                    y0 = var_for_config.dataset[label]
+                    y0 = var_for_config.dataset[label].value
             else:
                 raise KeyError
             if label == 'MLT':
@@ -422,59 +509,25 @@ class TS(DataHub, dashboard.Dashboard):
 
         hls = []
 
-        yy = numpy.empty((0, 1)) # for setting ylim
+        yy = numpy.empty((0, 1))    # for setting ylim
         for ind, var in enumerate(plot_layout):
-            x_data = var.get_visual_attr('x_data')
-            if type(x_data) == list:
-                x_data = x_data[0]
-            if x_data is None:
-                depend_0 = var.get_depend(axis=0)
-                x_data = depend_0['UT']   # numpy array, type=datetime
+            data = self._prepare_data_1d(var)
+            x = data['x']
+            y = data['y']
+            y_err = data['y_err']
 
-            y_data = var.visual.y_data
-            if y_data is None:
-                y_data = var.value
-
-            y_err_data = var.visual.y_err_data
-            if y_err_data is None:
-                y_err_data = var.error
-
-            x_data_res = var.visual.x_data_res
-            x = x_data
-            y = y_data * var.visual.y_data_scale
-            if y_err_data is None:
-                y_err = numpy.empty_like(y)
-                y_err[:] = 0
-            else:
-                y_err = y_err_data * var.visual.y_data_scale
-
-            y_err = y_err * var.visual.y_data_scale
             yy = numpy.vstack((yy, y - y_err))
             yy = numpy.vstack((yy, y + y_err))
-
-            # resample time if needed
-            x_data = x
-            y_data = y
-            y_err_data = y_err
-            if self.time_gap:
-                x, y = arraytool.data_resample(
-                    x_data, y_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
-
-                x, y_err = arraytool.data_resample(
-                    x_data, y_err_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
-
             # set default
-            plot_config = var.visual.plot_config
-            legend_config = var.visual.legend_config
+            plot_config = var.visual.plot_config.line
+            legend_config = var.visual.plot_config.legend
             # get color
             plot_config = basic.dict_set_default(plot_config, **default_plot_config)
             legend_config = basic.dict_set_default(legend_config, **default_legend_config)
-            label = var.get_visual_attr('z_label')
+            label = var.get_visual_axis_attr(axis=2, attr_name='label')
             plot_config.update({'label': label})
-            plot_config.update({'visible': var.visual.visible})
             errorbar_config = dict(plot_config)
-            errorbar_config.update(var.visual.errorbar_config)
-            option = {'plot_config': plot_config, 'errorbar_config': errorbar_config}
+            errorbar_config.update(var.visual.plot_config.errorbar)
 
             if errorbar == 'on':
                 hl = ax.errorbar(x, y, yerr=y_err.flatten(), **errorbar_config)
@@ -508,39 +561,10 @@ class TS(DataHub, dashboard.Dashboard):
     def _pcolormesh(self, ax, plot_layout):
         import geospacelab.visualization.mpl_toolbox.plot2d as plot2d
         var = plot_layout[0]
-        x_data = var.get_visual_attr('x_data')
-        if type(x_data) == list:
-            x_data = x_data[0]
-        if x_data is None:
-            x_data = var.get_depend(axis=0, retrieve_data=True)
-            x_data = x_data['UT']
-        y_data = var.get_visual_attr('y_data')
-        if type(y_data) == list:
-            y_data = y_data[0]
-        if y_data is None:
-            y_data = var.get_depend(axis=1, retrieve_data=True)
-            y_data_keys = list(y_data.keys())
-            y_data = y_data[y_data_keys[0]]
-        z_data = var.visual.z_data
-        if z_data is None:
-            z_data = var.value
-        if (x_data is None) or (z_data is None):
-            raise ValueError
-
-        x_data_res = var.visual.x_data_res
-        if self.time_gap:
-            # x, y = arraytool.data_resample(
-            #     x_data, y_data, xtype='datetime', xres=x_data_res, method='linear', axis=0)
-            # _, z = arraytool.data_resample(
-            #     x_data, z_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
-
-            x, y, z = arraytool.data_resample_2d(
-                x=x_data, y=y_data, z=z_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
-
-        else:
-            x = x_data
-            y = y_data
-            z = z_data
+        data = self._prepare_data_2d(var)
+        x = data['x']
+        y = data['y']
+        z = data['z']
         if x.shape[0] == z.shape[0]:
             delta_x = numpy.diff(x, axis=0)
             x[:-1, :] = x[:-1, :] + delta_x/2
@@ -567,32 +591,32 @@ class TS(DataHub, dashboard.Dashboard):
         if y.shape[0] == z.shape[0]:
             y = numpy.vstack((y, y[-1, :].reshape((1, y.shape[1]))))
 
-        pcolormesh_config = var.visual.pcolormesh_config
-        z_lim = var.visual.z_lim
+        pcolormesh_config = var.visual.plot_config.pcolormesh
+        z_lim = var.visual.axis[2].lim
         if z_lim is None:
-            z_lim = [numpy.nanmin[z_data.flatten()], numpy.nanmax[z_data.flatten()]]
-        z_scale = var.visual.z_scale
+            z_lim = [numpy.nanmin[z.flatten()], numpy.nanmax[z.flatten()]]
+        z_scale = var.visual.axis[2].scale
         if z_scale == 'log':
             norm = mpl.colors.LogNorm(vmin=z_lim[0], vmax=z_lim[1])
             pcolormesh_config.update(norm=norm)
         else:
             pcolormesh_config.update(vmin=z_lim[0])
             pcolormesh_config.update(vmax=z_lim[1])
-        colormap = mycmap.get_colormap(var.visual.color)
+        colormap = mycmap.get_colormap(var.visual.plot_config.color)
         pcolormesh_config.update(cmap=colormap)
 
         im = plot2d.pcolormesh(x=x.T, y=y.T, z=z.T, ax=ax, **pcolormesh_config)
         #ax.objects.setdefault('pcolormesh', [])
         #ax.objects['pcolormesh'].append(im)
 
-        z_label = var.get_visual_attr('z_label')
-        z_unit = var.get_visual_attr('z_unit')
+        z_label = var.get_visual_axis_attr(axis=2, attr_name='label')
+        z_unit = var.get_visual_axis_attr(axis=2, attr_name='unit')
         if str(z_unit):
             c_label = z_label + '\n' + '(' + z_unit + ')'
         else:
             c_label = z_label
-        z_ticks = var.visual.z_ticks
-        z_tick_labels = var.visual.z_tick_labels
+        z_ticks = var.visual.axis[2].ticks
+        z_tick_labels = var.visual.axis[2].tick_labels
         cax = self.__add_colorbar(ax, im, cscale=z_scale, clabel=c_label, cticks=z_ticks, cticklabels=z_tick_labels)
         # ax.subaxes.append(cax)
 

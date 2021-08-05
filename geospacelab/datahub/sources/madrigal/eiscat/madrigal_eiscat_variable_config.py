@@ -24,7 +24,7 @@ plot_config = {
     'markersize':       3,
 }
 
-vars = {}
+variables_assigned = {}
 visual = 'on'
 
 ########################################################################################################################
@@ -39,15 +39,13 @@ var.unit_label = r'm$^{-3}$'
 var.error = var_name + '_err'
 var.depends = {0: depend_0, 1: depend_1}
 # set plot attrs
-plot = var.visual.plot
-plot.style = '2P'
-plot.color = default_colormap
-# set data attrs
-data = var.visual.data
-data[1].data = "@d.height.value"
-data[2].data = "@v.value"
+plot_config = var.visual.plot_config
+plot_config.style = '2P'
+plot_config.color = default_colormap
 # set axis attrs
 axis = var.visual.axis
+axis[1].data = "@d.height.value"
+axis[2].data = "@v.value"
 axis[1].lim = [90, 350]
 axis[1].label = 'h'
 axis[1].unit = 'km'
@@ -56,7 +54,7 @@ axis[2].scale = 'log'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
 
-vars[var_name] = var
+variables_assigned[var_name] = var
 
 ########################################################################################################################
 var_name = 'T_i'
@@ -68,15 +66,13 @@ var.unit = 'K'
 var.error = var_name + '_err'
 var.depends = {0: depend_0, 1: depend_1}
 # set plot attrs
-plot = var.visual.plot
-plot.style = '2P'
-plot.color = default_colormap
-# set data attrs
-data = var.visual.data
-data[1].data = "@d.height.value"
-data[2].data = "@v.value"
+plot_config = var.visual.plot_config
+plot_config.style = '2P'
+plot_config.color = default_colormap
 # set axis attrs
 axis = var.visual.axis
+axis[1].data = "@d.height.value"
+axis[2].data = "@v.value"
 axis[1].lim = [90, 350]
 axis[1].label = 'h'
 axis[1].unit = 'km'
@@ -85,7 +81,7 @@ axis[2].scale = 'linear'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
 
-vars[var_name] = var
+variables_assigned[var_name] = var
 
 ########################################################################################################################
 var_name = 'T_e'
@@ -97,15 +93,13 @@ var.unit = 'K'
 var.error = var_name + '_err'
 var.depends = {0: depend_0, 1: depend_1}
 # set plot attrs
-plot = var.visual.plot
-plot.style = '2P'
-plot.color = default_colormap
-# set data attrs
-data = var.visual.data
-data[1].data = "@d.height.value"
-data[2].data = "@v.value"
+plot_config = var.visual.plot_config
+plot_config.style = '2P'
+plot_config.color = default_colormap
 # set axis attrs
 axis = var.visual.axis
+axis[1].data = "@d.height.value"
+axis[2].data = "@v.value"
 axis[1].lim = [90, 350]
 axis[1].label = 'h'
 axis[1].unit = 'km'
@@ -114,7 +108,7 @@ axis[2].scale = 'linear'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
 
-vars[var_name] = var
+variables_assigned[var_name] = var
 
 ########################################################################################################################
 var_name = 'v_i_los'
@@ -126,24 +120,22 @@ var.unit = 'm/s'
 var.error = var_name + '_err'
 var.depends = {0: depend_0, 1: depend_1}
 # set plot attrs
-plot = var.visual.plot
-plot.style = '2P'
-plot.color = default_colormap
-# set data attrs
-data = var.visual.data
-data[1].data = "@d.height.value"
-data[2].data = "@v.value"
+plot_config = var.visual.plot_config
+plot_config.style = '2P'
+plot_config.color = default_colormap
 # set axis attrs
 axis = var.visual.axis
+axis[1].data = "@d.height.value"
+axis[2].data = "@v.value"
 axis[1].lim = [90, 350]
 axis[1].label = 'h'
 axis[1].unit = 'km'
-axis[2].lim = [100, 3500]
+axis[2].lim = [-200, 200]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
 
-vars[var_name] = var
+variables_assigned[var_name] = var
 
 ########################################################################################################################
 var_name = 'az'
@@ -151,23 +143,20 @@ var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'azimuthal angle'
 var.label = 'az'
-var.error = var_name + '_err'
 var.depends = {0: depend_0, 1: depend_1}
 # set plot attrs
-plot = var.visual.plot
-plot.style = '1noE'
-# set data attrs
-data = var.visual.data
-data[1].data = "@v.value"
+plot_config = var.visual.plot_config
+plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
+axis[1].data = "@v.value"
 axis[1].lim = [0, 360]
 axis[1].label = '@v.group'
 axis[1].unit = ''
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
 
-vars[var_name] = var
+variables_assigned[var_name] = var
 
 ########################################################################################################################
 var_name = 'el'
@@ -175,23 +164,20 @@ var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'elevation angle'
 var.label = 'el'
-var.error = var_name + '_err'
 var.depends = {0: depend_0, 1: depend_1}
 # set plot attrs
-plot = var.visual.plot
-plot.style = '1noE'
-# set data attrs
-data = var.visual.data
-data[1].data = "@v.value"
+plot_config = var.visual.plot_config
+plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
+axis[1].data = "@v.value"
 axis[1].lim = [0, 180]
 axis[1].label = '@v.group'
 axis[1].unit = ''
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
 
-vars[var_name] = var
+variables_assigned[var_name] = var
 
 ########################################################################################################################
 

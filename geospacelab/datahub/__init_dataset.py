@@ -91,12 +91,6 @@ class DatasetModel(object):
             raise AttributeError
         self.data_file_num = len(self.data_file_paths)
 
-    @staticmethod
-    def _set_default_attrs(kwargs: dict, default_attrs: dict):
-        for key, value in default_attrs.items():
-            kwargs.setdefault(key, value)
-        return kwargs
-
     def label(self, fields=None, separator=' | ', lowercase=True):
         if fields is None:
             fields = self.label_fields
@@ -133,14 +127,18 @@ class DatasetModel(object):
             mylog.simpleinfo.info('{:^20d}{:30s}'.format(ind+1, var_name))
         print()
 
+    def keys(self):
+        return self._variables.keys()
+
     def __setitem__(self, key, value):
-        if value is None:
-            pass
-        elif not issubclass(value.__class__, VariableModel):
-            raise TypeError
+        if value is not None:
+            if not issubclass(value.__class__, VariableModel):
+                raise TypeError
         self._variables[key] = value
 
     def __getitem__(self, key):
+        # if key not in self._variables.keys():
+        #    raise KeyError
         return self._variables[key]
 
     def __delitem__(self, key):
@@ -153,6 +151,11 @@ class DatasetModel(object):
     #     else:
     #         variable = VariableModel(value=variable, name=name, visual=self.visual)
     #     self[variable.name] = variable
+    def exist(self, var_name):
+        if var_name in self._variables.keys():
+            return True
+        else:
+            return False
 
     def remove_variable(self, name):
         del self[name]
@@ -160,20 +163,20 @@ class DatasetModel(object):
     def get_variable_names(self):
         return list(self._variables.keys())
 
-    def set_variable(self, **kwargs):
-        var_name = kwargs.pop('var_name', '')
-        var_config = kwargs.pop('var_config', {})
-        var_config.setdefault('visual', self.visual)
-        var_config.setdefault('name', var_name)
-        if 'var_config_items' in kwargs.keys():
-            var_configs = kwargs.pop('var_config_items', {})
-            var_config.update(var_configs[var_name])
-        self._variables[var_name].config(**var_config)
-        return self._variables[var_name]
+    def add_variable(self, var_name):
+        self[var_name] = VariableModel(dataset=self, visual=self.visual)
+        return self[var_name]
 
-    def _set_default_variables(self, default_variable_names):
+    def _set_default_variables(self, default_variable_names, variables_assigned=None):
+        if variables_assigned is None:
+            variables_assigned = {}
         for var_name in default_variable_names:
-            self[var_name] = VariableModel(dataset=self, visual=self.visual)
+            if var_name in variables_assigned.keys():
+                self[var_name] = variables_assigned[var_name]
+                self[var_name].dataset = self
+                self[var_name].visual = self.visual
+            else:
+                self.add_variable(var_name)
 
     @property
     def data_root_dir(self):

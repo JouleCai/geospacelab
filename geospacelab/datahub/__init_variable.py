@@ -108,65 +108,33 @@ class VariableModel(object):
     #     attr = getattr(self.visual, attr_name)
     #     axis = ord('z') - ord(attr[0])
     #     if attr is None:
-    def get_visual_data_attr(self, axis, attr_name):
-        attr = getattr(self.visual.data[axis], attr_name)
-        if type(attr) is str:
-            if attr[0] == '@':
-                splits = attr[1:].split('.')
-                if splits[0] in ['v']:
-                    result = getattr(self, splits[1])
-                elif splits[0] in ['d']:
-                    result = getattr(self.dataset[splits[1]], splits[2])
-                else:
-                    raise ValueError
+    def get_attr_from_string(self, string):
+        if not str(string):
+            return string
+        if string[0] == '@':
+            splits = string[1:].split('.')
+            if splits[0] in ['v']:
+                result = getattr(self, splits[1])
+            elif splits[0] in ['d']:
+                result = getattr(self.dataset[splits[1]], splits[2])
             else:
-                result = attr
+                raise ValueError
         else:
-            result = attr
+            result = string
         return result
 
-    def get_visual_axis_attr(self, axis, attr_name):
+    def get_visual_axis_attr(self, attr_name=None, axis=None):
         attr = getattr(self.visual.axis[axis], attr_name)
-        if type(attr) is str:
-            if attr[0] == '@':
-                splits = attr[1:].split('.')
-                if splits[0] in ['v']:
-                    result = getattr(self, splits[1])
-                elif splits[0] in ['d']:
-                    result = getattr(self.dataset[splits[1]], splits[2])
-                else:
-                    raise ValueError
-            else:
-                result = attr
-        else:
-            result = attr
-        return result
-
-    def get_visual_plot_attr(self, attr_name):
-        attr = getattr(self.visual.plot, attr_name)
-        return attr
-
-    def get_visual_attr(self, attr_name):
-        attr = getattr(self.visual, attr_name)
         type_attr = type(attr)
         if type_attr is not list:
             attr = [attr]
-
         results = []
         for a in attr:
             if type(a) is str:
-                if a[0] == '@':
-                    splits = a[1:].split('.')
-                    if splits[0] in ['v']:
-                        result = getattr(self, splits[1])
-                    elif splits[0] in ['d']:
-                        result = getattr(self.dataset[splits[1]], splits[2])
-                else:
-                    result = a
+                result = self.get_attr_from_string(a)
             else:
                 result = a
             results.append(result)
-
         if type_attr is not list:
             results = results[0]
         return results
@@ -368,20 +336,16 @@ class VariableModel(object):
                 self._depends[key] = value
 
 
-class VisualData(object):
-    def __init__(self):
-        self.data = '@v.value'
-        self.error = '@v.error'
-        self.scale = 1.
-        self.resolution = None
-
-    def config(self, logging=True, **kwargs):
-        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
-
-
 class VisualAxis(object):
     def __init__(self):
+        self.data = None
+        self.data_err = None
+        self.data_scale = 1.
+        self.data_res = None
+        self.mask_gap = None
         self.label = None
+        self.label_style = 'double'   # or 'single
+        self.label_pos = None       # label position
         self.unit = None
         self.lim = None
         self.scale = 'linear'
@@ -389,14 +353,15 @@ class VisualAxis(object):
         self.ticks = None
         self.tick_labels = None
         self.minor_ticks = None
-        self.minor_tick_labels = None
+        self.major_tick_max = 6
+        self.minor_tick_max = 30
         self.visible = True
 
     def config(self, logging=True, **kwargs):
         pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
 
 
-class VisualPlot(object):
+class VisualPlotConfig(object):
     def __init__(self):
         self.color = None
         self.visible = True
@@ -405,7 +370,7 @@ class VisualPlot(object):
         self.pcolormesh = {}
         self.imshow = {}
         self.scatter = {}
-        self.mask_gap = True
+        self.legend = {}
         self.style = None
 
     def config(self, logging=True, **kwargs):
@@ -415,15 +380,13 @@ class VisualPlot(object):
 class Visual(object):
 
     def __init__(self, **kwargs):
-        self._data = {}
         self._axis = {}
         self._variable_proxy = None
         self._ndim = None
 
         self.variable = kwargs.pop('variable', None)
-        self.data = kwargs.pop('data', None)
         self.axis = kwargs.pop('axis', None)
-        self.plot = kwargs.pop('plot', VisualPlot())
+        self.plot_config = kwargs.pop('plot_config', VisualPlotConfig())
         self.ndim = kwargs.pop('ndim', self._ndim)
 
     def config(self, logging=True, **kwargs):
@@ -456,38 +419,6 @@ class Visual(object):
     @ndim.setter
     def ndim(self, value):
         self._ndim = value
-
-    @property
-    def data(self):
-        if not dict(self._data):
-            ndim = self.ndim
-            if ndim is None:
-                try:
-                    ndim = self.variable.ndim
-                    if ndim is None:
-                        return None
-                    self.ndim = ndim
-                except AttributeError:
-                    return None
-            for ind in range(ndim + 1):
-                self._data[ind] = VisualAxis()
-        return self._data
-
-    @data.setter
-    def data(self, d):
-        if d is None:
-            return
-        if type(d) is dict:
-            for key, value in d.items():
-                if value is None:
-                    self._data[key] = VisualData()
-                elif type(value) is dict:
-                    self._data[key].config(**value)
-                else:
-                    raise TypeError
-            self.ndim = len(d.keys()) - 1
-        else:
-            raise TypeError
 
     @property
     def axis(self):
@@ -523,15 +454,15 @@ class Visual(object):
             raise TypeError
 
     @property
-    def plot(self):
+    def plot_config(self):
         return self._plot
 
-    @plot.setter
-    def plot(self, value):
+    @plot_config.setter
+    def plot_config(self, value):
         if value is None:
-            self._plot = VisualPlot
+            self._plot = VisualPlotConfig()
             return
-        if isinstance(value, VisualPlot):
+        if isinstance(value, VisualPlotConfig):
             self._plot = value
         elif type(value) is dict:
             self._plot.config(**value)
