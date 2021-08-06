@@ -3,25 +3,25 @@ To collect, manage, visualize geospace data.
 
 ## Installation
 
-### Pre-requirements
+### -Pre-requirements
 The package was tested in a conda evironment with python (version>3.6). 
 Before installing the package, install the dependencies below in a conda virtual environment.
 
 ```sh
-conda install h5py
-conda install netcdf4
-conda install cartopy 
 pip install scipy
 pip install numpy
 pip install matplotlib
 pip install madrigalweb
+conda install h5py
+conda install netcdf4
+conda install cartopy 
 ```
 
-### Install the package
+### -Install the package
 The current version is pre-released. Install the package via:
 
 ```shell
-pip install -i https://test.pypi.org/simple/ geospacelab
+pip install geospacelab
 ```
 
 ## Usage
