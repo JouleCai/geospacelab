@@ -1,11 +1,12 @@
-"""Variable model based on np.ndarray"""
+    """ Model classes for geospace variables, e.g., VariableModel, Visual, ...
+    """
 
 
 __author__ = "Lei Cai"
-__copyright__ = "Copyright 2021, The GeoSpaceLab Project"
+__copyright__ = "Copyright 2021, the project GeospaceLab"
 __credits__ = ["Lei Cai"]
 __license__ = "MLT"
-# __version__ = "1.0.1"
+__version__ = "1.0.1"
 __maintainer__ = "Lei Cai"
 __email__ = "lei.cai@oulu.fi"
 __status__ = "Developing"
@@ -24,8 +25,50 @@ import geospacelab.toolbox.utilities.pybasic as basic
 
 
 class VariableModel(object):
-
+    """VariableModel is a base class for a geospace variable with useful attributes
+    
+    :param name: The variable's name, ['']
+    :type name: str
+    :param fullname: The variable's full name, ['']
+    :type fullname: str
+    :param label: The variable's label for display. If a raw string (e.g., r'$\alpha$'),
+        it will show a latex format.
+    :type label: str
+    :param data_type: The variable's data type in one of them: 'support_data', 'data', and 'metadata'
+        in the same format as in a NASA's cdf file.
+    :type
+    :param
+    :type
+    :param
+    :type
+    :param
+    :type
+    :param
+    :type
+    :param
+    :type
+    :param
+    :type
+    :param
+    :type
+    :param
+    :type
+    :param
+    :type
+    :param
+    :type
+    :param
+    :type 
+    :param
+    :type
+    :param
+    :type
+    """
     def __init__(self, **kwargs):
+        """Initial settings
+        
+        :params:
+        """
         # set default values
         self._name = ''
         self._fullname = ''
