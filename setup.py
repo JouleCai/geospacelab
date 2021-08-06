@@ -26,7 +26,7 @@ setup(
     'Development Status :: 4 - Beta',      # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
     'Intended Audience :: Developers',      # Define that your audience are developers
     'Topic :: Software Development :: Build Tools',
-    'License :: OSI Approved :: GPL-3.0 License',   # Again, pick a license
+    'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',   # Again, pick a license
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
