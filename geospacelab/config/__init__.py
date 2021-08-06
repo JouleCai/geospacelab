@@ -1,1 +1,3 @@
-from geospacelab.config._preferences import preferences
+import geospacelab.config._preferences as prf
+
+preferences = prf.Preferences()
