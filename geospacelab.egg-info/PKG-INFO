@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: geospacelab
-Version: 0.1.2
+Version: 0.1.3
 Summary: Collect, manage, and visualize geospace data.
 Home-page: https://github.com/JouleCai/geospacelab
 Author: Lei Cai
@@ -12,11 +12,9 @@ Classifier: Development Status :: 4 - Beta
 Classifier: Intended Audience :: Developers
 Classifier: Topic :: Software Development :: Build Tools
 Classifier: License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)
-Classifier: Programming Language :: Python :: 3.6
-Classifier: Programming Language :: Python :: 3.7
 Classifier: Programming Language :: Python :: 3.8
 Classifier: Programming Language :: Python :: 3.9
-Requires-Python: >=3.6
+Requires-Python: >=3.8
 Description-Content-Type: text/markdown
 License-File: LICENSE
 
@@ -25,25 +23,25 @@ To collect, manage, visualize geospace data.
 
 ## Installation
 
-### Pre-requirements
+### -Pre-requirements
 The package was tested in a conda evironment with python (version>3.6). 
 Before installing the package, install the dependencies below in a conda virtual environment.
 
 ```sh
-conda install h5py
-conda install netcdf
-conda install cartopy 
 pip install scipy
 pip install numpy
 pip install matplotlib
 pip install madrigalweb
+conda install h5py
+conda install netcdf4
+conda install cartopy 
 ```
 
-### Install the package
+### -Install the package
 The current version is pre-released. Install the package via:
 
 ```shell
-pip install -i https://test.pypi.org/simple/ geospacelab
+pip install geospacelab
 ```
 
 ## Usage

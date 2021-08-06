@@ -1,6 +1,14 @@
 # geospacelab
 To collect, manage, visualize geospace data.
 
+## Features
+- New designed dataframe for managing the data in space science.
+- Ability to load data from files with a list of common types, e.g., cdf, netcdf, hdf5, ascii, etc.
+- Collect and manage data from a number of online service: Madrigal, EISCAT, NCEI, JHUAPL, ...
+- A series of visualization tools for showing publication-ready plots, including time series plots and map projections.
+- Time series plot with flexible time axis and marking tools (line, shading, top bar, etc.).
+- Ability to extend to add more dataset.
+
 ## Installation
 
 ### -Pre-requirements
@@ -24,9 +32,21 @@ The current version is pre-released. Install the package via:
 pip install geospacelab
 ```
 
+### Update the package
+```shell
+pip install geospacelab --upgrade
+```
+
 ## Usage
 
 ### Example 1: EISCAT quickplot
+The package can download and load EISCAT data automatically from portal.eiscat.se in a loading mode (load_mode = "AUTO").
+In addition, the package can load data by assigning the data file paths. See introductions in the documentation.
+
+The EISCAT quickplot viewer shows the GUISDAP analysed results in the same format as the online EISCAT quickplot.
+The figure layout and quality are improved. In addition, the indicators like vertical lines, shadings, top bars can be 
+added in the plot. See the example script and figure below:
+
 > example.py
 > ```python
 > import datetime
@@ -61,3 +81,8 @@ pip install geospacelab
 > ```
 > ### Output:
 > ![plot](./examples/EISCAT_UHF_beata_cp1_2.1u_CP_20201209-180000-20201210-060000.png)
+
+## Notes
+- The current version is a pre-released version. Many features will be added soon.
+- The full documentation has not added.
+
