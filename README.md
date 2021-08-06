@@ -1,2 +1,2 @@
 # geospacelab
-To manage, analyse, and visualise measurments in geospace
+To collect, manage, visualize geospace data.
