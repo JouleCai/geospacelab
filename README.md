@@ -59,4 +59,5 @@ pip install -i https://test.pypi.org/simple/ geospacelab
 > # show on screen
 > viewer.show()
 > ```
-![plot](./directory_1/directory_2/.../directory_n/plot.png)
+> ### Output:
+> ![plot](./examples/EISCAT_UHF_beata_cp1_2.1u_CP_20201209-180000-20201210-060000.png)
