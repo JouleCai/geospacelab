@@ -6,13 +6,13 @@ To collect, manage, visualize geospace data.
 ### Pre-requirements
 The package was tested in a conda evironment with python (version>3.6). Install the dependencies below before the installation. 
 
-> conda install h5py
-> 
-> conda install netcdf
-> 
-> conda install cartopy 
-> 
-> pip install scipy
+'''sh
+conda install h5py
+conda install netcdf
+conda install cartopy 
+pip install scipy
+'''
+
 > 
 > pip install matplotlib
 > 
