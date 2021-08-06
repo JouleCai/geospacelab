@@ -17,17 +17,17 @@ setuptools.setup(
     # download_url = 'https://github.com/JouleCai/geospacelab/archive/refs/tags/v0.1.tar.gz',    # I explain this later on
     keywords = ['Geospace', 'EISCAT', 'DMSP', 'Space weather', 'Ionosphere', 'Space', 'Magnetosphere'],   # Keywords that define your package best
     install_requires=[            # I get to this in a second
-              'requests',
-              'beautifulsoup4',
-              'netcdf4',
-              'h5py',
-              'numpy',
-              'scipy',
-              'cdflib',
-              'matplotlib',
-              'madrigalweb',
+              'requests>=2.26.0',
+              'beautifulsoup4>=4.9.3',
+              'netcdf4>=1.5.7',
+              'h5py>=3.2.1',
+              'numpy>=1.20',
+              'scipy>=1.60',
+              'cdflib>=0.3.20',
+              'matplotlib>=3.3',
+              'madrigalweb>=3.2',
           ],
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     # py_modules=["geospacelab"],
     # package_dir={'':'geospacelab'},
     classifiers=[
@@ -35,8 +35,6 @@ setuptools.setup(
         'Intended Audience :: Developers',      # Define that your audience are developers
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',   # Again, pick a license
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         ],
