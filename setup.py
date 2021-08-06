@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name = 'geospacelab',         # How you named your package folder (MyLib)
   packages = ['geospacelab'],   # Chose the same as "name"
-  version = 'v0.1',      # Start with a small number and increase it with every change you make
+  version = 'v0.2',      # Start with a small number and increase it with every change you make
   license='GPL-3.0 License',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
   description = 'Collect, manage, and visualize geospace data.',   # Give a short description about your library
   author = 'Lei Cai',                   # Type in your name
@@ -18,7 +18,6 @@ setup(
           'numpy',
           'scipy',
           'cdflib',
-          'cartopy',
           'matplotlib',
           'madrigalweb',
       ],
