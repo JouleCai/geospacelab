@@ -84,9 +84,6 @@ class Dashboard(object):
 
     def add_text(self, x=None, y=None, text=None, **kwargs):
         # add text in dashboard coords
-        if text is not None:
-            self.title = text
-
         kwargs.setdefault('fontsize', default_dashboard_fontsize)
         kwargs.setdefault('ha', 'center')
         kwargs.setdefault('va', 'bottom')
@@ -100,7 +97,7 @@ class Dashboard(object):
 
         y_new = self.gs.bottom + y * (self.gs.top - self.gs.bottom)
 
-        self.figure.text(x_new, y_new, self.title, **kwargs)
+        self.figure.text(x_new, y_new, text, **kwargs)
 
     def add_panel_labels(self, panel_indices=None, style='alphabets', **kwargs):
         if panel_indices is None:

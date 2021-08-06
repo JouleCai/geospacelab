@@ -45,7 +45,7 @@ class EISCATViewer(mpl_ts.TS):
         ds_1.list_all_variables()
         self.title = kwargs.pop('title', ', '.join([ds_1.facility, ds_1.site, ds_1.experiment]))
 
-    def save_figure(self,**kwargs):
+    def save_figure(self, **kwargs):
         file_name = kwargs.pop('filename', self.title.replace(', ', '_'))
         super().save_figure(file_name=file_name, **kwargs)
 

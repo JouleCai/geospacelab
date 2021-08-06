@@ -23,5 +23,3 @@ class Preferences(object):
         else:
             self._datahub_data_root_dir = pathlib.Path(path)
 
-
-preferences = Preferences()

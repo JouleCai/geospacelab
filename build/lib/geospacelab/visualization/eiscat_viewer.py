@@ -1,12 +1,12 @@
 import datetime
 
 import geospacelab.visualization.mpl_toolbox.time_series as mpl_ts
-from geospacelab.config import preferences as prf
+from geospacelab.config import preferences as pfr
 
 
 def example():
-    prf.datahub_data_root_dir = '/Users/lcai/01-Work/00-Data'
-    # pfr.datahub_data_root_dir = '/data/afys-ionosphere/data'
+    # prf.datahub_data_root_dir = '/Users/lcai/01-Work/00-Data'
+    pfr.datahub_data_root_dir = '/data/afys-ionosphere/data'
 
     dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
     dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
@@ -62,8 +62,6 @@ def quicklook(dt_fr, dt_to,
 
     viewer = EISCATViewer(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
                           data_file_type=data_file_type, load_mode=load_mode)
-    # ds0 = ts.set_dataset(datasource_contents=['madrigal', 'eiscat'])
-    mpl_ts.default_gs_config['hspace'] = 0.1
 
     n_e = viewer.assign_variable('n_e')
     T_i = viewer.assign_variable('T_i')
@@ -75,7 +73,7 @@ def quicklook(dt_fr, dt_to,
     viewer.list_datasets()
 
     layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
-    viewer.set_layout(layout=layout, gs_row_heights=[5, 5, 5, 5, 3])
+    viewer.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3])
     # plt.style.use('dark_background')
     # dt_fr_1 = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
     # dt_to_1 = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
