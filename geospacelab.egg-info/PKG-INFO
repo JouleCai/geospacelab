@@ -1,0 +1,23 @@
+Metadata-Version: 2.1
+Name: geospacelab
+Version: 0.1
+Summary: Collect, manage, and visualize geospace data.
+Home-page: https://github.com/JouleCai/geospacelab
+Author: Lei Cai
+Author-email: lei.cai@oulu.fi
+License: GPL-3.0 License
+Description: # geospacelab
+        To collect, manage, visualize geospace data.
+        
+Keywords: Geospace,EISCAT,DMSP,Space weather,Ionosphere,Space,Magnetosphere
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Build Tools
+Classifier: License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
