@@ -59,3 +59,4 @@ pip install -i https://test.pypi.org/simple/ geospacelab
 > # show on screen
 > viewer.show()
 > ```
+![plot](./directory_1/directory_2/.../directory_n/plot.png)
