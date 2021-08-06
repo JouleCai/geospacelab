@@ -21,7 +21,7 @@ pip install madrigalweb
 The current version is pre-released. Install the package via:
 
 ```shell
-pip install -i https://test.pypi.org/simple/ geospacelab
+pip install geospacelab
 ```
 
 ## Usage
