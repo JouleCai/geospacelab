@@ -7,7 +7,7 @@ import numpy
 import geospacelab.visualization.mpl_toolbox.panel as mpl_panel
 import geospacelab.toolbox.utilities.pybasic as basic
 
-default_gs_config = {
+default_layout_config = {
         'left':     0.15,
         'right':    0.8,
         'bottom':   0.15,
@@ -37,8 +37,8 @@ class Dashboard(object):
 
         super().__init__(**kwargs)
 
-    def set_gridspec(self, num_rows, num_cols, **kwargs):
-        kwargs = basic.dict_set_default(kwargs, **default_gs_config)
+    def set_layout(self, num_rows=None, num_cols=None, **kwargs):
+        kwargs = basic.dict_set_default(kwargs, **default_layout_config)
         self.gs = self.figure.add_gridspec(num_rows, num_cols)
         self.gs.update(**kwargs)
 

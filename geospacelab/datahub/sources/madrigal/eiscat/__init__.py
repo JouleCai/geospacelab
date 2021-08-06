@@ -7,7 +7,7 @@ import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_loader as default_loader
 import geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_downloader as downloader
-from geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_variable_config import variables_assigned
+import geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_variable_config as var_config
 from geospacelab.datahub.sources.madrigal.eiscat.__utilities import *
 
 default_dataset_attrs = {
@@ -57,7 +57,7 @@ class Dataset(datahub.DatasetModel):
         kwargs = basic.dict_set_default(kwargs, **default_dataset_attrs)
         self.config(**kwargs)
 
-        self._set_default_variables(default_variable_names, variables_assigned=variables_assigned)
+        self._set_default_variables(default_variable_names, variables_assigned=var_config.get_variables_assigned())
 
         self._validate_attrs()
 

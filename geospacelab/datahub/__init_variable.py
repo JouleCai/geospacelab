@@ -1,5 +1,5 @@
-    """ Model classes for geospace variables, e.g., VariableModel, Visual, ...
-    """
+""" Model classes for geospace variables, e.g., VariableModel, Visual, ...
+"""
 
 
 __author__ = "Lei Cai"

@@ -33,7 +33,7 @@ plt.rcParams['ytick.labelsize'] = 10
 plt.rcParams['legend.fontsize'] = 12
 plt.rcParams['figure.titlesize'] = 16
 
-default_gs_config = {
+default_layout_config = {
     'left': 0.15,
     'right': 0.8,
     'bottom': 0.15,
@@ -52,7 +52,7 @@ default_plt_style_label = 'seaborn-darkgrid'
 
 def test():
     pfr.datahub_data_root_dir = pathlib.Path('/Users/lcai/01-Work/00-Data')
-    # pfr.datahub_data_root_dir = '/data/afys-ionosphere/data'
+    pfr.datahub_data_root_dir = '/data/afys-ionosphere/data'
 
     dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
     dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
@@ -65,8 +65,6 @@ def test():
                           site='UHF', antenna='UHF', modulation='60', data_file_type='eiscat-hdf5', load_data=False)
     ds_1.load_data(load_mode='AUTO')
 
-    default_gs_config['hspace'] = 0.1
-
     n_e = ts.assign_variable('n_e')
     T_i = ts.assign_variable('T_i')
     T_e = ts.assign_variable('T_e')
@@ -78,8 +76,8 @@ def test():
     ts.list_assigned_variables()
     ts.list_datasets()
 
-    layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
-    ts.set_layout(layout=layout, gs_row_heights=[5, 5 , 5 , 5 , 3])
+    panel_layouts = [[n_e], [T_e], [T_i], [v_i], [az, el]]
+    ts.set_layout(panel_layouts=panel_layouts, row_height_scales=[5, 5, 5, 5, 3])
     # plt.style.use('dark_background')
     #dt_fr_1 = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
     #dt_to_1 = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
@@ -96,7 +94,8 @@ def test():
     dt_fr_3 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
     dt_to_3 = datetime.datetime.strptime('20201210' + '0430', "%Y%m%d%H%M")
     ts.add_top_bar(dt_fr_3, dt_to_3, bottom=0., top=0.02, label='Top bar 1')
-    ts.save_figure(file_name=title.replace(', ', '_'))
+
+    #ts.save_figure(file_name=title.replace(', ', '_'))
     ts.show()
     pass
 
@@ -104,7 +103,7 @@ def test():
 class TS(DataHub, dashboard.Dashboard):
 
     def __init__(self, **kwargs):
-        self.layout = []
+        self.panel_layouts = []
         self.plot_styles = None
         new_figure = kwargs.pop('new_figure', True)
         figure_config = kwargs.pop('figure_config', default_figure_config)
@@ -115,35 +114,45 @@ class TS(DataHub, dashboard.Dashboard):
 
         self._xlim = [self.dt_fr, self.dt_to]
 
-    def set_layout(self, layout=None, plot_styles=None, gs_row_heights=None, gs_config=None):
-        if gs_row_heights is None:
+    def set_layout(self, panel_layouts=None, plot_styles=None, row_height_scales=None,
+                   left=None, right=None, bottom=None, top=None, hspace=None, **kwargs):
+        if row_height_scales is None:
             gs_row_heights = 1
-        if gs_config is None:
-            gs_config = {}
-        basic.dict_set_default(gs_config, **default_gs_config)
+        
+        if left is None:
+            left = default_layout_config['left']
+        if right is None:
+            right = default_layout_config['right']
+        if bottom is None:
+            bottom = default_layout_config['bottom']
+        if top is None:
+            top = default_layout_config['top']
+        if hspace is None:
+            hspace = default_layout_config['hspace']
 
         num_cols = 1
-        num_rows = len(layout)
-        self.layout = layout
+        num_rows = len(panel_layouts)
+        self.panel_layouts = panel_layouts
         if type(plot_styles) is not list:
             self.plot_styles = [None] * num_rows
         elif len(plot_styles) != num_rows:
             raise ValueError
 
-        if type(gs_row_heights) is not list:
-            if type(gs_row_heights) == int:
-                gs_row_heights = [gs_row_heights] * num_rows
+        if type(row_height_scales) is not list:
+            if type(row_height_scales) == int:
+                row_height_scales = [row_height_scales] * num_rows
             else:
                 raise TypeError
-        elif len(gs_row_heights) != num_rows:
+        elif len(row_height_scales) != num_rows:
             raise ValueError
 
-        gs_config['hspace'] = gs_config['hspace'] * gs_row_heights[0]
-        gs_num_rows = sum(gs_row_heights)
+        hspace = hspace * row_height_scales[0]
+        gs_num_rows = sum(row_height_scales)
         gs_num_cols = 1
-        self.set_gridspec(num_rows=gs_num_rows, num_cols=gs_num_cols, **gs_config)
+        super().set_layout(num_rows=gs_num_rows, num_cols=gs_num_cols, left=left, right=right, bottom=bottom, top=top,
+                           hspace=hspace, **kwargs)
         rec = 0
-        for ind, height in enumerate(gs_row_heights):
+        for ind, height in enumerate(row_height_scales):
             row_ind = [rec, rec+height]
             col_ind = [0, 1]
             self.add_panel(row_ind=row_ind, col_ind=col_ind)
@@ -158,7 +167,7 @@ class TS(DataHub, dashboard.Dashboard):
 
         bottom = False
         for ind, panel in enumerate(self.panels.values()):
-            plot_layout = self.layout[ind]
+            plot_layout = self.panel_layouts[ind]
             plot_style = self.plot_styles[ind]
             plot_layout_flatten = basic.list_flatten(plot_layout)
             var = plot_layout_flatten[0]
@@ -559,7 +568,6 @@ class TS(DataHub, dashboard.Dashboard):
         pass
 
     def _pcolormesh(self, ax, plot_layout):
-        import geospacelab.visualization.mpl_toolbox.plot2d as plot2d
         var = plot_layout[0]
         data = self._prepare_data_2d(var)
         x = data['x']
@@ -605,7 +613,7 @@ class TS(DataHub, dashboard.Dashboard):
         colormap = mycmap.get_colormap(var.visual.plot_config.color)
         pcolormesh_config.update(cmap=colormap)
 
-        im = plot2d.pcolormesh(x=x.T, y=y.T, z=z.T, ax=ax, **pcolormesh_config)
+        im = ax.pcolormesh(x.T, y.T, z.T, **pcolormesh_config)
         #ax.objects.setdefault('pcolormesh', [])
         #ax.objects['pcolormesh'].append(im)
 
