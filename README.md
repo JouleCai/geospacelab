@@ -20,3 +20,9 @@ pip install scipy
 > 
 > pip install numpy
 >
+
+```sh
+cd dillinger
+npm i
+node app
+```
