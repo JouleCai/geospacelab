@@ -26,15 +26,14 @@ pip install -i https://test.pypi.org/simple/ geospacelab
 
 ## Usage
 
-> ### Example: show quicklook plot of the EISCAT data
+### Example 1: EISCAT quickplot
+> example.py
 > ```python
 > import datetime
 > import geospacelab.visualization.eiscat_viewer as eiscat
 > from geospacelab.config import preferences as pfr
 > 
->
-> # prf.datahub_data_root_dir = '/Users/lcai/01-Work/00-Data'
-> pfr.datahub_data_root_dir = [A_directory_for_storing_the_data]  # Default: ~/Geospace_Data
+> pfr.datahub_data_root_dir = [A_directory_for_storing_the_data]  # Default: [home_directory]/Geospace_Data
 > dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
 > dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
 >
