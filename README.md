@@ -9,7 +9,7 @@ Before installing the package, install the dependencies below in a conda virtual
 
 ```sh
 conda install h5py
-conda install netcdf
+conda install netcdf4
 conda install cartopy 
 pip install scipy
 pip install numpy
