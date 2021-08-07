@@ -11,7 +11,7 @@ To collect, manage, visualize geospace data.
 - Provide utilities for data analysis.
 - Useful visualization components
     + Time series plots with:
-        * 
+        - adjustable time ticks
 - Ability to load data from files with a list of file formats, e.g., cdf, netcdf, hdf5, ascii, etc.
 - Collect and manage data from a number of online service: Madrigal, EISCAT, NCEI, JHUAPL, ...
 - A number of visualization tools for showing publication-ready plots, including time series plots and map projections.
