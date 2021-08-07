@@ -8,24 +8,24 @@ To collect, manage, visualize geospace data.
     + Load data from file with various data formats (hdf, mat, sav, cdf, netcdf, ascii, and binary)
     + Assign variables for visulization.
     + Save variables and attributes to several kinds of data file formats (hdf, mat, or cdf)
+    + Give variable type and attributes.
 - Provide utilities for data analysis.
 - Useful visualization components
     + Time series plots with:
-        - adjustable time ticks
-- Ability to load data from files with a list of file formats, e.g., cdf, netcdf, hdf5, ascii, etc.
-- Collect and manage data from a number of online service: Madrigal, EISCAT, NCEI, JHUAPL, ...
-- A number of visualization tools for showing publication-ready plots, including time series plots and map projections.
-- Time series plots with automatically adjustable time axis and marking tools (line, shading, top bar, nots, etc.). 
-- Easy to add more dataset.
-- ...
+        - Automatically adjustable time ticks.
+        - Easily add or remove panels.
+        - Marking tools including vertical lines, shadings, top bars, etc...
+        - Data gap removing.
+    + Map projections.
 
 ## Installation
 
 ### -Pre-requirements
-The package was tested in a conda evironment with python=>3.7 and OS: Ubuntu 20..04 or MacOS Big Sur.
+The package was tested in a conda evironment with python>=3.7 and with the OSs: Ubuntu 20..04 and MacOS Big Sur.
 Before installing the package, install the dependencies below in a conda virtual environment.
 
 ```sh
+pip install toml
 pip install scipy
 pip install numpy
 pip install matplotlib
@@ -49,6 +49,9 @@ pip install geospacelab
 pip install geospacelab --upgrade
 ```
 
+### Configuration for the first use
+Information will be displayed in the python console when you import the package at the first time. You will need to set the root directory for storing the data, and others including set cookies for some online datasets. For example, the madrigal database requires the user's full name, email, and affiliation to download the data. The users can set those parameters in their own config file which is located at "[your_home_directory]/.geospacelab/config.toml".
+
 ## Usage
 
 ### Example 1: EISCAT quickplot
@@ -65,7 +68,6 @@ added in the plot. See the example script and figure below:
 > import geospacelab.visualization.eiscat_viewer as eiscat
 > from geospacelab.config import preferences as pfr
 > 
-> pfr.datahub_data_root_dir = [A_directory_for_storing_the_data]  # Default: [home_directory]/Geospace_Data
 > dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
 > dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
 >
@@ -74,7 +76,9 @@ added in the plot. See the example script and figure below:
 > modulation = '60'
 > load_mode = 'AUTO'
 > viewer = eiscat.quicklook(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO')
-> 
+> viewer.show()
+
+Several marking tools can be added, overlaying on the quickplot:
 > # add vertical line
 > dt_fr_2 = datetime.datetime.strptime('20201209' + '2030', "%Y%m%d%H%M")
 > dt_to_2 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
@@ -92,9 +96,9 @@ added in the plot. See the example script and figure below:
 > viewer.show()
 > ```
 > ### Output:
-> ![plot](./examples/EISCAT_UHF_beata_cp1_2.1u_CP_20201209-180000-20201210-060000.png)
+> ![plot](https://github.com/JouleCai/geospacelab/blob/master/examples/EISCAT_UHF_beata_cp1_2.1u_CP_20201209-180000-20201210-060000.png)
 
 ## Notes
 - The current version is a pre-released version. Many features will be added soon.
-- The full documentation has not added.
+- The full documentation has not been added.
 
