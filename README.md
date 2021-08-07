@@ -24,7 +24,7 @@ To collect, manage, visualize geospace data.
 The package was tested in a conda evironment with python>=3.7 and with the OSs: Ubuntu 20..04 and MacOS Big Sur.
 Before installing the package, install the dependencies below in a conda virtual environment.
 
-```sh
+```shell
 pip install toml
 pip install scipy
 pip install numpy
@@ -80,7 +80,7 @@ added in the plot. See the example script and figure below:
 > ```
 >
 > Several marking tools can be added, overlaying on the quickplot:
-> ```
+> ```python
 > # add vertical line
 > dt_fr_2 = datetime.datetime.strptime('20201209' + '2030', "%Y%m%d%H%M")
 > dt_to_2 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
