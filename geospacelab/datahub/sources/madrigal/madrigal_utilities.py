@@ -4,12 +4,7 @@ import madrigalWeb.madrigalWeb as madrigalweb
 import geospacelab.toolbox.utilities.pybasic as pybasic
 import geospacelab.toolbox.utilities.pylogging as mylog
 
-
-default_user_fullname = 'Anonymous'
-default_user_email = 'public@gmail.com'
-default_user_affiliation = 'None'
 default_madrigal_url = "http://cedar.openmadrigal.org/"
-
 
 """
 Functions for the Madrigal sources

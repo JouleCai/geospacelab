@@ -2,7 +2,7 @@ import numpy as np
 import pathlib
 
 from geospacelab.datahub.__init_variable import *
-from geospacelab.config import preferences as pref
+from geospacelab import preferences as pref
 
 import geospacelab.toolbox.utilities.pyclass as pyclass
 import geospacelab.toolbox.utilities.pybasic as pybasic

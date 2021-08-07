@@ -6,7 +6,7 @@ import numpy as np
 import pickle
 import pathlib
 
-from geospacelab.config import preferences as prf
+from geospacelab import preferences as prf
 # from geospacelab.datahub.sources.madrigal.eiscat import madrigal_eiscat_downloader as downloader
 
 import geospacelab.toolbox.utilities.pydatetime as dttool

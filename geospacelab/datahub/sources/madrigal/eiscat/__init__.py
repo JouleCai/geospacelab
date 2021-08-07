@@ -2,7 +2,7 @@ import datetime
 
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, SiteModel
-from geospacelab.config import preferences as prf
+from geospacelab import preferences as prf
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_loader as default_loader
