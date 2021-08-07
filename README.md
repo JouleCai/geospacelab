@@ -97,7 +97,7 @@ added in the plot. See the example script and figure below:
 > # show on screen
 > viewer.show()
 > ```
-> ### Output:
+> Output:
 > ![alt text](https://github.com/JouleCai/geospacelab/blob/master/examples/EISCAT_UHF_beata_cp1_2.1u_CP_20201209-180000-20201210-060000.png?raw=true)
 
 ## Notes
