@@ -67,6 +67,7 @@ class Preferences(object):
             mylog.StreamLogger.info(
                 "A toml file for user's configuration has been created at {}.".format(config_file_path)
             )
+            time.sleep(2)
             config_file_path.touch()
             with open(config_file_path, 'w') as f:
                 f.write(config_string)

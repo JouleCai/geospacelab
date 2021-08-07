@@ -1,7 +1,7 @@
 import datetime
 
 import geospacelab.visualization.mpl_toolbox.time_series as mpl_ts
-from geospacelab.config import preferences as pfr
+from geospacelab import preferences as pfr
 
 
 def example():
