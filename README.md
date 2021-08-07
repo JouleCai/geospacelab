@@ -66,7 +66,7 @@ added in the plot. See the example script and figure below:
 > ```python
 > import datetime
 > import geospacelab.visualization.eiscat_viewer as eiscat
-> from geospacelab.config import preferences as pfr
+> from geospacelab import preferences as pfr
 > 
 > dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
 > dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
