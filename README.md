@@ -77,8 +77,10 @@ added in the plot. See the example script and figure below:
 > load_mode = 'AUTO'
 > viewer = eiscat.quicklook(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO')
 > viewer.show()
-
-Several marking tools can be added, overlaying on the quickplot:
+> ```
+>
+> Several marking tools can be added, overlaying on the quickplot:
+> ```
 > # add vertical line
 > dt_fr_2 = datetime.datetime.strptime('20201209' + '2030', "%Y%m%d%H%M")
 > dt_to_2 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
@@ -96,7 +98,7 @@ Several marking tools can be added, overlaying on the quickplot:
 > viewer.show()
 > ```
 > ### Output:
-> ![plot](https://github.com/JouleCai/geospacelab/blob/master/examples/EISCAT_UHF_beata_cp1_2.1u_CP_20201209-180000-20201210-060000.png)
+> ![alt text](https://github.com/JouleCai/geospacelab/blob/master/examples/EISCAT_UHF_beata_cp1_2.1u_CP_20201209-180000-20201210-060000.png?raw=true)
 
 ## Notes
 - The current version is a pre-released version. Many features will be added soon.
