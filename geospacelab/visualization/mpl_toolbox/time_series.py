@@ -21,7 +21,7 @@ import geospacelab.visualization.mpl_toolbox.axis_ticks as ticktool
 
 # plt.style.use('ggplot')
 
-plt.rcParams['font.family'] = 'serif'
+# plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = 'Ubuntu'
 plt.rcParams['font.monospace'] = 'Ubuntu Mono'
 plt.rcParams['font.size'] = 12
