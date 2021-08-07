@@ -22,7 +22,7 @@ setuptools.setup(
               'netcdf4>=1.5.7',
               'h5py>=3.2.1',
               'numpy>=1.19',
-              'scipy>=1.60',
+              'scipy>=1.6.0',
               'cdflib>=0.3.20',
               'matplotlib>=3.3',
               'madrigalweb>=3.2',
