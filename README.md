@@ -6,7 +6,7 @@ To collect, manage, visualize geospace data.
 - Ability to load data from files with a list of file formats, e.g., cdf, netcdf, hdf5, ascii, etc.
 - Collect and manage data from a number of online service: Madrigal, EISCAT, NCEI, JHUAPL, ...
 - A number of visualization tools for showing publication-ready plots, including time series plots and map projections.
-- Time series plots with flexible time axis and marking tools (line, shading, top bar, nots, etc.). 
+- Time series plots with automatically adjustable time axis and marking tools (line, shading, top bar, nots, etc.). 
 - Easy to add more dataset.
 - ...
 
