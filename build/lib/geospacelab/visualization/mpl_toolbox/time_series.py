@@ -9,7 +9,7 @@ from scipy.interpolate import interp1d
 
 
 from geospacelab.datahub import DataHub
-from geospacelab.config import preferences as pfr
+from geospacelab import preferences as pfr
 import geospacelab.visualization.mpl_toolbox.dashboard as dashboard
 # from geospacelab.visualization.mpl_toolbox.figure import Figure
 import geospacelab.visualization.mpl_toolbox.colormaps as mycmap
@@ -21,7 +21,7 @@ import geospacelab.visualization.mpl_toolbox.axis_ticks as ticktool
 
 # plt.style.use('ggplot')
 
-plt.rcParams['font.family'] = 'serif'
+# plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = 'Ubuntu'
 plt.rcParams['font.monospace'] = 'Ubuntu Mono'
 plt.rcParams['font.size'] = 12
@@ -52,7 +52,7 @@ default_plt_style_label = 'seaborn-darkgrid'
 
 def test():
     pfr.datahub_data_root_dir = pathlib.Path('/Users/lcai/01-Work/00-Data')
-    pfr.datahub_data_root_dir = '/data/afys-ionosphere/data'
+    # pfr.datahub_data_root_dir = '/data/afys-ionosphere/data'
 
     dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
     dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')

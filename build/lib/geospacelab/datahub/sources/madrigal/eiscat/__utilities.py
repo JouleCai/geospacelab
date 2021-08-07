@@ -3,7 +3,7 @@ import pathlib
 import geospacelab.toolbox.utilities.pylogging as mylog
 
 
-def list_eiscat_hdf5_variables(fh5, var_groups=None, var_names_queried=None, display=True):
+def list_eiscat_hdf5_variables(fh5, var_groups=None, var_names_queried=None, display=False):
     if isinstance(fh5, str) or isinstance(fh5, pathlib.PurePath):
         fh5 = h5py.File(fh5, 'r')
     elif not isinstance(fh5, h5py._hl.files.File):

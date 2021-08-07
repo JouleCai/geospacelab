@@ -1,12 +1,10 @@
 import datetime
 
 import geospacelab.visualization.mpl_toolbox.time_series as mpl_ts
-from geospacelab.config import preferences as pfr
+from geospacelab import preferences as pfr
 
 
 def example():
-    # prf.datahub_data_root_dir = '/Users/lcai/01-Work/00-Data'
-    pfr.datahub_data_root_dir = '/data/afys-ionosphere/data'
 
     dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
     dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
