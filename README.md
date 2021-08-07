@@ -13,7 +13,7 @@ To collect, manage, visualize geospace data.
 ## Installation
 
 ### -Pre-requirements
-The package was tested in a conda evironment with python (version>3.6). 
+The package was tested in a conda evironment with python=>3.7 and OS: Ubuntu 20..04 or MacOS Big Sur.
 Before installing the package, install the dependencies below in a conda virtual environment.
 
 ```sh
@@ -21,6 +21,8 @@ pip install scipy
 pip install numpy
 pip install matplotlib
 pip install madrigalweb
+pip install aacgmv2
+pip install apexpy
 conda install h5py
 conda install netcdf4
 conda install cartopy 
