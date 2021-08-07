@@ -3,11 +3,12 @@ To collect, manage, visualize geospace data.
 
 ## Features
 - New designed dataframe for managing the data in space science.
-- Ability to load data from files with a list of common types, e.g., cdf, netcdf, hdf5, ascii, etc.
+- Ability to load data from files with a list of file formats, e.g., cdf, netcdf, hdf5, ascii, etc.
 - Collect and manage data from a number of online service: Madrigal, EISCAT, NCEI, JHUAPL, ...
-- A series of visualization tools for showing publication-ready plots, including time series plots and map projections.
-- Time series plot with flexible time axis and marking tools (line, shading, top bar, etc.).
-- Ability to extend to add more dataset.
+- A number of visualization tools for showing publication-ready plots, including time series plots and map projections.
+- Time series plots with flexible time axis and marking tools (line, shading, top bar, nots, etc.). 
+- Easy to add more dataset.
+- ...
 
 ## Installation
 
