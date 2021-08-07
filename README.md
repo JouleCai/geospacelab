@@ -2,7 +2,16 @@
 To collect, manage, visualize geospace data.
 
 ## Features
-- New designed dataframe for managing the data in space science.
+- With a user-friendly data manager ("Datahub"):
+    + Dock to a sourced or temporary dataset.
+    + Control the data downloading, loading and managing a secondary products.
+    + Load data from file with various data formats (hdf, mat, sav, cdf, netcdf, ascii, and binary)
+    + Assign variables for visulization.
+    + Save variables and attributes to several kinds of data file formats (hdf, mat, or cdf)
+- Provide utilities for data analysis.
+- Useful visualization components
+    + Time series plots with:
+        * 
 - Ability to load data from files with a list of file formats, e.g., cdf, netcdf, hdf5, ascii, etc.
 - Collect and manage data from a number of online service: Madrigal, EISCAT, NCEI, JHUAPL, ...
 - A number of visualization tools for showing publication-ready plots, including time series plots and map projections.
