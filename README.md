@@ -17,6 +17,7 @@ To collect, manage, visualize geospace data.
         - Marking tools including vertical lines, shadings, top bars, etc...
         - Data gap removing.
     + Map projections.
+    + Publication ready plots.
 
 ## Installation
 
