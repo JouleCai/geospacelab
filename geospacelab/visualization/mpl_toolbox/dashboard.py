@@ -54,14 +54,18 @@ class Dashboard(object):
     def add_arrows(self, **kwargs):
         pass
 
-    def add_panel(self, row_ind=None, col_ind=None, index=None, label=None, panel_class=mpl_panel.Panel, **kwargs):
+    def add_panel(self, row_ind=None, col_ind=None, index=None, label=None, panel_class=None, **kwargs):
         if isinstance(row_ind, int):
             row_ind = [row_ind, row_ind+1]
         if isinstance(col_ind, int):
             col_ind = [col_ind, col_ind+1]
-        panel = mpl_panel.Panel(label=label, **kwargs)
-        ax = self.figure.add_subplot(self.gs[row_ind[0]:row_ind[1], col_ind[0]:col_ind[1]], **kwargs)
-        panel.axes['major'] = ax
+        if panel_class is None:
+            panel_class = mpl_panel.Panel
+        elif not issubclass(panel_class, mpl_panel.Panel):
+            raise TypeError
+
+        panel = panel_class(label=label, **kwargs)
+        panel.add_subplot(self.gs[row_ind[0]:row_ind[1], col_ind[0]:col_ind[1]], major=True, **kwargs)
 
         if index is None:
             index = len(self.panels.keys()) + 1

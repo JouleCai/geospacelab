@@ -13,10 +13,44 @@ def check_panel_ax(func):
 
 
 class Panel(object):
-    def __init__(self, **kwargs):
-        self.axes = {'major': None}
+    def __init__(self, figure=None, **kwargs):
+        if figure is None:
+            figure = plt.gcf()
+        self.figure = figure
+        self.axes = {}
         self.label = kwargs.pop('label', None)
         # self.objectives = kwargs.pop('objectives', {})
+
+    def add_subplot(self, *args, major=False, label=None, **kwargs):
+        if major:
+            label = 'major'
+        else:
+            if label is None:
+                label = len(self.axes.keys())
+
+        ax = self.figure.add_subplot(*args, **kwargs)
+        self.axes[label] = ax
+        return ax
+
+    def add_axes(self, *args, major=False, label=None, **kwargs):
+        if major:
+            label = 'major'
+        else:
+            if label is None:
+                label = len(self.axes.keys())
+
+        ax = self.figure.add_axes(*args, **kwargs)
+        ax.patch.set_alpha(0)
+        self.axes[label] = ax
+        return ax
+
+    @property
+    def major_ax(self):
+        return self.axes['major']
+
+    @major_ax.setter
+    def major_ax(self, ax):
+        self.axes['major'] = ax
 
     @check_panel_ax
     def plot(self, *args, ax=None, **kwargs):
@@ -41,13 +75,6 @@ class Panel(object):
         # plot_type = "2I"
         im = ax.imshow(*args, **kwargs)
         return im
-
-    def add_sub_axes(self, *args, label=None, **kwargs):
-        ax = plt.gcf().add_axes(*args, **kwargs)
-        ax.patch.set_alpha(0)
-        if label is None:
-            label = len(self.sub_axes.keys()) + 1
-        self.axes[label] = ax
 
     def add_label(self, x, y, label, ha='left', va='center', **kwargs):
         ax = self.axes['major']

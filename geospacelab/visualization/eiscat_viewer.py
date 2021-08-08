@@ -1,6 +1,6 @@
 import datetime
 
-import geospacelab.visualization.mpl_toolbox.time_series as mpl_ts
+import geospacelab.visualization.mpl_toolbox as mpl
 from geospacelab import preferences as pfr
 
 
@@ -35,7 +35,7 @@ def example():
     viewer.show()
 
 
-class EISCATViewer(mpl_ts.TS):
+class EISCATViewer(mpl.TimeSeriesViewer):
     def __init__(self, dt_fr, dt_to, **kwargs):
         super().__init__(dt_fr=dt_fr, dt_to=dt_to)
         ds_1 = self.set_dataset(datasource_contents=['madrigal', 'eiscat'], **kwargs)
