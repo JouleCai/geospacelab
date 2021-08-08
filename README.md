@@ -3,7 +3,7 @@ To collect, manage, visualize geospace data.
 
 ## Features
 - With a user-friendly data manager ("Datahub"):
-    + Dock to a sourced or temporary dataset.
+    + Dock to multiple sourced or temporary datasets.
     + Control the data downloading, loading and managing a secondary products.
     + Load data from file with various data formats (hdf, mat, sav, cdf, netcdf, ascii, and binary)
     + Assign variables for visulization.
@@ -13,11 +13,11 @@ To collect, manage, visualize geospace data.
 - Useful visualization components
     + Time series plots with:
         - Automatically adjustable time ticks.
-        - Easily add or remove panels.
         - Marking tools including vertical lines, shadings, top bars, etc...
         - Data gap removing.
     + Map projections.
-    + Publication ready plots.
+- Add or remove panels by a simple configuration ("panel_layouts")
+- Produce publication-ready plots.
 
 ## Installation
 
