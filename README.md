@@ -10,7 +10,7 @@ To collect, manage, visualize geospace data.
     + Save variables and attributes to several kinds of data file formats (hdf, mat, or cdf)
     + Give variable type and attributes.
 - Provide utilities for data analysis.
-- Useful visualization components
+- Useful visualization components based on "matplotlib".
     + Time series plots with:
         - Automatically adjustable time ticks.
         - Marking tools including vertical lines, shadings, top bars, etc...
