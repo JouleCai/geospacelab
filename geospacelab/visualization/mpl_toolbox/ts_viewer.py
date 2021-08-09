@@ -418,7 +418,7 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
         ticks = ax.get_xticks()
         ylim0, _ = ax.get_ylim()
         xy_fig = []
-        # transform from data coords to figure coords
+        # transform from data cs to figure cs
         for tick in ticks:
             px = ax.transData.transform([tick, ylim0])
             xy = self.figure.transFigure.inverted().transform(px)

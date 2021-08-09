@@ -1,4 +1,33 @@
 import geospacelab.toolbox.utilities.pylogging as mylog
+import geospacelab.toolbox.utilities.pyclass as pyclass
+
+
+class SpaceCoordinateSystem(object):
+    def __init__(self, name=None, coords=None, ut=None, sph_or_car=None, **kwargs):
+
+        self.name = name
+        self.ut = ut
+        self.sph_or_car = sph_or_car
+        if sph_or_car == 'sph':
+            self.coords = SphericalCoordinates(cs=self.name)
+        elif sph_or_car == 'car':
+            self.coords = CartesianCoordinates(cs=self.name)
+
+        self.coords.config(**coords)
+
+    def transform(self, cs_to_class=None, trans_func=None, **kwargs):
+        coords, sph_or_car = trans_func(**kwargs)
+        cs_new = cs_to_class(coords=coords, ut=self.ut, sph_or_car)
+        return cs_new
+
+
+class GEO(SpaceCoordinateSystem):
+    def __init__(self, coords=None, ut=None, **kwargs):
+        super().__init__(name='GEO', coords=coords, ut=None, sph_or_car='sph', **kwargs)
+
+    def transform(self, cs_to=None, **kwargs):
+        if cs_to.lower() == 'aacgm':
+            pass
 
 
 class SpaceCS(object):
@@ -42,13 +71,13 @@ class SpaceCS(object):
                                                            dtime=self.dt, method_code=method_code, )
                 else:
                     if self.dt.shape[0] != coords.lat.shape[0]:
-                        mylog.StreamLogger.error("Datetimes must have the same length as coords!")
+                        mylog.StreamLogger.error("Datetimes must have the same length as cs!")
                         return
                     lat = np.empty_like(coords.lat)
                     lon = np.empty_like(coords.lon)
                     r = np.empty_like(coords.lat)
                     for ind_dt, dt in enumerate(self.dt.flatten()):
-                        # print(ind_dt, dt, coords.lat[ind_dt, 0])
+                        # print(ind_dt, dt, cs.lat[ind_dt, 0])
                         lat[ind_dt], lon[ind_dt], r[ind_dt] = aacgm.convert_latlon_arr(in_lat=coords.lat[ind_dt],
                                                                                        in_lon=coords.lon[ind_dt], height=coords.alt[ind_dt],
                                                                                        dtime=dt, method_code=method_code)
@@ -66,42 +95,56 @@ class SpaceCS(object):
         return csObj_new
 
 
-class Coordinates(object):
-    def __init__(self, coords, labels, sph_or_car=None, units=None):
-        self._standard_coords = {'sph': {'labels':   ['lon', 'lat', 'colat', 'alt', 'r', 'mlt'],
-                                         'units':    ['degree', 'degree', 'degree', 'km', 'km', 'h']
-                                         },
-                                 'car': {'labels':   ['x', 'y', 'z'],
-                                         'units':    ['km', 'km', 'km']
-                                         }
-                                 }
-        if units is None:
-            units = [None] * len(coords)
-        for ind, c in enumerate(coords):
-            label = labels[ind]
-            if label not in self._standard_coords[sph_or_car]['labels']:
-                mylog.StreamLogger.error('The label ' + label + ' is not a standard coordinate label!')
-                return
+class SphericalCoordinates(object):
+    def __init__(self, cs):
+        self.cs = cs
+        self.kind = 'sph'
+        self.lat = None
+        self.lat_unit = 'degree'
+        self.lon = None
+        self.lon_unit = 'degree'
+        self.alt = None
+        self.alt_unit = 'km'
+        self.r = None
+        self.r_unit = 'km'
 
-            unit = units[ind]
-            self.add_coord(label, c, sph_or_car=sph_or_car, unit=unit)
+    def __call__(self, **kwargs):
+        self.config(**kwargs)
 
-    def convert_car2sph(self):
-        # from spacepy import irbempy as op
-        # result = op.car2sph([self.x, self.y, self.z])
-        pass
+    def to_car(self):
+        raise NotImplemented
 
-    def convert_sph2car(self):
-        pass
+    def config(self, logging=True, **kwargs):
+        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
 
-    def convert_distance_unit(self, method='km2Re'):
-        pass
+    def add_coord(self, name, unit):
+        setattr(self, name, None)
+        setattr(self, name + '_unit', unit)
 
-    def add_coord(self, label, c, sph_or_car=None, unit=None):
-        if unit is None:
-            unit = self._standard_coords[sph_or_car]['units'][self._standard_coords[sph_or_car]['labels'].index(label)]
-        setattr(self, label, c)
-        setattr(self, label + '_unit', unit)
+
+class CartesianCoordinates(object):
+    def __init__(self, cs):
+        self.cs = cs
+        self.kind = 'car'
+        self.x = None
+        self.x_unit = 'km'
+        self.y = None
+        self.y_unit = 'km'
+        self.z = None
+        self.z_unit = 'km'
+
+    def __call__(self, **kwargs):
+        self.config(**kwargs)
+
+    def to_sph(self):
+        raise NotImplemented
+
+    def config(self, logging=True, **kwargs):
+        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
+
+    def add_coord(self, name, unit):
+        setattr(self, name, None)
+        setattr(self, name + '_unit', unit)
 
 
 

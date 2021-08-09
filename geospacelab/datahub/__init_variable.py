@@ -585,7 +585,7 @@ class Visual_1(object):
 #         'name', 'label', 'description', 'group',
 #         'error',
 #         'depends', 'unit', 'quantity_type',
-#         'coords',
+#         'cs',
 #         'visual'
 #     ]
 #

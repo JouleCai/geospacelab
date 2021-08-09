@@ -185,7 +185,7 @@ class PolarView(mpl.Panel):
             self.lst_c = mlt
             self._depend_mlt = True
             if self.coords == "GEO":
-                raise AttributeError('A magnetic coordinate system must be specified (Set the attribute "coords")!')
+                raise AttributeError('A magnetic coordinate system must be specified (Set the attribute "cs")!')
         self._mlt_c = mlt
 
 

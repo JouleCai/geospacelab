@@ -87,7 +87,7 @@ class Dashboard(object):
         self.panels[index] = panel
 
     def add_text(self, x=None, y=None, text=None, **kwargs):
-        # add text in dashboard coords
+        # add text in dashboard cs
         kwargs.setdefault('fontsize', default_dashboard_fontsize)
         kwargs.setdefault('ha', 'center')
         kwargs.setdefault('va', 'bottom')
@@ -96,7 +96,7 @@ class Dashboard(object):
         if y is None:
             y = 1.05
 
-        # set in dashboard coords
+        # set in dashboard cs
         x_new = self.gs.left + x * (self.gs.right - self.gs.left)
 
         y_new = self.gs.bottom + y * (self.gs.top - self.gs.bottom)
