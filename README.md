@@ -48,7 +48,6 @@ pip install scipy
 pip install numpy 
 pip install matplotlib 
 pip install madrigalweb 
-pip install aacgmv2 
 conda install h5py 
 conda install netcdf4 
 conda install cartopy 
@@ -68,6 +67,10 @@ pip install geospacelab --upgrade
 ```
 
 Note: The package is currently pre-released. The installation methods may be changed in the future.
+
+### Other dependencies
+The package also depends on several packages for the coordinate system transformation and file reading. Other packages
+include: __aacgmv2__, __apexpy__, __cdflib__
 
 ### 4. Configuration for the first-time use
 Information will be displayed in the python console when you import the package at the first time. You will need to set the root directory for storing the data, and other configurations, e.g., the cookies for some online database. A user's configuration file will be created at:
