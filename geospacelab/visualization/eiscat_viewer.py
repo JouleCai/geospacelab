@@ -49,7 +49,7 @@ class EISCATViewer(mpl.TimeSeriesViewer):
 
     def add_title(self, **kwargs):
         title = kwargs.pop('title', self.title)
-        super().add_title(x=0.5, y=1.03, title=title)
+        super().add_title(x=0.5, y=1.06, title=title)
 
 
 def quicklook(dt_fr, dt_to,
