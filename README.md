@@ -76,7 +76,7 @@ Information will be displayed in the python console when you import the package 
 [your_home_directory]/.geospacelab/config.toml
 ```
 
-You can make settings there (For most of the cases, you don't need to change it).
+You can set your own preferences there. Otherwise, the package will use the default settings. 
 
 To access the madrigal database, it requires the user's full name, email, and affiliation to download the data. The user can set those parameters from python console when call the madrigal modules at the first time. Or, you can add or change the content below in the configuration file "config.toml":
 
