@@ -78,7 +78,14 @@ Information will be displayed in the python console when you import the package 
 
 You can make settings there (For most of the cases, you don't need to change it).
 
-To access the madrigal database, it requires the user's full name, email, and affiliation to download the data. The user can set those parameters from python console when call the madrigal modules at the first time, or in the configuration file "config.toml" mentioned above.
+To access the madrigal database, it requires the user's full name, email, and affiliation to download the data. The user can set those parameters from python console when call the madrigal modules at the first time. Or, you can add or change the content below in the configuration file "config.toml":
+
+```config.toml
+[datahub.madrigal]
+user_fullname = "Lei Cai"
+user_email = "lei.cai@oulu.fi"
+user_affiliation = "University of Oulu"
+```
 
 ## Usage
 
