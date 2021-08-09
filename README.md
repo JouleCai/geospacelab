@@ -82,9 +82,9 @@ To access the madrigal database, it requires the user's full name, email, and af
 
 ```config.toml
 [datahub.madrigal]
-user_fullname = "Lei Cai"
-user_email = "lei.cai@oulu.fi"
-user_affiliation = "University of Oulu"
+user_fullname = "YOUR_NAME"
+user_email = "YOU_EMAIL"
+user_affiliation = "YOUR_AFFILIATION"
 ```
 
 ## Usage
