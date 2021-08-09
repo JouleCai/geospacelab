@@ -60,7 +60,7 @@ and other purposes. Those packages include:
 
 - Geomagnetic coordinate systems:
   - [*__aacgmv2__*](https://aacgmv2.readthedocs.io/en/latest/reference/aacgmv2.html): ```pip install aacgmv2 ``` 
-  - [*__apexpy \* __*](https://apexpy.readthedocs.io/en/latest/reference/Apex.html): ```pip install apexpy ```
+  - [*__apexpy__* \*](https://apexpy.readthedocs.io/en/latest/reference/Apex.html): ```pip install apexpy ```
   - [*__geopack__*](https://github.com/tsssss/geopack): ```pip install geopack ```
 - I/O:
   - [*__cdflib__*](https://pypi.org/project/cdflib/): ```pip install cdflib ```
