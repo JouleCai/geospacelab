@@ -117,8 +117,9 @@ added in the plot. See the example script and figure below:
 > modulation = '60'
 > load_mode = 'AUTO'
 > viewer = eiscat.quicklook(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO')
-> viewer.show()
+> 
 > viewer.save_figure()
+> viewer.show()
 > ```
 >
 > Several marking tools can be added, overlaying on the quickplot:
