@@ -40,7 +40,7 @@ conda activate [YOUR_ENV_NAME]
 More detailed instroduction to work with the anaconda environment can be found [here](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#), 
 
 ### 2. Required dependencies
-The current release requires pre-installation for some dependencies. If you are in an annaconda virtual environment, install the dependencies using the commands below:
+The current release requires a pre-installation for several dependencies. If you are in an annaconda virtual environment, install the dependencies using the commands below:
 
 ```shell
 pip install toml 
