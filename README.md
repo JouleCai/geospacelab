@@ -87,7 +87,7 @@ pip install geospacelab --upgrade
 
 Note: The package is currently pre-released. The installation methods may be changed in the future.
 
-### 5. Configuration for the first-time use
+### 4. Configuration for the first-time use
 Information will be displayed in the python console when you import the package at the first time. You will need to set the root directory for storing the data, and other configurations, e.g., the cookies for some online database. A user's configuration file will be created at:
 
 ```
