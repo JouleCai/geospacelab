@@ -54,6 +54,23 @@ conda install cartopy
 ```
 For other python distribution, please check the instroduction of the packages from their own webpages.
 
+### 4. Other dependencies
+The package also depends on several other python packages for transforming coordinate systems transformation, reading file, 
+and other purposes. Those packages include: 
+
+- Geomagnetic coordinate systems:
+  - *__aacgmv2__*: ```pip install aacgmv2 ``` 
+  - *__apexpy__*: ```pip install apexpy ```.*  
+- I/O:
+  - *__cdflib__*: ```pip install cdflib ```
+
+> (*): A **_gcc_** or **_gfortran_** compiler is required before installing the package. 
+> For MacOS: ```brew install gcc```. 
+> For Linux: ```sudo aap install gcc gfortran```.  
+
+Please install those packages when you see an error message when you import the geospacelab packge or related modules.
+
+
 ### 3. Install and update the package
 Install the package via:
 
@@ -68,11 +85,7 @@ pip install geospacelab --upgrade
 
 Note: The package is currently pre-released. The installation methods may be changed in the future.
 
-### Other dependencies
-The package also depends on several packages for the coordinate system transformation and file reading. Other packages
-include: __aacgmv2__, __apexpy__, __cdflib__
-
-### 4. Configuration for the first-time use
+### 5. Configuration for the first-time use
 Information will be displayed in the python console when you import the package at the first time. You will need to set the root directory for storing the data, and other configurations, e.g., the cookies for some online database. A user's configuration file will be created at:
 
 ```
