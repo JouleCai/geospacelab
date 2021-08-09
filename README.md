@@ -25,7 +25,7 @@ The package was tested with the anaconda distribution and with python>=3.7 under
 
 Some required dependencies (e.g. cartopy) listed below may be easier to install using conda commands.
 
-When using the anaconda distribution, it's recommended to install the package in a virtual environment. To create a virtual evironment, see the introduction [here](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-with-commands), or using:
+When using the anaconda distribution, it's recommended to install the package in a virtual environment. To create a virtual evironmentor using:
 
 ```shell
 conda create --name [YOUR_ENV_NAME] python=3.8
@@ -37,6 +37,7 @@ After creating the virtual environement, you need to activate the virtual enviro
 conda activate [YOUR_ENV_NAME]
 ```
 
+More detailed instroduction to work with the anaconda environment can be found [here](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#), 
 
 ### -Required dependencies
 The package was tested in a conda evironment with python>=3.7 and with the OSs: Ubuntu 20..04 and MacOS Big Sur.
