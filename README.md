@@ -80,12 +80,19 @@ You can make settings there (For most of the cases, you don't need to change it)
 
 To access the madrigal database, it requires the user's full name, email, and affiliation to download the data. The user can set those parameters from python console when call the madrigal modules at the first time. Or, you can add or change the content below in the configuration file "config.toml":
 
-```config.toml
+```toml
 [datahub.madrigal]
 user_fullname = "YOUR_NAME"
 user_email = "YOU_EMAIL"
 user_affiliation = "YOUR_AFFILIATION"
 ```
+
+### 5. Uninstallation
+Uninstall the package via:
+```shell
+pip uninstall geospacelab
+```
+If you don't need the user's configuration, delete the file at _[your_home_directory]/.geospacelab/config.toml_**
 
 ## Usage
 
