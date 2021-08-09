@@ -24,14 +24,14 @@ import geospacelab.visualization.mpl_toolbox.axis_ticks as ticktool
 # plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = 'Ubuntu'
 plt.rcParams['font.monospace'] = 'Ubuntu Mono'
-plt.rcParams['font.size'] = 12
-plt.rcParams['axes.labelsize'] = 14
+plt.rcParams['font.size'] = 10
+plt.rcParams['axes.labelsize'] = 12
 plt.rcParams['axes.labelweight'] = 'book'
-plt.rcParams['axes.titlesize'] = 12
+plt.rcParams['axes.titlesize'] = 10
 plt.rcParams['xtick.labelsize'] = 10
 plt.rcParams['ytick.labelsize'] = 10
-plt.rcParams['legend.fontsize'] = 12
-plt.rcParams['figure.titlesize'] = 16
+plt.rcParams['legend.fontsize'] = 10
+plt.rcParams['figure.titlesize'] = 12
 
 default_layout_config = {
     'left': 0.15,
@@ -43,8 +43,7 @@ default_layout_config = {
 }
 
 default_figure_config = {
-    'figsize': (12, 12),    # (width, height)
-    'dpi': 100,
+    'figsize': (8, 8),
 }
 
 default_plt_style_label = 'seaborn-darkgrid'
@@ -341,7 +340,7 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
         return label
 
     def _set_yaxis(self, ax, var_for_config=None):
-        ax.tick_params(axis='y', which='major', labelsize=11)
+        ax.tick_params(axis='y', which='major', labelsize=plt.rcParams['ytick.labelsize'])
         # Set y axis lim
         self._set_ylim(ax, var_for_config=var_for_config)
 
@@ -403,7 +402,7 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
             self._set_xaxis_ticklabels(ax, var_for_config, majorformatter=majorformatter)
 
     def _set_xaxis_ticklabels(self, ax, var_for_config, majorformatter=None):
-        ax.tick_params(axis='x', labelsize=12)
+        ax.tick_params(axis='x', labelsize=plt.rcParams['xtick.labelsize'])
         # set UT timeline
         if not list(self.timeline_extra_labels):
 
@@ -474,7 +473,7 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
             plt.text(
                 0.1, xy_fig[0][1] - yoffset * ind - 0.013,
                 xlabels[ind],
-                fontsize=14, fontweight='normal',
+                fontsize=plt.rcParams['xtick.labelsize'], fontweight='normal',
                 horizontalalignment='right', verticalalignment='top',
                 transform=self.figure.transFigure
             )
@@ -490,7 +489,7 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
                 plt.text(
                     xy_fig[ind_pos][0], xy_fig[ind_pos][1] - yoffset * ind - 0.013,
                     text,
-                    fontsize=14,
+                    fontsize=plt.rcParams['xtick.labelsize'],
                     horizontalalignment='center', verticalalignment='top',
                     transform=self.figure.transFigure
                 )
@@ -679,14 +678,14 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
     def show():
         plt.show()
 
-    def add_title(self, x=None, y=None, title=None, **kwargs):
+    def add_title(self, x=0.5, y=1.05, title=None, **kwargs):
         append_time = kwargs.pop('append_time', True)
         kwargs.setdefault('fontsize', plt.rcParams['figure.titlesize'])
         kwargs.setdefault('fontweight', 'roman')
         if append_time:
             dt_range_str = self.get_dt_range_str(style='title')
             title = title + ', ' + dt_range_str
-        super().add_text(x=None, y=None, text=title, **kwargs)
+        super().add_text(x=x, y=y, text=title, **kwargs)
 
     def get_dt_range_str(self, style='title'):
         dt_fr = self._xlim[0]
@@ -757,7 +756,7 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
                 y = label_position[1]
                 text_config.setdefault('va', 'center')
             text_config.setdefault('ha', 'center')
-            text_config.setdefault('fontsize', 14)
+            text_config.setdefault('fontsize', plt.rcParams['axes.labelsize'])
             text_config.setdefault('fontweight', 'medium')
             text_config.setdefault('clip_on', False)
             ax.text(x, y, label, transform=ax.transAxes, **text_config)
@@ -811,7 +810,7 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
                 y = label_position[1]
                 text_config.setdefault('va', 'center')
             text_config.setdefault('ha', 'center')
-            text_config.setdefault('fontsize', 14)
+            text_config.setdefault('fontsize', plt.rcParams['axes.labelsize'])
             text_config.setdefault('fontweight', 'medium')
             text_config.setdefault('clip_on', False)
             ax.text(x, y, label, transform=ax.transAxes, **text_config)
