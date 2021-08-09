@@ -72,7 +72,9 @@ Note: The package is currently pre-released. The installation methods may be cha
 ### 4. Configuration for the first-time use
 Information will be displayed in the python console when you import the package at the first time. You will need to set the root directory for storing the data, and other configurations, e.g., the cookies for some online database. A user's configuration file will be created at:
 
->"[your_home_directory]/.geospacelab/config.toml". 
+```
+[your_home_directory]/.geospacelab/config.toml
+```
 
 You can make settings there (For most of the cases, you don't need to change it).
 
