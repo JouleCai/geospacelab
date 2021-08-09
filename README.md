@@ -20,8 +20,25 @@ A python-based library to collect, manage, analyze, and visualize geospace data.
 - Produce publication-ready plots.
 
 ## Installation
+### Anaconda python distribution is recommended:
+The package was tested with the anaconda distribution and with python>=3.7 under Ubuntu 20.04 and MacOS Big Sur.
 
-### -Pre-requirements
+Some required dependencies (e.g. cartopy) listed below may be easier to install using conda commands.
+
+When using the anaconda distribution, it's recommended to install the package in a virtual environment. To create a virtual evironment, see the introduction [here](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-with-commands), or using:
+
+```shell
+conda create --name [YOUR_ENV_NAME] python=3.8
+```
+
+After creating the virtual environement, you need to activate the virtual environment:
+
+```shell
+conda activate [YOUR_ENV_NAME]
+```
+
+
+### -Required dependencies
 The package was tested in a conda evironment with python>=3.7 and with the OSs: Ubuntu 20..04 and MacOS Big Sur.
 Before installing the package, install the dependencies below in a conda virtual environment.
 
@@ -32,7 +49,6 @@ pip install numpy
 pip install matplotlib
 pip install madrigalweb
 pip install aacgmv2
-pip install apexpy
 conda install h5py
 conda install netcdf4
 conda install cartopy 
