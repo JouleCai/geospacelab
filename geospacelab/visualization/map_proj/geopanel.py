@@ -14,23 +14,21 @@ import geospacelab.visualization.mpl_toolbox as mpl
 
 def test():
     import matplotlib.pyplot as plt
-    dt = datetime.datetime(2019, 1, 19, 0, 0)
-    p = PolarView(pole='S', lon_c=0, ut=dt, lst_c=None)
+    dt = datetime.datetime(2012, 1, 19, 10, 0)
+    p = PolarView(pole='S', lon_c=0, ut=dt, mlt_c=0)
     p.add_subplot(major=True)
+
+    p.set_extent(boundary_style='circle')
 
     p.add_coastlines()
     p.add_grids()
-    p.set_extent(boundary_style='circle')
-    p.major_ax.invert_xaxis()
-    p.set_extent()
-    p.major_ax.invert_xaxis()
     plt.show()
     pass
 
 
 class PolarView(mpl.Panel):
-    def __init__(self, lon_c=None, pole='N', ut=None, lst_c=None, boundary_lat=0., boundary_style='circle',
-                 cs='GEO', mlt_c=None, grid_lat_res=10., grid_lon_res=15., mirror_south=True,
+    def __init__(self, lon_c=None, pole='N', ut=None, lst_c=None, boundary_lat=30., boundary_style='circle',
+                 cs='AACGM', mlt_c=None, grid_lat_res=10., grid_lon_res=15., mirror_south=True,
                  proj_style='Stereographic', **kwargs):
 
         if lon_c is not None and pole == 'S':
@@ -102,7 +100,7 @@ class PolarView(mpl.Panel):
 
         cs2.coords.lon = lon
         coords = {'lat': cs2.coords.lat, 'lon': cs2.coords.lon, 'h': cs2.coords.h}
-        return cs2.coords
+        return coords
 
     def add_coastlines(self):
         import cartopy.io.shapereader as shpreader
@@ -124,7 +122,7 @@ class PolarView(mpl.Panel):
             y0 = np.array(c.xy[1])
             if len(x0) < 20:  # omit small islands, etc.
                 continue
-            x0 = x0[::1]
+            x0 = np.mod(x0[::1], 360)
             y0 = y0[::1]
             x = np.append(np.append(x, x0), np.nan)
             y = np.append(np.append(y, y0), np.nan)
@@ -181,11 +179,18 @@ class PolarView(mpl.Panel):
         y = np.ones(4) * self.boundary_lat
         data = self.proj.transform_points(ccrs.PlateCarree(), x, y)
         # self.axes.plot(x, y, '.', transform=ccrs.PlateCarree())
-        ext = [np.min(data[:, 0]), np.max(data[:, 0]), np.min(data[:, 1]), np.max(data[:, 1])]
+        ext = [np.nanmin(data[:, 0]), np.nanmax(data[:, 0]), np.nanmin(data[:, 1]), np.nanmax(data[:, 1])]
         self._extent = ext
         self.major_ax.set_extent(ext, self.proj)
 
         self._set_boundary_style()
+
+        self._check_mirror_south()
+
+    def _check_mirror_south(self):
+        if self.pole == 'S' and self.mirror_south:
+            xlim = self.major_ax.get_xlim()
+            self.major_ax.set_xlim([max(xlim), min(xlim)])
 
     def _set_boundary_style(self):
 
@@ -240,9 +245,11 @@ class PolarView(mpl.Panel):
     @mlt_c.setter
     def mlt_c(self, mlt):
         if mlt is not None:
-            self.lst_c = mlt
-            self._depend_mlt = True
-            if self.coords == "GEO":
+            self.depend_mlt = True
+            self.lon_c = self._transform_mlt_to_lon(mlt)
+            if self.pole == 'S':
+                self.lon_c = np.mod(self.lon_c+180., 360)
+            if self.cs == "GEO":
                 raise AttributeError('A magnetic coordinate system must be specified (Set the attribute "cs")!')
         self._mlt_c = mlt
 

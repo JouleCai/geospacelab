@@ -10,6 +10,15 @@ class SpaceCoordinateSystem(object):
         self.sph_or_car = sph_or_car
         self.coords = coords
 
+    def transform(self, cs_to=None, **kwargs):
+        if cs_to.lower() == 'aacgm':
+            cs_new = self.to_aacgm(**kwargs)
+        elif cs_to.lower() == 'apex':
+            cs_new = self.to_apex(**kwargs)
+        else:
+            raise NotImplementedError
+        return cs_new
+
     def config(self, logging=True, **kwargs):
         pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
 
@@ -30,7 +39,10 @@ class SpaceCoordinateSystem(object):
                     self._coords = CartesianCoordinates(cs=self.name)
                 else:
                     raise NotImplementedError
-            self._coords.config(**c)
+            for key, value in c.items():
+                if not hasattr(self._coords, key):
+                    self._coords.add_coord(key)
+                setattr(self._coords, key, value)
 
 
 class Coordinates(object):
