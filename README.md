@@ -43,12 +43,12 @@ More detailed instroduction to work with the anaconda environment can be found [
 The current release requires pre-installation for some dependencies. If you are in an annaconda virtual environment, install the dependencies using the commands below:
 
 ```shell
-pip install toml
-pip install scipy
-pip install numpy
-pip install matplotlib
-pip install madrigalweb
-pip install aacgmv2
+pip install toml 
+pip install scipy 
+pip install numpy 
+pip install matplotlib 
+pip install madrigalweb 
+pip install aacgmv2 
 conda install h5py 
 conda install netcdf4 
 conda install cartopy 
