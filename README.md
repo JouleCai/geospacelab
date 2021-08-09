@@ -76,11 +76,10 @@ To access the madrigal database, it requires the user's full name, email, and af
 
 ## Usage
 
-### Example 1: EISCAT quickplot
-The package can download and load EISCAT data automatically from portal.eiscat.se in a loading mode (load_mode = "AUTO").
-In addition, the package can load data by assigning the data file paths. See introductions in the documentation.
+### Example 1: EISCAT quicklook plot
+The package can download and load EISCAT data automatically from [the EISCAT schedule page](https://portal.eiscat.se/schedule/) with the preset loading mode "AUTO" and file type "eiscat-hdf5". In addition, the package can load data by assigning the data file paths. See introductions in the documentation.
 
-The EISCAT quickplot viewer shows the GUISDAP analysed results in the same format as the online EISCAT quickplot.
+The EISCAT quicklook plot shows the GUISDAP analysed results in the same format as the online EISCAT quicklook plot.
 The figure layout and quality are improved. In addition, several marking tools like vertical lines, shadings, top bars can be 
 added in the plot. See the example script and figure below:
 
