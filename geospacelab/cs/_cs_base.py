@@ -8,7 +8,7 @@ class SpaceCoordinateSystem(object):
         self.name = name
         self.ut = ut
         self.sph_or_car = sph_or_car
-        self.coords = None
+        self.coords = coords
 
     def config(self, logging=True, **kwargs):
         pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
@@ -53,8 +53,8 @@ class SphericalCoordinates(Coordinates):
         self.lat_unit = 'degree'
         self.lon = None
         self.lon_unit = 'degree'
-        self.alt = None
-        self.alt_unit = 'km'
+        self.h = None
+        self.h_unit = 'km'
         self.r = None
         self.r_unit = 'km'
 
