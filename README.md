@@ -23,7 +23,7 @@ A python-based library to collect, manage, analyze, and visualize geospace data.
 ### 1. The python distribution _Anaconda_ is recommended:
 The package was tested with the anaconda distribution and with python>=3.7 under Ubuntu 20.04 and MacOS Big Sur.
 
-With Anaconda, some required dependencies listed below (e.g., h5py, netcdf4, and cartopy) may be easier to install by using conda commands.
+With Anaconda, it may be easier to install some required dependencies listed below, e.g., h5py, netcdf4, and cartopy, using the _conda_ command.
 
 It's also recommended to install the package and dependencies in a virtual environment with anaconda. To create a virtual environment, use:
 
