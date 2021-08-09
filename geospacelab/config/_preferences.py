@@ -28,6 +28,8 @@ class Preferences(object):
 
     @datahub_data_root_dir.setter
     def datahub_data_root_dir(self, path):
+        if path == '':
+            path = None
         if path is None:
             self._datahub_data_root_dir = pathlib.Path.home() / 'Geospacelab' / 'Data'
         else:
@@ -57,13 +59,12 @@ class Preferences(object):
         config_file_path.parent.mkdir(exist_ok=True, parents=True)
 
         if not config_file_path.is_file():
-            data_file_dir = pathlib.Path.home() / "Geospacelab" / "Data"
             config_string = """
             # This is a document for the user's configuration in the TOML format.
             package_name = \"{}\"
             [datahub]
-            data_root_dir = \"{}\"
-            """.format(package_name, data_file_dir)
+            data_root_dir = \""
+            """.format(package_name)
             mylog.StreamLogger.info(
                 "A toml file for user's configuration has been created at {}.".format(config_file_path)
             )

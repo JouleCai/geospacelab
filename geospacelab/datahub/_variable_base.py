@@ -224,7 +224,7 @@ class VariableModel(object):
         if dataset_obj is None:
             return
 
-        from geospacelab.datahub.__init_dataset import DatasetModel
+        from geospacelab.datahub._dataset_base import DatasetModel
         if issubclass(dataset_obj.__class__, DatasetModel):
             self._dataset_proxy = weakref.proxy(dataset_obj)
         else:

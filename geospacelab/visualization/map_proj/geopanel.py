@@ -1,4 +1,4 @@
-import geospacelab.visualization.mpl_toolbox as mpl
+
 import numpy as np
 import cartopy.crs as ccrs
 from cartopy.mpl.ticker import (
@@ -7,6 +7,9 @@ from cartopy.mpl.ticker import (
 import matplotlib.ticker as mticker
 import matplotlib.path as mpath
 import matplotlib.cm as cm
+
+import geospacelab.visualization.mpl_toolbox as mpl
+import geospacelab.cs as geo_cs
 
 
 class PolarView(mpl.Panel):
@@ -32,8 +35,8 @@ class PolarView(mpl.Panel):
         self.proj = proj(central_latitude=self.lat_c, central_longitude=self.lon_c)
 
     def __call__(self, *args, cs_fr='GEO', coords_labels=None):
-
-        cs1 = gsl_cs.SpaceCS(args, coords=cs_fr, dt=self.ut, coords_labels=coords_labels)
+        cs_class = getattr(geo_cs, cs_fr)
+        cs1 = cs_class(args, coords=cs_fr, dt=self.ut, coords_labels=coords_labels)
         cs2 = cs1.transform(coords_to=self.coords, append_mlt=self.depend_mlt)
         if self.depend_mlt:
             lon = self._convert_mlt_to_lon(cs2.coords.mlt)
