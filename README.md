@@ -92,7 +92,7 @@ Uninstall the package via:
 ```shell
 pip uninstall geospacelab
 ```
-If you don't need the user's configuration, delete the file at _[your_home_directory]/.geospacelab/config.toml_**
+If you don't need the user's configuration, delete the file at **_[your_home_directory]/.geospacelab/config.toml_**
 
 ## Usage
 
