@@ -1,5 +1,5 @@
 # geospacelab
-To collect, manage, visualize geospace data.
+A python-based library to collect, manage, analyze, and visualize geospace data.
 
 ## Features
 - With a user-friendly data manager ("Datahub"):
