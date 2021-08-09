@@ -20,7 +20,7 @@ A python-based library to collect, manage, analyze, and visualize geospace data.
 - Produce publication-ready plots.
 
 ## Installation
-### Anaconda python distribution is recommended:
+### 1. Anaconda python distribution is recommended:
 The package was tested with the anaconda distribution and with python>=3.7 under Ubuntu 20.04 and MacOS Big Sur.
 
 Some required dependencies (e.g. cartopy) listed below may be easier to install using conda commands.
@@ -39,9 +39,8 @@ conda activate [YOUR_ENV_NAME]
 
 More detailed instroduction to work with the anaconda environment can be found [here](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#), 
 
-### -Required dependencies
-The package was tested in a conda evironment with python>=3.7 and with the OSs: Ubuntu 20..04 and MacOS Big Sur.
-Before installing the package, install the dependencies below in a conda virtual environment.
+### 2. Required dependencies
+The current release requires pre-installation for some dependencies. If you are in an annaconda virtual environment, install the dependencies using the commands below:
 
 ```shell
 pip install toml
@@ -54,9 +53,10 @@ conda install h5py
 conda install netcdf4
 conda install cartopy 
 ```
+For other python distribution, please check the instroduction of the packages from their own webpages.
 
-### -Install the package
-The current version is pre-released. Install the package via:
+### 3. Install the package
+Install the package via:
 
 ```shell
 pip install geospacelab
@@ -67,8 +67,12 @@ pip install geospacelab
 pip install geospacelab --upgrade
 ```
 
-### Configuration for the first use
-Information will be displayed in the python console when you import the package at the first time. You will need to set the root directory for storing the data, and others including set cookies for some online datasets. For example, the madrigal database requires the user's full name, email, and affiliation to download the data. The users can set those parameters in their own config file which is located at "[your_home_directory]/.geospacelab/config.toml".
+Note: The package is currently pre-released. The installation methods may be changed in the future.
+
+### 4. Configuration for the first-time use
+Information will be displayed in the python console when you import the package at the first time. You will need to set the root directory for storing the data, and other configurations, e.g., the cookies for some online database. A user's configuration file will be created at "[your_home_directory]/.geospacelab/config.toml". You can make settings there (For most of the cases, you don't need to change it).
+
+To access the madrigal database, it requires the user's full name, email, and affiliation to download the data. The user can set those parameters from python console when call the madrigal modules at the first time, or in the configuration file which is located at "[your_home_directory]/.geospacelab/config.toml".
 
 ## Usage
 
