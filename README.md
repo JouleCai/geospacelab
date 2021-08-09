@@ -70,7 +70,11 @@ pip install geospacelab --upgrade
 Note: The package is currently pre-released. The installation methods may be changed in the future.
 
 ### 4. Configuration for the first-time use
-Information will be displayed in the python console when you import the package at the first time. You will need to set the root directory for storing the data, and other configurations, e.g., the cookies for some online database. A user's configuration file will be created at "[your_home_directory]/.geospacelab/config.toml". You can make settings there (For most of the cases, you don't need to change it).
+Information will be displayed in the python console when you import the package at the first time. You will need to set the root directory for storing the data, and other configurations, e.g., the cookies for some online database. A user's configuration file will be created at:
+
+>"[your_home_directory]/.geospacelab/config.toml". 
+
+You can make settings there (For most of the cases, you don't need to change it).
 
 To access the madrigal database, it requires the user's full name, email, and affiliation to download the data. The user can set those parameters from python console when call the madrigal modules at the first time, or in the configuration file "config.toml" mentioned above.
 
