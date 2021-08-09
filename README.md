@@ -59,14 +59,15 @@ The package also depends on several other python packages for transforming coord
 and other purposes. Those packages include: 
 
 - Geomagnetic coordinate systems:
-  - *__aacgmv2__*: ```pip install aacgmv2 ``` 
-  - *__apexpy__*: ```pip install apexpy ```.*  
+  - [*__aacgmv2__*](https://aacgmv2.readthedocs.io/en/latest/reference/aacgmv2.html): ```pip install aacgmv2 ``` 
+  - [*__apexpy__*](https://apexpy.readthedocs.io/en/latest/reference/Apex.html): ```pip install apexpy ```\*
+  - [*__geopack__*](https://github.com/tsssss/geopack): ```pip install geopack ```
 - I/O:
-  - *__cdflib__*: ```pip install cdflib ```
+  - [*__cdflib__*](https://pypi.org/project/cdflib/): ```pip install cdflib ```
 
 > (*): A **_gcc_** or **_gfortran_** compiler is required before installing the package. 
 > For MacOS: ```brew install gcc```. 
-> For Linux: ```sudo aap install gcc gfortran```.  
+> For Linux: ```sudo apt install gcc gfortran```.  
 
 Please install those packages when you see an error message when you import the geospacelab packge or related modules.
 
@@ -132,14 +133,17 @@ added in the plot. See the example script and figure below:
 > antenna = 'UHF'
 > modulation = '60'
 > load_mode = 'AUTO'
-> viewer = eiscat.quicklook(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO')
+> viewer = eiscat.quicklook(
+>       dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO'
+> )
 > 
 > viewer.save_figure()
 > viewer.show()
-> ```
->
-> Several marking tools can be added as the overlays on the top of the quicklook plot:
-> ```python
+> 
+> """
+> Several marking tools (vertical lines, shadings, and top bars) can be added as the overlays 
+> on the top of the quicklook plot.
+> """
 > # add vertical line
 > dt_fr_2 = datetime.datetime.strptime('20201209' + '2030', "%Y%m%d%H%M")
 > dt_to_2 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
