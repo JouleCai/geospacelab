@@ -49,8 +49,8 @@ pip install numpy
 pip install matplotlib
 pip install madrigalweb
 pip install aacgmv2
-conda install h5py
-conda install netcdf4
+conda install h5py 
+conda install netcdf4 
 conda install cartopy 
 ```
 For other python distribution, please check the instroduction of the packages from their own webpages.
