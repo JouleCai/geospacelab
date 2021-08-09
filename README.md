@@ -65,11 +65,12 @@ and other purposes. Those packages include:
 - I/O:
   - [*__cdflib__*](https://pypi.org/project/cdflib/): ```pip install cdflib ```
 
-> (*): A **_gcc_** or **_gfortran_** compiler is required before installing the package. 
+> ([\*]()): The **_gcc_** or **_gfortran_** compilers are required before installing the package. 
 > For MacOS: ```brew install gcc```. 
 > For Linux: ```sudo apt install gcc gfortran```.  
 
-Please install those packages when you see an error message when you import the geospacelab packge or related modules.
+Please install those packages, if an error message is displayed when importing the geospacelab packge 
+or related modules.
 
 
 ### 3. Install and update the package
