@@ -25,7 +25,7 @@ The package was tested with the anaconda distribution and with python>=3.7 under
 
 Some required dependencies listed below (e.g., h5py, netcdf4, and cartopy) may be easier to install by using conda commands.
 
-When using the anaconda distribution, it's also recommended to install the package and dependencies in a virtual environment. To create a virtual evironmentor using:
+When using the anaconda distribution, it's also recommended to install the package and dependencies in a virtual environment. To create a virtual evironmentor, use:
 
 ```shell
 conda create --name [YOUR_ENV_NAME] python=3.8
