@@ -14,20 +14,23 @@ import geospacelab.visualization.mpl_toolbox as mpl
 
 def test():
     import matplotlib.pyplot as plt
-    dt = datetime.datetime(2019, 1, 12, 0, 0)
-    p = PolarView(pole='S', lon_c=0, ut=dt)
+    dt = datetime.datetime(2019, 1, 19, 0, 0)
+    p = PolarView(pole='S', lon_c=0, ut=dt, lst_c=None)
     p.add_subplot(major=True)
 
     p.add_coastlines()
     p.add_grids()
     p.set_extent(boundary_style='circle')
+    p.major_ax.invert_xaxis()
+    p.set_extent()
+    p.major_ax.invert_xaxis()
     plt.show()
     pass
 
 
 class PolarView(mpl.Panel):
     def __init__(self, lon_c=None, pole='N', ut=None, lst_c=None, boundary_lat=0., boundary_style='circle',
-                 cs='AACGM', mlt_c=None, grid_lat_res=10., grid_lon_res=15.,
+                 cs='GEO', mlt_c=None, grid_lat_res=10., grid_lon_res=15., mirror_south=True,
                  proj_style='Stereographic', **kwargs):
 
         if lon_c is not None and pole == 'S':
@@ -45,24 +48,15 @@ class PolarView(mpl.Panel):
         self.cs = cs
         self.depend_mlt = False
         self.mlt_c = mlt_c
+        self.mirror_south = mirror_south
         self._extent = None
         super().__init__(**kwargs)
 
         proj = getattr(ccrs, proj_style)
         self.proj = proj(central_latitude=self.lat_c, central_longitude=self.lon_c)
 
-    def __call__(self, *args, cs_fr='GEO', coords_labels=None):
-        cs_class = getattr(geo_cs, cs_fr)
-        cs1 = cs_class(args, coords=cs_fr, dt=self.ut, coords_labels=coords_labels)
-        cs2 = cs1.transform(coords_to=self.coords, append_mlt=self.depend_mlt)
-        if self.depend_mlt:
-            lon = self._convert_mlt_to_lon(cs2.coords.mlt)
-        else:
-            lon = cs2.coords.lon
-        return lon, cs2.coords.lat
-
     @staticmethod
-    def _convert_mlt_to_lon(mlt):
+    def _transform_mlt_to_lon(mlt):
         lon = mlt / 24. * 360.
         lon = np.mod(lon, 360.)
         return lon
@@ -102,11 +96,12 @@ class PolarView(mpl.Panel):
         cs1 = cs_class(coords=coords, ut=self.ut)
         cs2 = cs1.transform(cs_to=cs_to, append_mlt=self.depend_mlt)
         if self.depend_mlt:
-            lon = self._convert_mlt_to_lon(cs2.coords.mlt)
+            lon = self._transform_mlt_to_lon(cs2.coords.mlt)
         else:
             lon = cs2.coords.lon
 
         cs2.coords.lon = lon
+        coords = {'lat': cs2.coords.lat, 'lon': cs2.coords.lon, 'h': cs2.coords.h}
         return cs2.coords
 
     def add_coastlines(self):
@@ -138,11 +133,11 @@ class PolarView(mpl.Panel):
 
         coords = {'lat': y, 'lon': x, 'h': 250.}
         coords = self.cs_transform(cs_fr='GEO', cs_to=self.cs, coords=coords)
-        x_new = coords.lon
-        y_new = coords.lat
+        x_new = coords['lon']
+        y_new = coords['lat']
         # x_new, y_new = x, y
         self.major_ax.plot(x_new, y_new, transform=ccrs.Geodetic(),
-                           linestyle='-', linewidth=0.3, color='#C0C0C0')
+                           linestyle='-', linewidth=0.5, color='#778088', zorder=100, alpha=0.6)
         # self.ax.scatter(x_new, y_new, transform=self.default_transform,
         #             marker='.', edgecolors='none', color='#C0C0C0', s=1)
 
