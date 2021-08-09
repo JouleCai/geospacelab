@@ -59,7 +59,7 @@ def test():
     database_name = 'madrigal'
     facility_name = 'eiscat'
 
-    ts = TS(dt_fr=dt_fr, dt_to=dt_to)
+    ts = TimeSeriesViewer(dt_fr=dt_fr, dt_to=dt_to)
     # ds0 = ts.set_dataset(datasource_contents=['madrigal', 'eiscat'])
     ds_1 = ts.set_dataset(datasource_contents=[database_name, facility_name],
                           site='UHF', antenna='UHF', modulation='60', data_file_type='eiscat-hdf5', load_data=False)
@@ -100,7 +100,7 @@ def test():
     pass
 
 
-class TS(DataHub, dashboard.Dashboard):
+class TimeSeriesViewer(DataHub, dashboard.Dashboard):
 
     def __init__(self, **kwargs):
         self.panel_layouts = []
@@ -418,7 +418,7 @@ class TS(DataHub, dashboard.Dashboard):
         ticks = ax.get_xticks()
         ylim0, _ = ax.get_ylim()
         xy_fig = []
-        # transform from data coords to figure coords
+        # transform from data cs to figure cs
         for tick in ticks:
             px = ax.transData.transform([tick, ylim0])
             xy = self.figure.transFigure.inverted().transform(px)
