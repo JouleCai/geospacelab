@@ -81,7 +81,7 @@ The package can download and load EISCAT data automatically from portal.eiscat.s
 In addition, the package can load data by assigning the data file paths. See introductions in the documentation.
 
 The EISCAT quickplot viewer shows the GUISDAP analysed results in the same format as the online EISCAT quickplot.
-The figure layout and quality are improved. In addition, the indicators like vertical lines, shadings, top bars can be 
+The figure layout and quality are improved. In addition, several marking tools like vertical lines, shadings, top bars can be 
 added in the plot. See the example script and figure below:
 
 > example.py
