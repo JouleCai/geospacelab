@@ -1,5 +1,6 @@
 
 import numpy as np
+import datetime
 import cartopy.crs as ccrs
 from cartopy.mpl.ticker import (
     LongitudeLocator, LatitudeLocator,
@@ -9,26 +10,42 @@ import matplotlib.path as mpath
 import matplotlib.cm as cm
 
 import geospacelab.visualization.mpl_toolbox as mpl
-import geospacelab.cs as geo_cs
+
+
+def test():
+    import matplotlib.pyplot as plt
+    dt = datetime.datetime(2019, 1, 12, 0, 0)
+    p = PolarView(pole='S', lon_c=0, ut=dt)
+    p.add_subplot(major=True)
+
+    p.add_coastlines()
+    p.add_grids()
+    p.set_extent(boundary_style='circle')
+    plt.show()
+    pass
 
 
 class PolarView(mpl.Panel):
-    def __init__(self, pole='N', lon_c=None,  ut=None, lst_c=None, boundary_lat=0., boundary_style='circle',
-                 coords='GEO', mlt_c=None, grid_lat_res=10., grid_lon_res=15.,
+    def __init__(self, lon_c=None, pole='N', ut=None, lst_c=None, boundary_lat=0., boundary_style='circle',
+                 cs='AACGM', mlt_c=None, grid_lat_res=10., grid_lon_res=15.,
                  proj_style='Stereographic', **kwargs):
+
+        if lon_c is not None and pole == 'S':
+            lon_c = lon_c + 180.
 
         self.lat_c = None
         self.lon_c = lon_c
+        self.ut = ut
         self.boundary_lat = boundary_lat
         self.boundary_style = boundary_style
         self.grid_lat_res = grid_lat_res
         self.grid_lon_res = grid_lon_res
         self.pole = pole
-        self.ut = ut
         self.lst_c = lst_c
-        self.coords = coords
+        self.cs = cs
         self.depend_mlt = False
-        self.mlt_c=None
+        self.mlt_c = mlt_c
+        self._extent = None
         super().__init__(**kwargs)
 
         proj = getattr(ccrs, proj_style)
@@ -60,10 +77,42 @@ class PolarView(mpl.Panel):
             kwargs.setdefault('projection', self.proj)
         super().add_axes(*args, major=major, label=label, **kwargs)
 
+    # def add_lands(self):
+    #     import cartopy.io.shapereader as shpreader
+    #
+    #     resolution = '110m'
+    #     shpfilename = shpreader.natural_earth(resolution=resolution,
+    #                                           category='physical',
+    #                                           name='coastline')
+    #     reader = shpreader.Reader(shpfilename)
+    #     lands = list(reader.geometries())
+    #
+    #     for ind1, land in enumerate(lands):
+    #         land_polygons = list(land)
+    #         for ind2, polygon in enumerate(land_polygons):
+    #             x, y = polygon.exterior.coords.xy
+    #
+    def cs_transform(self, cs_fr=None, cs_to=None, coords=None):
+        import geospacelab.cs as geo_cs
+
+        if cs_fr == cs_to:
+            return coords
+
+        cs_class = getattr(geo_cs, cs_fr.upper())
+        cs1 = cs_class(coords=coords, ut=self.ut)
+        cs2 = cs1.transform(cs_to=cs_to, append_mlt=self.depend_mlt)
+        if self.depend_mlt:
+            lon = self._convert_mlt_to_lon(cs2.coords.mlt)
+        else:
+            lon = cs2.coords.lon
+
+        cs2.coords.lon = lon
+        return cs2.coords
+
     def add_coastlines(self):
         import cartopy.io.shapereader as shpreader
 
-        resolution = '10m'
+        resolution = '110m'
         shpfilename = shpreader.natural_earth(resolution=resolution,
                                               category='physical',
                                               name='coastline')
@@ -72,21 +121,26 @@ class PolarView(mpl.Panel):
         x = np.array([])
         y = np.array([])
         for ind, c in enumerate(coastlines[:-1]):
+            # print(ind)
             # print(len(c.xy[0]))
             # if ind not in [4013, 4014]:
             #    continue
             x0 = np.array(c.xy[0])
             y0 = np.array(c.xy[1])
-            if len(x0) < 200:  # omit small islands, etc.
+            if len(x0) < 20:  # omit small islands, etc.
                 continue
-            x0 = x0[::30]
-            y0 = y0[::30]
+            x0 = x0[::1]
+            y0 = y0[::1]
             x = np.append(np.append(x, x0), np.nan)
             y = np.append(np.append(y, y0), np.nan)
 
             # csObj = scs.SpaceCS(x, y, CS='GEO', dt=self.dt, coords_labels=['lon', 'lat'])
-        x_new, y_new = self.__call__(x, y, 300., cs_fr='GEO', coords_labels=['lon', 'lat', 'alt'])
 
+        coords = {'lat': y, 'lon': x, 'h': 250.}
+        coords = self.cs_transform(cs_fr='GEO', cs_to=self.cs, coords=coords)
+        x_new = coords.lon
+        y_new = coords.lat
+        # x_new, y_new = x, y
         self.major_ax.plot(x_new, y_new, transform=ccrs.Geodetic(),
                            linestyle='-', linewidth=0.3, color='#C0C0C0')
         # self.ax.scatter(x_new, y_new, transform=self.default_transform,
@@ -123,29 +177,33 @@ class PolarView(mpl.Panel):
         gl.xlocator = xlocator
         gl.ylocator = ylocator
 
-    def set_extent(self, boundary_lat=None):
+    def set_extent(self, boundary_lat=None, boundary_style=None):
         if boundary_lat is not None:
             self.boundary_lat = boundary_lat
+        if boundary_style is not None:
+            self.boundary_style = boundary_style
         x = np.array([270., 90., 180., 0.])
         y = np.ones(4) * self.boundary_lat
         data = self.proj.transform_points(ccrs.PlateCarree(), x, y)
         # self.axes.plot(x, y, '.', transform=ccrs.PlateCarree())
         ext = [np.min(data[:, 0]), np.max(data[:, 0]), np.min(data[:, 1]), np.max(data[:, 1])]
+        self._extent = ext
         self.major_ax.set_extent(ext, self.proj)
 
-    def set_boundary_style(self, style=None):
-        if style is not None:
-            self.boundary_style = style
-        else:
-            style = self.boundary_style
+        self._set_boundary_style()
+
+    def _set_boundary_style(self):
+
+        style = self.boundary_style
         if style == 'square':
             return
         elif style == 'circle':
-            theta = np.linspace(0, 2 * np.pi, 100)
-            center, radius = [0.5, 0.5], 0.5
+            theta = np.linspace(0, 2 * np.pi, 400)
+            center = self.proj.transform_point(self.lon_c, self.lat_c, ccrs.PlateCarree())
+            radius = (self._extent[1] - self._extent[0]) / 2
             verts = np.vstack([np.sin(theta), np.cos(theta)]).T
             circle = mpath.Path(verts * radius + center)
-            self.major_ax.set_boundary(circle, transform=self.major_ax.transAxes)
+            self.major_ax.set_boundary(circle, transform=self.proj)
         else:
             raise NotImplementedError
 
@@ -173,10 +231,12 @@ class PolarView(mpl.Panel):
     @lst_c.setter
     def lst_c(self, lst):
         self._lst_c = lst
+        if lst is None:
+            return
         if self.pole == 'N':
-            self.lon_c = (24 - (self.ut.hour + self.ut.minute / 60) + self.lst_c) * 15.
+            self.lon_c = (self.lst_c - (self.ut.hour + self.ut.minute / 60)) * 15.
         elif self.pole == 'S':
-            self.lon_c = (24 - (self.ut.hour + self.ut.minute / 60) + self.lst_c) * 15. + 180.
+            self.lon_c = (self.lst_c - (self.ut.hour + self.ut.minute / 60)) * 15. + 180.
 
     @property
     def mlt_c(self):
@@ -192,4 +252,5 @@ class PolarView(mpl.Panel):
         self._mlt_c = mlt
 
 
-
+if __name__ == "__main__":
+    test()

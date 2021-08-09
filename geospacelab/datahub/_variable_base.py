@@ -491,6 +491,8 @@ class Visual(object):
                     self._axis[key] = VisualAxis()
                 elif type(value) is dict:
                     self._axis[key].config(**value)
+                elif isinstance(value, VisualAxis):
+                    self._axis[key] = value
                 else:
                     raise TypeError
         else:
