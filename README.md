@@ -122,7 +122,7 @@ added in the plot. See the example script and figure below:
 > viewer.show()
 > ```
 >
-> Several marking tools can be added, overlaying on the quickplot:
+> Several marking tools can be added as the overlays on the top of the quicklook plot:
 > ```python
 > # add vertical line
 > dt_fr_2 = datetime.datetime.strptime('20201209' + '2030', "%Y%m%d%H%M")
