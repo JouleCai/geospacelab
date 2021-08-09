@@ -55,14 +55,14 @@ conda install cartopy
 ```
 For other python distribution, please check the instroduction of the packages from their own webpages.
 
-### 3. Install the package
+### 3. Install and update the package
 Install the package via:
 
 ```shell
 pip install geospacelab
 ```
 
-### Update the package
+Update the package via:
 ```shell
 pip install geospacelab --upgrade
 ```
