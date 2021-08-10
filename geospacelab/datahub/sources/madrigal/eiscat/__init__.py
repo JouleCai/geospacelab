@@ -57,7 +57,10 @@ class Dataset(datahub.DatasetModel):
         kwargs = basic.dict_set_default(kwargs, **default_dataset_attrs)
         self.config(**kwargs)
 
-        self._set_default_variables(default_variable_names, configured_variables=var_config.get_default_configured_variables())
+        self._set_default_variables(
+            default_variable_names,
+            configured_variables=var_config.get_default_configured_variables()
+        )
 
         self._validate_attrs()
 
