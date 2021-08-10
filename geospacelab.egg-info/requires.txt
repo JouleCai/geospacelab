@@ -1,4 +1,4 @@
-toml>=0.10.2requests>=2.26.0
+requests>=2.26.0
 beautifulsoup4>=4.9.3
 numpy>=1.19
 scipy>=1.6.0
