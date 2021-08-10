@@ -58,6 +58,7 @@ setuptools.setup(
               'madrigalweb>=3.2',
               'aacgmv2>=2.6.2',
               'cdflib>=0.3.20',
+              'geopack>=1.08',
               'toml',
           ],
     python_requires='>=3.7',

@@ -1,13 +1,12 @@
 # geospacelab
-A python-based library to collect, manage, analyze, and visualize geospace data.
+A python-based library to collect, manage, and visualize geospace data.
 
 ## Features
 - With a user-friendly data manager ("Datahub"):
-    + Dock to multiple sourced or temporary datasets.
-    + Control the data downloading, loading and managing a secondary products.
-    + Load data from file with various data formats (hdf, mat, sav, cdf, netcdf, ascii, and binary)
-    + Assign variables for visulization.
-    + Save variables and attributes to several kinds of data file formats (hdf, mat, or cdf)
+    + Dock with multiple datasets (sourced or temporary).
+    + Control to download, load, and manage the data.
+    + Load data from files with formats (hdf, mat, sav, cdf, netcdf, ascii, and binary)
+    + Assign variables for visualization.
     + Give variable type and attributes.
 - Provide utilities for data analysis.
 - Useful visualization components based on "matplotlib" and "cartopy".
