@@ -1,11 +1,42 @@
 import setuptools
+import pathlib
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+package_name = "geospacelab"
+
+
+def get_version():
+    '''
+    read the version string from __init__
+
+    '''
+    # get the init file path
+    setup_path = pathlib.Path(__file__).parent.resolve()
+    package_init_path = setup_path / package_name / '__init__.py'
+
+    # read the file in
+    f = open(package_init_path, 'r')
+    lines = f.readlines()
+    f.close()
+
+    # search for the version
+    version = 'unknown'
+    for l in lines:
+        if '__version__' in l:
+            s = l.split('=')
+            version = s[-1].strip().strip('"').strip("'")
+            break
+    return version
+
+
+package_version = get_version()
+
+
 setuptools.setup(
-    name = 'geospacelab',         # How you named your package folder (MyLib)
-    version = '0.1.14',      # Start with a small number and increase it with every change you make
+    name = package_name,         # How you named your package folder (MyLib)
+    version = package_version,      # Start with a small number and increase it with every change you make
     license='GPL-3.0 License',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
     description = 'Collect, manage, and visualize geospace data.',   # Give a short description about your library
     author = 'Lei Cai',                   # Type in your name
@@ -19,13 +50,14 @@ setuptools.setup(
     install_requires=[            # I get to this in a second
               'requests>=2.26.0',
               'beautifulsoup4>=4.9.3',
-              'numpy>=1.19',
+              'numpy>=1.20',
               'scipy>=1.6.0',
               'h5py>=3.2.1',
               'netcdf4>=1.5.7',
               'matplotlib>=3.3',
               'madrigalweb>=3.2',
               'aacgmv2>=2.6.2',
+              'toml',
           ],
     python_requires='>=3.7',
     # py_modules=["geospacelab"],
