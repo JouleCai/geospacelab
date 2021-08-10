@@ -39,65 +39,57 @@ conda activate [YOUR_ENV_NAME]
 
 More detailed instroduction to work with the anaconda environment can be found [here](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#), 
 
-### 2. Required dependencies
-The current release requires a pre-installation for several dependencies. If you are in an annaconda virtual environment, install the dependencies using the commands below:
-
-```shell
-pip install toml 
-pip install scipy 
-pip install numpy 
-pip install matplotlib 
-pip install madrigalweb 
-conda install h5py 
-conda install netcdf4 
-conda install cartopy 
-```
-For other python distribution, please check the instroduction of the packages from their own webpages.
-
-### 4. Other dependencies
-The package also depends on several other python packages for transforming coordinate systems transformation, reading file, 
-and other purposes. Those packages include: 
-
-- Geomagnetic coordinate systems:
-  - [*__aacgmv2__*](https://aacgmv2.readthedocs.io/en/latest/reference/aacgmv2.html): ```pip install aacgmv2 ``` 
-  - [*__apexpy__* \*](https://apexpy.readthedocs.io/en/latest/reference/Apex.html): ```pip install apexpy ```
-  - [*__geopack__*](https://github.com/tsssss/geopack): ```pip install geopack ```
-- I/O:
-  - [*__cdflib__*](https://pypi.org/project/cdflib/): ```pip install cdflib ```
-
-> ([\*]()): The **_gcc_** or **_gfortran_** compilers are required before installing the package. 
-> For MacOS: ```brew install gcc```. 
-> For Linux: ```sudo apt install gcc gfortran```.  
-
-Please install those packages, if an error message is displayed when importing the geospacelab packge 
-or related modules.
-
-
-### 3. Install and update the package
-Install the package via:
-
+### 2. Installation
+#### Quick install from the pre-built release (recommended):
 ```shell
 pip install geospacelab
 ```
 
-Update the package via:
+#### Install from [Github](https://github.com/JouleCai/geospacelab) (not recommended):
 ```shell
-pip install geospacelab --upgrade
+pip install git+https://github.com/JouleCai/geospacelab@master
 ```
 
-Note: The package is currently pre-released. The installation methods may be changed in the future.
+### 2. Dependencies
+The package dependencies need to be installed before or after the installation of the package. 
+Several dependencies will be installed automatically with the package installation, 
+including __toml__, __requests__, __bueatifulsoup4__, __numpy__, __scipy__, __matplotlib__, __h5py__, __netcdf4__,
+__cdflib__, __madrigalweb__, and __aacgmv2__.
 
-### 4. Configuration for the first-time use
-Information will be displayed in the python console when you import the package at the first time. You will need to set the root directory for storing the data, and other configurations, e.g., the cookies for some online database. A user's configuration file will be created at:
+Other dependencies will be needed if you see a *__ImportError__* or *__ModuleNotFoundError__* 
+displayed in the python console. Some frequently used modules and their installation methods are listed below:
+- [__cartopy__](https://scitools.org.uk/cartopy/docs/latest/installing.html): Map projection for geospatial data.
+  - ```conda install -c conda-forge cartopy ``` 
+- [__apexpy__ \*](https://apexpy.readthedocs.io/en/latest/reference/Apex.html): Apex and Quasi-Dipole geomagnetic 
+coordinate system. 
+  - ```pip install apexpy ```
+- [__geopack__](https://github.com/tsssss/geopack): The geopack and Tsyganenko models in Python.
+  - ```pip install geopack ```
 
+> ([\*]()): The **_gcc_** or **_gfortran_** compilers are required before installing the package. 
+> - MacOS: ```brew install gcc ``` 
+> - Linux: ```sudo apt install gcc gfortran ```  
+
+Please install those packages, if an error message is displayed when importing the geospacelab packge 
+or related modules.
+
+### 4. First-time startup and basic configuration
+Some basic configuration will be made with the first-time import of the package. 
+Follow the messages prompted in the python console, and set the root directory for storing the data.
+Whe importing modules to access the online Madrigal database, 
+it will ask for the inputs of user's full name, email, and affiliation.
+
+The user's configuration can be also found from the file below:
 ```
 [your_home_directory]/.geospacelab/config.toml
 ```
-
-You can set your own preferences there. Otherwise, the package will use the default settings. 
-
-To access the madrigal database, it requires the user's full name, email, and affiliation to download the data. The user can set those parameters from python console when call the madrigal modules at the first time. Or, you can add or change the content below in the configuration file "config.toml":
-
+The user can set or change the preferences in the configuration file. 
+For example, to change the root directory for storing the data, modify or add the lines in "config.toml":
+```toml
+[datahub]
+data_root_dir = "YOUR_ROOT_DIR"
+```
+To set the Madrigal cookies, change the lines:
 ```toml
 [datahub.madrigal]
 user_fullname = "YOUR_NAME"
@@ -105,7 +97,16 @@ user_email = "YOU_EMAIL"
 user_affiliation = "YOUR_AFFILIATION"
 ```
 
-### 5. Uninstallation
+### 5. Update
+
+If the package is installed from the pre-built release. Update the package via:
+```shell
+pip install geospacelab --upgrade
+```
+
+Note: The package is currently pre-released. The installation methods may be changed in the future.
+
+### 6. Uninstallation
 Uninstall the package via:
 ```shell
 pip uninstall geospacelab
