@@ -70,8 +70,7 @@ coordinate system.
 > - MacOS: ```brew install gcc ``` 
 > - Linux: ```sudo apt install gcc gfortran ```  
 
-Please install those packages, if an error message is displayed when importing the geospacelab packge 
-or related modules.
+Please install the packages above, if needed.
 
 ### 4. First-time startup and basic configuration
 Some basic configuration will be made with the first-time import of the package. 
@@ -79,7 +78,7 @@ Follow the messages prompted in the python console, and set the root directory f
 Whe importing modules to access the online Madrigal database, 
 it will ask for the inputs of user's full name, email, and affiliation.
 
-The user's configuration can be also found from the file below:
+The user's configuration can be found from the *__toml__* file below:
 ```
 [your_home_directory]/.geospacelab/config.toml
 ```
