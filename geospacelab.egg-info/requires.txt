@@ -1,9 +1,9 @@
-requests>=2.26.0
+toml>=0.10.2requests>=2.26.0
 beautifulsoup4>=4.9.3
-netcdf4>=1.5.7
-h5py>=3.2.1
 numpy>=1.19
 scipy>=1.6.0
-cdflib>=0.3.20
+h5py>=3.2.1
+netcdf4>=1.5.7
 matplotlib>=3.3
 madrigalweb>=3.2
+aacgmv2>=2.6.2

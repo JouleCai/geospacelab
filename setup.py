@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name = 'geospacelab',         # How you named your package folder (MyLib)
-    version = '0.1.10',      # Start with a small number and increase it with every change you make
+    version = '0.1.13',      # Start with a small number and increase it with every change you make
     license='GPL-3.0 License',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
     description = 'Collect, manage, and visualize geospace data.',   # Give a short description about your library
     author = 'Lei Cai',                   # Type in your name
@@ -17,14 +17,12 @@ setuptools.setup(
     # download_url = 'https://github.com/JouleCai/geospacelab/archive/refs/tags/v0.1.tar.gz',    # I explain this later on
     keywords = ['Geospace', 'EISCAT', 'DMSP', 'Space weather', 'Ionosphere', 'Space', 'Magnetosphere'],   # Keywords that define your package best
     install_requires=[            # I get to this in a second
-              'toml>=0.10.2'
               'requests>=2.26.0',
               'beautifulsoup4>=4.9.3',
               'numpy>=1.19',
               'scipy>=1.6.0',
               'h5py>=3.2.1',
               'netcdf4>=1.5.7',
-              'cdflib>=0.3.20',
               'matplotlib>=3.3',
               'madrigalweb>=3.2',
               'aacgmv2>=2.6.2',
