@@ -74,8 +74,8 @@ Please install the packages above, if needed.
 
 ### 4. First-time startup and basic configuration
 Some basic configuration will be made with the first-time import of the package. 
-Follow the messages prompted in the python console, and set the root directory for storing the data.
-Whe importing modules to access the online Madrigal database, 
+Following the messages prompted in the python console, the first thing is to set the root directory for storing the data.
+Also, when importing modules to access the online Madrigal database, 
 it will ask for the inputs of user's full name, email, and affiliation.
 
 The user's configuration can be found from the *__toml__* file below:
