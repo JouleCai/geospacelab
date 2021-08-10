@@ -219,7 +219,7 @@ class Loader:
 if __name__ == "__main__":
     dir_root = prf.datahub_data_root_dir
 
-    filepath = pathlib.Path('./example') / "EISCAT_2005-09-01_steffe_64@32m.hdf5"
+    filepath = pathlib.Path('examples') / "EISCAT_2005-09-01_steffe_64@32m.hdf5"
 
     load_eiscat_hdf5([filepath])
 

@@ -16,7 +16,7 @@ def example():
     viewer = quicklook(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO')
 
     """
-    example: add indicators
+    examples: add indicators
     """
     # add vertical line
     dt_fr_2 = datetime.datetime.strptime('20201209' + '2030', "%Y%m%d%H%M")

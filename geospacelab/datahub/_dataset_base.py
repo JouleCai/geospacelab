@@ -167,12 +167,12 @@ class DatasetModel(object):
         self[var_name] = VariableModel(dataset=self, visual=self.visual)
         return self[var_name]
 
-    def _set_default_variables(self, default_variable_names, variables_assigned=None):
-        if variables_assigned is None:
+    def _set_default_variables(self, default_variable_names, configured_variables=None):
+        if configured_variables is None:
             variables_assigned = {}
         for var_name in default_variable_names:
-            if var_name in variables_assigned.keys():
-                self[var_name] = variables_assigned[var_name]
+            if var_name in configured_variables.keys():
+                self[var_name] = configured_variables[var_name]
                 self[var_name].dataset = self
                 self[var_name].visual = self.visual
             else:

@@ -1,8 +1,9 @@
+import copy
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pybasic as mybasic
 
 
-def set_object_attributes(obj, *args, **kwargs):
+def set_object_attributes(obj, *args, dict_deepcopy=True, **kwargs):
     append = kwargs.pop('append', False)
     logging = kwargs.pop('logging', True)
 
@@ -23,6 +24,8 @@ def set_object_attributes(obj, *args, **kwargs):
                 if logging:
                     mylog.simpleinfo.info("Object %s: The attribute '%s' is added!", mybasic.retrieve_name(obj), key)
 
+        if type(value) is dict and dict_deepcopy is True:
+            value = copy.deepcopy(value)
         setattr(obj, key, value)
 
     if append_rec:

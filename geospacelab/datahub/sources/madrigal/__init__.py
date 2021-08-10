@@ -1,5 +1,5 @@
 from geospacelab import preferences
-from geospacelab.datahub.sources.madrigal.madrigal_utilities import *
+from geospacelab.datahub.sources.madrigal.utilities import *
 
 try:
     default_user_fullname = preferences.user_config['datahub']['madrigal']['user_fullname']

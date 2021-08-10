@@ -609,7 +609,7 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
         else:
             pcolormesh_config.update(vmin=z_lim[0])
             pcolormesh_config.update(vmax=z_lim[1])
-        colormap = mycmap.get_colormap(var.visual.plot_config.color)
+        colormap = mycmap.get_colormap(var.visual.plot_config.pcolormesh.get('cmap', None))
         pcolormesh_config.update(cmap=colormap)
 
         im = ax.pcolormesh(x.T, y.T, z.T, **pcolormesh_config)

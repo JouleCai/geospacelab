@@ -244,6 +244,9 @@ class VariableModel(object):
         # type check
         if v is None:
             return
+        if type(v) is str:
+            self._value = v
+            return
         if not isinstance(v, np.ndarray):
             if basic.isnumeric(v):
                 v = np.array([v])
@@ -251,7 +254,7 @@ class VariableModel(object):
                 v = np.array(v)
             else:
                 raise TypeError
-        # reshape np.array with shape like (m,) m>1
+            # reshape np.array with shape like (m,) m>1
         if len(v.shape) == 1 and v.shape != (1,):
             v = v.reshape((v.shape[0], 1))
         self._value = v
@@ -272,8 +275,6 @@ class VariableModel(object):
         # type check
         if type(v) is str:
             self._error = v
-            return
-        if v is None:
             return
         if not isinstance(v, np.ndarray):
             if basic.isnumeric(v):
@@ -406,7 +407,6 @@ class VisualAxis(object):
 
 class VisualPlotConfig(object):
     def __init__(self):
-        self.color = None
         self.visible = True
         self.line = {}
         self.errorbar = {}

@@ -5,10 +5,10 @@ from geospacelab.datahub import DatabaseModel, FacilityModel, SiteModel
 from geospacelab import preferences as prf
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pybasic as basic
-import geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_loader as default_loader
-import geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_downloader as downloader
-import geospacelab.datahub.sources.madrigal.eiscat.madrigal_eiscat_variable_config as var_config
-from geospacelab.datahub.sources.madrigal.eiscat.__utilities import *
+import geospacelab.datahub.sources.madrigal.eiscat._loader as default_loader
+import geospacelab.datahub.sources.madrigal.eiscat._downloader as downloader
+import geospacelab.datahub.sources.madrigal.eiscat._variable_config as var_config
+from geospacelab.datahub.sources.madrigal.eiscat.utilities import *
 
 default_dataset_attrs = {
     'database': 'Madrigal',
@@ -57,7 +57,7 @@ class Dataset(datahub.DatasetModel):
         kwargs = basic.dict_set_default(kwargs, **default_dataset_attrs)
         self.config(**kwargs)
 
-        self._set_default_variables(default_variable_names, variables_assigned=var_config.get_variables_assigned())
+        self._set_default_variables(default_variable_names, configured_variables=var_config.get_default_configured_variables())
 
         self._validate_attrs()
 

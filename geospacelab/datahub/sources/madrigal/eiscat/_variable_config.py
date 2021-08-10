@@ -1,3 +1,4 @@
+import copy
 from geospacelab.datahub import VariableModel as Var
 
 database = 'Madrigal'
@@ -24,8 +25,34 @@ plot_config = {
     'markersize': 3,
 }
 
+default_axis_dict_2d = {
+    1:     {
+        'data':     '@d.height.value',
+        'lim':      [90, 350],
+        'label':    'h',
+        'unit':     'km',
+    },
+    2:  {
+        'data':     '@v.value',
+        'label':    '@v.label',
+        'unit':     '@v.unit',
+    }
+}
 
-def get_variables_assigned():
+default_plot_config = {
+    'line':         {
+        'linestyle':        '-',
+        'linewidth':        1.5,
+        'marker':           '.',
+        'markersize':       3,
+    },
+    'pcolormesh':   {
+        'cmap':            default_colormap,
+    }
+}
+
+
+def get_default_configured_variables():
     vars = {}
     visual = 'on'
 
@@ -33,28 +60,34 @@ def get_variables_assigned():
     var_name = 'n_e'
     var = Var(ndim=2, variable_type='scalar', visual=visual)
     # set variable attrs
-    var.name = var_name
-    var.fullname = 'electron density'
-    var.label = r'$n_e$'
-    var.unit = 'm-3'
-    var.unit_label = r'm$^{-3}$'
-    var.error = var_name + '_err'
-    var.depends = {0: depend_0, 1: depend_1}
+    var_config = {
+        'name': var_name,
+        'fullname': 'electron density',
+        'label': r'$n_e$',
+        'unit': 'm-3',
+        'unit_label': r'm$^{-3}$',
+        'error': var_name + '_err',
+        'depends': {0: depend_0, 1: depend_1},
+    }
+    var.config(**var_config)
     # set plot attrs
-    plot_config = var.visual.plot_config
-    plot_config.style = '2P'
-    plot_config.color = default_colormap
+    var.visual.plot_config.config(**default_plot_config)
+    var.visual.plot_config.style = '2P'
     # set axis attrs
-    axis = var.visual.axis
-    axis[1].data = "@d.height.value"
-    axis[2].data = "@v.value"
-    axis[1].lim = [90, 350]
-    axis[1].label = 'h'
-    axis[1].unit = 'km'
-    axis[2].lim = [8e9, 9e11]
-    axis[2].scale = 'log'
-    axis[2].label = '@v.label'
-    axis[2].unit = '@v.unit_label'
+    var.visual.axis[1].config(**default_axis_dict_2d[1])
+    var.visual.axis[2].config(**default_axis_dict_2d[2])
+    var.visual.axis[2].scale = 'log'
+    var.visual.axis[2].lim = [8e9, 9e11]
+    # axis = var.visual.axis
+    # axis[1].data = "@d.height.value"
+    # axis[2].data = "@v.value"
+    # axis[1].lim = [90, 350]
+    # axis[1].label = 'h'
+    # axis[1].unit = 'km'
+    # axis[2].lim = [8e9, 9e11]
+    # axis[2].scale = 'log'
+    # axis[2].label = '@v.label'
+    # axis[2].unit = '@v.unit_label'
 
     vars[var_name] = var
 
@@ -68,9 +101,8 @@ def get_variables_assigned():
     var.error = var_name + '_err'
     var.depends = {0: depend_0, 1: depend_1}
     # set plot attrs
-    plot_config = var.visual.plot_config
-    plot_config.style = '2P'
-    plot_config.color = default_colormap
+    var.visual.plot_config.config(**default_plot_config)
+    var.visual.plot_config.style = '2P'
     # set axis attrs
     axis = var.visual.axis
     axis[1].data = "@d.height.value"
@@ -95,9 +127,8 @@ def get_variables_assigned():
     var.error = var_name + '_err'
     var.depends = {0: depend_0, 1: depend_1}
     # set plot attrs
-    plot_config = var.visual.plot_config
-    plot_config.style = '2P'
-    plot_config.color = default_colormap
+    var.visual.plot_config.config(**default_plot_config)
+    var.visual.plot_config.style = '2P'
     # set axis attrs
     axis = var.visual.axis
     axis[1].data = "@d.height.value"
@@ -122,9 +153,8 @@ def get_variables_assigned():
     var.error = var_name + '_err'
     var.depends = {0: depend_0, 1: depend_1}
     # set plot attrs
-    plot_config = var.visual.plot_config
-    plot_config.style = '2P'
-    plot_config.color = default_colormap
+    var.visual.plot_config.config(**default_plot_config)
+    var.visual.plot_config.style = '2P'
     # set axis attrs
     axis = var.visual.axis
     axis[1].data = "@d.height.value"
@@ -182,6 +212,3 @@ def get_variables_assigned():
     vars[var_name] = var
 
     ####################################################################################################################
-
-    return vars
-
