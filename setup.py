@@ -57,6 +57,7 @@ setuptools.setup(
               'matplotlib>=3.3',
               'madrigalweb>=3.2',
               'aacgmv2>=2.6.2',
+              'cdflib>=0.3.20',
               'toml',
           ],
     python_requires='>=3.7',

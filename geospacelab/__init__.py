@@ -1,4 +1,4 @@
-__version__ = "0.1.20"
+__version__ = "0.1.23"
 
 import geospacelab.config as config
 
