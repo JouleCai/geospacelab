@@ -113,13 +113,21 @@ class DataHub(object):
         return var
 
     def assign_variable(self, var_name, dataset=None, dataset_index=None, add_new=False, **kwargs):
+        if dataset is None:
+            if dataset_index is None:
+                dataset = self.datasets[self._latest_dataset_ind]  # the latest added dataset
+            else:
+                dataset = self.datasets[dataset_index]
+        elif not issubclass(dataset.__class__, DatasetModel):
+            raise TypeError('A dataset instance\'s class must be a heritage of the class DatasetModel!')
 
         var = self.get_variable(var_name, dataset=dataset, dataset_index=dataset_index)
 
-        if var is None and add_new:
-            var = dataset.add_variable(var_name)
-        else:
-            raise KeyError('The variable does not exist in the dataset. Set add_new=True, if you want to add.')
+        if var is None:
+            if add_new:
+                var = dataset.add_variable(var_name)
+            else:
+                raise KeyError('The variable does not exist in the dataset. Set add_new=True, if you want to add.')
         var.config(**kwargs)
 
         if var not in self.variables.values():
