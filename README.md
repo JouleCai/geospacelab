@@ -71,18 +71,19 @@ coordinate system.
 
 Please install the packages above, if needed.
 
+Note: The package is currently pre-released. The installation methods may be changed in the future.
+
+
 ### 4. First-time startup and basic configuration
-Some basic configuration will be made with the first-time import of the package. 
-Following the messages prompted in the python console, the first thing is to set the root directory for storing the data.
-Also, when importing modules to access the online Madrigal database, 
-it will ask for the inputs of user's full name, email, and affiliation.
+Some basic configurations will be made with the first-time import of the package. Following the messages prompted in the python console, the first configuration is to set the root directory for storing the data.
+
+When the modules to access the online Madrigal database is imported,  it will ask for the inputs of user's full name, email, and affiliation.
 
 The user's configuration can be found from the *__toml__* file below:
 ```
 [your_home_directory]/.geospacelab/config.toml
 ```
-The user can set or change the preferences in the configuration file. 
-For example, to change the root directory for storing the data, modify or add the lines in "config.toml":
+The user can set or change the preferences in the configuration file. For example, to change the root directory for storing the data, modify or add the lines in "config.toml":
 ```toml
 [datahub]
 data_root_dir = "YOUR_ROOT_DIR"
@@ -102,8 +103,6 @@ If the package is installed from the pre-built release. Update the package via:
 pip install geospacelab --upgrade
 ```
 
-Note: The package is currently pre-released. The installation methods may be changed in the future.
-
 ### 6. Uninstallation
 Uninstall the package via:
 ```shell
@@ -113,13 +112,14 @@ If you don't need the user's configuration, delete the file at **_[your_home_dir
 
 ## Usage
 ### Example 1: Dock a sourced dataset and get variables:
-The core of the data manager is the class Datahub. A Datahub instance will be used for docking a buit-in sourced dataset,
-or adding a temporary or user-defined dataset. The "dataset" is a Dataset instance, which is used for loading and downloading 
-the data. Here is an example to load the EISCAT data from the online service.  
-The module will download EISCAT data automatically from 
-[the EISCAT schedule page](https://portal.eiscat.se/schedule/) with 
-the preset loading mode "AUTO" and file type "eiscat-hdf5". 
-In addition, the package can load data by assigning the data file paths. Below is an example to get the EISCAT analyzed variables.
+The core of the data manager is the class Datahub. A Datahub instance will be used for docking a buit-in sourced dataset, or adding a temporary or user-defined dataset. 
+
+The "dataset" is a Dataset instance, which is used for loading and downloading 
+the data. 
+
+Here is an example to load the EISCAT data from the online service.  The module will download EISCAT data automatically from 
+[the EISCAT schedule page](https://portal.eiscat.se/schedule/) with the preset loading mode "AUTO" and file type "eiscat-hdf5". 
+In addition, the package can load data by assigning the data file paths.
 
 ```python
 import datetime
@@ -144,9 +144,9 @@ ds_1 = dh.dock(datasource_contents=[database_name, facility_name],
 # load data
 ds_1.load_data()
 # get the variables which have been assigned in the dataset 
-n_e = dh.assign_variable('n_e', dataset=ds_1)   
+n_e = dh.get_variable('n_e', dataset=ds_1) # equivalent to n_e = ds_1['n_e']   
 # the variable will be retrieved from the latest added dataset, if dataset is not specified 
-T_i = dh.assign_variable('T_i')
+T_i = dh.get_variable('T_i') # equivalent to T_i = ds_1['T_i']   
 # The variables, e.g., n_e and T_i, are the class Variable's instances, 
 # which stores the variable values, errors, and many other attributes, e.g., name, label, unit, depends, ....
 # To get the value of the variable, use variable_isntance.value, e.g.,
@@ -182,7 +182,7 @@ viewer = eiscat.quicklook(
 As the viewer is an instance of the class EISCATViewer, which is a heritage of the class Datahub.
 Thus, the variables can be retrieved in the same ways as shown in Example 1. 
 """
-n_e = viewer.assign_variable('n_e')
+n_e = viewer.get_variable('n_e')
 
 """
 Several marking tools (vertical lines, shadings, and top bars) can be added as the overlays 
