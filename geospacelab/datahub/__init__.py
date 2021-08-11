@@ -96,7 +96,7 @@ class DataHub(object):
         self.datasets[ind] = dataset
         self._latest_dataset_ind = ind
 
-    def assign_variable(self, var_name, add_new=False, dataset=None, dataset_index=None, **kwargs):
+    def assign_variable(self, var_name, dataset=None, dataset_index=None, add_new=False, **kwargs):
         if dataset is None:
             if dataset_index is None:
                 dataset = self.datasets[self._latest_dataset_ind]  # the latest added dataset
@@ -113,7 +113,8 @@ class DataHub(object):
             raise KeyError('The variable does not exist in the dataset. Set add_new=True, if you want to add.')
         var.config(**kwargs)
 
-        self._append_variable(var)
+        if var not in self.variables.values():
+            self._append_variable(var)
 
         return var
 
