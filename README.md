@@ -179,7 +179,7 @@ viewer = eiscat.quicklook(
 # viewer.show()   # comment this if you need to run the following codes.
 
 """
-As the viewer is an instance of the class EISCATViewer, which is a heritage of the class Datahub.
+The viewer is an instance of the class EISCATViewer, which is a heritage of the class Datahub.
 Thus, the variables can be retrieved in the same ways as shown in Example 1. 
 """
 n_e = viewer.get_variable('n_e')
