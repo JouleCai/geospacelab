@@ -37,7 +37,7 @@ class Preferences(object):
 
         if not self._datahub_data_root_dir.is_dir():
             mylog.StreamLogger.info(
-                "A root directory ({}) will be created for storing the data!".format(self._datahub_data_root_dir)
+                "The root directory ({}) will be created for storing the data!".format(self._datahub_data_root_dir)
             )
             time.sleep(1)
             result = input("Create or not? [y]/n: ")
@@ -46,7 +46,13 @@ class Preferences(object):
                 self._datahub_data_root_dir.mkdir(parents=True)
                 mylog.simpleinfo.info("The directory has been created!")
             elif result.lower() in ['n', 'no']:
-                raise NotADirectoryError('"Set the default root directory in ~/.geospacelab/config.toml!"')
+                result = input('Input the root directory for storing data: ')
+                if str(result):
+                    self._datahub_data_root_dir = pathlib.Path(result)
+                    self._datahub_data_root_dir.mkdir(parents=True)
+                    mylog.simpleinfo.info("The directory {} has been created!".format(self._datahub_data_root_dir))
+                else:
+                    raise NotADirectoryError('"Set the default root directory in ~/.geospacelab/config.toml!"')
             else:
                 raise ValueError
 
