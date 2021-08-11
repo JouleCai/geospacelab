@@ -90,3 +90,6 @@ class GEO(SpaceCoordinateSystem):
 
         return cs_new
 
+    def to_LENU(self):
+        pass
+
