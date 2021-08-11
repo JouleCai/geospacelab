@@ -144,13 +144,13 @@ ds_1 = dh.dock(datasource_contents=[database_name, facility_name],
 # load data
 ds_1.load_data()
 # get the variables which have been assigned in the dataset 
-n_e = dh.get_variable('n_e', dataset=ds_1) # equivalent to n_e = ds_1['n_e']   
+n_e = dh.get_variable('n_e', dataset=ds_1) # equivalent to n_e = ds_1['n_e'], return a Variable instance.
 # the variable will be retrieved from the latest added dataset, if dataset is not specified 
 T_i = dh.get_variable('T_i') # equivalent to T_i = ds_1['T_i']   
 # The variables, e.g., n_e and T_i, are the class Variable's instances, 
 # which stores the variable values, errors, and many other attributes, e.g., name, label, unit, depends, ....
 # To get the value of the variable, use variable_isntance.value, e.g.,
-print(n_e.value)
+print(n_e.value)        # return the variable's value, type: numpy.ndarray, axis 0 is always along the time, check n_e.depends.items{}
 print(n_e.error)
 
 ```
