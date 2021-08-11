@@ -50,8 +50,6 @@ default_plt_style_label = 'seaborn-darkgrid'
 
 
 def test():
-    pfr.datahub_data_root_dir = pathlib.Path('/Users/lcai/01-Work/00-Data')
-    # pfr.datahub_data_root_dir = '/data/afys-ionosphere/data'
 
     dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
     dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
@@ -60,7 +58,7 @@ def test():
 
     ts = TimeSeriesViewer(dt_fr=dt_fr, dt_to=dt_to)
     # ds0 = ts.set_dataset(datasource_contents=['madrigal', 'eiscat'])
-    ds_1 = ts.set_dataset(datasource_contents=[database_name, facility_name],
+    ds_1 = ts.dock(datasource_contents=[database_name, facility_name],
                           site='UHF', antenna='UHF', modulation='60', data_file_type='eiscat-hdf5', load_data=False)
     ds_1.load_data(load_mode='AUTO')
 
@@ -84,7 +82,7 @@ def test():
     dt_to_1 = dt_to
     ts.draw(dt_fr=dt_fr_1, dt_to=dt_to_1)
     title = ', '.join([ds_1.facility, ds_1.site, ds_1.experiment])
-    ts.add_title(x=0.5, y=1.03, title=title)
+    ts.add_title(x=0.5, y=1.06, title=title)
     ts.add_panel_labels()
     dt_fr_2 = datetime.datetime.strptime('20201209' + '2030', "%Y%m%d%H%M")
     dt_to_2 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
@@ -678,7 +676,7 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
     def show():
         plt.show()
 
-    def add_title(self, x=0.5, y=1.05, title=None, **kwargs):
+    def add_title(self, x=0.5, y=1.08, title=None, **kwargs):
         append_time = kwargs.pop('append_time', True)
         kwargs.setdefault('fontsize', plt.rcParams['figure.titlesize'])
         kwargs.setdefault('fontweight', 'roman')

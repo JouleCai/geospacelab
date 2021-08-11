@@ -1,7 +1,6 @@
 import datetime
 
-import geospacelab.visualization.mpl_toolbox as mpl
-from geospacelab import preferences as pfr
+from geospacelab.visualization.tsviewer import TimeSeriesViewer
 
 
 def example():
@@ -13,10 +12,23 @@ def example():
     antenna = 'UHF'
     modulation = '60'
     load_mode = 'AUTO'
-    viewer = quicklook(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO')
+    viewer = quicklook(
+        dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO'
+    )
+
+    # viewer.save_figure() # comment this if you need to run the following codes
+    # viewer.show()   # comment this if you need to run the following codes.
 
     """
-    examples: add indicators
+    As the viewer is an instance of the class EISCATViewer, which is a heritage of the class Datahub.
+    The variables can be retrieved in the same ways as shown in Example 1. 
+    """
+    n_e = viewer.assign_variable('n_e')
+    print(n_e.value)
+
+    """
+    Several marking tools (vertical lines, shadings, and top bars) can be added as the overlays 
+    on the top of the quicklook plot.
     """
     # add vertical line
     dt_fr_2 = datetime.datetime.strptime('20201209' + '2030', "%Y%m%d%H%M")
@@ -35,10 +47,10 @@ def example():
     viewer.show()
 
 
-class EISCATViewer(mpl.TimeSeriesViewer):
+class EISCATViewer(TimeSeriesViewer):
     def __init__(self, dt_fr, dt_to, **kwargs):
         super().__init__(dt_fr=dt_fr, dt_to=dt_to)
-        ds_1 = self.set_dataset(datasource_contents=['madrigal', 'eiscat'], **kwargs)
+        ds_1 = self.dock(datasource_contents=['madrigal', 'eiscat'], **kwargs)
         ds_1.load_data(load_mode=kwargs['load_mode'])
         ds_1.list_all_variables()
         self.title = kwargs.pop('title', ', '.join([ds_1.facility, ds_1.site, ds_1.experiment]))

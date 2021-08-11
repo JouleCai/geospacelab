@@ -16,6 +16,8 @@ class DatasetModel(object):
 
     def __init__(self, **kwargs):
         self._variables = {}
+        self.name = None
+        self.kind = None
         self.dt_fr = None
         self.dt_to = None
 

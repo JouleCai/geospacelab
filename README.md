@@ -112,55 +112,99 @@ pip uninstall geospacelab
 If you don't need the user's configuration, delete the file at **_[your_home_directory]/.geospacelab/config.toml_**
 
 ## Usage
+### Example 1: Dock a sourced dataset and get variables:
+The core of the data manager is the class Datahub. A Datahub instance will be used for docking a buit-in sourced dataset,
+or adding a temporary or user-defined dataset. The "dataset" is a Dataset instance, which is used for loading and downloading 
+the data. Here is an example to load the EISCAT data from the online service.  
+The module will download EISCAT data automatically from 
+[the EISCAT schedule page](https://portal.eiscat.se/schedule/) with 
+the preset loading mode "AUTO" and file type "eiscat-hdf5". 
+In addition, the package can load data by assigning the data file paths. Below is an example to get the EISCAT analyzed variables.
 
-### Example 1: EISCAT quicklook plot
-The package can download and load EISCAT data automatically from [the EISCAT schedule page](https://portal.eiscat.se/schedule/) with the preset loading mode "AUTO" and file type "eiscat-hdf5". In addition, the package can load data by assigning the data file paths. See introductions in the documentation.
+```python
+import datetime
 
+from geospacelab.datahub import DataHub
+
+# settings
+dt_fr = datetime.datetime.strptime('20210309' + '0000', '%Y%m%d%H%M')   # datetime from
+dt_to = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')   # datetime to
+database_name = 'madrigal'      # built-in sourced database name 
+facility_name = 'eiscat'        # facility name
+
+site = 'UHF'                # facility attributes required, check from the eiscat schedule page
+antenna = 'UHF'
+modulation = 'ant'
+
+# create a datahub instance
+dh = DataHub(dt_fr, dt_to)
+# dock a dataset
+ds_1 = dh.dock(datasource_contents=[database_name, facility_name],
+                      site=site, antenna=antenna, modulation=modulation, data_file_type='eiscat-hdf5')
+# load data
+ds_1.load_data()
+# get the variables which have been assigned in the dataset 
+n_e = dh.assign_variable('n_e', dataset=ds_1)   
+# the variable will be retrieved from the latest added dataset, if dataset is not specified 
+T_i = dh.assign_variable('T_i')
+# The variables, e.g., n_e and T_i, are the class Variable's instances, 
+# which stores the variable values, errors, and many other attributes, e.g., name, label, unit, depends, ....
+# To get the value of the variable, use variable_isntance.value, e.g.,
+print(n_e.value)
+print(n_e.error)
+
+```
+
+### Example 2: EISCAT quicklook plot
 The EISCAT quicklook plot shows the GUISDAP analysed results in the same format as the online EISCAT quicklook plot.
 The figure layout and quality are improved. In addition, several marking tools like vertical lines, shadings, top bars can be 
 added in the plot. See the example script and figure below:
 
-> example.py
-> ```python
-> import datetime
-> import geospacelab.visualization.eiscat_viewer as eiscat
-> from geospacelab import preferences as pfr
-> 
-> dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
-> dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
->
-> site = 'UHF'
-> antenna = 'UHF'
-> modulation = '60'
-> load_mode = 'AUTO'
-> viewer = eiscat.quicklook(
->       dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO'
-> )
-> 
-> viewer.save_figure()
-> viewer.show()
-> 
-> """
-> Several marking tools (vertical lines, shadings, and top bars) can be added as the overlays 
-> on the top of the quicklook plot.
-> """
-> # add vertical line
-> dt_fr_2 = datetime.datetime.strptime('20201209' + '2030', "%Y%m%d%H%M")
-> dt_to_2 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
-> viewer.add_vertical_line(dt_fr_2, bottom_extend=0, top_extend=0.02, label='Line 1', label_position='top')
-> # add shading
-> viewer.add_shading(dt_fr_2, dt_to_2, bottom_extend=0, top_extend=0.02, label='Shading 1', label_position='top')
-> # add top bar
-> dt_fr_3 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
-> dt_to_3 = datetime.datetime.strptime('20201210' + '0430', "%Y%m%d%H%M")
-> viewer.add_top_bar(dt_fr_3, dt_to_3, bottom=0., top=0.02, label='Top bar 1')
->
-> # save figure
-> viewer.save_figure()
-> # show on screen
-> viewer.show()
-> ```
-> Output:
+```python
+import datetime
+import geospacelab.visualization.eiscat_viewer as eiscat
+
+dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
+dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
+
+site = 'UHF'
+antenna = 'UHF'
+modulation = '60'
+load_mode = 'AUTO'
+viewer = eiscat.quicklook(
+      dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO'
+)
+
+# viewer.save_figure() # comment this if you need to run the following codes
+# viewer.show()   # comment this if you need to run the following codes.
+
+"""
+As the viewer is an instance of the class EISCATViewer, which is a heritage of the class Datahub.
+The variables can be retrieved in the same ways as shown in Example 1. 
+"""
+n_e = viewer.assign_variable('n_e')
+
+"""
+Several marking tools (vertical lines, shadings, and top bars) can be added as the overlays 
+on the top of the quicklook plot.
+"""
+# add vertical line
+dt_fr_2 = datetime.datetime.strptime('20201209' + '2030', "%Y%m%d%H%M")
+dt_to_2 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
+viewer.add_vertical_line(dt_fr_2, bottom_extend=0, top_extend=0.02, label='Line 1', label_position='top')
+# add shading
+viewer.add_shading(dt_fr_2, dt_to_2, bottom_extend=0, top_extend=0.02, label='Shading 1', label_position='top')
+# add top bar
+dt_fr_3 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
+dt_to_3 = datetime.datetime.strptime('20201210' + '0430', "%Y%m%d%H%M")
+viewer.add_top_bar(dt_fr_3, dt_to_3, bottom=0., top=0.02, label='Top bar 1')
+
+# save figure
+viewer.save_figure()
+# show on screen
+viewer.show()
+```
+Output:
 > ![alt text](https://github.com/JouleCai/geospacelab/blob/master/examples/EISCAT_UHF_beata_cp1_2.1u_CP_20201209-180000-20201210-060000.png?raw=true)
 
 ## Notes
