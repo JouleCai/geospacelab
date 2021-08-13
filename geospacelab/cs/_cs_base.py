@@ -14,11 +14,20 @@ default_coord_attrs = {
         'r':    {'unit': 'Re'},
         'mlt':  {'unit': 'h'},
         'lst':  {'unit': 'h'},
+        'az':   {'unit': 'degree'},
+        'el':   {'unit': 'degree'},
+        'range': {'unit':'degree'},
     },
     'car':  {
         'x':    {'unit': 'km'},
         'y':    {'unit': 'km'},
-        'z':    {'unit': 'km'}
+        'z':    {'unit': 'km'},
+        'E':    {'unit': 'km'},
+        'N':    {'unit': 'km'},
+        'Upward':   {'unit': 'km'},
+        'Downward': {'unit': 'km'},
+        'Forward':  {'unit': 'km'},
+        'Perp':     {'unit': 'km'},
     }
 }
 
