@@ -1,6 +1,6 @@
 import datetime
 
-from geospacelab.visualization.tsviewer import TimeSeriesViewer
+from geospacelab.visualization.ts_viewer import TimeSeriesViewer
 
 
 def example():

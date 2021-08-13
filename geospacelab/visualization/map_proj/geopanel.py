@@ -8,6 +8,8 @@ from cartopy.mpl.ticker import (
 import matplotlib.ticker as mticker
 import matplotlib.path as mpath
 import matplotlib.cm as cm
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+
 
 import geospacelab.visualization.mpl_toolbox as mpl
 
@@ -160,14 +162,26 @@ class PolarView(mpl.Panel):
         if lat_res is None:
             ylocator = LatitudeLocator()
         else:
-            lat_fr = np.abs(-1) + np.mod(90. - np.abs(-1), lat_res)
+            lat_fr = np.abs(self.boundary_lat) + np.mod(90 - np.abs(self.boundary_lat), lat_res)
             lat_to = 85.
-            num_lats = (lat_to - lat_fr) / lat_res + 1.
-            lats = np.linspace(lat_fr, lat_to, int(num_lats)) * np.sign(self.lat_c)
+            # num_lats = (lat_to - lat_fr) / lat_res + 1.
+            lats = np.arange(lat_fr, lat_to, lat_res) * np.sign(self.lat_c)
             ylocator = mticker.FixedLocator(lats)
-        gl = self.major_ax.gridlines(crs=ccrs.PlateCarree(), color='b', linewidth=0.3, linestyle=':')
+        gl = self.major_ax.gridlines(crs=ccrs.PlateCarree(), color='b', linewidth=0.3, linestyle=':', draw_labels=True)
+
+
         gl.xlocator = xlocator
         gl.ylocator = ylocator
+
+        #gl.xformatter = LONGITUDE_FORMATTER()
+        # gl.yformatter = LATITUDE_FORMATTER()
+        # for ea in gl.label_artists:
+        #     if ea[1]==False:
+        #         tx = ea[2]
+        #         xy = tx.get_position()
+        #         #print(xy)
+        #
+        #         tx.set_position([30, xy[1]])
 
     def set_extent(self, boundary_lat=None, boundary_style=None):
         if boundary_lat is not None:
@@ -176,6 +190,9 @@ class PolarView(mpl.Panel):
             self.boundary_style = boundary_style
         x = np.array([270., 90., 180., 0.])
         y = np.ones(4) * self.boundary_lat
+        x = np.arange(0., 360., 5.)
+        y = np.empty_like(x)
+        y[:] = 1. * self.boundary_lat
         data = self.proj.transform_points(ccrs.PlateCarree(), x, y)
         # self.axes.plot(x, y, '.', transform=ccrs.PlateCarree())
         ext = [np.nanmin(data[:, 0]), np.nanmax(data[:, 0]), np.nanmin(data[:, 1]), np.nanmax(data[:, 1])]
