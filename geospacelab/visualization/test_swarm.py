@@ -23,7 +23,7 @@ from geospacelab.visualization.map_proj.geopanel import PolarView
 
 
 def get_swarm_data(dt_fr, dt_to, satID="C"):
-    dt_range = [dt_fr-datetime.timedelta(hours=1), dt_to+datetime.timedelta(hours=1)]
+    dt_range = [dt_fr, dt_to]
 
     instr_info1 = {'name': 'SWARM-' + satID, 'assign_key': 'SWARM_ACC'}
 
@@ -64,7 +64,7 @@ def show(dt_fr, dt_to):
     rho_n_sc = swarm_data['rho_n_sc'].flatten()
 
     plt.figure(figsize=(8,8))
-    panel = PolarView(cs='GEO', pole='N', lon_c=0, boundary_lat=0., proj_style='AzimuthalEquidistant')
+    panel = PolarView(cs='GEO', pole='N', lon_c=None, lst_c=0, ut=dt_fr, boundary_lat=0., proj_style='Stereographic')
     panel.add_subplot(major=True)
     panel.set_extent(boundary_style='circle')
 
@@ -118,7 +118,10 @@ def show(dt_fr, dt_to):
     lc.set_array(z)
     lc.set_linewidth(6)
     line = panel.major_ax.add_collection(lc)
-    plt.gcf().colorbar(line, ax=panel.major_ax)
+    cbar = plt.gcf().colorbar(line, ax=panel.major_ax, pad=0.1, fraction=0.03)
+    cbar.set_label('Neutral mass density\n' + r'(kg/m$^{3}$)', rotation=90, labelpad=10)
+    #cbaxes = plt.gcf().add_axes([0.8, 0.1, 0.03, 0.8]) 
+    #cb = plt.colorbar(panel.major_ax, cax = cbaxes)  
 
 
     sectime, dt0 = du.convert_datetime_to_sectime(sc_dt, datetime.datetime(dt_fr.year, dt_fr.month, dt_fr.day))
@@ -145,13 +148,13 @@ def show(dt_fr, dt_to):
     panel.add_coastlines()
     panel.add_grids()
 
-    plt.gcf().suptitle('Swarm-C neutral mass density\n 2016-02-02T20:00 - 2016-02-03T0800')
+    plt.gcf().suptitle('Swarm-C neutral mass density\n 2016-02-03T07:00 - 2016-02-03T07:50')
     plt.savefig('test2.png', dpi=300)
     plt.show()
 
 
 if __name__ == "__main__":
-    dt_fr = datetime.datetime(2016, 2, 2, 20)
-    dt_to = datetime.datetime(2016, 2, 3, 8)
+    dt_fr = datetime.datetime(2016, 2, 3, 7)
+    dt_to = datetime.datetime(2016, 2, 3, 7, 50)
 
     show(dt_fr, dt_to)
