@@ -105,25 +105,45 @@ class Dataset(datahub.DatasetModel):
                 self.metadata = load_obj.metadata
             self.calc_lat_lon()
 
-    def filter_field_aligned(self):
-        pass
+    def select_beams(self, field_aligned=False, az_el_pairs=None):
+        az = self['az'].flatten()
+        el = self['el'].flatten()
+        if field_aligned:
+            inds = np.where((np.abs(az - 188.6) <= 1.5) and (np.abs(el-77.7) <= 1.5))[0]
+            if not list(inds):
+                mylog.StreamLogger.info("No field-aligned beams found!")
+                return
+        elif isinstance(az_el_pairs, list):
+            inds = []
+            for az1, el1 in az_el_pairs:
+                inds.extend(np.where((np.abs(az - az1) <= 0.5) and (np.abs(el-el1) <= 0.5))[0])
+            inds = inds.sort()
+        self.filter_by_inds(inds)
+
+    def filter_by_inds(self, inds):
+        for var in self._variables.values():
+            if var.ndim >= 1:
+                var.value = var.value[inds, ::]
 
     def calc_lat_lon(self):
-        from geospacelab.cs._geo import GEO, LENU
+        from geospacelab.cs import GEO, LENUSpherical
         az = self['az'].value
         el = self['el'].value
         range = self['range'].value
-        az = np.tile(az, range.shape)  # make az, el, range in the same shape
-        el = np.tile(el, range.shape)
-        cs_LENU = LENU(coords={'az': az, 'el': el, 'range': range},
-                       lat_0=self.site.location['GEO_LAT'],
-                       lon_0=self.site.location['GEO_LON'],
-                       height_0=self.site.location['GEO_ALT'],
-                       kind='sph')
+        az = np.tile(az, (1, range.shape[1]))  # make az, el, range in the same shape
+        el = np.tile(el, (1, range.shape[1]))
+
+        # az = np.array([0, 90, 180, 270])
+        # el = np.array([0, 45, 90, 45])
+        # range = np.array([0, 100, 200, 100])
+        cs_LENU = LENUSpherical(coords={'az': az, 'el': el, 'range': range},
+                                lat_0=self.site.location['GEO_LAT'],
+                                lon_0=self.site.location['GEO_LON'],
+                                height_0=self.site.location['GEO_ALT'])
         cs_new = cs_LENU.to_GEO()
-        self.add_variable(var_name='GEO_LAT', value=cs_new['lat'])
-        self.add_variable(var_name='GEO_LON', value=cs_new['lon'])
-        self.add_variable(var_name='GEO_ALT', value=cs_new['height'])
+        var = self.add_variable(var_name='GEO_LAT', value=cs_new['lat'])
+        var = self.add_variable(var_name='GEO_LON', value=cs_new['lon'])
+        var = self.add_variable(var_name='GEO_ALT', value=cs_new['height'])
         pass
 
     def search_data_files(self, **kwargs):

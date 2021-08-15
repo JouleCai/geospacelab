@@ -94,7 +94,7 @@ class PolarView(mpl.Panel):
 
         cs_class = getattr(geo_cs, cs_fr.upper())
         cs1 = cs_class(coords=coords, ut=self.ut)
-        cs2 = cs1.transform(cs_to=cs_to, append_mlt=self.depend_mlt)
+        cs2 = cs1(cs_to=cs_to, append_mlt=self.depend_mlt)
         if self.depend_mlt:
             lon = self._transform_mlt_to_lon(cs2.coords.mlt)
         else:

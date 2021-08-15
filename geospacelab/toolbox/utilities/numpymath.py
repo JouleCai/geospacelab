@@ -1,6 +1,7 @@
 import numpy as np
 
 def trig_arctan_to_sph_lon(x, y):
+    isscalar = False
     if np.isscalar(x) and np.isscalar(y):
         isscalar = True
         x = np.array([x])

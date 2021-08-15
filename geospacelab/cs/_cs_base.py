@@ -13,7 +13,7 @@ default_coord_attrs = {
         'lon':  {'unit': 'deg'},
         'phi':  {'unit': 'rad'},
         'theta': {'unit': 'rad'},
-        'h': {'unit': 'km'},
+        'height': {'unit': 'km'},
         'r':    {'unit': 'Re'},
         'mlt':  {'unit': 'h'},
         'lst':  {'unit': 'h'},
@@ -27,8 +27,8 @@ default_coord_attrs = {
         'z':    {'unit': 'Re'},
         'E':    {'unit': 'km'},
         'N':    {'unit': 'km'},
-        'Upward':   {'unit': 'km'},
-        'Downward': {'unit': 'km'},
+        'Up':   {'unit': 'km'},
+        'Down': {'unit': 'km'},
         'Forward':  {'unit': 'km'},
         'Perp':     {'unit': 'km'},
     }
@@ -39,13 +39,12 @@ class SpaceCSBase(object):
     def __init__(self,  name=None, vector=None, coords=None, ut=None, kind=None, new_coords=None, **kwargs):
         self.name = name
         self.ut = ut
-        self._coords = None
-        self.vector = None
-        self._set_coords(coords, new_coords=new_coords)
+        self.coords = None
+        self.vector = vector
         self.kind = kind
+        self._set_coords(coords, new_coords=new_coords)
 
     def __call__(self, *args, cs_to=None, **kwargs):
-        import geospacelab.cs as geo_cs
         if not list(args):
             self.vector = None
         elif len(args) == 1:
@@ -59,7 +58,9 @@ class SpaceCSBase(object):
         else:
             raise NotImplementedError
 
-        transform_func = getattr(self, 'to_' + cs_to.upper())(**kwargs)
+        transform_func = getattr(self, 'to_' + cs_to.upper())
+        cs_new = transform_func(**kwargs)
+        return cs_new
 
     def _set_coords(self, coords, new_coords=None):
         if self.kind == 'sph':
@@ -92,12 +93,6 @@ class SpaceCSBase(object):
             setattr(self.coords, key, value)
         else:
             raise KeyError
-
-    def __getattr__(self, item):
-        if hasattr(self.coords, item):
-            getattr(self.coords, item)
-        else:
-            raise AttributeError
 
     def to_GEO(self, cs_new=None, **kwargs):
         if self.name == 'GEO':
@@ -170,7 +165,7 @@ class SpaceSphericalCS(SpaceCSBase):
 
         super().__init__(name=name, vector=vector, coords=coords, ut=ut, kind='sph', new_coords=new_coords, **kwargs)
 
-    def to_cartesian(self):
+    def to_cartesian(self, **kwargs):
         from geospacelab.cs import set_cs
 
         if self.name in ['AACGM', 'APEX']:
@@ -181,9 +176,9 @@ class SpaceSphericalCS(SpaceCSBase):
             cs_new = self.to_GEOC()
             return cs_new.sph_to_car()
 
-        x = self.r * np.sin(self.theta) * np.cos(self.phi)
-        y = self.r * np.sin(self.theta) * np.sin(self.phi)
-        z = self.r * np.cos(self.theta)
+        x = self.coords.r * np.sin(self.coords.theta) * np.cos(self.coords.phi)
+        y = self.coords.r * np.sin(self.coords.theta) * np.sin(self.coords.phi)
+        z = self.coords.r * np.cos(self.coords.theta)
 
         coords = {'x': x, 'y': y, 'z': z}
 
@@ -191,7 +186,7 @@ class SpaceSphericalCS(SpaceCSBase):
         if self.vector is not None:
             mylog.StreamLogger.warning("The tranformation for vectors have not been implemented!")
 
-        cs_new = set_cs(name=self.name, coords=coords, vector=vector, kind='car', ut=self.ut, new_coords=['x', 'y', 'z'])
+        cs_new = set_cs(name=self.name, coords=coords, vector=vector, kind='car', ut=self.ut, **kwargs)
 
         return cs_new
 
@@ -201,22 +196,20 @@ class SpaceCartesianCS(SpaceCSBase):
 
         super().__init__(name=name, vector=vector, coords=coords, ut=ut, kind='car', new_coords=new_coords, **kwargs)
 
-    def to_spherical(self):
+    def to_spherical(self, **kwargs):
         from geospacelab.cs import set_cs
         import geospacelab.toolbox.utilities.numpymath as npmath
 
         # phi: longitude, theta: co-latitude, r: radial distance
-        r = np.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
-        theta = np.arccos(self.z / r)
-        phi = npmath.trig_arctan_to_sph_lon(self.x, self.y)
+        r = np.sqrt(self.coords.x ** 2 + self.coords.y ** 2 + self.coords.z ** 2)
+        theta = np.arccos(self.coords.z / r)
+        phi = npmath.trig_arctan_to_sph_lon(self.coords.x, self.coords.y)
         vector = None
         if self.vector is not None:
             mylog.StreamLogger.warning("The tranformation for vectors have not been implemented!")
-        cs_new = set_cs(name=self.name, vector=vector, kind='sph', ut=self.ut, new_coords=['r', 'theta', 'phi'])
 
-        cs_new['r'] = r
-        cs_new['phi'] = phi
-        cs_new['theta'] = theta
+        coords = {'theta': theta, 'phi': phi, 'r': r}
+        cs_new = set_cs(name=self.name, coords=coords,  vector=vector, kind='sph', ut=self.ut, **kwargs)
 
         return cs_new
 
@@ -247,14 +240,14 @@ class CoordinatesBase(object):
 
 class SphericalCoordinates(CoordinatesBase):
     def __init__(self, cs=None, **kwargs):
-        self.Re = 6371.2
+        self.Re = np.double(6371.2)
         kwargs.setdefault('new_coords', ['r', 'theta', 'phi'])
         super().__init__(cs=cs, kind='sph', **kwargs)
 
 
 class CartesianCoordinates(CoordinatesBase):
     def __init__(self, cs=None, **kwargs):
-        self.Re = 6371.2       # Earth rad in km
+        self.Re = np.double(6371.2)     # Earth rad in km
         kwargs.setdefault('new_coords', ['x', 'y', 'z'])
         super().__init__(cs=cs, kind='car', **kwargs)
 

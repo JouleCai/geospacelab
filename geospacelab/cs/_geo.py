@@ -32,7 +32,6 @@ class GEO(SpaceSphericalCS):
         """
 
         cs_0 = GEO(coords={'lat': lat_0, 'lon': lon_0, 'height': height_0})
-        cs_geoc = cs_0.to_GEOC(kind='sph')
 
         cs_geoc = self.to_GEOC(kind='car')
         cs_new = cs_geoc.to_LENU(lat_0=cs_0['lat'], lon_0=cs_0['lon'], height_0=cs_0['height'], kind=kind)
@@ -41,15 +40,41 @@ class GEO(SpaceSphericalCS):
 
     def to_GEOC(self, kind='sph', **kwargs):
         from geospacelab.cs import geopack
-        hgeod = self.coords.height
+        height = self.coords.height
         if self['lat_unit'] == 'deg':
             factor = np.pi / 180.
         elif self['lat_unit'] == 'rad':
             factor = 1.
         else:
             raise AttributeError
-        xmugeod = self['lat'] * factor
-        r, theta = geopack.geodgeo(hgeod, xmugeod, 1)
+        lat = self['lat'] * factor
+
+        if np.isscalar(lat) and np.isscalar(height):
+            r, theta = geopack.geodgeo(height, lat, 1)
+        else:
+            if np.isscalar(lat) and not np.isscalar(height):
+                heights = height.flatten()
+                lats = np.empty_like(heights)
+                lats[:] = lat
+                shape = height.shape
+            elif not np.isscalar(lat) and np.isscalar(height):
+                lats = lat.flatten()
+                heights = np.empty_like(lats)
+                heights[:] = height
+                shape = lat.shape
+            else:
+                lats = lat.flatten()
+                heights = height.flatten()
+                shape = lat.shape
+
+            rs = np.empty_like(lats)
+            thetas = np.empty_like(lats)
+            for ind, lat1 in enumerate(lats):
+                height1 = heights[ind]
+                rs[ind], thetas[ind] = geopack.geodgeo(height1, lat1, 1)
+            r = np.reshape(rs, shape)
+            theta = np.reshape(thetas, shape)
+
         r = r / self.coords.Re            # unit in Re
         phi = self['lon'] * factor
 
@@ -71,33 +96,37 @@ class GEOD(GEO):
 
 class LENUCartesian(SpaceCartesianCS):
     def __init__(self, coords=None, lat_0=None, lon_0=None, height_0=None, ut=None, vector=None, **kwargs):
-        kwargs.setdefault('new_coords', ['E', 'N', 'Up'])
+        kwargs.setdefault('new_coords', ['E', 'N', 'Up', 'x', 'y', 'z'])
         self.lat_0 = lat_0
         self.lon_0 = lon_0
         self.height_0 = height_0
-        super().__init__(name='LENU', coords=coords, ut=ut, **kwargs)
-        if self.E is not None and self.x is None:
+        super().__init__(name='LENU', coords=coords, ut=ut, vector=vector, **kwargs)
+
+        self.check_coords()
+
+    def check_coords(self):
+        if self.coords.E is not None and self.coords.x is None:
             self.convert_ENU_to_xyz()
-        elif self.E is None and self.x is not None:
+        elif self.coords.E is None and self.coords.x is not None:
             self.convert_xyz_to_ENU()
 
     def convert_ENU_to_xyz(self):
         x = self.coords.E / self.coords.Re
         y = self.coords.N / self.coords.Re
         z = self.coords.Up / self.coords.Re
-        self.coords.add_coord(name='x', value=x, unit='Re')
-        self.coords.add_coord(name='y', value=y, unit='Re')
-        self.coords.add_coord(name='z', value=z, unit='Re')
+        self.coords.x = x
+        self.coords.y = y
+        self.coords.z = z
 
     def convert_xyz_to_ENU(self):
         E = self.coords.x * self.coords.Re
         N = self.coords.y * self.coords.Re
         Up = self.coords.z * self.coords.Re
-        self.coords.add_coord(name='E', value=E, unit='km')
-        self.coords.add_coord(name='N', value=N, unit='km')
-        self.coords.add_coord(name='Up', value=Up, unit='km')
+        self.coords.E = E
+        self.coords.N = N
+        self.coords.Up = Up
 
-    def to_GEOC(self, kind='sph'):
+    def to_GEOC(self, kind='sph', **kwargs):
 
         cs_0 = GEO(coords={'lat': self.lat_0, 'lon': self.lon_0, 'height': self.height_0})
         cs_0 = cs_0.to_GEOC(kind='sph')
@@ -110,19 +139,19 @@ class LENUCartesian(SpaceCartesianCS):
 
         R_1 = np.array([
             [1,     0,                  0],
-            [0,     np.cos(theta_0),    -np.sin(theta_0)],
-            [0,     np.sin(theta_0),    np.cos(theta_0)]
+            [0,     np.cos(theta_0),    np.sin(theta_0)],
+            [0,     -np.sin(theta_0),    np.cos(theta_0)]
         ])
 
         R_2 = np.array([
-            [-np.sin(phi_0),    -np.cos(phi_0),     0],
-            [np.cos(phi_0),     -np.sin(phi_0),     0],
+            [-np.sin(phi_0),    np.cos(phi_0),     0],
+            [-np.cos(phi_0),     -np.sin(phi_0),     0],
             [0,                 0,                  1]
         ])
 
-        x = self.x
-        y = self.y
-        z = self.z
+        x = self.coords.x
+        y = self.coords.y
+        z = self.coords.z
         shape_x = x.shape
 
         v = np.array([x.flatten(), y.flatten(), z.flatten()]).T
@@ -141,13 +170,17 @@ class LENUCartesian(SpaceCartesianCS):
         if vector is not None:
             raise NotImplementedError
 
-        cs_new = GEOC(coords=coords, vector=vector, kind='car')
+        cs_new = GEOCCartesian(coords=coords, vector=vector)
 
         if kind == 'sph':
             cs_new = cs_new.to_spherical()
         return cs_new
 
-    def to_GEO(self):
+    def to_spherical(self, **kwargs):
+        cs_new = super(LENUCartesian, self).to_spherical(lat_0=self.lat_0, lon_0=self.lon_0, height_0=self.height_0)
+        return cs_new
+
+    def to_GEO(self, **kwargs):
         cs_new = self.to_GEOC()
         cs_new = cs_new.to_GEO()
         return cs_new
@@ -161,9 +194,13 @@ class LENUSpherical(SpaceSphericalCS):
         self.lon_0 = lon_0
         self.height_0 = height_0
         super().__init__(name='LENU', coords=coords, ut=ut, vector=vector, **kwargs)
-        if self.phi is None and self.az is not None:
+
+        self.check_coords()
+
+    def check_coords(self):
+        if self.coords.phi is None and self.coords.az is not None:
             self.convert_rangeazel_to_rphitheta()
-        elif self.phi is not None and self.az is None:
+        elif self.coords.phi is not None and self.coords.az is None:
             self.convert_rphitheta_to_rangeazel()
 
     def convert_rangeazel_to_rphitheta(self):
@@ -176,9 +213,10 @@ class LENUSpherical(SpaceSphericalCS):
         phi = np.mod(np.pi/2 - self.coords.az * factor, 2*np.pi)
         theta = np.pi / 2 - self.coords.el * factor
         r = self.coords.range / self.coords.Re
-        self.coords.add_coord(name='phi', value=phi, unit='rad')
-        self.coords.add_coord(name='theta', value=theta, unit='rad')
-        self.coords.add_coord(name='r', value=r, unit='Re')
+        self.coords.phi = phi
+        self.coords.theta = theta
+        self.coords.r = r
+        return theta, phi, r
 
     def convert_rphitheta_to_rangeazel(self):
         if self.coords.phi_unit == 'deg':
@@ -187,13 +225,18 @@ class LENUSpherical(SpaceSphericalCS):
             factor = 180. / np.pi
         else:
             raise NotImplemented
-        az = np.mod(90. - self.phi*factor, 360)
-        el = 90. - self.theta * factor
-        range = self.r * self.coords.Re
+        az = np.mod(90. - self.coords.phi*factor, 360)
+        el = 90. - self.coords.theta * factor
+        range = self.coords.r * self.coords.Re
 
-        self.coords.add_coord(name='az', value=az, unit='deg')
-        self.coords.add_coord(name='el', value=el, unit='deg')
-        self.coords.add_coord(name='range', value=range, unit='Re')
+        self.coords.az = az
+        self.coords.el = el
+        self.coords.range = range
+        return az, el, range
+
+    def to_cartesian(self, **kwargs):
+        cs_new = super(LENUSpherical, self).to_cartesian(lat_0=self.lat_0, lon_0=self.lon_0, height_0=self.height_0)
+        return cs_new
 
     def to_GEO(self, **kwargs):
         cs_new = self.to_cartesian()
@@ -208,32 +251,33 @@ class LENUSpherical(SpaceSphericalCS):
 
 class GEOCSpherical(SpaceSphericalCS):
     def __init__(self, coords=None, ut=None, vector=None, **kwargs):
-        kwargs.setdefault('new_coords', ['phi', 'theta', 'r'])
+        kwargs.setdefault('new_coords', ['phi', 'theta', 'r', 'lat', 'lon', 'height'])
         super().__init__(name='GEOC', coords=coords, ut=ut, vector=vector, **kwargs)
 
         self.check_coords()
 
     def check_coords(self):
-        if self.lat is not None and self.theta is None:
-            self.convert_latlon_to_phitheta()
-        elif self.lat is None and self.theta is not None:
-            self.convert_phitheta_to_latlon()
-        if self.height is None and self.r is not None:
+        if self.coords.lat is not None and self.coords.theta is None:
+            self.convert_latlon_to_thetaphi()
+        elif self.coords.lat is None and self.coords.theta is not None:
+            self.convert_thetaphi_to_latlon()
+        if self.coords.height is None and self.coords.r is not None:
             self.convert_r_to_height()
-        elif self.height is not None and self.r is None:
+        elif self.coords.height is not None and self.coords.r is None:
             self.convert_height_to_r()
 
     def convert_latlon_to_thetaphi(self):
         if self.coords.lon_unit == 'rad':
             factor = 1.
-        elif self.coords.phi_unit == 'deg':
+        elif self.coords.lat_unit == 'deg':
             factor = np.pi / 180.
         else:
             raise NotImplementedError
-        theta = 90. - self.lat * factor
-        phi = self.phi * factor
-        self.add_coord('phi', value=phi)
-        self.add_coord('theta', value=theta)
+        theta = np.pi/2 - self.coords.lat * factor
+        phi = self.coords.lon * factor
+        self['phi'] = phi
+        self['theta'] = theta
+        return theta, phi
 
     def convert_thetaphi_to_latlon(self):
 
@@ -243,14 +287,15 @@ class GEOCSpherical(SpaceSphericalCS):
             factor = 1.
         else:
             raise NotImplementedError
-        lat = 90. - self.theta * factor
-        lon = self.phi * factor
-        self.add_coord('lat', value=lat)
-        self.add_coord('lon', value=lon)
+        lat = 90. - self.coords.theta * factor
+        lon = self.coords.phi * factor
+        self['lat'] = lat
+        self['lon'] = lon
+        return lat, lon
 
     def convert_height_to_r(self):
-        r = (self.height + self.coords.Re) / self.coords.Re
-        self.add_coord('r', value=r)
+        r = (self.coords.height + self.coords.Re) / self.coords.Re
+        self['r'] = r
         return r
 
     def convert_r_to_height(self):
@@ -260,22 +305,46 @@ class GEOCSpherical(SpaceSphericalCS):
             factor = 1.
         else:
             raise NotImplementedError
-        height = self.r * factor - self.coords.Re
-        self.add_coord('height', value=height)
+        height = self.coords.r * factor - self.coords.Re
+        self['height'] = height
         return height
 
-    def to_LENU(self, kind='sph'):
+    def to_LENU(self, kind='sph', **kwargs):
         cs_new = self.to_cartesian()
-        return cs_new.to_LENU(kind=kind)
+        return cs_new.to_LENU(kind=kind, **kwargs)
 
     def to_GEO(self, **kwargs):
         from geospacelab.cs import geopack
 
-        r = self.r * self.coords.Re
-        theta = self.theta
+        r = self.coords.r * self.coords.Re
+        theta = self.coords.theta
 
-        h, lat = geopack.geodgeo(r, theta, -1)
-        lon = self.phi
+        if np.isscalar(r) and np.isscalar(theta):
+            h, lat = geopack.geodgeo(r, theta, 1)
+        else:
+            if np.isscalar(theta) and not np.isscalar(r):
+                rs = r.flatten()
+                thetas = np.empty_like(rs)
+                thetas[:] = theta
+                shape = r.shape
+            elif not np.isscalar(theta) and np.isscalar(r):
+                thetas = theta.flatten()
+                rs = np.empty_like(thetas)
+                rs[:] = r
+                shape = thetas.shape
+            else:
+                thetas = theta.flatten()
+                rs = r.flatten()
+                shape = theta.shape
+
+            hs = np.empty_like(thetas)
+            lats = np.empty_like(thetas)
+            for ind, r1 in enumerate(rs):
+                theta1 = thetas[ind]
+                hs[ind], lats[ind] = geopack.geodgeo(r1, theta1, -1)
+            h = np.reshape(hs, shape)
+            lat = np.reshape(lats, shape)
+        lon = self.coords.phi
 
         factor = 180. / np.pi
 
@@ -299,21 +368,21 @@ class GEOCSpherical(SpaceSphericalCS):
             uts = self.ut
 
         if ut_type is datetime.datetime:
-            lat, lon, r = aacgm.convert_latlon_arr(in_lat=self.lat,
-                                                   in_lon=self.lon, height=self.height,
+            lat, lon, r = aacgm.convert_latlon_arr(in_lat=self.coords.lat,
+                                                   in_lon=self.coords.lon, height=self.coords.height,
                                                    dtime=self.ut, method_code=method_code)
         else:
-            if uts.shape[0] != self.lat.shape[0]:
+            if uts.shape[0] != self.coords.lat.shape[0]:
                 mylog.StreamLogger.error("Datetimes must have the same length as cs!")
                 return
-            lat = np.empty_like(self.lat)
-            lon = np.empty_like(self.lon)
-            r = np.empty_like(self.lat)
+            lat = np.empty_like(self.coords.lat)
+            lon = np.empty_like(self.coords.lon)
+            r = np.empty_like(self.coords.lat)
             for ind_dt, dt in enumerate(uts.flatten()):
                 # print(ind_dt, dt, cs.lat[ind_dt, 0])
-                lat[ind_dt], lon[ind_dt], r[ind_dt] = aacgm.convert_latlon_arr(in_lat=self.lat[ind_dt],
-                                                                               in_lon=self.lon[ind_dt],
-                                                                               height=self.height[ind_dt],
+                lat[ind_dt], lon[ind_dt], r[ind_dt] = aacgm.convert_latlon_arr(in_lat=self.coords.lat[ind_dt],
+                                                                               in_lon=self.coords.lon[ind_dt],
+                                                                               height=self.coords.height[ind_dt],
                                                                                dtime=dt, method_code=method_code)
         cs_new = AACGM(coords={'lat': lat, 'lon': lon, 'r': r, 'r_unit': 'R_E'}, ut=self.ut)
         if append_mlt:
@@ -323,8 +392,7 @@ class GEOCSpherical(SpaceSphericalCS):
                 mlt = np.empty_like(self.coords.lat)
                 for ind_dt, dt in enumerate(self.ut.flatten()):
                     mlt[ind_dt] = aacgm.convert_mlt(lon[ind_dt], dt)
-            cs_new.coords.add_coord('mlt', unit='h')
-            cs_new.coords.mlt = mlt
+            cs_new['mlt'] = mlt
         return cs_new
 
     def to_APEX(self, append_mlt=False, **kwargs):
@@ -374,7 +442,7 @@ class GEOCCartesian(SpaceCartesianCS):
     def __init__(self, coords=None, ut=None, vector=None, **kwargs):
         kwargs.setdefault('new_coords', ['x', 'y', 'z'])
 
-        super().__init__(name='GEOC', coords=coords, ut=ut, kind='car', vector=vector, **kwargs)
+        super().__init__(name='GEOC', coords=coords, ut=ut, vector=vector, **kwargs)
 
     def to_GEO(self, **kwargs):
         cs_new = self.to_spherical()
@@ -397,9 +465,9 @@ class GEOCCartesian(SpaceCartesianCS):
         y_0 = cs_0['y']
         z_0 = cs_0['z']
 
-        x = self.x
-        y = self.y
-        z = self.z
+        x = self.coords.x
+        y = self.coords.y
+        z = self.coords.z
         shape_x = x.shape
 
         v = np.array([x.flatten(), y.flatten(), z.flatten()]).T
@@ -407,15 +475,15 @@ class GEOCCartesian(SpaceCartesianCS):
         v_0 = np.tile(v_0, (x.size, 1))
 
         R_1 = np.array([
-            [-np.sin(phi_0), np.cos(phi_0), 0],
-            [-np.cos(phi_0), -np.sin(phi_0), 0],
+            [-np.sin(phi_0), -np.cos(phi_0), 0],
+            [np.cos(phi_0), -np.sin(phi_0), 0],
             [0, 0, 1]
         ])
 
         R_2 = np.array([
             [1, 0, 0],
-            [0, np.cos(theta_0), np.sin(theta_0)],
-            [0, -np.sin(theta_0), np.cos(theta_0)]
+            [0, np.cos(theta_0), -np.sin(theta_0)],
+            [0, np.sin(theta_0), np.cos(theta_0)]
         ])
 
         v_new = (v - v_0) @ R_1 @ R_2

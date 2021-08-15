@@ -6,7 +6,7 @@ from geopack import geopack
 
 
 def set_cs(name=None, **kwargs):
-    kind = kwargs.get('kind', None)
+    kind = kwargs.pop('kind', None)
     if name.upper() == 'GEO':
         cls = GEO
     elif name.upper() == 'AACGM':
