@@ -1,7 +1,9 @@
 import datetime
+import numpy as np
 
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, SiteModel
+from geospacelab.datahub.sources.madrigal import madrigal_database
 from geospacelab import preferences as prf
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pybasic as basic
@@ -36,9 +38,9 @@ default_attrs_required = ['site', 'antenna', 'modulation']
 
 class Dataset(datahub.DatasetModel):
     def __init__(self, **kwargs):
-        self.database = 'Madrigal'
+        self.database = madrigal_database
         self.facility = 'EISCAT'
-        self.site = ''
+        self.site = None
         self.antenna = ''
         self.experiment = ''
         self.pulse_code = ''
@@ -101,7 +103,29 @@ class Dataset(datahub.DatasetModel):
                 self.experiment = rawdata_path.split('/')[-1].split('@')[0]
                 self.affiliation = load_obj.metadata['affiliation']
                 self.metadata = load_obj.metadata
+            self.calc_lat_lon()
 
+    def filter_field_aligned(self):
+        pass
+
+    def calc_lat_lon(self):
+        from geospacelab.cs._geo import GEO, LENU
+        az = self['az'].value
+        el = self['el'].value
+        range = self['range'].value
+        az = np.tile(az, range.shape)  # make az, el, range in the same shape
+        el = np.tile(el, range.shape)
+        cs_LENU = LENU(coords={'az': az, 'el': el, 'range': range},
+                       lat_0=self.site.location['GEO_LAT'],
+                       lon_0=self.site.location['GEO_LON'],
+                       height_0=self.site.location['GEO_ALT'],
+                       kind='sph')
+        cs_new = cs_LENU.to_GEO()
+        self.add_variable(var_name='GEO_LAT', value=cs_new['lat'])
+        self.add_variable(var_name='GEO_LON', value=cs_new['lon'])
+        self.add_variable(var_name='GEO_ALT', value=cs_new['height'])
+        pass
+    
     def search_data_files(self, **kwargs):
         dt_fr = self.dt_fr
         dt_to = self.dt_to
@@ -165,7 +189,12 @@ class Dataset(datahub.DatasetModel):
 
     @database.setter
     def database(self, value):
-        self._database = DatabaseModel(value)
+        if isinstance(value, str):
+            self._database = DatabaseModel(value)
+        elif issubclass(value.__class__, DatabaseModel):
+            self._database = value
+        else:
+            raise TypeError
 
     @property
     def facility(self):
@@ -173,7 +202,12 @@ class Dataset(datahub.DatasetModel):
 
     @facility.setter
     def facility(self, value):
-        self._facility = FacilityModel(value)
+        if isinstance(value, str):
+            self._facility = FacilityModel(value)
+        elif issubclass(value.__class__, FacilityModel):
+            self._facility = value
+        else:
+            raise TypeError
 
     @property
     def site(self):
@@ -181,15 +215,64 @@ class Dataset(datahub.DatasetModel):
 
     @site.setter
     def site(self, value):
-        if value == 'TRO':
-            value = 'UHF'
-        self._site = Site(value)
+        if value is None:
+            self._site=None
+            return
+        if isinstance(value, str):
+            if value == 'TRO':
+                value = 'UHF'
+            self._site = EISCATSite(value)
+        elif issubclass(value.__class__, SiteModel):
+            self._site = value
+        else:
+            raise TypeError
 
 
-class Site(SiteModel):
+class EISCATSite(SiteModel):
     def __new__(cls, str_in, **kwargs):
         obj = super().__new__(cls, str_in, **kwargs)
         return obj
+
+    def __init__(self, str_in, **kwargs):
+        site_info = {
+            'TRO': {
+                'name': 'Tromsø',
+                'location': {
+                    'GEO_LAT': 69.58,
+                    'GEO_LON': 19.23,
+                    'GEO_ALT': 86 * 1e-3,   # in km
+                    'CGM_LAT': 66.73,
+                    'CGM_LOM': 102.18,
+                    'L (ground)': 6.45,
+                    'L (300km)':  6.70,
+                },
+            },
+            'ESR': {
+                'name': 'Longyearbyen',
+                'location': {
+                    'GEO_LAT': 78.15,
+                    'GEO_LON': 16.02,
+                    'GEO_ALT': 445 * 1e-3,
+                    'CGM_LAT': 75.43,
+                    'CGM_LON': 110.68,
+                }
+            },
+        }
+
+        if str_in in ['UHF', 'TRO']:
+            self.name = site_info['TRO']['name'] + '-UHF'
+            self.location = site_info['TRO']['location']
+        elif str_in == 'VHF':
+            self.name = site_info['TRO']['name'] + '-VHF'
+            self.location = site_info['TRO']['location']
+        elif str_in in ['ESR', 'LYB']:
+            self.name = site_info['ESR']['name']
+            self.location = site_info['ESR']['location']
+        else:
+            raise NotImplementedError('The site ”{}" does not exist or has not been implemented!'.format(str_in))
+
+
+
 
 
 

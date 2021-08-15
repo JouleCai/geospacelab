@@ -123,7 +123,6 @@ def show_rho_n(dt_fr, dt_to):
     #cbaxes = plt.gcf().add_axes([0.8, 0.1, 0.03, 0.8]) 
     #cb = plt.colorbar(panel.major_ax, cax = cbaxes)  
 
-
     sectime, dt0 = du.convert_datetime_to_sectime(sc_dt, datetime.datetime(dt_fr.year, dt_fr.month, dt_fr.day))
     sectime_res = 10 * 60
     time_ticks = np.arange(np.floor(sectime[0]/sectime_res)*sectime_res, np.ceil(sectime[-1]/sectime_res)*sectime_res, sectime_res)

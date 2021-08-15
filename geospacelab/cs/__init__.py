@@ -1,5 +1,5 @@
 from geospacelab.cs._cs_base import SphericalCoordinates, CartesianCoordinates, SpaceCSBase
-from geospacelab.cs._geo import GEO, GEOD, GEOC
+from geospacelab.cs._geo import GEO, GEOD, GEOC, LENU
 from geospacelab.cs._aacgm import AACGM
 from geospacelab.cs._apex import APEX
 from geopack import geopack
@@ -16,7 +16,9 @@ def set_cs(name=None, coords=None, kind=None, ut=None, **kwargs):
         cls = GEOD
     elif name.upper() == 'GEOC':
         cls = GEOC
+    elif name.upper() == 'LENU':
+        cls = LENU
     else:
         raise NotImplementedError
 
-    return cls(name=name.upper(), coords=coords, kind=kind, ut=ut, **kwargs)
+    return cls(coords=coords, kind=kind, ut=ut, **kwargs)

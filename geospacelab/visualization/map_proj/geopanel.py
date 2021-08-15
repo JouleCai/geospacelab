@@ -99,7 +99,6 @@ class PolarView(mpl.Panel):
             lon = self._transform_mlt_to_lon(cs2.coords.mlt)
         else:
             lon = cs2.coords.lon
-
         cs2.coords.lon = lon
         return cs2
 

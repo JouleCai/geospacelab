@@ -6,22 +6,22 @@ from geopack import geopack
 
 default_coord_attrs = {
     'sph':  {
-        'lat':  {'unit': 'degree'},
-        'lon':  {'unit': 'degree'},
-        'phi':  {'unit': 'radians'},
-        'theta': {'unit': 'radians'},
+        'lat':  {'unit': 'deg'},
+        'lon':  {'unit': 'deg'},
+        'phi':  {'unit': 'rad'},
+        'theta': {'unit': 'rad'},
         'height': {'unit': 'km'},
         'r':    {'unit': 'Re'},
         'mlt':  {'unit': 'h'},
         'lst':  {'unit': 'h'},
-        'az':   {'unit': 'degree'},
-        'el':   {'unit': 'degree'},
-        'range': {'unit':'degree'},
+        'az':   {'unit': 'deg'},
+        'el':   {'unit': 'deg'},
+        'range': {'unit':'deg'},
     },
     'car':  {
-        'x':    {'unit': 'km'},
-        'y':    {'unit': 'km'},
-        'z':    {'unit': 'km'},
+        'x':    {'unit': 'Re'},
+        'y':    {'unit': 'Re'},
+        'z':    {'unit': 'Re'},
         'E':    {'unit': 'km'},
         'N':    {'unit': 'km'},
         'Upward':   {'unit': 'km'},
@@ -39,7 +39,7 @@ class SpaceCSBase(object):
         self.ut = ut
         self.coords = None
         self.kind = kind
-        self._set_coords(kind, new_coords=new_coords)
+        self._set_coords(new_coords=new_coords)
         
         attrs = {}
 
@@ -56,10 +56,10 @@ class SpaceCSBase(object):
                     'The coords have not the attr {}. Add a new coord using the method "add_coord"'.format(key)
                 )
 
-    def _set_coords(self, sph_or_car, new_coords=None):
-        if sph_or_car == 'sph':
+    def _set_coords(self, new_coords=None):
+        if self.kind == 'sph':
             self.coords = SphericalCoordinates(cs=self, new_coords=new_coords)
-        elif self.sph_or_car == 'car':
+        elif self.kind == 'car':
             self.coords = CartesianCoordinates(cs=self, new_coords=new_coords)
 
     def transform(self, cs_to=None, **kwargs):
@@ -115,9 +115,9 @@ class SphericalCoordinates(CoordinatesBase):
 
     def convert_thetaphi_to_latlon(self):
 
-        if self.phi_unit == 'radians':
+        if self.phi_unit == 'rad':
             factor = 180. / np.pi
-        elif self.phi_unit == 'degree':
+        elif self.phi_unit == 'deg':
             factor = 1.
         else:
             raise NotImplementedError
@@ -143,9 +143,9 @@ class SphericalCoordinates(CoordinatesBase):
         return height
 
     def convert_latlon_to_thetaphi(self):
-        if self.lon_unit == 'radians':
+        if self.lon_unit == 'rad':
             factor = 1.
-        elif self.phi_unit == 'degree':
+        elif self.phi_unit == 'deg':
             factor = np.pi / 180.
         else:
             raise NotImplementedError
@@ -160,13 +160,10 @@ class SphericalCoordinates(CoordinatesBase):
 
         if self.cs.name in ['GEO', 'GEOD']:
             cs_new = self.cs.to_GEOC
-            r = cs_new.coords.r
-            phi = cs_new.coords.phi
-            theta = cs_new.coords.theta
-            return cs_new.to_car
+            return cs_new.to_car()
 
         from geospacelab.cs import set_cs
-        cs_new = set_cs(name=self.cs.name, kind='car', ut=self.cs.ut)
+        cs_new = set_cs(name=self.cs.name, kind='car', ut=self.cs.ut, new_coords=['x', 'y', 'z'])
         cs_new['x'] = self.r * np.sin(self.theta) * np.cos(self.phi)
         cs_new['y'] = self.r * np.sin(self.theta) * np.sin(self.phi)
         cs_new['z'] = self.r * np.cos(self.theta)
@@ -176,7 +173,7 @@ class SphericalCoordinates(CoordinatesBase):
 
 class CartesianCoordinates(CoordinatesBase):
     def __init__(self, cs=None, **kwargs):
-        self._Re = 6371.2       # Earth radians in km
+        self._Re = 6371.2       # Earth rad in km
         kwargs.setdefault('new_coords', ['x', 'y', 'z'])
         super().__init__(cs=cs, kind='car', **kwargs)
 
@@ -188,7 +185,7 @@ class CartesianCoordinates(CoordinatesBase):
         theta = np.arccos(self.z / r)
         phi = npmath.trig_arctan_to_sph_lon(self.x, self.y)
 
-        cs_new = set_cs(name=self.cs.name, kind='sph', ut=self.cs.ut)
+        cs_new = set_cs(name=self.cs.name, kind='sph', ut=self.cs.ut, new_coords=['r', 'theta', 'phi'])
 
         cs_new['r'] = r
         cs_new['phi'] = phi

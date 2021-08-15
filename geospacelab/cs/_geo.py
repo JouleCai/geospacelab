@@ -9,8 +9,8 @@ import geospacelab.toolbox.utilities.pybasic as pybasic
 class GEO(SpaceCSBase):
     def __init__(self, coords=None, ut=None, **kwargs):
         
-        new_coords = ['lat', 'lon', 'height']
-        super().__init__(name='GEO', coords=coords, ut=ut, kind='sph', new_coords=new_coords, **kwargs)
+        kwargs.setdefault('new_coords', ['lat', 'lon', 'height'])
+        super().__init__(name='GEO', coords=coords, ut=ut, kind='sph',**kwargs)
 
     def to_AACGM(self, append_mlt=False):
         cs_geoc = self.to_GEOC()
@@ -44,9 +44,9 @@ class GEO(SpaceCSBase):
         from geospacelab.cs import geopack
         cs_new = GEOC(ut=self.ut, kind='sph')
         hgeod = self.coords.height
-        if self['lat_unit'] == 'degree':
+        if self['lat_unit'] == 'deg':
             factor = np.pi / 180.
-        elif self['lat_unit'] == 'radians':
+        elif self['lat_unit'] == 'rad':
             factor = 1.
         else:
             raise AttributeError
@@ -66,22 +66,49 @@ class GEO(SpaceCSBase):
 
 
 class GEOD(GEO):
-    def __init__(self, coords=None, ut=None, kind='sph', **kwargs):
+    def __init__(self, coords=None, ut=None, **kwargs):
         super().__init__(name='GEOD', coords=coords, ut=ut, kind='sph', **kwargs)
 
 
 class LENU(SpaceCSBase):
     def __init__(self, coords=None, lat_0=None, lon_0=None, height_0=None, ut=None, kind='sph', **kwargs):
         if kind == 'sph':
-            new_coords = ['az', 'el', 'range']
+            kwargs.setdefault('new_coords', ['az', 'el', 'range'])
         elif kind == 'car':
-            new_coords = ['E', 'N', 'Up']
+            kwargs.setdefault('new_coords', ['E', 'N', 'Up'])
         else:
             raise NotImplemented
         self.lat_0 = lat_0
         self.lon_0 = lon_0
         self.height_0 = height_0
-        super().__init__(name='GEO', coords=coords, ut=ut, kind=kind, new_coords=new_coords, **kwargs)
+        super().__init__(name='LENU', coords=coords, ut=ut, kind=kind, **kwargs)
+
+    def convert_rangeazel_to_rphitheta(self):
+        if self.kind == 'car':
+            return
+        if self.coords.az_unit == 'deg':
+            factor = np.pi / 180.
+        elif self.coords.az_unit == 'rad':
+            factor = 1.
+        else:
+            raise NotImplemented
+        phi = np.mod(np.pi/2 - self.coords.az * factor, 2*np.pi)
+        theta = np.pi / 2 - self.coords.el * factor
+        r = self.coords.range / self.coords._Re
+        self.coords.add_coord(name='phi', value=phi, unit='rad')
+        self.coords.add_coord(name='theta', value=theta, unit='rad')
+        self.coords.add_coord(name='r', value=r, unit='Re')
+
+    def convert_ENUp_to_xyz(self):
+        if self.kind == 'sph':
+            return
+
+        x = self.coords.E / self.coords._Re
+        y = self.coords.N / self.coords._Re
+        z = self.coords.Up / self.coords._Re
+        self.coords.add_coord(name='x', value=x, unit='Re')
+        self.coords.add_coord(name='y', value=y, unit='Re')
+        self.coords.add_coord(name='z', value=z, unit='Re')
 
     def to_GEO(self):
         cs_new = self.to_GEOC()
@@ -89,9 +116,8 @@ class LENU(SpaceCSBase):
         return cs_new
 
     def to_GEOC(self):
-        cs_0 = GEOC(coords={'lat': self.lat_0, 'lon': self.lon_0, 'height': self.height_0})
-        cs_0.coords.convert_latlon_to_thetaphi()
-        cs_0.coords.convert_h_to_r()
+        cs_0 = GEO(coords={'lat': self.lat_0, 'lon': self.lon_0, 'height': self.height_0})
+        cs_0 = cs_0.to_GEOC(kind='sph')
         phi_0 = cs_0['phi']
         theta_0 = cs_0['theta']
         cs_0 = cs_0.coords.to_car()
@@ -100,8 +126,7 @@ class LENU(SpaceCSBase):
         z_0 = cs_0['z']
 
         if self.kind == 'sph':
-            if not hasattr(self.coords, 'phi'):
-                self.az_el_range_to_sph()
+            self.convert_rangeazel_to_rphitheta()
             cs_v = self.coords.to_car()
         else:
             cs_v = self
@@ -137,12 +162,12 @@ class LENU(SpaceCSBase):
 
 class GEOC(SpaceCSBase):
     def __init__(self, coords=None, ut=None, kind='sph', **kwargs):
-        if kind=='sph':
-            new_coords = ['phi', 'theta', 'r']
+        if kind == 'sph':
+            kwargs.setdefault('new_coords', ['phi', 'theta', 'r'])
         elif kind == 'car':
-            new_coords = ['x', 'y', 'z']
+            kwargs.setdefault('new_coords', ['x', 'y', 'z'])
 
-        super().__init__(name='GEOC', coords=coords, ut=ut, kind=kind, new_coords=new_coords, **kwargs)
+        super().__init__(name='GEOC', coords=coords, ut=ut, kind=kind, **kwargs)
 
     def to_AACGM(self, append_mlt=False):
         import aacgmv2 as aacgm
