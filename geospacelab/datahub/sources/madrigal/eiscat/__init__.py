@@ -125,7 +125,7 @@ class Dataset(datahub.DatasetModel):
         self.add_variable(var_name='GEO_LON', value=cs_new['lon'])
         self.add_variable(var_name='GEO_ALT', value=cs_new['height'])
         pass
-    
+
     def search_data_files(self, **kwargs):
         dt_fr = self.dt_fr
         dt_to = self.dt_to
@@ -216,7 +216,7 @@ class Dataset(datahub.DatasetModel):
     @site.setter
     def site(self, value):
         if value is None:
-            self._site=None
+            self._site = None
             return
         if isinstance(value, str):
             if value == 'TRO':
