@@ -167,7 +167,7 @@ class PolarView(mpl.Panel):
             # num_lats = (lat_to - lat_fr) / lat_res + 1.
             lats = np.arange(lat_fr, lat_to, lat_res) * np.sign(self.lat_c)
             ylocator = mticker.FixedLocator(lats)
-        gl = self.major_ax.gridlines(crs=ccrs.PlateCarree(), color='b', linewidth=0.3, linestyle=':', draw_labels=False)
+        gl = self.major_ax.gridlines(crs=ccrs.PlateCarree(), color='b', linewidth=0.3, linestyle=':', draw_labels=True)
 
 
         gl.xlocator = xlocator
