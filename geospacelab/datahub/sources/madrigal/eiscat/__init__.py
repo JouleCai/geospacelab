@@ -52,6 +52,7 @@ class Dataset(datahub.DatasetModel):
         self.download = False
         self._thisday = None
         self.metadata = None
+        self.beam_location = True
 
         load_data = kwargs.pop('load_data', False)
 
@@ -103,29 +104,42 @@ class Dataset(datahub.DatasetModel):
                 self.experiment = rawdata_path.split('/')[-1].split('@')[0]
                 self.affiliation = load_obj.metadata['affiliation']
                 self.metadata = load_obj.metadata
-            self.calc_lat_lon()
+            if self.beam_location:
+                self.calc_lat_lon()
+            # self.select_beams(field_aligned=True)
 
     def select_beams(self, field_aligned=False, az_el_pairs=None):
-        az = self['az'].flatten()
-        el = self['el'].flatten()
         if field_aligned:
-            inds = np.where((np.abs(az - 188.6) <= 1.5) and (np.abs(el-77.7) <= 1.5))[0]
+            if az_el_pairs is not None:
+                raise AttributeError("The parameters field_aligned and az_el_pairs cannot be set at the same time!")
+            if self.site != 'UHF':
+                raise AttributeError("Only UHF can be applied.")
+
+        az = self['az'].value.flatten()
+        el = self['el'].value.flatten()
+        if field_aligned:
+            inds = np.where(((np.abs(az - 188.6) <= 1.5) & (np.abs(el-77.7) <= 1.5)))[0]
             if not list(inds):
                 mylog.StreamLogger.info("No field-aligned beams found!")
                 return
         elif isinstance(az_el_pairs, list):
             inds = []
             for az1, el1 in az_el_pairs:
-                inds.extend(np.where((np.abs(az - az1) <= 0.5) and (np.abs(el-el1) <= 0.5))[0])
-            inds = inds.sort()
+                inds.extend(np.where(((np.abs(az - az1) <= 0.5) & (np.abs(el-el1) <= 0.5)))[0])
+            inds.sort()
         self.filter_by_inds(inds)
 
     def filter_by_inds(self, inds):
+        if inds is None:
+            return
+        if not list(inds):
+            return
+        shape_0 = self['DATETIME'].value.shape[0]
         for var in self._variables.values():
-            if var.ndim >= 1:
+            if var.value.shape[0] == shape_0:
                 var.value = var.value[inds, ::]
 
-    def calc_lat_lon(self):
+    def calc_lat_lon(self, AACGM=True):
         from geospacelab.cs import GEO, LENUSpherical
         az = self['az'].value
         el = self['el'].value
@@ -144,6 +158,13 @@ class Dataset(datahub.DatasetModel):
         var = self.add_variable(var_name='GEO_LAT', value=cs_new['lat'])
         var = self.add_variable(var_name='GEO_LON', value=cs_new['lon'])
         var = self.add_variable(var_name='GEO_ALT', value=cs_new['height'])
+
+        if AACGM:
+            cs_new.ut = self['DATETIME'].value
+            cs_new = cs_new.to_AACGM()
+        var = self.add_variable(var_name='AACGM_LAT', value=cs_new['lat'])
+        var = self.add_variable(var_name='AACGM_LON', value=cs_new['lon'])
+        # var = self.add_variable(var_name='AACGM_ALT', value=cs_new['height'])
         pass
 
     def search_data_files(self, **kwargs):

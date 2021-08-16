@@ -176,6 +176,11 @@ class VariableModel(object):
         else:
             value = var_new
 
+        if np.isscalar(value):
+            if value != self.value:
+                mylog.StreamLogger.warning("The scalar variables have different values!")
+            return
+
         if self.value is None:
             self.value = value
         else:
@@ -319,7 +324,7 @@ class VariableModel(object):
         if self._ndim is None:
             var_type = self.variable_type
             if var_type is None:
-                mylog.StreamLogger.warning('the variable type has not been defined! Use default type "Scalar"...')
+                mylog.StreamLogger.warning('the variable type has not been defined! Use default type "scalar"...')
                 var_type = "scalar"
             value = self.value
             if value is None:
