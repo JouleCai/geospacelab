@@ -36,7 +36,7 @@ After creating the virtual environement, you need to activate the virtual enviro
 conda activate [YOUR_ENV_NAME]
 ```
 
-More detailed instroduction to work with the anaconda environment can be found [here](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#), 
+More detailed information to set the anaconda environment can be found [here](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#), 
 
 ### 2. Installation
 #### Quick install from the pre-built release (recommended):
