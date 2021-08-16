@@ -126,7 +126,7 @@ def load_eiscat_hdf5(file_path):
             var_ind = var_info_list['index'][ind_v]
             var = h5_data[var_group][var_ind]
             if var_group == 'par0d':
-                metadata[var_name] = var[0]
+                vars[var_name] = var[0]
             elif var_group == 'par1d':
                 var = var.reshape(num_row, 1)
                 vars[var_name] = var
@@ -184,14 +184,31 @@ def load_eiscat_hdf5(file_path):
     vars['T_e'] = vars['T_i'] * vars['T_r']
     vars['T_e_err'] = vars['T_e'] * np.sqrt((vars['T_i_err']/vars['T_i'])**2
                                             + (vars['T_r_err']/vars['T_r'])**2)
+
+    # check height and range
     vars['height'] = vars['height'] / 1000.
     vars['range'] = vars['range'] / 1000.
+    inds = np.where(np.isnan(vars['height']))
+    for i in range(len(inds[0])):
+        ind_0 = inds[0][i]
+        ind_1 = inds[1][i]
+        x0 = np.arange(vars['height'].shape[0])
+        y0 = vars['height'][:, ind_1]
+        xp = x0[np.where(np.isfinite(y0))[0]]
+        yp = y0[np.isfinite(y0)]
+        vars['height'][ind_0, ind_1] = np.interp(x0[ind_0], xp, yp)
 
-    if 'az' in metadata.keys():
+        x0 = np.arange(vars['range'].shape[0])
+        y0 = vars['range'][:, ind_1]
+        xp = x0[np.isfinite(y0)]
+        yp = y0[np.isfinite(y0)]
+        vars['range'][ind_0, ind_1] = np.interp(x0[ind_0], xp, yp)
+
+    if np.isscalar(vars['az']):
         az = np.empty((vars['DATETIME_1'].shape[0], 1))
         az[:, :] = vars['az']
         vars['az'] = az
-    if 'el' in metadata.keys():
+    if np.isscalar(vars['el']):
         el = np.empty((vars['DATETIME_1'].shape[0], 1))
         el[:, :] = vars['el']
         vars['el'] = el

@@ -1,7 +1,9 @@
 import datetime
+import numpy as np
 
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, SiteModel
+from geospacelab.datahub.sources.madrigal import madrigal_database
 from geospacelab import preferences as prf
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pybasic as basic
@@ -36,9 +38,9 @@ default_attrs_required = ['site', 'antenna', 'modulation']
 
 class Dataset(datahub.DatasetModel):
     def __init__(self, **kwargs):
-        self.database = 'Madrigal'
+        self.database = madrigal_database
         self.facility = 'EISCAT'
-        self.site = ''
+        self.site = None
         self.antenna = ''
         self.experiment = ''
         self.pulse_code = ''
@@ -50,6 +52,7 @@ class Dataset(datahub.DatasetModel):
         self.download = False
         self._thisday = None
         self.metadata = None
+        self.beam_location = True
 
         load_data = kwargs.pop('load_data', False)
 
@@ -101,6 +104,68 @@ class Dataset(datahub.DatasetModel):
                 self.experiment = rawdata_path.split('/')[-1].split('@')[0]
                 self.affiliation = load_obj.metadata['affiliation']
                 self.metadata = load_obj.metadata
+            if self.beam_location:
+                self.calc_lat_lon()
+            # self.select_beams(field_aligned=True)
+
+    def select_beams(self, field_aligned=False, az_el_pairs=None):
+        if field_aligned:
+            if az_el_pairs is not None:
+                raise AttributeError("The parameters field_aligned and az_el_pairs cannot be set at the same time!")
+            if self.site != 'UHF':
+                raise AttributeError("Only UHF can be applied.")
+
+        az = self['az'].value.flatten()
+        el = self['el'].value.flatten()
+        if field_aligned:
+            inds = np.where(((np.abs(az - 188.6) <= 1.5) & (np.abs(el-77.7) <= 1.5)))[0]
+            if not list(inds):
+                mylog.StreamLogger.info("No field-aligned beams found!")
+                return
+        elif isinstance(az_el_pairs, list):
+            inds = []
+            for az1, el1 in az_el_pairs:
+                inds.extend(np.where(((np.abs(az - az1) <= 0.5) & (np.abs(el-el1) <= 0.5)))[0])
+            inds.sort()
+        self.filter_by_inds(inds)
+
+    def filter_by_inds(self, inds):
+        if inds is None:
+            return
+        if not list(inds):
+            return
+        shape_0 = self['DATETIME'].value.shape[0]
+        for var in self._variables.values():
+            if var.value.shape[0] == shape_0:
+                var.value = var.value[inds, ::]
+
+    def calc_lat_lon(self, AACGM=True):
+        from geospacelab.cs import GEO, LENUSpherical
+        az = self['az'].value
+        el = self['el'].value
+        range = self['range'].value
+        az = np.tile(az, (1, range.shape[1]))  # make az, el, range in the same shape
+        el = np.tile(el, (1, range.shape[1]))
+
+        # az = np.array([0, 90, 180, 270])
+        # el = np.array([0, 45, 90, 45])
+        # range = np.array([0, 100, 200, 100])
+        cs_LENU = LENUSpherical(coords={'az': az, 'el': el, 'range': range},
+                                lat_0=self.site.location['GEO_LAT'],
+                                lon_0=self.site.location['GEO_LON'],
+                                height_0=self.site.location['GEO_ALT'])
+        cs_new = cs_LENU.to_GEO()
+        var = self.add_variable(var_name='GEO_LAT', value=cs_new['lat'])
+        var = self.add_variable(var_name='GEO_LON', value=cs_new['lon'])
+        var = self.add_variable(var_name='GEO_ALT', value=cs_new['height'])
+
+        if AACGM:
+            cs_new.ut = self['DATETIME'].value
+            cs_new = cs_new.to_AACGM()
+        var = self.add_variable(var_name='AACGM_LAT', value=cs_new['lat'])
+        var = self.add_variable(var_name='AACGM_LON', value=cs_new['lon'])
+        # var = self.add_variable(var_name='AACGM_ALT', value=cs_new['height'])
+        pass
 
     def search_data_files(self, **kwargs):
         dt_fr = self.dt_fr
@@ -165,7 +230,12 @@ class Dataset(datahub.DatasetModel):
 
     @database.setter
     def database(self, value):
-        self._database = DatabaseModel(value)
+        if isinstance(value, str):
+            self._database = DatabaseModel(value)
+        elif issubclass(value.__class__, DatabaseModel):
+            self._database = value
+        else:
+            raise TypeError
 
     @property
     def facility(self):
@@ -173,7 +243,12 @@ class Dataset(datahub.DatasetModel):
 
     @facility.setter
     def facility(self, value):
-        self._facility = FacilityModel(value)
+        if isinstance(value, str):
+            self._facility = FacilityModel(value)
+        elif issubclass(value.__class__, FacilityModel):
+            self._facility = value
+        else:
+            raise TypeError
 
     @property
     def site(self):
@@ -181,15 +256,64 @@ class Dataset(datahub.DatasetModel):
 
     @site.setter
     def site(self, value):
-        if value == 'TRO':
-            value = 'UHF'
-        self._site = Site(value)
+        if value is None:
+            self._site = None
+            return
+        if isinstance(value, str):
+            if value == 'TRO':
+                value = 'UHF'
+            self._site = EISCATSite(value)
+        elif issubclass(value.__class__, SiteModel):
+            self._site = value
+        else:
+            raise TypeError
 
 
-class Site(SiteModel):
+class EISCATSite(SiteModel):
     def __new__(cls, str_in, **kwargs):
         obj = super().__new__(cls, str_in, **kwargs)
         return obj
+
+    def __init__(self, str_in, **kwargs):
+        site_info = {
+            'TRO': {
+                'name': 'Tromsø',
+                'location': {
+                    'GEO_LAT': 69.58,
+                    'GEO_LON': 19.23,
+                    'GEO_ALT': 86 * 1e-3,   # in km
+                    'CGM_LAT': 66.73,
+                    'CGM_LOM': 102.18,
+                    'L (ground)': 6.45,
+                    'L (300km)':  6.70,
+                },
+            },
+            'ESR': {
+                'name': 'Longyearbyen',
+                'location': {
+                    'GEO_LAT': 78.15,
+                    'GEO_LON': 16.02,
+                    'GEO_ALT': 445 * 1e-3,
+                    'CGM_LAT': 75.43,
+                    'CGM_LON': 110.68,
+                }
+            },
+        }
+
+        if str_in in ['UHF', 'TRO']:
+            self.name = site_info['TRO']['name'] + '-UHF'
+            self.location = site_info['TRO']['location']
+        elif str_in == 'VHF':
+            self.name = site_info['TRO']['name'] + '-VHF'
+            self.location = site_info['TRO']['location']
+        elif str_in in ['ESR', 'LYB']:
+            self.name = site_info['ESR']['name']
+            self.location = site_info['ESR']['location']
+        else:
+            raise NotImplementedError('The site ”{}" does not exist or has not been implemented!'.format(str_in))
+
+
+
 
 
 

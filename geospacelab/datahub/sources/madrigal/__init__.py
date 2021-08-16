@@ -1,5 +1,19 @@
 from geospacelab import preferences
-from geospacelab.datahub.sources.madrigal.utilities import *
+import geospacelab.datahub.sources.madrigal.utilities as utilities
+
+from geospacelab.datahub import DatabaseModel
+
+
+class MadrigalDatabase(DatabaseModel):
+    def __new__(cls, str_in, **kwargs):
+        obj = super().__new__(cls, str_in, **kwargs)
+        return obj
+
+
+madrigal_database = MadrigalDatabase('Madrigal')
+madrigal_database.url = 'http://cedar.openmadrigal.org/'
+madrigal_database.category = 'online database'
+
 
 try:
     default_user_fullname = preferences.user_config['datahub']['madrigal']['user_fullname']

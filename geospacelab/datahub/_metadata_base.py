@@ -16,75 +16,55 @@ class StrAttrBase(str):
 
 
 class DatabaseModel(StrAttrBase):
-    _category = ''
-    _url = ''
-    _description = ''
-    _notes = []
-
     def __new__(cls, str_in, **kwargs):
         obj = super().__new__(cls, str_in)
-        obj.category = kwargs.pop('category', cls._category)
-        obj.url = kwargs.pop('url', cls._url)
-        obj.description = kwargs.pop('description', cls._description)
-        obj.notes = kwargs.pop('notes', cls._notes)
+        obj.category = kwargs.pop('category', '')
+        obj.url = kwargs.pop('url', None)
+        obj.description = kwargs.pop('description', '')
+        obj.notes = kwargs.pop('notes', '')
         return obj
 
 
 class FacilityModel(StrAttrBase):
-    _category = ''
-    _url = ''
-    _description = ''
-    _notes = []
-
     def __new__(cls, str_in, **kwargs):
         obj = super().__new__(cls, str_in)
-        obj.category = kwargs.pop('category', cls._category)
-        obj.url = kwargs.pop('url', cls._url)
-        obj.description = kwargs.pop('description', cls._description)
-        obj.notes = kwargs.pop('notes', cls._notes)
+        obj.category = kwargs.pop('category', '')
+        obj.url = kwargs.pop('url', None)
+        obj.description = kwargs.pop('description', '')
+        obj.notes = kwargs.pop('notes', '')
         return obj
 
 
 class DataProductModel(StrAttrBase):
-    _category = ''
-    _url = ''
-    _description = ''
-    _notes = []
 
     def __new__(cls, str_in, **kwargs):
         obj = super().__new__(cls, str_in)
-        obj.category = kwargs.pop('category', cls._category)
-        obj.url = kwargs.pop('url', cls._url)
-        obj.description = kwargs.pop('description', cls._description)
-        obj.notes = kwargs.pop('notes', cls._notes)
+        obj.category = kwargs.pop('category', '')
+        obj.url = kwargs.pop('url', None)
+        obj.description = kwargs.pop('description', '')
+        obj.notes = kwargs.pop('notes', '')
         return obj
 
 
 class InstrumentModel(StrAttrBase):
-    _category = ''
-    _description = ''
-    _notes = []
-
     def __new__(cls, str_in, **kwargs):
         obj = super().__new__(cls, str_in)
-        obj.category = kwargs.pop('category', cls._category)
-        obj.description = kwargs.pop('description', cls._description)
-        obj.notes = kwargs.pop('notes', cls._notes)
+        obj.category = kwargs.pop('category', '')
+        obj.description = kwargs.pop('description', '')
+        obj.notes = kwargs.pop('notes', '')
         return obj
 
 
 class SiteModel(StrAttrBase):
-    _category = ''
-    _location = {'GEO_LAT': None, 'GEO_LON': None, 'GEO_ALT': None}
-    _description = ''
-    _notes = []
 
     def __new__(cls, str_in, **kwargs):
         obj = super().__new__(cls, str_in)
-        obj.category = kwargs.pop('category', cls._category)
-        obj.location = kwargs.pop('url', cls._location)
-        obj.description = kwargs.pop('description', cls._description)
-        obj.notes = kwargs.pop('notes', cls._notes)
+        obj.category = kwargs.pop('category', '')
+        obj.name = kwargs.pop('name', '')
+        obj.code = str_in
+        obj.location = kwargs.pop('location', {'GEO_LAT': None, 'GEO_LON': None, 'GEO_ALT': None})
+        obj.description = kwargs.pop('description', '')
+        obj.notes = kwargs.pop('notes', '')
         return obj
 
 

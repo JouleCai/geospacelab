@@ -165,8 +165,8 @@ class DatasetModel(object):
     def get_variable_names(self):
         return list(self._variables.keys())
 
-    def add_variable(self, var_name):
-        self[var_name] = VariableModel(dataset=self, visual=self.visual)
+    def add_variable(self, var_name, **kwargs):
+        self[var_name] = VariableModel(dataset=self, visual=self.visual, **kwargs)
         return self[var_name]
 
     def _set_default_variables(self, default_variable_names, configured_variables=None):
