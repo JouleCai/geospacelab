@@ -51,7 +51,8 @@ class Downloader(object):
 
         if data_file_root_dir is None:
             self.data_file_root_dir = pfr.datahub_data_root_dir / 'Madrigal' / 'EISCAT' / 'analyzed'
-
+        else:
+            self.data_file_root_dir = data_file_root_dir
         self.done = False
 
         if kind_data.lower() == "madrigal":
