@@ -14,16 +14,32 @@ import geospacelab.toolbox.utilities.pybasic as basic
 
 class VariableModel(object):
     """VariableModel is a base class for a geospace variable with useful attributes
-    
-    :param name: The variable's name, ['']
-    :type name: str
-    :param fullname: The variable's full name, ['']
-    :type fullname: str
-    :param label: The variable's label for display. If a raw string (e.g., r'$\alpha$'),
+
+    :param  name: The variable's name, ['']
+    :type   name: str
+    :param  fullname: The variable's full name, ['']
+    :type   fullname: str
+    :param  label: The variable's label for display. If a raw string (e.g., r'$\alpha$'),
         it will show a latex format.
-    :type label: str
-    :param data_type: The variable's data type in one of them: 'support_data', 'data', and 'metadata'
-        in the same format as in a NASA's cdf file.
+    :type   label: str
+    :param  data_type: The variable's data type in one of them: 'support_data', 'data', and 'metadata'
+        in the same format as in a NASA's cdf file. ['']
+    :type   data_type: str
+    :param  group: The group that the variable is belonged to, e.g., var.name = 'v_i_z', var.group = 'ion velocity',
+        as the label in plots with multiple lines. ['']
+    :type   group: str
+    :param  unit: The variable's unit. ['']
+    :type   unit: str
+    :param  unit_label: The unit's  label,  used for plots. The string is a raw string (e.g., r'$n_e$').
+                If None, the plot will use unit as a label.
+    :type   unit_label: str
+    :param  quantity: The physical quantity associated with the variable, waiting for implementing. [None]
+    :type   quantity: TBD.
+    :param  value: the variable's value. Usually it's a np.ndarray. The axis=0 along the time, axis=1 along height, lat,
+    lon. For a scalar, value in a shape of (1, ). [None]
+    :type   value: np.ndarray
+    :param  error: the variable's error. Either a np.ndarray or a string. When it's a string, the string is a variable name
+    indicating the variable in the associated dataset (see :attr:`dataset` below).
     :type
     :param
     :type
@@ -35,71 +51,42 @@ class VariableModel(object):
     :type
     :param
     :type
-    :param
-    :type
-    :param
-    :type
-    :param
-    :type
-    :param
-    :type
-    :param
-    :type
-    :param
-    :type 
     :param
     :type
     :param
     :type
     """
+
     def __init__(self, **kwargs):
         """Initial settings
         
         :params:
         """
         # set default values
-        self._name = ''
-        self._fullname = ''
-        self._label = ''
-        self._data_type = None
-        self._group = ''
-        self._unit = ''
-        self._unit_label = ''
-        self._quantity = None
 
-        self._value = None
-        self._error = None
-        self._variable_type = None
+        self.name = kwargs.pop('name', '')
+        self.fullname = kwargs.pop('fullname', '')
 
-        self._ndim = None
-        self._depends = {}
+        self.label = kwargs.pop('label', '')
 
-        self._dataset_proxy = None
+        self.data_type = kwargs.pop('data_type', None)  # 'support_data', 'data', 'metadata'
+        self.group = kwargs.pop('group', '')
 
-        self._visual = None
+        self.unit = kwargs.pop('unit', None)
+        self.unit_label = kwargs.pop('unit_label', None)
 
-        self.name = kwargs.pop('name', self._name)
-        self.fullname = kwargs.pop('fullname', self._fullname)
+        self.quantity = kwargs.pop('quantity', None)
 
-        self.label = kwargs.pop('label', self._label)
+        self.value = kwargs.pop('value', None)
+        self.error = kwargs.pop('error', None)
 
-        self.data_type = kwargs.pop('data_type', self._data_type)  # 'support_data', 'data', 'metadata'
-        self.group = kwargs.pop('group', self._group)
-
-        self.unit = kwargs.pop('unit', self._unit)
-        self.unit_label = kwargs.pop('unit_label', self._unit_label)
-
-        self.quantity = kwargs.pop('quantity', self._quantity)
-
-        self.value = kwargs.pop('value', self._value)
-        self.error = kwargs.pop('error', self._error)
-
-        self.variable_type = kwargs.pop('variable_type', self._variable_type)    # scalar, vector, tensor, ...
-        self.ndim = kwargs.pop('ndim', self._ndim)
-        self.depends = kwargs.pop('depends', self._depends)
+        self.variable_type = kwargs.pop('variable_type', 'scalar')    # scalar, vector, tensor, ...
+        self.ndim = kwargs.pop('ndim', None)
+        self.depends = kwargs.pop('depends', None)
 
         self.dataset = kwargs.pop('dataset', None)
 
+        self._visual = None
         self.visual = kwargs.pop('visual', 'off')
 
     def config(self, logging=True, **kwargs):
@@ -215,6 +202,7 @@ class VariableModel(object):
     @dataset.setter
     def dataset(self, dataset_obj):
         if dataset_obj is None:
+            self._dataset_proxy = None
             return
 
         from geospacelab.datahub._dataset_base import DatasetModel
@@ -236,6 +224,7 @@ class VariableModel(object):
     def value(self, v):
         # type check
         if v is None:
+            self._value = None
             return
         if type(v) is str:
             self._value = v
@@ -264,6 +253,7 @@ class VariableModel(object):
     @error.setter
     def error(self, v):
         if v is None:
+            self._error = None
             return
         # type check
         if type(v) is str:
@@ -290,6 +280,9 @@ class VariableModel(object):
 
     @unit_label.setter
     def unit_label(self, label):
+        if label is None:
+            self._unit_label = ''
+            return
         if type(label) is not str:
             raise TypeError
         self._unit_label = label
@@ -303,6 +296,9 @@ class VariableModel(object):
 
     @label.setter
     def label(self, lb):
+        if lb is None:
+            self._label = ''
+            return
         if type(lb) is not str:
             raise TypeError
         self._label = lb
@@ -314,6 +310,7 @@ class VariableModel(object):
     @variable_type.setter
     def variable_type(self, value):
         if value is None:
+            self._variable_type = None
             return
         if value.lower() not in ['scalar', 'vector', 'matrix', 'tensor']:
             raise AttributeError
@@ -350,6 +347,7 @@ class VariableModel(object):
     @ndim.setter
     def ndim(self, value):
         if value is None:
+            self._ndim = None
             return
         if type(value) is not int:
             raise TypeError
@@ -361,6 +359,10 @@ class VariableModel(object):
 
     @depends.setter
     def depends(self, d_dict):
+        if d_dict is None:
+            self._depends = {}
+            return
+
         if type(d_dict) is not dict:
             raise TypeError
 

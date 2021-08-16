@@ -153,7 +153,7 @@ def test_vhf_lowel():
     v_i.visual.axis[1].data = '@d.GEO_LAT.value'
     v_i.visual.axis[1].label = 'GLAT'
     v_i.visual.axis[1].unit = 'deg'
-    v_i.visual.axis[1].lim = [71, 75]
+    v_i.visual.axis[1].lim = [None, None]
     az = viewer.assign_variable('az')
     el = viewer.assign_variable('el')
 
@@ -166,7 +166,7 @@ def test_vhf_lowel():
 
 if __name__ == "__main__":
     test_vhf_lowel()
-    #test_uhf_cp3()
-    # test_UHF_CP2()
-    # test_esr_32m()
+    test_uhf_cp3()
+    test_UHF_CP2()
+    test_esr_32m()
     plt.show()
