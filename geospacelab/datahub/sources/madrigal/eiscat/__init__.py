@@ -155,15 +155,22 @@ class Dataset(datahub.DatasetModel):
                                 lon_0=self.site.location['GEO_LON'],
                                 height_0=self.site.location['GEO_ALT'])
         cs_new = cs_LENU.to_GEO()
-        var = self.add_variable(var_name='GEO_LAT', value=cs_new['lat'])
-        var = self.add_variable(var_name='GEO_LON', value=cs_new['lon'])
-        var = self.add_variable(var_name='GEO_ALT', value=cs_new['height'])
+        configured_variables = var_config.get_default_configured_variables()
+
+        var = self.add_variable(var_name='GEO_LAT', value=cs_new['lat'],
+                                configured_variables=configured_variables.get('GEO_LAT', None))
+        var = self.add_variable(var_name='GEO_LON', value=cs_new['lon'],
+                                configured_variables=configured_variables.get('GEO_LON', None))
+        var = self.add_variable(var_name='GEO_ALT', value=cs_new['height'],
+                                configured_variables=configured_variables.get('GEO_ALT', None))
 
         if AACGM:
             cs_new.ut = self['DATETIME'].value
             cs_new = cs_new.to_AACGM()
-        var = self.add_variable(var_name='AACGM_LAT', value=cs_new['lat'])
-        var = self.add_variable(var_name='AACGM_LON', value=cs_new['lon'])
+        var = self.add_variable(var_name='AACGM_LAT', value=cs_new['lat'],
+                                configured_variables=configured_variables.get('AACGM_LAT', None))
+        var = self.add_variable(var_name='AACGM_LON', value=cs_new['lon'],
+                                configured_variables=configured_variables.get('AACGM_LON', None))
         # var = self.add_variable(var_name='AACGM_ALT', value=cs_new['height'])
         pass
 

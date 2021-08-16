@@ -165,20 +165,22 @@ class DatasetModel(object):
     def get_variable_names(self):
         return list(self._variables.keys())
 
-    def add_variable(self, var_name, **kwargs):
-        self[var_name] = VariableModel(dataset=self, visual=self.visual, **kwargs)
+    def add_variable(self, var_name, configured_variables=None, **kwargs):
+        if configured_variables is None:
+            configured_variables = {}
+        if var_name in configured_variables.keys():
+            self[var_name] = configured_variables[var_name]
+            self[var_name].dataset = self
+            self[var_name].visual = self.visual
+        else:
+            self[var_name] = VariableModel(dataset=self, visual=self.visual, **kwargs)
         return self[var_name]
 
     def _set_default_variables(self, default_variable_names, configured_variables=None):
         if configured_variables is None:
-            variables_assigned = {}
+            configured_variables = {}
         for var_name in default_variable_names:
-            if var_name in configured_variables.keys():
-                self[var_name] = configured_variables[var_name]
-                self[var_name].dataset = self
-                self[var_name].visual = self.visual
-            else:
-                self.add_variable(var_name)
+            self.add_variable(var_name, configured_variables=configured_variables)
 
     @property
     def data_root_dir(self):
