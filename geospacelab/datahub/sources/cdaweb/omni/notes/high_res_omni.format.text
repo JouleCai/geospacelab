@@ -1,0 +1,165 @@
+ftp://spdf.gsfc.nasa.gov/pub/data/omni/high_res_omni/HRO_format.txt
+
+This files gives the format of the High Resolution OMNI (HRO)
+data set.  The content of the HRO data set is much more fully explained
+at http://omniweb.gsfc.nasa.gov/html/HROdocum.html
+
+The common format for the 1-min and 5-min* OMNI data sets is
+
+Year			        I4	      1995 ... 2006
+Day			        I4	1 ... 365 or 366
+Hour			        I3	0 ... 23
+Minute			        I3	0 ... 59 at start of average
+ID for IMF spacecraft	        I3	See  footnote D below
+ID for SW Plasma spacecraft	I3	See  footnote D below
+# of points in IMF averages	I4
+# of points in Plasma averages	I4
+Percent interp		        I4	See  footnote A below
+Timeshift, sec		        I7
+RMS, Timeshift		        I7
+RMS, Phase front normal	        F6.2	See Footnotes E, F below
+Time btwn observations, sec	I7	DBOT1, See Footnote C below
+Field magnitude average, nT	F8.2
+Bx, nT (GSE, GSM)		F8.2
+By, nT (GSE)		        F8.2
+Bz, nT (GSE)		        F8.2
+By, nT (GSM)	                F8.2	Determined from post-shift GSE components
+Bz, nT (GSM)	                F8.2	Determined from post-shift GSE components
+                                   See  footnote "gsm" below
+
+RMS SD B scalar, nT	        F8.2	                
+RMS SD field vector, nT	        F8.2	See  footnote E below
+Flow speed, km/s		F8.1
+Vx Velocity, km/s, GSE	        F8.1
+Vy Velocity, km/s, GSE	        F8.1
+Vz Velocity, km/s, GSE	        F8.1
+Proton Density, n/cc		F7.2
+Temperature, K		        F9.0
+Flow pressure, nPa		F6.2	See  footnote G below		
+Electric field, mV/m		F7.2	See  footnote G below
+Plasma beta		        F7.2	See  footnote G below
+Alfven mach number		F6.1	See  footnote G below
+X(s/c), GSE, Re		        F8.2
+Y(s/c), GSE, Re		        F8.2
+Z(s/c), GSE, Re		        F8.2
+BSN location, Xgse, Re	        F8.2	BSN = bow shock nose
+BSN location, Ygse, Re	        F8.2
+BSN location, Zgse, Re 	        F8.2
+
+              Ancilary Data
+AE-index, nT                    I6      See  footnote H below
+AL-index, nT                    I6      See  footnote H below
+AU-index, nT                    I6      See  footnote H below
+SYM/D index, nT                 I6      See  footnote H below
+SYM/H index, nT                 I6      See  footnote H below
+ASY/D index, nT                 I6      See  footnote H below
+ASY/H index, nT                 I6      See  footnote H below
+PC(N) index,                    F7.2    See  footnote I below
+Magnetosonic mach number        F5.1    See  Footnote K below
+
+
+
+The data may be read with the format statement
+(2I4,4I3,3I4,2I7,F6.2,I7, 8F8.2,4F8.1,F7.2,F9.0,F6.2,2F7.2,F6.1,6F8.2,7I6,F7.2, F5.1)
+
+* Note For 5-min data  we added fluxes from GOES at the end of each record
+ in format:
+  Proton Flux >10 MeV, 1/(cm**2-sec-ster)  F9.2 See  footnote J below
+  Proton Flux >30 MeV, 1/(cm**2-sec-ster)  F9.2
+  Proton Flux >60 MeV, 1/(cm**2-sec-ster)  F9.2
+
+Footnote A:
+
+Percent interp: The percent (0-100) of the points contributing to 
+the 1-min magnetic field averages whose phase front normal (PFN) 
+was interpolated because neither the MVAB-0 nor Cross Product 
+shift techniques yielded a PFN that satisfied its respective tests 
+(see detailed documentation for these).
+
+Footnote C: 
+
+The DBOT (Duration Between Observing Times) words: For a 
+given record, we take the 1-min average time shift and estimate, 
+using the solar wind velocity and the location of the observing 
+spacecraft, the time at which the corresponding observation 
+would have been made at the spacecraft. Then we take the 
+difference between this time and the corresponding time of 
+the preceding 1-min record and define this as DBOT1. This 
+difference would be one minute in the absence of PFN and/or 
+flow velocity variations. When this difference becomes negative, 
+we have apparent out-of- sequence arrivals of phase planes. 
+That is, if plane A is observed before plane B at the spacecraft, 
+plane B is predicted to arrive at the target before plane A. 
+Searching for negative DBOT enables finding of such cases.
+
+DBOT2 is like DBOT1 except that the observation time for 
+the current 1-min record is compared to the latest (most time-
+advanced) previous observation time and not to the observation 
+time of the previous record. Use of DBOT2 helps to find 
+extended intervals of out-of-sequence arrivals.
+
+We do not capture out-of-sequence-arrival information at 15-s 
+resolution but only at 1-min resolution. The standard deviation 
+in the 1-min averaged time shifts may be used to help find cases 
+of out-of-sequence 15-s data. 
+
+Footnote gsm:
+The computation of standard By and Bz, GSM is taken from the GEOPACK-2008 
+at http://geo.phys.spbu.ru/~tsyganenko/Geopack-2008.html)
+software package developed by Drs. Nikolai Tsyganenko. 
+
+Footnote D: 
+
+The following spacecraft ID's are used:
+	ACE	71
+	Geotail	60
+	IMP 8	50
+	Wind	51
+
+Footnote E: 
+
+Note that standard deviations for the two vectors are given
+as the square roots of the sum of squares of the standard deviations
+in the component averages.  The component averages are given in
+the records but not their individual standard deviations.
+
+Footnote F: 
+
+There are no phase front normal standard deviations in the 5-min
+records.  This word has fill (99.99) for such records.
+
+Footnote G: 
+
+Derived parameters are obtained from the following equations.
+
+Flow pressure = (2*10**-6)*Np*Vp**2 nPa (Np in cm**-3, 
+Vp in km/s, subscript "p" for "proton")
+
+Electric field = -V(km/s) * Bz (nT; GSM) * 10**-3
+
+Plasma beta = [(T*4.16/10**5) + 5.34] * Np / B**2 (B in nT)
+
+Alfven Mach number = (V * Np**0.5) / (20 * B)
+
+For details on these, see http://omniweb.sci.gsfc.nasa.gov/ftpbrowser/bow_derivation.html
+
+Footnote H:
+Provisional high res. Indices where taken from World Data Center for Geomagnetism, 
+Kyoto: http://swdcwww.kugi.kyoto-u.ac.jp/aeasy/
+
+Footnote I:
+PC(N) index was taken from World Data Center for Geomagnetism, Copenhagen:
+href="ftp://ftp.space.dtu.dk/WDC/indices/pcn/PCN_definitive/"
+
+Footnote J: 
+Proton fluxes from GOES were taken from http://satdat.ngdc.noaa.gov/sem/goes/data/new_avg/
+
+Footnote K: Magnetosonic Mach Number = V/Magnetosonic_speed
+            Magnetosonic speed = [(sound speed)**2 + (Alfv speed)**2]**0.5
+            The Alfven speed = 20. * B / N**0.5 
+            The sound speed = 0.12 * [T + 1.28*10**5]**0.5 
+            About Magnetosonic speed check  http://ftpbrowser.gsfc.nasa.gov/bow_derivation1.html also
+            
+
+----------------------------------------------------------
+

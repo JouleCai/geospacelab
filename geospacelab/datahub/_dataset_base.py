@@ -21,7 +21,8 @@ class DatasetModel(object):
         self.dt_fr = None
         self.dt_to = None
 
-        self.load_func = None
+        self.loader = None
+        self.downloader = None
         self.load_mode = 'AUTO'  # ['AUTO'], 'dialog', 'assigned'
         self.data_root_dir = pref.datahub_data_root_dir
         self.data_file_paths = []
@@ -169,7 +170,11 @@ class DatasetModel(object):
         if configured_variables is None:
             configured_variables = {}
         if var_name in configured_variables.keys():
-            self[var_name] = configured_variables[var_name]
+            configured_variable = configured_variables[var_name]
+            if type(configured_variable) is dict:
+                self[var_name] = VariableModel(**configured_variable)
+            elif issubclass(configured_variable.__class__, VariableModel):
+                self[var_name] = configured_variable.clone()
             self[var_name].dataset = self
             self[var_name].visual = self.visual
         else:

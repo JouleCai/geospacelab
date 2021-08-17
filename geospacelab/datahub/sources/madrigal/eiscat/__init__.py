@@ -7,9 +7,9 @@ from geospacelab.datahub.sources.madrigal import madrigal_database
 from geospacelab import preferences as prf
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pybasic as basic
-import geospacelab.datahub.sources.madrigal.eiscat._loader as default_loader
-import geospacelab.datahub.sources.madrigal.eiscat._downloader as downloader
-import geospacelab.datahub.sources.madrigal.eiscat._variable_config as var_config
+import geospacelab.datahub.sources.madrigal.eiscat.loader as default_loader
+import geospacelab.datahub.sources.madrigal.eiscat.downloader as downloader
+import geospacelab.datahub.sources.madrigal.eiscat.variable_config as var_config
 from geospacelab.datahub.sources.madrigal.eiscat.utilities import *
 
 default_dataset_attrs = {
@@ -25,7 +25,7 @@ default_label_fields = ['database', 'facility', 'site', 'antenna', 'experiment']
 
 default_variable_names = [
     'DATETIME', 'DATETIME_1', 'DATETIME_2',
-    'az', 'el', 'P_Tx', 'height', 'range',
+    'AZ', 'EL', 'P_Tx', 'HEIGHT', 'RANGE',
     'n_e', 'T_i', 'T_e', 'nu_i', 'v_i_los', 'comp_mix', 'comp_O_p',
     'n_e_err', 'T_i_err', 'T_e_err', 'nu_i_err', 'v_i_los_err', 'comp_mix_err', 'comp_O_p_err',
     'status', 'residual'
@@ -60,9 +60,12 @@ class Dataset(datahub.DatasetModel):
         kwargs = basic.dict_set_default(kwargs, **default_dataset_attrs)
         self.config(**kwargs)
 
+        if self.loader is None:
+            self.loader = default_loader
+
         self._set_default_variables(
             default_variable_names,
-            configured_variables=var_config.get_default_configured_variables()
+            configured_variables=var_config.configured_variables
         )
 
         self._validate_attrs()
@@ -87,25 +90,22 @@ class Dataset(datahub.DatasetModel):
     def load_data(self, **kwargs):
         self.check_data_files(**kwargs)
 
-        if self.load_func is None:
-            self.load_func = default_loader.select_loader(self.data_file_type)
+        for file_path in self.data_file_paths:
+            load_obj = self.loader.Loader(file_path, file_type=self.data_file_type)
 
-            for file_path in self.data_file_paths:
-                load_obj = self.load_func(file_path)
+            for var_name in self._variables.keys():
+                self._variables[var_name].join(load_obj.variables[var_name])
 
-                for var_name in self._variables.keys():
-                    self._variables[var_name].join(load_obj.variables[var_name])
-
-                self.site = load_obj.metadata['site_name']
-                self.antenna = load_obj.metadata['antenna']
-                self.pulse_code = load_obj.metadata['pulse_code']
-                self.scan_mode = load_obj.metadata['scan_mode']
-                rawdata_path = load_obj.metadata['rawdata_path']
-                self.experiment = rawdata_path.split('/')[-1].split('@')[0]
-                self.affiliation = load_obj.metadata['affiliation']
-                self.metadata = load_obj.metadata
-            if self.beam_location:
-                self.calc_lat_lon()
+            self.site = load_obj.metadata['site_name']
+            self.antenna = load_obj.metadata['antenna']
+            self.pulse_code = load_obj.metadata['pulse_code']
+            self.scan_mode = load_obj.metadata['scan_mode']
+            rawdata_path = load_obj.metadata['rawdata_path']
+            self.experiment = rawdata_path.split('/')[-1].split('@')[0]
+            self.affiliation = load_obj.metadata['affiliation']
+            self.metadata = load_obj.metadata
+        if self.beam_location:
+            self.calc_lat_lon()
             # self.select_beams(field_aligned=True)
 
     def select_beams(self, field_aligned=False, az_el_pairs=None):
@@ -115,8 +115,8 @@ class Dataset(datahub.DatasetModel):
             if self.site != 'UHF':
                 raise AttributeError("Only UHF can be applied.")
 
-        az = self['az'].value.flatten()
-        el = self['el'].value.flatten()
+        az = self['AZ'].value.flatten()
+        el = self['EL'].value.flatten()
         if field_aligned:
             inds = np.where(((np.abs(az - 188.6) <= 1.5) & (np.abs(el-77.7) <= 1.5)))[0]
             if not list(inds):
@@ -141,9 +141,9 @@ class Dataset(datahub.DatasetModel):
 
     def calc_lat_lon(self, AACGM=True):
         from geospacelab.cs import GEO, LENUSpherical
-        az = self['az'].value
-        el = self['el'].value
-        range = self['range'].value
+        az = self['AZ'].value
+        el = self['EL'].value
+        range = self['RANGE'].value
         az = np.tile(az, (1, range.shape[1]))  # make az, el, range in the same shape
         el = np.tile(el, (1, range.shape[1]))
 
@@ -155,22 +155,22 @@ class Dataset(datahub.DatasetModel):
                                 lon_0=self.site.location['GEO_LON'],
                                 height_0=self.site.location['GEO_ALT'])
         cs_new = cs_LENU.to_GEO()
-        configured_variables = var_config.get_default_configured_variables()
+        configured_variables = var_config.configured_variables
 
         var = self.add_variable(var_name='GEO_LAT', value=cs_new['lat'],
-                                configured_variables=configured_variables.get('GEO_LAT', None))
+                                configured_variables=configured_variables)
         var = self.add_variable(var_name='GEO_LON', value=cs_new['lon'],
-                                configured_variables=configured_variables.get('GEO_LON', None))
+                                configured_variables=configured_variables)
         var = self.add_variable(var_name='GEO_ALT', value=cs_new['height'],
-                                configured_variables=configured_variables.get('GEO_ALT', None))
+                                configured_variables=configured_variables)
 
         if AACGM:
             cs_new.ut = self['DATETIME'].value
             cs_new = cs_new.to_AACGM()
         var = self.add_variable(var_name='AACGM_LAT', value=cs_new['lat'],
-                                configured_variables=configured_variables.get('AACGM_LAT', None))
+                                configured_variables=configured_variables)
         var = self.add_variable(var_name='AACGM_LON', value=cs_new['lon'],
-                                configured_variables=configured_variables.get('AACGM_LON', None))
+                                configured_variables=configured_variables)
         # var = self.add_variable(var_name='AACGM_ALT', value=cs_new['height'])
         pass
 
@@ -229,6 +229,8 @@ class Dataset(datahub.DatasetModel):
         elif self.data_file_type == 'eiscat-mat':
             download_obj = downloader.Downloader(dt_fr=self.dt_fr, dt_to=self.dt_to,
                                                  sites=[self.site], kind_data='eiscat')
+        else:
+            raise TypeError
         return download_obj.done
 
     @property

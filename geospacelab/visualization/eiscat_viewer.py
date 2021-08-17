@@ -39,8 +39,8 @@ def quicklook(dt_fr, dt_to,
     T_i = viewer.assign_variable('T_i')
     T_e = viewer.assign_variable('T_e')
     v_i = viewer.assign_variable('v_i_los')
-    az = viewer.assign_variable('az')
-    el = viewer.assign_variable('el')
+    az = viewer.assign_variable('AZ')
+    el = viewer.assign_variable('EL')
     viewer.list_assigned_variables()
     viewer.list_datasets()
 

@@ -25,8 +25,8 @@ def test_UHF_CP2():
     T_i = viewer.assign_variable('T_i')
     T_e = viewer.assign_variable('T_e')
     v_i = viewer.assign_variable('v_i_los')
-    az = viewer.assign_variable('az')
-    el = viewer.assign_variable('el')
+    az = viewer.assign_variable('AZ')
+    el = viewer.assign_variable('EL')
 
     layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
     viewer.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3])
@@ -56,8 +56,8 @@ def test_esr_32m():
     T_i = viewer.assign_variable('T_i')
     T_e = viewer.assign_variable('T_e')
     v_i = viewer.assign_variable('v_i_los')
-    az = viewer.assign_variable('az')
-    el = viewer.assign_variable('el')
+    az = viewer.assign_variable('AZ')
+    el = viewer.assign_variable('EL')
 
     layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
     viewer.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3])
@@ -101,9 +101,9 @@ def test_uhf_cp3():
     v_i.visual.axis[1].unit = 'deg'
     v_i.visual.axis[1].lim = [65, 75]
 
-    az = viewer.assign_variable('az')
+    az = viewer.assign_variable('AZ')
     az.visual.axis[0].data_res = 180
-    el = viewer.assign_variable('el')
+    el = viewer.assign_variable('EL')
     el.visual.axis[0].data_res = 180
 
     layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
@@ -131,6 +131,7 @@ def test_vhf_lowel():
     # viewer.dataset.select_beams(field_aligned=False)
 
     n_e = viewer.assign_variable('n_e')
+    n_e_clone = n_e.clone()         # Clone a variable. It has no meaning here, but it may be useful to create panels with the same variable but different visual settings.
     n_e.visual.axis[0].data_res = 180 # time resolution in seconds
     n_e.visual.axis[1].data = '@d.AACGM_LAT.value'
     n_e.visual.axis[1].label = 'MALT'
@@ -154,8 +155,8 @@ def test_vhf_lowel():
     v_i.visual.axis[1].label = 'GLAT'
     v_i.visual.axis[1].unit = 'deg'
     v_i.visual.axis[1].lim = [None, None]
-    az = viewer.assign_variable('az')
-    el = viewer.assign_variable('el')
+    az = viewer.assign_variable('AZ')
+    el = viewer.assign_variable('EL')
 
     layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
     viewer.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3])

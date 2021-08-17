@@ -82,18 +82,38 @@ class VariableModel(object):
 
         self.variable_type = kwargs.pop('variable_type', 'scalar')    # scalar, vector, tensor, ...
         self.ndim = kwargs.pop('ndim', None)
+        self._depends = {}
         self.depends = kwargs.pop('depends', None)
 
         self.dataset = kwargs.pop('dataset', None)
 
         self._visual = None
         self.visual = kwargs.pop('visual', 'off')
+        self._attrs_registered = ['name', 'fullname', 'label', 'data_type', 'group', 'unit', 'unit_label',
+                                  'quantity', 'value', 'error', 'variable_type', 'ndim', 'depends', 'dataset',
+                                  'visual']
 
     def config(self, logging=True, **kwargs):
         pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
 
     def add_attr(self, logging=True, **kwargs):
+        self._attrs_registered.extend(kwargs.keys())
         pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
+
+    def clone(self, omit_attrs=None):
+        if omit_attrs is None:
+            omit_attrs = {}
+        kwargs = {}
+        for key in self._attrs_registered:
+            if key in omit_attrs.keys():
+                continue
+            if key == 'visual':
+                kwargs['visual'] = self.visual.clone()
+            elif key == 'dataset':
+                kwargs['dataset'] = self.dataset
+            else:
+                kwargs[key] = copy.deepcopy(getattr(self, key))
+        return self.__class__(**kwargs)
 
     def get_depend(self, axis=None, retrieve_data=True):
         # axis = 0, 1, 2
@@ -197,28 +217,34 @@ class VariableModel(object):
 
     @property
     def dataset(self):
-        return self._dataset_proxy
+        if self._dataset_ref is None:
+            return None
+        else:
+            return self._dataset_ref()
 
     @dataset.setter
     def dataset(self, dataset_obj):
         if dataset_obj is None:
-            self._dataset_proxy = None
+            self._dataset_ref = None
             return
 
         from geospacelab.datahub._dataset_base import DatasetModel
         if issubclass(dataset_obj.__class__, DatasetModel):
-            self._dataset_proxy = weakref.proxy(dataset_obj)
+            self._dataset_ref = weakref.ref(dataset_obj)
         else:
             raise TypeError
 
     @property
     def value(self):
-        v = None
-        if isinstance(self._value, str):
-            v = self.dataset[self._value].value
+        if self._value is None:
+            return None
+        elif isinstance(self._value, str):
+            if self.dataset is not None:
+                return self.dataset[self._value].value
+            else:
+                return self._value
         else:
-            v = self._value
-        return v
+            return self._value
 
     @value.setter
     def value(self, v):
@@ -243,12 +269,15 @@ class VariableModel(object):
 
     @property
     def error(self):
-        v = None
-        if isinstance(self._error, str):
-            v = self.dataset[self._error].value
+        if self._error is None:
+            return None
+        elif isinstance(self._error, str):
+            if self.dataset is not None:
+                return self.dataset[self._error].value
+            else:
+                return self._error
         else:
-            v = self._error
-        return v
+            return self._error
 
     @error.setter
     def error(self, v):
@@ -360,7 +389,6 @@ class VariableModel(object):
     @depends.setter
     def depends(self, d_dict):
         if d_dict is None:
-            self._depends = {}
             return
 
         if type(d_dict) is not dict:
@@ -419,7 +447,7 @@ class Visual(object):
 
     def __init__(self, **kwargs):
         self._axis = {}
-        self._variable_proxy = None
+        self.variable = None
         self._ndim = None
 
         self.variable = kwargs.pop('variable', None)
@@ -433,16 +461,30 @@ class Visual(object):
     def add_attr(self, logging=True, **kwargs):
         pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
 
+    def clone(self):
+        kwargs = {
+            'variable': self.variable,
+            'axis': copy.deepcopy(self.axis),
+            'plot_config': copy.deepcopy(self.plot_config),
+            'ndim': copy.deepcopy(self.ndim)
+        }
+
+        return self.__class__(**kwargs)
+
     @property
     def variable(self):
-        return self._variable_proxy
+        if self._variable_ref is None:
+            return None
+        else:
+            return self._variable_ref()
 
     @variable.setter
     def variable(self, var_obj):
         if var_obj is None:
+            self._variable_ref = None
             return
         if issubclass(var_obj.__class__, VariableModel):
-            self._variable_proxy = weakref.proxy(var_obj)
+            self._variable_ref = weakref.ref(var_obj)
         else:
             raise TypeError
 
