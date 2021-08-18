@@ -18,10 +18,10 @@ default_dataset_attrs = {
     'data_file_type': 'eiscat-hdf5',
     'data_file_ext': 'hdf5',
     'data_root_dir': prf.datahub_data_root_dir / 'Madrigal' / 'EISCAT' / 'analyzed',
-    'download': True,
+    'downloadable': True,
+    'data_search_recursive': True,
+    'label_fields': ['database', 'facility', 'site', 'antenna', 'experiment'],
 }
-
-default_label_fields = ['database', 'facility', 'site', 'antenna', 'experiment']
 
 default_variable_names = [
     'DATETIME', 'DATETIME_1', 'DATETIME_2',
@@ -31,34 +31,34 @@ default_variable_names = [
     'status', 'residual'
 ]
 
-default_data_search_recursive = True
+# default_data_search_recursive = True
 
 default_attrs_required = ['site', 'antenna', 'modulation']
 
 
 class Dataset(datahub.DatasetModel):
     def __init__(self, **kwargs):
+        kwargs = basic.dict_set_default(kwargs, **default_dataset_attrs)
         self.database = madrigal_database
         self.facility = 'EISCAT'
-        self.site = None
-        self.antenna = ''
-        self.experiment = ''
-        self.pulse_code = ''
-        self.scan_mode = ''
-        self.modulation = ''
-        self.data_file_type = ''
-        self.affiliation = ''
-        self.data_search_recursive = default_data_search_recursive
-        self.download = False
+        self.site = kwargs.pop('site', None)
+        self.antenna = kwargs.pop('antenna', '')
+        self.experiment = kwargs.pop('experiment', '')
+        self.pulse_code = kwargs.pop('pulse_code', '')
+        self.scan_mode = kwargs.pop('scan_mode', '')
+        self.modulation = kwargs.pop('modulation', '')
+        self.data_file_type = kwargs.pop('data_file_type', '')
+        self.affiliation = kwargs.pop('affiliation', '')
+        self.downloadable = kwargs.pop('downloadable', True)
         self._thisday = None
         self.metadata = None
-        self.beam_location = True
+        self.beam_location = kwargs.pop('beam_location', True)
 
         load_data = kwargs.pop('load_data', False)
 
-        super().__init__()
-        kwargs = basic.dict_set_default(kwargs, **default_dataset_attrs)
-        self.config(**kwargs)
+        super().__init__(**kwargs)
+
+        # self.config(**kwargs)
 
         if self.loader is None:
             self.loader = default_loader
@@ -83,7 +83,6 @@ class Dataset(datahub.DatasetModel):
             self.data_file_ext = self.data_file_type.split('-')[1]
 
     def label(self, **kwargs):
-        self.label_fields = default_label_fields
         label = super().label()
         return label
 
@@ -201,14 +200,12 @@ class Dataset(datahub.DatasetModel):
             search_pattern = '*' + '*'.join(file_patterns) + '*'
             if self.data_file_type == 'eiscat-mat':
                 search_pattern = search_pattern + '/'
-            recursive = self.data_search_recursive
             done = super().search_data_files(
-                initial_file_dir=initial_file_dir, search_pattern=search_pattern, recursive=recursive
-            )
+                initial_file_dir=initial_file_dir, search_pattern=search_pattern)
 
             # Validate file paths
 
-            if not done and self.download:
+            if not done and self.downloadable:
                 done = self.download_data()
                 if done:
                     done = super().search_data_files(

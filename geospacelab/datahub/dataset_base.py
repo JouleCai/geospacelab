@@ -16,27 +16,28 @@ class DatasetModel(object):
 
     def __init__(self, **kwargs):
         self._variables = {}
-        self.name = None
-        self.kind = None
-        self.dt_fr = None
-        self.dt_to = None
+        self.name = kwargs.pop('name', None)
+        self.kind = kwargs.pop('kind', None)
+        self.dt_fr = kwargs.pop('dt_fr', None)
+        self.dt_to = kwargs.pop('dt_to', None)
 
-        self.loader = None
-        self.downloader = None
-        self.load_mode = 'AUTO'  # ['AUTO'], 'dialog', 'assigned'
-        self.data_root_dir = pref.datahub_data_root_dir
-        self.data_file_paths = []
-        self.data_file_num = 0
-        self.data_file_ext = '*'
+        self.loader = kwargs.pop('loader', None)
+        self.downloader = kwargs.pop('downloader', None)
+        self.load_mode = kwargs.pop('load_mode', 'AUTO')  # ['AUTO'], 'dialog', 'assigned'
+        self.data_root_dir = kwargs.pop('data_root_dir', pref.datahub_data_root_dir)
+        self.data_file_paths = kwargs.pop('data_file_paths', [])
+        self.data_file_num = kwargs.pop('data_file_num', 0)
+        self.data_file_ext = kwargs.pop('data_file_ext', '*')
+        self.data_search_recursive = kwargs.pop('data_search_recursive', False)
         self.visual = kwargs.pop('visual', 'off')
 
-        self.label_fields = []
+        self.label_fields = kwargs.pop('label_fields', [])
 
     def search_data_files(self, **kwargs):
         done = False
         initial_file_dir = kwargs.pop('initial_file_dir', self.data_root_dir)
         search_pattern = kwargs.pop('search_pattern', '*')
-        recursive = kwargs.pop('recursive', False)
+        recursive = kwargs.pop('recursive', self.data_search_recursive)
         if str(self.data_file_ext):
             search_pattern = search_pattern + '.' + self.data_file_ext
         if recursive:

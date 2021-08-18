@@ -1,3 +1,6 @@
+import cdflib
+import numpy as np
+import datetime
 
 
 class Loader:
@@ -6,13 +9,38 @@ class Loader:
         self.file_type = file_type
         self.variables = {}
         self.metadata = {}
+        self.done = False
         if load_data:
             self.load()
 
     def load(self):
-        pass
+        if self.file_type == 'cdf':
+            self.load_omni_cdf()
 
-variable_name_dict = {
+    def load_omni_cdf(self):
+        f_cdf = cdflib.CDF(self.file_path)
+        f_info = f_cdf.cdf_info()
+        variables = {}
+        self.metadata['var_attrs'] = {}
+        for var_name, var_name_cdf in cdf_variable_name_dict.items():
+            var = f_cdf.varget(var_name_cdf)
+            var_attr = f_cdf.varattsget(var_name_cdf)
+            fillval = var_attr['FILLVAL'][0]
+            var = np.where(var == fillval, np.nan, var)
+            variables[var_name] = np.reshape(var, (var.size, 1))
+            self.metadata['var_attrs'].update(var_name=f_cdf.varattsget(var_name_cdf))
+
+        dts_str = cdflib.cdfepoch.encode(variables['Epoch'].flatten())
+        dts = np.empty_like(variables['Epoch'], dtype=datetime.datetime)
+        for ind, dt_str in enumerate(dts_str):
+            dts[ind, 0] = datetime.datetime.strptime(dt_str + '000', '%Y-%m-%dT%H:%M:%S.%f')
+        variables['DATETIME'] = dts
+
+        self.metadata.update(f_cdf.globalattsget(expand=False))
+        self.done = True
+
+
+cdf_variable_name_dict = {
     'EPOCH':    'Epoch',
     'YEAR':     'YR',
     'DAY':      'Day',
@@ -44,8 +72,8 @@ variable_name_dict = {
     'BSN_x':        'BSN_x',
     'BSN_y':        'BSN_y',
     'BSN_z':        'BSN_z',
-    
 }
+
 
 def load_cdaweb_cdf(filepath):
     vars = {}
