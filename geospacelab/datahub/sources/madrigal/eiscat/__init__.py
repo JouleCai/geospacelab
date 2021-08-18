@@ -7,13 +7,14 @@ from geospacelab.datahub.sources.madrigal import madrigal_database
 from geospacelab import preferences as prf
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pybasic as basic
-import geospacelab.datahub.sources.madrigal.eiscat.loader as default_loader
-import geospacelab.datahub.sources.madrigal.eiscat.downloader as downloader
+from geospacelab.datahub.sources.madrigal.eiscat.loader import Loader as default_Loader
+from geospacelab.datahub.sources.madrigal.eiscat.downloader import Downloader as default_Downloader
 import geospacelab.datahub.sources.madrigal.eiscat.variable_config as var_config
 from geospacelab.datahub.sources.madrigal.eiscat.utilities import *
 
 default_dataset_attrs = {
-    'database': 'Madrigal',
+    'kind': 'sourced',
+    'database': madrigal_database,
     'facility': 'EISCAT',
     'data_file_type': 'eiscat-hdf5',
     'data_file_ext': 'hdf5',
@@ -39,9 +40,12 @@ default_attrs_required = ['site', 'antenna', 'modulation']
 class Dataset(datahub.DatasetModel):
     def __init__(self, **kwargs):
         kwargs = basic.dict_set_default(kwargs, **default_dataset_attrs)
-        self.database = madrigal_database
-        self.facility = 'EISCAT'
-        self.site = kwargs.pop('site', None)
+
+        super().__init__(**kwargs)
+
+        self.database = kwargs.pop('database', '')
+        self.facility = kwargs.pop('facility', '')
+        self.site = kwargs.pop('site', '')
         self.antenna = kwargs.pop('antenna', '')
         self.experiment = kwargs.pop('experiment', '')
         self.pulse_code = kwargs.pop('pulse_code', '')
@@ -50,18 +54,17 @@ class Dataset(datahub.DatasetModel):
         self.data_file_type = kwargs.pop('data_file_type', '')
         self.affiliation = kwargs.pop('affiliation', '')
         self.downloadable = kwargs.pop('downloadable', True)
-        self._thisday = None
         self.metadata = None
         self.beam_location = kwargs.pop('beam_location', True)
 
         load_data = kwargs.pop('load_data', False)
 
-        super().__init__(**kwargs)
-
         # self.config(**kwargs)
 
         if self.loader is None:
-            self.loader = default_loader
+            self.loader = default_Loader
+        if self.downloader is None:
+            self.downloader = default_Downloader
 
         self._set_default_variables(
             default_variable_names,
@@ -79,7 +82,7 @@ class Dataset(datahub.DatasetModel):
             if not str(attr):
                 mylog.StreamLogger.warning("The parameter {} is required before loading data!".format(attr_name))
 
-        if list(self.data_file_type):
+        if str(self.data_file_type):
             self.data_file_ext = self.data_file_type.split('-')[1]
 
     def label(self, **kwargs):
@@ -90,7 +93,7 @@ class Dataset(datahub.DatasetModel):
         self.check_data_files(**kwargs)
 
         for file_path in self.data_file_paths:
-            load_obj = self.loader.Loader(file_path, file_type=self.data_file_type)
+            load_obj = self.loader(file_path, file_type=self.data_file_type)
 
             for var_name in self._variables.keys():
                 self._variables[var_name].join(load_obj.variables[var_name])
@@ -106,6 +109,8 @@ class Dataset(datahub.DatasetModel):
         if self.beam_location:
             self.calc_lat_lon()
             # self.select_beams(field_aligned=True)
+        if self.time_clip:
+            self.time_filter_by_range()
 
     def select_beams(self, field_aligned=False, az_el_pairs=None):
         if field_aligned:
@@ -126,17 +131,9 @@ class Dataset(datahub.DatasetModel):
             for az1, el1 in az_el_pairs:
                 inds.extend(np.where(((np.abs(az - az1) <= 0.5) & (np.abs(el-el1) <= 0.5)))[0])
             inds.sort()
-        self.filter_by_inds(inds)
-
-    def filter_by_inds(self, inds):
-        if inds is None:
-            return
-        if not list(inds):
-            return
-        shape_0 = self['DATETIME'].value.shape[0]
-        for var in self._variables.values():
-            if var.value.shape[0] == shape_0:
-                var.value = var.value[inds, ::]
+        else:
+            raise ValueError
+        self.time_filter_by_inds(inds)
 
     def calc_lat_lon(self, AACGM=True):
         from geospacelab.cs import GEO, LENUSpherical
@@ -180,7 +177,6 @@ class Dataset(datahub.DatasetModel):
         day0 = dttool.get_start_of_the_day(dt_fr)
         for i in range(diff_days + 1):
             thisday = day0 + datetime.timedelta(days=i)
-            self._thisday = thisday
             initial_file_dir = self.data_root_dir / self.site / thisday.strftime('%Y')
 
             file_patterns = []
@@ -209,8 +205,7 @@ class Dataset(datahub.DatasetModel):
                 done = self.download_data()
                 if done:
                     done = super().search_data_files(
-                        initial_file_dir=initial_file_dir, search_pattern=search_pattern, recursive=recursive
-                    )
+                        initial_file_dir=initial_file_dir, search_pattern=search_pattern)
                 else:
                     print('Cannot find files from the online database!')
 
@@ -218,14 +213,17 @@ class Dataset(datahub.DatasetModel):
 
     def download_data(self):
         if self.data_file_type == 'eiscat-hdf5':
-            download_obj = downloader.Downloader(dt_fr=self.dt_fr, dt_to=self.dt_to,
-                                                 sites=[self.site], kind_data='eiscat')
+            download_obj = self.downloader(dt_fr=self.dt_fr, dt_to=self.dt_to,
+                                           sites=[self.site], kind_data='eiscat',
+                                           data_file_root_dir=self.data_root_dir)
         elif self.data_file_type == 'madrigal-hdf5':
-            download_obj = downloader.Downloader(dt_fr=self.dt_fr, dt_to=self.dt_to,
-                                                 sites=[self.site], kind_data='madrigal')
+            download_obj = self.downloader(dt_fr=self.dt_fr, dt_to=self.dt_to,
+                                           sites=[self.site], kind_data='madrigal',
+                                           data_file_root_dir=self.data_root_dir)
         elif self.data_file_type == 'eiscat-mat':
-            download_obj = downloader.Downloader(dt_fr=self.dt_fr, dt_to=self.dt_to,
-                                                 sites=[self.site], kind_data='eiscat')
+            download_obj = self.downloader(dt_fr=self.dt_fr, dt_to=self.dt_to,
+                                                 sites=[self.site], kind_data='eiscat',
+                                           data_file_root_dir=self.data_root_dir)
         else:
             raise TypeError
         return download_obj.done
@@ -262,9 +260,6 @@ class Dataset(datahub.DatasetModel):
 
     @site.setter
     def site(self, value):
-        if value is None:
-            self._site = None
-            return
         if isinstance(value, str):
             if value == 'TRO':
                 value = 'UHF'

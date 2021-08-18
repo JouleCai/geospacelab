@@ -176,7 +176,8 @@ var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'azimuthal angle'
 var.label = 'AZ'
-var.depends = {0: depend_0, 1: depend_1}
+var.group = 'radar param'
+var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
 plot_config.style = '1noE'
@@ -197,7 +198,8 @@ var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'elevation angle'
 var.label = 'EL'
-var.depends = {0: depend_0, 1: depend_1}
+var.group = 'radar param'
+var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
 plot_config.style = '1noE'

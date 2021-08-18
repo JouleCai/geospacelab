@@ -1,0 +1,2 @@
+forms = {'Tens': 201, 'Year': 1, 'Month': '01', 'Day_Tens': 0, 'Days': 1, 'Hour': '00', 'min': '00', 'Dur_Day_Tens':'00', 'Dur_Day': 1, 'Dur_Hour': '04', 'Dur_Min': '50', 'Output': "AE", 'Out format': "IAGA2002", 'Email': "lei.cai@oulu.fi"}
+In[48]: r = requests.get(url, params=forms, allow_redirects=True, verify=True)

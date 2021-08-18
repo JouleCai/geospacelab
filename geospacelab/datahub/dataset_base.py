@@ -1,7 +1,7 @@
 import numpy as np
 import pathlib
 
-from geospacelab.datahub._variable_base import *
+from geospacelab.datahub.variable_base import *
 from geospacelab import preferences as pref
 
 import geospacelab.toolbox.utilities.pyclass as pyclass
@@ -30,6 +30,7 @@ class DatasetModel(object):
         self.data_file_ext = kwargs.pop('data_file_ext', '*')
         self.data_search_recursive = kwargs.pop('data_search_recursive', False)
         self.visual = kwargs.pop('visual', 'off')
+        self.time_clip = kwargs.pop('time_clip', True)
 
         self.label_fields = kwargs.pop('label_fields', [])
 
@@ -94,6 +95,20 @@ class DatasetModel(object):
         else:
             raise AttributeError
         self.data_file_num = len(self.data_file_paths)
+
+    def time_filter_by_range(self):
+        inds = np.where((self['DATETIME'].value.flatten() >= self.dt_fr) & (self['DATETIME'].value.flatten() <= self.dt_to))[0]
+        self.time_filter_by_inds(inds)
+
+    def time_filter_by_inds(self, inds):
+        if inds is None:
+            return
+        if not list(inds):
+            return
+        shape_0 = self['DATETIME'].value.shape[0]
+        for var in self._variables.values():
+            if var.value.shape[0] == shape_0:
+                var.value = var.value[inds, ::]
 
     def label(self, fields=None, separator=' | ', lowercase=True):
         if fields is None:

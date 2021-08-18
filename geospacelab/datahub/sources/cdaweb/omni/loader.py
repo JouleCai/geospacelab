@@ -14,7 +14,7 @@ class Loader:
             self.load()
 
     def load(self):
-        if self.file_type == 'cdf':
+        if self.file_type == 'cdf' or self.file_type == 'hres-cdf':
             self.load_omni_cdf()
 
     def load_omni_cdf(self):
@@ -30,12 +30,14 @@ class Loader:
             variables[var_name] = np.reshape(var, (var.size, 1))
             self.metadata['var_attrs'].update(var_name=f_cdf.varattsget(var_name_cdf))
 
-        dts_str = cdflib.cdfepoch.encode(variables['Epoch'].flatten())
-        dts = np.empty_like(variables['Epoch'], dtype=datetime.datetime)
+        dts_str = cdflib.cdfepoch.encode(variables['EPOCH'].flatten())
+        dts = np.empty_like(variables['EPOCH'], dtype=datetime.datetime)
         for ind, dt_str in enumerate(dts_str):
             dts[ind, 0] = datetime.datetime.strptime(dt_str + '000', '%Y-%m-%dT%H:%M:%S.%f')
         variables['DATETIME'] = dts
+        variables['B_x_GSM'] = variables['B_x_GSE']
 
+        self.variables = variables
         self.metadata.update(f_cdf.globalattsget(expand=False))
         self.done = True
 
@@ -55,16 +57,16 @@ cdf_variable_name_dict = {
     'Timeshift_RMS':  'RMS_Timeshift',
     'B_x_GSE':      'BX_GSE',
     'B_y_GSE':      'BY_GSE',
-    'B_z_GSE':      'B_z_GSE',
-    'B_y_GSM':      'B_y_GSM',
-    'B_z_GSM':      'B_z_GSM',
+    'B_z_GSE':      'BZ_GSE',
+    'B_y_GSM':      'BY_GSM',
+    'B_z_GSM':      'BZ_GSM',
     'v_sw':         'flow_speed',
     'v_x':          'Vx',
     'v_y':          'Vy',
     'v_z':          'Vz',
     'n_p':          'proton_density',
     'T':            'T',
-    'p':            'Pressure',
+    'p_dyn':        'Pressure',
     'E':            'E',
     'beta':         'Beta',
     'Ma_A':         'Mach_num',

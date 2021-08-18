@@ -19,11 +19,13 @@ class Downloader(object):
         self.version = version
         self.done = False
         if data_file_root_dir is None:
-            self.data_file_root_dir = prf.datahub_data_root_dir / "CDAWeb"
+            self.data_file_root_dir = prf.datahub_data_root_dir / "CDAWeb" / 'OMNI'
         else:
             self.data_file_root_dir = data_file_root_dir
 
         self.url_base = "https://cdaweb.gsfc.nasa.gov/pub/data/omni/omni_cdaweb/"
+
+        self.download()
 
     def download(self):
         if self.res in ['1min', '5min']:
@@ -73,34 +75,20 @@ class Downloader(object):
 
             r_file = requests.get(url + href, allow_redirects=True)
             file_name = href
-            file_path = self.data_file_root_dir / omni_dir_name / ('high_res_' + self.res)
+            file_path = self.data_file_root_dir / (omni_dir_name + '_high_res_' + self.res)
             file_path = file_path / '{:4d}'.format(dt1.year) / file_name
-            file_path.parent.resolve().mkdir(parents=True, exist_ok=True)
-            with open(file_path, "wb") as omni:
+            if file_path.is_file():
                 mylog.simpleinfo.info(
-                    "Downloading {} to the directory {} ...".format(file_path.name, file_path.parent.resolve())
-                )
-                omni.write(r_file.content)
-                mylog.simpleinfo.info("Done")
-
-            # if self.res in ["1min", "5min"]:
-            #     href = self.base_link + name + '_' + self.res + '/' + '{:4d}'.format(dt1.year) + '/' \
-            #            + 'omni_' + name + '_' + self.res + '_' + dt1.strftime("%Y%m%d") + '_' + self.version + '.cdf'
-            # else:
-            #     raise NotImplementedError
-            #
-            # filepath = self.data_file_root_dir / (name + '_' + self.res) / \
-            #            '{:4d}'.format(dt1.year) / ('omni_' + name + '_' + self.res + '_' + dt1.strftime("%Y%m%d") +
-            #                                        '_' + self.version + '.cdf')
-            #
-            # filepath.parent.resolve().mkdir(parents=True, exist_ok=True)
-            # r = requests.get(href, allow_redirects=True)
-            # with open(filepath, "wb") as omni:
-            #     mylog.simpleinfo.info(
-            #         "Downloading {} to the directory {} ...".format(filepath.name, filepath.parent.resolve())
-            #     )
-            #     omni.write(r.content)
-            #     mylog.simpleinfo.info("Done")
+                    "The file {} exists in the directory {}.".format(file_path.name, file_path.parent.resolve()))
+            else:
+                file_path.parent.resolve().mkdir(parents=True, exist_ok=True)
+                with open(file_path, "wb") as omni:
+                    mylog.simpleinfo.info(
+                        "Downloading {} to the directory {} ...".format(file_path.name, file_path.parent.resolve())
+                    )
+                    omni.write(r_file.content)
+                    mylog.simpleinfo.info("Done")
+            self.done = True
 
     def download_low_res_omni(self):
         raise NotImplemented
@@ -110,7 +98,6 @@ def test():
     dt_fr = datetime.datetime(2020, 3, 4)
     dt_to = datetime.datetime(2020, 5, 3)
     download_obj = Downloader(dt_fr, dt_to)
-    download_obj.download()
     pass
 
 

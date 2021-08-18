@@ -111,11 +111,9 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
 
         self._xlim = [self.dt_fr, self.dt_to]
 
-    def set_layout(self, panel_layouts=None, plot_styles=None, row_height_scales=None,
+    def set_layout(self, panel_layouts=None, plot_styles=None, row_height_scales=1,
                    left=None, right=None, bottom=None, top=None, hspace=None, **kwargs):
-        if row_height_scales is None:
-            gs_row_heights = 1
-        
+
         if left is None:
             left = default_layout_config['left']
         if right is None:
@@ -547,7 +545,8 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
 
         if not list(hls):
             return False
-        hlgd = ax.legend(handles=hls, **legend_config)  # this return a handle
+        elif len(hls) > 1:
+            hlgd = ax.legend(handles=hls, **legend_config)  # this return a handle
 
         # set default ylim
         ymin = numpy.nanmin(yy)

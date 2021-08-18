@@ -8,9 +8,9 @@ import pathlib
 import geospacelab.toolbox.utilities.pyclass as pyclass
 import geospacelab.toolbox.utilities.pybasic as pybasic
 import geospacelab.toolbox.utilities.pylogging as mylog
-from geospacelab.datahub._metadata_base import *
+from geospacelab.datahub.metadata_base import *
 from geospacelab.datahub.dataset_base import DatasetModel
-from geospacelab.datahub._variable_base import VariableModel
+from geospacelab.datahub.variable_base import VariableModel
 from geospacelab import preferences as pfr
 
 
@@ -42,7 +42,7 @@ class DataHub(object):
         kwargs.setdefault('dt_fr', self.dt_fr)
         kwargs.setdefault('dt_to', self.dt_to)
         kwargs.setdefault('visual', self.visual)
-        append=True
+        append = True
 
         module_keys = [pfr.package_name, 'datahub', 'sources']
         module_keys.extend(datasource_contents)
@@ -57,9 +57,9 @@ class DataHub(object):
                 + 'Or, add a temporary or user-defined dataset by the method of "add_dataset". '
             )
 
-        if dataset.label() in [ds.label() for ds in self.datasets]:
-            mylog.simpleinfo.info('The same dataset has been docked!')
-            append = False
+        # if dataset.label() in [ds.label() for ds in self.datasets]:
+        #     mylog.simpleinfo.info('The same dataset has been docked!')
+        #    append = False
 
         if append:
             self._append_dataset(dataset)
