@@ -4,11 +4,11 @@ A python-based library to collect, manage, and visualize geospace data.
 ## Features
 - With a user-friendly data manager ("Datahub"):
     + Dock with multiple datasets (sourced or temporary).
-    + Control to download, load, and manage the data.
-    + Load data from files with formats (hdf, mat, sav, cdf, netcdf, ascii, and binary)
-    + Assign variables for visualization.
-    + Give variable type and attributes.
-- Provide utilities for data analysis.
+    + Quickly download, load, and view the data.
+    + Support I/O with multiple file formats (hdf, mat, sav, cdf, netcdf, ascii, and binary)
+    + Easily assign variables for visualization.
+    + Provide Variable objects with useful attributes.
+- A number of utilities for data analysis.
 - Useful visualization components based on "matplotlib" and "cartopy".
     + Time series plots with:
         - Automatically adjustable time ticks.
