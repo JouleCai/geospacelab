@@ -23,7 +23,7 @@ class Downloader(object):
 
         self.done = False
         if data_file_root_dir is None:
-            self.data_file_root_dir = prf.datahub_data_root_dir / 'WDC' / 'AE'
+            self.data_file_root_dir = prf.datahub_data_root_dir / 'WDC' / 'ASYSYM'
         else:
             self.data_file_root_dir = pathlib.Path(data_file_root_dir)
 
@@ -44,7 +44,7 @@ class Downloader(object):
             dt_to = dttool.get_next_n_months(dt0, i + 1) - datetime.timedelta(seconds=1)
             delta_seconds = (dt_to - dt_fr).total_seconds()
 
-            file_name = 'WDC_AE_' + dt_fr.strftime('%Y%m') + '.nc'
+            file_name = 'WDC_ASYSYM_' + dt_fr.strftime('%Y%m') + '.nc'
             file_path = self.data_file_root_dir / '{:4d}'.format(dt_fr.year) / file_name
             if file_path.is_file():
                 mylog.simpleinfo.info(
@@ -53,7 +53,7 @@ class Downloader(object):
                 continue
             else:
                 file_path.parent.resolve().mkdir(parents=True, exist_ok=True)
-            form_ae = {
+            form_asy = {
                 'Tens': str(int(dt_fr.year/10)),
                 'Year': str(int(dt_fr.year - np.floor(dt_fr.year/10)*10)),
                 'Month': '{:02d}'.format(dt_fr.month),
@@ -69,14 +69,14 @@ class Downloader(object):
                 "COLOR": "COLOR",
                 "AE Sensitivity": "100",
                 "ASY/SYM Sensitivity": "100",
-                "Output": 'AE',
+                "Output": 'ASY',
                 "Out format": "IAGA2002",
                 "Email": self.user_email,
             }
 
             if r_method.lower() == 'get':
                 mylog.StreamLogger.info("Requesting data from WDC ...")
-                r_file = requests.get(r_action_url, params=form_ae)
+                r_file = requests.get(r_action_url, params=form_asy)
 
             if "No data for your request" in r_file.text or "DATE       TIME         DOY" not in r_file.text:
                 mylog.StreamLogger.warning("No data for your request!")
@@ -100,33 +100,33 @@ class Downloader(object):
             datetime.datetime.utcfromtimestamp(time_array[0]),
             datetime.datetime.utcfromtimestamp(time_array[-1]))
         )
-        ae_array = np.array(results[2])
-        ae_array.astype(np.float32)
-        au_array = np.array(results[3])
-        au_array.astype(np.float32)
-        al_array = np.array(results[4])
-        al_array.astype(np.float32)
-        ao_array = np.array(results[5])
-        ao_array.astype(np.float32)
+        asy_d_array = np.array(results[2])
+        asy_d_array.astype(np.float32)
+        asy_h_array = np.array(results[3])
+        asy_h_array.astype(np.float32)
+        sym_d_array = np.array(results[4])
+        sym_d_array.astype(np.float32)
+        sym_h_array = np.array(results[5])
+        sym_h_array.astype(np.float32)
 
         num_rows = len(results[0])
 
         fnc = nc.Dataset(file_path, 'w')
         fnc.createDimension('UNIX_TIME', num_rows)
 
-        fnc.title = "WDC AE indices"
+        fnc.title = "WDC ASY/SYM indices"
         time = fnc.createVariable('UNIX_TIME', np.float32, ('UNIX_TIME',))
         time.units = 'Unix Time since 1970-1-1'
-        ae = fnc.createVariable('AE', np.float32, ('UNIX_TIME',))
-        au = fnc.createVariable('AU', np.float32, ('UNIX_TIME',))
-        al = fnc.createVariable('AL', np.float32, ('UNIX_TIME',))
-        ao = fnc.createVariable('AO', np.float32, ('UNIX_TIME',))
+        asy_d = fnc.createVariable('ASY-D', np.float32, ('UNIX_TIME',))
+        asy_h = fnc.createVariable('ASY-H', np.float32, ('UNIX_TIME',))
+        sym_d = fnc.createVariable('SYM-D', np.float32, ('UNIX_TIME',))
+        sym_h = fnc.createVariable('SYM-H', np.float32, ('UNIX_TIME',))
 
         time[::] = time_array[::]
-        ae[::] = ae_array[::]
-        au[::] = au_array[::]
-        al[::] = al_array[::]
-        ao[::] = ao_array[::]
+        asy_d[::] = asy_d_array[::]
+        asy_h[::] = asy_h_array[::]
+        sym_d[::] = sym_d_array[::]
+        sym_h[::] = sym_h_array[::]
         # for i, res in enumerate(results):
         #     dt = datetime.datetime.strptime(res[0]+'000', "%Y-%m-%d %H:%M:%S.%f")
         #     time[i] = (dt - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1)
