@@ -421,7 +421,7 @@ class VisualAxis(object):
         self.tick_labels = None
         self.minor_ticks = None
         self.major_tick_max = 6
-        self.minor_tick_max = 30
+        self.minor_tick_max = None
         self.visible = True
 
     def config(self, logging=True, **kwargs):

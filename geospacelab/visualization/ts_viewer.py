@@ -19,9 +19,11 @@ import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.visualization.mpl_toolbox.axis_ticks as ticktool
 
 
-# plt.style.use('ggplot')
-
-# plt.rcParams['font.family'] = 'serif' 
+# plt.style.use('seaborn-dark-palette')
+plt.style.use('fast')
+# plt.style.use('dark_background')    # nice for line plots
+# plt.style.use('bmh')
+# plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = 'Ubuntu'
 plt.rcParams['font.monospace'] = 'Ubuntu Mono'
 plt.rcParams['font.size'] = 10
@@ -368,14 +370,18 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
             major_max = var_for_config.visual.axis[1].major_tick_max
             minor_max = var_for_config.visual.axis[1].minor_tick_max
             ax.yaxis.set_major_locator(mpl.ticker.MaxNLocator(major_max))
-            ax.yaxis.set_minor_locator(mpl.ticker.MaxNLocator(minor_max))
+            if minor_max is None:
+                ax.yaxis.set_minor_locator(mpl.ticker.AutoMinorLocator())
+            else:
+                ax.yaxis.set_minor_locator(mpl.ticker.MaxNLocator(minor_max))
+
         if yscale == 'log':
             locmin = mpl.ticker.LogLocator(base=10.0,
                                            subs=(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
                                            numticks=12
                                            )
             ax.yaxis.set_minor_locator(locmin)
-            ax.xaxis.set_minor_formatter(mpl.ticker.NullFormatter())
+            # ax.yaxis.set_minor_formatter(mpl.ticker.NullFormatter())
         ax.set_ylim(ylim)
 
     def _set_xaxis(self, ax, var_for_config, bottom=False):
