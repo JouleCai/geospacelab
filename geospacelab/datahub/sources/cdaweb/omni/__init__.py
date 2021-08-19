@@ -110,10 +110,11 @@ class Dataset(datahub.DatasetModel):
         for i in range(diff_months + 1):
             thismonth = dttool.get_next_n_months(dt0, i)
             if self.omni_res in ['1min', '5min']:
-                initial_file_dir = self.data_root_dir / \
-                                   (self.omni_type.upper() + '_high_res_' + self.omni_res) / \
-                                   '{:4d}'.format(thismonth.year)
-
+                initial_file_dir = kwargs.pop('initial_file_dir', None)
+                if initial_file_dir is None:
+                    initial_file_dir = self.data_root_dir / \
+                                       (self.omni_type.upper() + '_high_res_' + self.omni_res) / \
+                                       '{:4d}'.format(thismonth.year)
                 file_patterns = [
                     self.omni_res,
                     thismonth.strftime('%Y%m%d')
@@ -121,9 +122,11 @@ class Dataset(datahub.DatasetModel):
             else:
                 raise NotImplementedError
             # remove empty str
-            file_patterns = [pattern for pattern in file_patterns if str(pattern)]
+            search_pattern = kwargs.pop('search_pattern', None)
+            if search_pattern is None:
+                file_patterns = [pattern for pattern in file_patterns if str(pattern)]
 
-            search_pattern = '*' + '*'.join(file_patterns) + '*'
+                search_pattern = '*' + '*'.join(file_patterns) + '*'
 
             done = super().search_data_files(
                 initial_file_dir=initial_file_dir, search_pattern=search_pattern)

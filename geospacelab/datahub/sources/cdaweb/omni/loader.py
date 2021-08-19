@@ -75,7 +75,3 @@ cdf_variable_name_dict = {
     'BSN_y':        'BSN_y',
     'BSN_z':        'BSN_z',
 }
-
-
-def load_cdaweb_cdf(filepath):
-    vars = {}

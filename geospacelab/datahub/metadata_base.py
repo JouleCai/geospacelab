@@ -35,7 +35,7 @@ class FacilityModel(StrAttrBase):
         return obj
 
 
-class DataProductModel(StrAttrBase):
+class ProductModel(StrAttrBase):
 
     def __new__(cls, str_in, **kwargs):
         obj = super().__new__(cls, str_in)

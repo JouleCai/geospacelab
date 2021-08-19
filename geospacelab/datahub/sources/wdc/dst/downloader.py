@@ -4,7 +4,8 @@ import requests
 import bs4
 import pathlib
 import re
-import netCDF4 as nc
+import netCDF4
+import cftime
 
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as mylog
@@ -79,6 +80,8 @@ class Downloader(object):
                 mylog.StreamLogger.warning("No data for your request!")
                 return
 
+            with open(file_path.with_suffix('.dat'), 'w') as f:
+                f.write(r_file.text)
             mylog.StreamLogger.info("Preparing to save the data in the netcdf format ...")
             self.save_to_netcdf(r_file.text, file_path)
 
@@ -90,9 +93,11 @@ class Downloader(object):
             re.M
         )
         results = list(zip(*results))
-        time_array = np.array([(datetime.datetime.strptime(dtstr+'000', "%Y-%m-%d %H:%M:%S.%f")
-                              - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1)
-                              for dtstr in results[0]])
+        # time_array = np.array([(datetime.datetime.strptime(dtstr+'000', "%Y-%m-%d %H:%M:%S.%f")
+        #                      - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1)
+        #                      for dtstr in results[0]])
+        dts = [datetime.datetime.strptime(dtstr+'000', "%Y-%m-%d %H:%M:%S.%f") for dtstr in results[0]]
+        time_array = np.array(cftime.date2num(dts, units='seconds since 1970-01-01 00:00:00.0'))
         print('From {} to {}.'.format(
             datetime.datetime.utcfromtimestamp(time_array[0]),
             datetime.datetime.utcfromtimestamp(time_array[-1]))
@@ -102,12 +107,12 @@ class Downloader(object):
 
         num_rows = len(results[0])
 
-        fnc = nc.Dataset(file_path, 'w')
+        fnc = netCDF4.Dataset(file_path, 'w')
         fnc.createDimension('UNIX_TIME', num_rows)
 
         fnc.title = "WDC DST index"
-        time = fnc.createVariable('UNIX_TIME', np.float32, ('UNIX_TIME',))
-        time.units = 'Unix Time since 1970-1-1'
+        time = fnc.createVariable('UNIX_TIME', np.float64, ('UNIX_TIME',))
+        time.units = 'seconds since 1970-01-01 00:00:00.0'
         dst = fnc.createVariable('Dst', np.float32, ('UNIX_TIME',))
 
         time[::] = time_array[::]
