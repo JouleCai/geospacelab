@@ -240,6 +240,9 @@ viewer.save_figure()
 # show on screen
 viewer.show()
 ```
+Output:
+> ![alt text](https://github.com/JouleCai/geospacelab/blob/master/examples/OMNI_1min_20160314-060000-20160320-060000.png?raw=true)
+
 ## Notes
 - The current version is a pre-released version. Many features will be added soon.
 - The full documentation has not been added.
