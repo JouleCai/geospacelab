@@ -97,11 +97,17 @@ class DataHub(object):
         self._latest_dataset_ind = ind
 
     def get_variable(self, var_name, dataset=None, dataset_index=None):
+        if dataset is None and dataset_index is None:
+            var = None
+            for ind, var in self.variables.items():
+                if var_name == var.name:
+                    var = self.variables[ind]
+            if var is None:
+                mylog.StreamLogger.warning("Cannot find the variable in the datahub assigned variables. Try specify the dataset.")
+            return var
+
         if dataset is None:
-            if dataset_index is None:
-                dataset = self.datasets[self._latest_dataset_ind]  # the latest added dataset
-            else:
-                dataset = self.datasets[dataset_index]
+            dataset = self.datasets[dataset_index]
         elif not issubclass(dataset.__class__, DatasetModel):
             raise TypeError('A dataset instance\'s class must be a heritage of the class DatasetModel!')
 

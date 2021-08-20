@@ -19,13 +19,6 @@ depend_1 = {'HEIGHT': 'HEIGHT', 'RANGE': 'RANGE', 'GEO_LAT': 'GEO_LAT', 'GEO_LON
 
 default_colormap = "gist_ncar"
 
-plot_config = {
-    'linestyle': '-',
-    'linewidth': 1.5,
-    'marker': '.',
-    'markersize': 3,
-}
-
 default_axis_dict_2d = {
     1:     {
         'data':     '@d.HEIGHT.value',
@@ -42,7 +35,7 @@ default_axis_dict_2d = {
 
 default_plot_config = {
     'line':         {
-        'linestyle':        '-',
+        'linestyle':        '',
         'linewidth':        1.5,
         'marker':           '.',
         'markersize':       3,
@@ -180,6 +173,7 @@ var.group = 'radar param'
 var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
 plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
@@ -202,6 +196,7 @@ var.group = 'radar param'
 var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
 plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis

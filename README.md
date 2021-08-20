@@ -96,7 +96,7 @@ user_email = "YOU_EMAIL"
 user_affiliation = "YOUR_AFFILIATION"
 ```
 
-### 5. Update
+### 5. Upgrade
 
 If the package is installed from the pre-built release. Update the package via:
 ```shell
@@ -143,10 +143,18 @@ ds_1 = dh.dock(datasource_contents=[database_name, facility_name],
                       site=site, antenna=antenna, modulation=modulation, data_file_type='eiscat-hdf5')
 # load data
 ds_1.load_data()
-# get the variables which have been assigned in the dataset 
-n_e = dh.get_variable('n_e', dataset=ds_1) # equivalent to n_e = ds_1['n_e'], return a Variable instance.
-# the variable will be retrieved from the latest added dataset, if dataset is not specified 
-T_i = dh.get_variable('T_i') # equivalent to T_i = ds_1['T_i']   
+# assign a variable from its own dataset to the datahub
+n_e = dh.assign_variable('n_e')
+T_i = dh.assign_variable('T_i')
+
+# get the variables which have been assigned in the datahub
+n_e = dh.get_variable('n_e')
+T_i = dh.get_variable('T_i')
+# if the variable is not assigned in the datahub, but exists in the its own dataset:
+comp_O_p = dh.get_variable('comp_O_p', dataset=ds_1)     # O+ ratio
+# above line is equivalent to
+comp_O_p = dh.datasets[1]['comp_O_p']
+
 # The variables, e.g., n_e and T_i, are the class Variable's instances, 
 # which stores the variable values, errors, and many other attributes, e.g., name, label, unit, depends, ....
 # To get the value of the variable, use variable_isntance.value, e.g.,
@@ -162,7 +170,7 @@ added in the plot. See the example script and figure below:
 
 ```python
 import datetime
-import geospacelab.visualization.eiscat_viewer as eiscat
+import geospacelab.express.eiscat_viewer as eiscat
 
 dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
 dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
@@ -171,10 +179,10 @@ site = 'UHF'
 antenna = 'UHF'
 modulation = '60'
 load_mode = 'AUTO'
-viewer = eiscat.quicklook(
+viewer = eiscat.EISCATViewer(
       dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO'
 )
-
+viewer.quicklook()
 # viewer.save_figure() # comment this if you need to run the following codes
 # viewer.show()   # comment this if you need to run the following codes.
 
@@ -207,6 +215,31 @@ viewer.show()
 Output:
 > ![alt text](https://github.com/JouleCai/geospacelab/blob/master/examples/EISCAT_UHF_beata_cp1_2.1u_CP_20201209-180000-20201210-060000.png?raw=true)
 
+### Example 3: OMNI and WDC geomagnetic indices:
+
+```python
+import datetime
+import geospacelab.express.omni_viewer as omni
+
+dt_fr = datetime.datetime.strptime('20160314' + '0600', '%Y%m%d%H%M')
+dt_to = datetime.datetime.strptime('20160320' + '0600', '%Y%m%d%H%M')
+
+omni_type = 'OMNI2'
+omni_res = '1min'
+load_mode = 'AUTO'
+viewer = omni.OMNIViewer(
+    dt_fr, dt_to, omni_type=omni_type, omni_res=omni_res, load_mode=load_mode
+)
+viewer.quicklook()
+
+# data can be retrieved in the same way as in Example 2:
+viewer.list_assigned_variables()
+B_x_gsm = viewer.get_variable('B_x_GSM')
+# save figure
+viewer.save_figure()
+# show on screen
+viewer.show()
+```
 ## Notes
 - The current version is a pre-released version. Many features will be added soon.
 - The full documentation has not been added.

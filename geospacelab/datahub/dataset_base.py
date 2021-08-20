@@ -97,6 +97,8 @@ class DatasetModel(object):
         self.data_file_num = len(self.data_file_paths)
 
     def time_filter_by_range(self):
+        if self['DATETIME'].value is None:
+            return
         inds = np.where((self['DATETIME'].value.flatten() >= self.dt_fr) & (self['DATETIME'].value.flatten() <= self.dt_to))[0]
         self.time_filter_by_inds(inds)
 

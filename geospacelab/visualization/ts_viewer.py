@@ -5,6 +5,7 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 import pathlib
 
+import numpy as np
 from scipy.interpolate import interp1d
 
 
@@ -229,10 +230,16 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
         if x_data is None:
             depend_0 = var.get_depend(axis=0)
             x_data = depend_0['UT']  # numpy array, type=datetime
+            if x_data is None:
+                x_data = np.array([self._xlim[0], self._xlim[1]]).reshape(2, 1)
+                var.visual.axis[0].mask_gap = False
 
         y_data = var.get_visual_axis_attr(axis=1, attr_name='data')
         if y_data is None:
             y_data = var.value
+            if y_data is None:
+                y_data = np.empty_like(x_data, dtype=np.float32)
+                y_data[::] = np.nan
 
         y_err_data = var.get_visual_axis_attr(axis=1, attr_name='data_err')
         if y_err_data is None:
@@ -270,6 +277,9 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
         if x_data is None:
             depend_0 = var.get_depend(axis=0)
             x_data = depend_0['UT']  # numpy array, type=datetime
+            if x_data is None:
+                x_data = np.array([self._xlim[0], self._xlim[1]]).reshape(2, 1)
+                var.visual.axis[0].mask_gap = False
 
         y_data = var.get_visual_axis_attr(axis=1, attr_name='data')
         if type(y_data) == list:
@@ -278,6 +288,8 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
             y_data = var.get_depend(axis=1, retrieve_data=True)
             y_data_keys = list(y_data.keys())
             y_data = y_data[y_data_keys[0]]
+            if y_data is None:
+                y_data = np.array([0, 1]).reshape(1, 2)
         y_data = y_data * var.visual.axis[1].data_scale
 
         z_data = var.get_visual_axis_attr(axis=2, attr_name='data')
@@ -285,6 +297,8 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
             z_data = z_data[0]
         if z_data is None:
             z_data = var.value
+            if z_data is None:
+                z_data = np.array([[np.nan, np.nan], [np.nan, np.nan]])
         if (x_data is None) or (z_data is None):
             raise ValueError
 
@@ -555,12 +569,16 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
             hlgd = ax.legend(handles=hls, **legend_config)  # this return a handle
 
         # set default ylim
-        ymin = numpy.nanmin(yy)
-        if numpy.isnan(ymin):
+        if np.isnan(yy.flatten()).all():
             ymin = -1
-        ymax = numpy.nanmax(yy)
-        if numpy.isnan(ymax):
             ymax = 1
+        else:
+            ymin = numpy.nanmin(yy.flatten())
+            if numpy.isnan(ymin):
+                ymin = -1
+            ymax = numpy.nanmax(yy.flatten())
+            if numpy.isnan(ymax):
+                ymax = 1
 
         ax.set_ylim([ymin-(ymax-ymin)*0.05, ymax+(ymax-ymin)*0.05])
 

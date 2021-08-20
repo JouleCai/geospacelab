@@ -17,7 +17,7 @@ class EISCATViewer(TimeSeriesViewer):
         return self.datasets[1]
 
     def list_all_variables(self):
-        self.datasets[0].list_all_variables()
+        self.datasets[1].list_all_variables()
 
     def save_figure(self, **kwargs):
         file_name = kwargs.pop('filename', self.title.replace(', ', '_'))
@@ -27,33 +27,25 @@ class EISCATViewer(TimeSeriesViewer):
         title = kwargs.pop('title', self.title)
         super().add_title(x=0.5, y=1.06, title=title)
 
+    def quicklook(self):
+        n_e = self.assign_variable('n_e')
+        T_i = self.assign_variable('T_i')
+        T_e = self.assign_variable('T_e')
+        v_i = self.assign_variable('v_i_los')
+        az = self.assign_variable('AZ')
+        el = self.assign_variable('EL')
+        self.list_assigned_variables()
+        self.list_datasets()
 
-def quicklook(dt_fr, dt_to,
-              site=None, antenna=None, modulation=None, data_file_type='eiscat-hdf5',
-              load_mode='AUTO'):
+        layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
+        self.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3])
+        # plt.style.use('dark_background')
+        # dt_fr_1 = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
+        # dt_to_1 = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
 
-    viewer = EISCATViewer(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
-                          data_file_type=data_file_type, load_mode=load_mode)
-
-    n_e = viewer.assign_variable('n_e')
-    T_i = viewer.assign_variable('T_i')
-    T_e = viewer.assign_variable('T_e')
-    v_i = viewer.assign_variable('v_i_los')
-    az = viewer.assign_variable('AZ')
-    el = viewer.assign_variable('EL')
-    viewer.list_assigned_variables()
-    viewer.list_datasets()
-
-    layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
-    viewer.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3])
-    # plt.style.use('dark_background')
-    # dt_fr_1 = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
-    # dt_to_1 = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
-
-    viewer.draw()
-    viewer.add_title()
-    viewer.add_panel_labels()
-    return viewer
+        self.draw()
+        self.add_title()
+        self.add_panel_labels()
 
 
 def example():
@@ -65,9 +57,10 @@ def example():
     antenna = 'UHF'
     modulation = '60'
     load_mode = 'AUTO'
-    viewer = quicklook(
+    viewer = EISCATViewer(
         dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO'
     )
+    viewer.quicklook()
 
     # viewer.save_figure() # comment this if you need to run the following codes
     # viewer.show()   # comment this if you need to run the following codes.
@@ -95,7 +88,7 @@ def example():
     viewer.add_top_bar(dt_fr_3, dt_to_3, bottom=0., top=0.02, label='Top bar 1')
 
     # save figure
-    viewer.save_figure()
+    # viewer.save_figure()
     # show on screen
     viewer.show()
 

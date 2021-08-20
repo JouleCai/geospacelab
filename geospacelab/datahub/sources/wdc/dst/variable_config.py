@@ -12,18 +12,12 @@ depend_0 = {'UT': 'DATETIME'}
 
 default_colormap = "gist_ncar"
 
-plot_config = {
-    'linestyle': '-',
-    'linewidth': 1.5,
-    'marker': '',
-    'markersize': 3,
-}
 
 default_plot_config = {
     'line':         {
         'linestyle':        '-',
         'linewidth':        1.5,
-        'marker':           '.',
+        'marker':           '',
         'markersize':       3,
     },
     'pcolormesh':   {
@@ -46,6 +40,7 @@ var.unit = 'nT'
 var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
 plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis

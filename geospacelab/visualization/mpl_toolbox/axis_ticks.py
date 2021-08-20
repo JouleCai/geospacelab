@@ -215,7 +215,7 @@ def set_timeline(dt_start, dt_stop, **kwargs):
 
     # for day
     if majorlocatorclass is mdates.DayLocator:
-        temp = np.floor(31.5/majorscale)
+        temp = int(np.floor(31.5/majorscale))
         by1 = range(1, temp*majorscale, majorscale)
         majorlocator = majorlocatorclass(bymonthday=by1, interval=1)
         if dt_start.year != dt_stop.year:
