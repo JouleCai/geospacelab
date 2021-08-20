@@ -34,7 +34,7 @@ a sourced or user-defined database, such as Madrigal/EISCAT, CDAWeb/OMNI, WDC/in
 
 ## Installation
 ### 1. The python distribution "*__Anaconda__*" is recommended:
-The package was tested with the anaconda distribution and with python>=3.7 under Ubuntu 20.04 and MacOS Big Sur.
+The package was tested with the anaconda distribution and with **PYTHON>=3.7** under **Ubuntu 20.04** and **MacOS Big Sur**.
 
 With Anaconda, it may be easier to install some required dependencies listed below, e.g., cartopy, using the _conda_ command.
 

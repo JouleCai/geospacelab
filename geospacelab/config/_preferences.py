@@ -43,13 +43,13 @@ class Preferences(object):
             result = input("Create or not? [y]/n: ")
             time.sleep(0.5)
             if result.lower() in ['', 'y', 'yes']:
-                self._datahub_data_root_dir.mkdir(parents=True)
+                self._datahub_data_root_dir.mkdir(parents=True, exist_ok=True)
                 mylog.simpleinfo.info("The directory has been created!")
             elif result.lower() in ['n', 'no']:
                 result = input('Input the root directory for storing data: ')
                 if str(result):
                     self._datahub_data_root_dir = pathlib.Path(result)
-                    self._datahub_data_root_dir.mkdir(parents=True)
+                    self._datahub_data_root_dir.mkdir(parents=True, exist_ok=True)
                     mylog.simpleinfo.info("The directory {} has been created!".format(self._datahub_data_root_dir))
                 else:
                     raise NotADirectoryError('"Set the default root directory in ~/.geospacelab/config.toml!"')
