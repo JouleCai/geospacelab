@@ -158,13 +158,13 @@ class Loader:
 
             # unix time to datetime
             utime1 = h5_data['utime'][0]
-            dt1 = dttool.convert_unix_time_to_datetime(utime1)
+            dt1 = dttool.convert_unix_time_to_datetime_cftime(utime1)
             var = dt1.reshape(num_row, 1)
             var_name = 'DATETIME_1'
             vars[var_name] = var
 
             utime2 = h5_data['utime'][1]
-            dt2 = dttool.convert_unix_time_to_datetime(utime2)
+            dt2 = dttool.convert_unix_time_to_datetime_cftime(utime2)
             var = dt2.reshape(num_row, 1)
             var_name = 'DATETIME_2'
             vars[var_name] = var

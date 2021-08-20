@@ -1,22 +1,33 @@
-# geospacelab
-A python-based library to collect, manage, and visualize geospace data.
+# GeospaceLab (geospacelab)
+To collect, manage, and visualize geospace data in an easy and fast way.
 
 ## Features
-- With a user-friendly data manager ("Datahub"):
-    + Dock with multiple datasets (sourced or temporary).
-    + Quickly download, load, and view the data.
-    + Support I/O with multiple file formats (hdf, mat, sav, cdf, netcdf, ascii, and binary)
-    + Easily assign variables for visualization.
-    + Provide Variable objects with useful attributes.
-- A number of utilities for data analysis.
-- Useful visualization components based on "matplotlib" and "cartopy".
-    + Time series plots with:
-        - Automatically adjustable time ticks.
-        - Marking tools including vertical lines, shadings, top bars, etc...
-        - Data gap removing.
-    + Map projections.
-- Add or remove panels by a simple configuration ("panel_layouts")
-- Produce publication-ready plots.
+- User-friendly
+  - Use the class "DataHub" as the core module of the data manager.
+  - A "DataHub" object can be docked simultaneously with different datasets 
+(A dataset is the class Dataset's object, linked with a sourced database, such as Madrigal/EISCAT, CDAWeb/OMNI, WDC/indices ...)
+  - Support I/O with multiple file formats (hdf, mat, sav, cdf, netcdf, ascii, and binary)
+  - Simplified and readable coding.
+- Extendable
+  - Easy to include more databases.
+  - Easy to add useful functions for a specified dataset (e.g., filter for the EISCAT field-aligned beams).
+- Useful toolboxes
+  - Basic toolboxes for numpy array, datetime, logging, python dict, list, and class.
+  - Coordinate system transformation.
+- Visualization
+  - Time series plots with 
+    - automatically adjustable time ticks and tick labels.
+    - dynamical panels (easily adding or removing panels).
+    - useful marking tools (vertical line crossing panels, shadings, top bars, etc, see Example 2 in
+[Usage](https://github.com/JouleCai/geospacelab#usage))
+  - Map projection
+    - Polar views with
+      - coastlines in either GEO or AACGM (APEX) coordinate system.
+      - mapping in either fixed lon/mlon mode or in fixed LST/MLT mode.
+    - Support 1-D or 2-D plots with
+      - satellite tracks (time ticks and labels)
+      - nadir colored 1-D plots
+      - gridded surface plots 
 
 ## Installation
 ### 1. The python distribution "*__Anaconda__*" is recommended:
@@ -121,6 +132,7 @@ Here is an example to load the EISCAT data from the online service.  The module 
 [the EISCAT schedule page](https://portal.eiscat.se/schedule/) with the preset loading mode "AUTO" and file type "eiscat-hdf5". 
 In addition, the package can load data by assigning the data file paths.
 
+In "example1.py":
 ```python
 import datetime
 
@@ -168,6 +180,7 @@ The EISCAT quicklook plot shows the GUISDAP analysed results in the same format 
 The figure layout and quality are improved. In addition, several marking tools like vertical lines, shadings, top bars can be 
 added in the plot. See the example script and figure below:
 
+In "example2.py"
 ```python
 import datetime
 import geospacelab.express.eiscat_viewer as eiscat
@@ -217,6 +230,7 @@ Output:
 
 ### Example 3: OMNI and WDC geomagnetic indices:
 
+In "example3.py"
 ```python
 import datetime
 import geospacelab.express.omni_viewer as omni
