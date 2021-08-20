@@ -41,14 +41,16 @@ With Anaconda, it may be easier to install some required dependencies listed bel
 It's also recommended to install the package and dependencies in a virtual environment with anaconda. To create a virtual environment, use:
 
 ```shell
-conda create --name [YOUR_ENV_NAME] python=3.8
+conda create --name [YOUR_ENV_NAME] python=3.8 spyder
 ```
+The package "spyder" is a widely-used python IDE. Other IDEs, like "VS Code" or "Pycharm" also work.
 
 After creating the virtual environement, you need to activate the virtual environment:
 
 ```shell
 conda activate [YOUR_ENV_NAME]
 ```
+and then to install the package as shown below or to start the IDE "spyder".
 
 More detailed information to set the anaconda environment can be found [here](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#), 
 
