@@ -251,7 +251,7 @@ viewer = omni.OMNIViewer(
 )
 viewer.quicklook()
 
-# data can be retrieved in the same way as in Example 2:
+# data can be retrieved in the same way as in Example 1:
 viewer.list_assigned_variables()
 B_x_gsm = viewer.get_variable('B_x_GSM')
 # save figure
