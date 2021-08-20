@@ -37,8 +37,9 @@ a sourced or user-defined database, such as Madrigal/EISCAT, CDAWeb/OMNI, WDC/in
 The package was tested with the anaconda distribution and with **PYTHON>=3.7** under **Ubuntu 20.04** and **MacOS Big Sur**.
 
 With Anaconda, it may be easier to install some required dependencies listed below, e.g., cartopy, using the _conda_ command.
+It's also recommended installing the package and dependencies in a virtual environment with anaconda. 
 
-It's also recommended to install the package and dependencies in a virtual environment with anaconda. To create a virtual environment, use:
+After [installing the anaconda distribution](https://docs.anaconda.com/anaconda/install/index.html), a virtual environment can be created by the code below in the terminal:
 
 ```shell
 conda create --name [YOUR_ENV_NAME] python=3.8 spyder
