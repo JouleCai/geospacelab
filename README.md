@@ -3,9 +3,12 @@ To collect, manage, and visualize geospace data in an easy and fast way.
 
 ## Features
 - User-friendly
-  - Use the class "DataHub" as the core module of the data manager.
-  - A "DataHub" object can be docked simultaneously with different datasets 
-(A dataset is the class Dataset's object, linked with a sourced database, such as Madrigal/EISCAT, CDAWeb/OMNI, WDC/indices ...)
+  - Specially designed classes "DataHub", "Dataset", and "Variable" as the core modules of the data manager.
+    - A "DataHub" object can be docked simultaneously with different datasets (Dataset objects). 
+    - A Dataset object ("dataset") responds to downloading and loading data from 
+a sourced or user-defined database, such as Madrigal/EISCAT, CDAWeb/OMNI, WDC/indices, etc.
+    - The loaded data are stored in the Variable objects within a dataset.
+    - A Variable object has both "value" and "error", as well as other attributes like name, unit, label, depends, ...
   - Support I/O with multiple file formats (hdf, mat, sav, cdf, netcdf, ascii, and binary)
   - Simplified and readable coding.
 - Extendable
