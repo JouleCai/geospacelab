@@ -1,3 +1,13 @@
+# Licensed under the BSD 3-Clause License
+# Copyright (C) 2021 GeospaceLab (geospacelab)
+# Author: Lei Cai, Space Physics and Astronomy, University of Oulu
+
+__author__ = "Lei Cai"
+__copyright__ = "Copyright 2021, GeospaceLab"
+__license__ = "BSD-3-Clause License"
+__email__ = "lei.cai@oulu.fi"
+__docformat__ = "reStructureText"
+
 import numpy as np
 import pathlib
 
@@ -64,23 +74,35 @@ class DatasetModel(object):
         if initial_file_dir is None:
             initial_file_dir = self.data_root_dir
 
-        import tkinter as tk
-        from tkinter import simpledialog
-        from tkinter import filedialog
-
-        root = tk.Tk()
-        root.withdraw()
         self.data_file_num = kwargs.pop('data_file_num', self.data_file_num)
         if self.data_file_num == 0:
-            self.data_file_num = simpledialog.askinteger('Input dialog', 'Input the number of files:', initialvalue=1)
-
+            value = input("How many files will be loaded? Input the number: ")
+            self.data_file_num = int(value)
         for nf in range(self.data_file_num):
-            file_types = (('eiscat files', '*.' + self.data_file_ext), ('all files', '*.*'))
-            file_name = filedialog.askopenfilename(
-                title=title,
-                initialdir=initial_file_dir
-            )
-            self.data_file_paths.append(pathlib.Path(file_name))
+            value = input("Input the No. {} file's full path: ".format(str(nf)))
+            fp = pathlib.Path(value)
+            if not fp.is_file():
+                mylog.StreamLogger.warning("The input file does not exist!")
+                return
+            self.data_file_paths.append(fp)
+
+        # import tkinter as tk
+        # from tkinter import simpledialog
+        # from tkinter import filedialog
+        #
+        # root = tk.Tk()
+        # root.withdraw()
+        # self.data_file_num = kwargs.pop('data_file_num', self.data_file_num)
+        # if self.data_file_num == 0:
+        #     self.data_file_num = simpledialog.askinteger('Input dialog', 'Input the number of files:', initialvalue=1)
+        #
+        # for nf in range(self.data_file_num):
+        #     file_types = (('eiscat files', '*.' + self.data_file_ext), ('all files', '*.*'))
+        #     file_name = filedialog.askopenfilename(
+        #         title=title,
+        #         initialdir=initial_file_dir
+        #     )
+        #     self.data_file_paths.append(pathlib.Path(file_name))
 
     def check_data_files(self, **kwargs):
         self.load_mode = kwargs.pop('load_mode', self.load_mode)

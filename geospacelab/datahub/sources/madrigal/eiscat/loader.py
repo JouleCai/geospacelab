@@ -1,13 +1,19 @@
+# Licensed under the BSD 3-Clause License
+# Copyright (C) 2021 GeospaceLab (geospacelab)
+# Author: Lei Cai, Space Physics and Astronomy, University of Oulu
+
+__author__ = "Lei Cai"
+__copyright__ = "Copyright 2021, GeospaceLab"
+__license__ = "BSD-3-Clause License"
+__email__ = "lei.cai@oulu.fi"
+__docformat__ = "reStructureText"
+
+
 import h5py
-import datetime
-import pathlib
-from pathlib import Path, PurePath
 import numpy as np
-import pickle
 import pathlib
 
 from geospacelab import preferences as prf
-# from geospacelab.datahub.sources.madrigal.eiscat import madrigal_eiscat_downloader as downloader
 
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as pylog

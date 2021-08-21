@@ -68,10 +68,10 @@ setuptools.setup(
         'Development Status :: 4 - Beta',      # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Physics',
-        'Topic :: Scientific/Engineering :: Space Physics',
-        'Topic :: Scientific/Engineering :: Geophysics',
+        'Topic :: Scientific/Engineering :: Visualization',
+        'Topic :: Scientific/Engineering :: Astronomy',
         'Topic :: Software Development :: Build Tools',
-        'License :: OSI Approved :: BSD License'  # Again, pick a license
+        'License :: OSI Approved :: BSD License',  # Again, pick a license
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
