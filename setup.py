@@ -69,7 +69,7 @@ setuptools.setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Physics',
         'Topic :: Scientific/Engineering :: Space Physics',
-        'Topic :: Scientific/Engineering :: Upper atmosphere',
+        'Topic :: Scientific/Engineering :: Geophysics',
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: BSD License'  # Again, pick a license
         'Programming Language :: Python :: 3.7',
