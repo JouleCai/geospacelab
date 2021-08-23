@@ -64,7 +64,11 @@ def show_rho_n(dt_fr, dt_to):
     rho_n_sc = swarm_data['rho_n_sc'].flatten()
 
     plt.figure(figsize=(8,8))
-    panel = PolarView(cs='GEO', pole='N', lon_c=None, lst_c=0, ut=dt_fr, boundary_lat=0., proj_style='Stereographic')
+    # cs = 'GEO'
+    # panel = PolarView(cs='GEO', pole='N', lon_c=None, lst_c=0, mlt_c=None, ut=dt_fr, boundary_lat=30., proj_style='Stereographic')
+    cs = 'AACGM'
+    panel = PolarView(cs=cs, pole='N', lon_c=None, lst_c=None, mlt_c=0, ut=dt_fr, boundary_lat=30., proj_style='Stereographic')
+
     panel.add_subplot(major=True)
     panel.set_extent(boundary_style='circle')
 
@@ -106,8 +110,9 @@ def show_rho_n(dt_fr, dt_to):
 
     from matplotlib.collections import LineCollection
     from matplotlib.colors import ListedColormap, BoundaryNorm
-
-    data = panel.proj.transform_points(ccrs.PlateCarree(), sc_lon, sc_lat)
+    coords = {'lat': sc_lat, 'lon': sc_lon, 'height': 250.}
+    cs_new = panel.cs_transform(cs_fr='GEO', cs_to=cs, coords=coords)
+    data = panel.proj.transform_points(ccrs.PlateCarree(), cs_new['lon'], cs_new['lat'])
     x = data[:, 0]
     y = data[:, 1]
     z = rho_n_sc.flatten()
@@ -148,7 +153,7 @@ def show_rho_n(dt_fr, dt_to):
     panel.add_grids()
 
     plt.gcf().suptitle('Swarm-C neutral mass density\n 2016-02-03T07:00 - 2016-02-03T07:50')
-    plt.savefig('test_pho_n.png', dpi=300)
+    plt.savefig('test_pho_n_aacgm.png', dpi=300)
     # plt.show()
 
 def show_n_e(dt_fr, dt_to):
@@ -176,7 +181,10 @@ def show_n_e(dt_fr, dt_to):
     rho_n_sc = n_e[ind_dt]
 
     plt.figure(figsize=(8,8))
-    panel = PolarView(cs='GEO', pole='N', lon_c=None, lst_c=0, ut=dt_fr, boundary_lat=0., proj_style='Stereographic')
+    # cs = 'GEO'
+    # panel = PolarView(cs='GEO', pole='N', lon_c=None, lst_c=0, mlt_c=None, ut=dt_fr, boundary_lat=30., proj_style='Stereographic')
+    cs = 'AACGM'
+    panel = PolarView(cs=cs, pole='N', lon_c=None, lst_c=None, mlt_c=0, ut=dt_fr, boundary_lat=30., proj_style='Stereographic')
     panel.add_subplot(major=True)
     panel.set_extent(boundary_style='circle')
 
@@ -218,15 +226,15 @@ def show_n_e(dt_fr, dt_to):
 
     from matplotlib.collections import LineCollection
     from matplotlib.colors import ListedColormap, BoundaryNorm
-
-    data = panel.proj.transform_points(ccrs.PlateCarree(), sc_lon, sc_lat)
+    coords = {'lat': sc_lat, 'lon': sc_lon, 'height': 250.}
+    cs_new = panel.cs_transform(cs_fr='GEO', cs_to=cs, coords=coords)
+    data = panel.proj.transform_points(ccrs.PlateCarree(), cs_new['lon'], cs_new['lat'])
     x = data[:, 0]
     y = data[:, 1]
     z = rho_n_sc.flatten()
     points = np.array([x, y]).T.reshape(-1, 1, 2)
     segments = np.concatenate([points[:-1], points[1:]], axis=1)
-    norm = plt.Normalize(1e4, 1e6)
-    norm = colors.LogNorm(vmin=1e4, vmax=1e6)
+    norm = colors.LogNorm(vmin=8e3, vmax=2e5)
     lc = LineCollection(segments, cmap='gist_ncar', norm=norm)
     lc.set_array(z)
     lc.set_linewidth(6)
@@ -262,7 +270,7 @@ def show_n_e(dt_fr, dt_to):
     panel.add_grids()
 
     plt.gcf().suptitle('Swarm-C electron density\n 2016-02-03T07:00 - 2016-02-03T07:50')
-    plt.savefig('test_n_e.png', dpi=300)
+    plt.savefig('test_n_e_aacgm.png', dpi=300)
     plt.show()
     
 def show_T_e(dt_fr, dt_to):
@@ -385,6 +393,6 @@ if __name__ == "__main__":
 
     # show_rho_n(dt_fr, dt_to)
     
-    # show_n_e(dt_fr, dt_to)
+    show_n_e(dt_fr, dt_to)
     
-    show_T_e(dt_fr, dt_to)
+    # show_T_e(dt_fr, dt_to)

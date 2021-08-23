@@ -26,7 +26,7 @@ import geospacelab.visualization.mpl_toolbox as mpl
 def test():
     import matplotlib.pyplot as plt
     dt = datetime.datetime(2012, 1, 19, 10, 0)
-    p = PolarView(pole='S', lon_c=0, ut=dt, mlt_c=0)
+    p = PolarView(pole='N', lon_c=None, ut=dt, mlt_c=0)
     p.add_subplot(major=True)
 
     p.set_extent(boundary_style='circle')
@@ -129,8 +129,8 @@ class PolarView(mpl.Panel):
             #    continue
             x0 = np.array(c.xy[0])
             y0 = np.array(c.xy[1])
-            if len(x0) < 20:  # omit small islands, etc.
-                continue
+            # if len(x0) < 20:  # omit small islands, etc.
+            #    continue
             x0 = np.mod(x0[::1], 360)
             y0 = y0[::1]
             x = np.append(np.append(x, x0), np.nan)
@@ -175,7 +175,7 @@ class PolarView(mpl.Panel):
             # num_lats = (lat_to - lat_fr) / lat_res + 1.
             lats = np.arange(lat_fr, lat_to, lat_res) * np.sign(self.lat_c)
             ylocator = mticker.FixedLocator(lats)
-        gl = self.major_ax.gridlines(crs=ccrs.PlateCarree(), color='b', linewidth=0.3, linestyle=':', draw_labels=True)
+        gl = self.major_ax.gridlines(crs=ccrs.PlateCarree(), color='b', linewidth=0.3, linestyle=':', draw_labels=False)
 
 
         gl.xlocator = xlocator
