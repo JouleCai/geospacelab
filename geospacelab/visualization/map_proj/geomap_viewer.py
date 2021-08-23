@@ -11,6 +11,7 @@ __docformat__ = "reStructureText"
 
 import geospacelab.visualization.mpl_toolbox as mpl
 import geospacelab.datahub as datahub
+import geospacelab.visualization.map_proj.geopanel as geopanel
 
 default_layout_config = {
     'left': 0.15,
@@ -27,7 +28,7 @@ default_figure_config = {
 }
 
 
-class GeoViewer(datahub.DataHub, mpl.Dashboard):
+class GeoMapViewer(datahub.DataHub, mpl.Dashboard):
     def __init__(self, **kwargs):
         new_figure = kwargs.pop('new_figure', True)
         figure_config = kwargs.pop('figure_config', default_figure_config)
@@ -52,4 +53,8 @@ class GeoViewer(datahub.DataHub, mpl.Dashboard):
 
         super().set_layout(num_rows=num_rows, num_cols=num_cols, left=left, right=right, bottom=bottom, top=top,
                            hspace=hspace, wspace=wspace, **kwargs)
+
+    def add_panel(self, row_ind=None, col_ind=None, label=None, panel_class=geopanel.PolarPanel, **kwargs):
+        super().add_panel(row_ind=row_ind, col_ind=col_ind, index=None, label=label, panel_class=panel_class, **kwargs)
+
 

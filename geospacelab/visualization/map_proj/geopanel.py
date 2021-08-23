@@ -19,14 +19,14 @@ import matplotlib.path as mpath
 import matplotlib.cm as cm
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
-
 import geospacelab.visualization.mpl_toolbox as mpl
+import geospacelab.toolbox.utilities.pylogging as mylog
 
 
 def test():
     import matplotlib.pyplot as plt
     dt = datetime.datetime(2012, 1, 19, 10, 0)
-    p = PolarView(pole='N', lon_c=None, ut=dt, mlt_c=0)
+    p = PolarPanel(pole='N', lon_c=None, ut=dt, mlt_c=0)
     p.add_subplot(major=True)
 
     p.set_extent(boundary_style='circle')
@@ -37,10 +37,41 @@ def test():
     pass
 
 
-class PolarView(mpl.Panel):
-    def __init__(self, lon_c=None, pole='N', ut=None, lst_c=None, boundary_lat=30., boundary_style='circle',
-                 cs='AACGM', mlt_c=None, grid_lat_res=10., grid_lon_res=15., mirror_south=True,
-                 proj_style='Stereographic', **kwargs):
+class PolarPanel(mpl.Panel):
+    def __init__(self, cs='AACGM', style=None, lon_c=None, pole='N', ut=None, lst_c=None, mlt_c=None, mlon_c=None,
+                 boundary_lat=30., boundary_style='circle',
+                 grid_lat_res=10., grid_lon_res=15., mirror_south=True,
+                 proj_type='Stereographic', **kwargs):
+        if style is None:
+            style = input("Specify the mapping style: lon-fixed, lst-fixed, mlon-fixed, or mlt-fixed? ")
+
+        if style in ['lon-fixed']:
+            if lon_c is None:
+                raise ValueError
+            lst_c = None
+            mlon_c = None
+            mlt_c = None
+
+        if style in ['lst-fixed']:
+            if lst_c is None:
+                raise ValueError
+            lon_c = None
+            mlon_c = None
+            mlt_c = None
+
+        if style in ['mlon-fixed']:
+            if mlon_c is None:
+                raise ValueError
+            lst_c = None
+            lon_c = mlon_c
+            mlt_c = None
+
+        if style in ['mlt-fixed']:
+            if mlt_c is None:
+                raise ValueError
+            lst_c = None
+            lon_c = None
+            mlon_c = None
 
         if lon_c is not None and pole == 'S':
             lon_c = lon_c + 180.
@@ -61,7 +92,7 @@ class PolarView(mpl.Panel):
         self._extent = None
         super().__init__(**kwargs)
 
-        proj = getattr(ccrs, proj_style)
+        proj = getattr(ccrs, proj_type)
         self.proj = proj(central_latitude=self.lat_c, central_longitude=self.lon_c)
 
     @staticmethod

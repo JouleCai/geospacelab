@@ -19,7 +19,7 @@ import utilities.datetime_utilities as du
 import visualization.time_series as ts
 import scipy.signal as sig
 
-from geospacelab.visualization.map_proj.geopanel import PolarView
+from geospacelab.visualization.map_proj.geopanel import PolarPanel
 
 
 def get_swarm_data(dt_fr, dt_to, satID="C"):
@@ -65,9 +65,9 @@ def show_rho_n(dt_fr, dt_to):
 
     plt.figure(figsize=(8,8))
     # cs = 'GEO'
-    # panel = PolarView(cs='GEO', pole='N', lon_c=None, lst_c=0, mlt_c=None, ut=dt_fr, boundary_lat=30., proj_style='Stereographic')
+    # panel = PolarView(cs='GEO', sytle='lst-fixed', pole='N', lon_c=None, lst_c=0, mlt_c=None, ut=dt_fr, boundary_lat=30., proj_style='Stereographic')
     cs = 'AACGM'
-    panel = PolarView(cs=cs, pole='N', lon_c=None, lst_c=None, mlt_c=0, ut=dt_fr, boundary_lat=30., proj_style='Stereographic')
+    panel = PolarPanel(cs=cs, style='mlt-fixed', pole='N', lon_c=None, lst_c=None, mlt_c=0, ut=dt_fr, boundary_lat=30., proj_style='Stereographic')
 
     panel.add_subplot(major=True)
     panel.set_extent(boundary_style='circle')
@@ -182,9 +182,10 @@ def show_n_e(dt_fr, dt_to):
 
     plt.figure(figsize=(8,8))
     # cs = 'GEO'
-    # panel = PolarView(cs='GEO', pole='N', lon_c=None, lst_c=0, mlt_c=None, ut=dt_fr, boundary_lat=30., proj_style='Stereographic')
+    # panel = PolarView(cs='GEO', sytle='lst-fixed', pole='N', lon_c=None, lst_c=0, mlt_c=None, ut=dt_fr, boundary_lat=30., proj_style='Stereographic')
     cs = 'AACGM'
-    panel = PolarView(cs=cs, pole='N', lon_c=None, lst_c=None, mlt_c=0, ut=dt_fr, boundary_lat=30., proj_style='Stereographic')
+    panel = PolarPanel(cs=cs, style='mlt-fixed', pole='N', lon_c=None, lst_c=None, mlt_c=0, ut=dt_fr, boundary_lat=30.,
+                       proj_style='Stereographic')
     panel.add_subplot(major=True)
     panel.set_extent(boundary_style='circle')
 
