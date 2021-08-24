@@ -181,6 +181,9 @@ class Dataset(datahub.DatasetModel):
         # var = self.add_variable(var_name='AACGM_ALT', value=cs_new['height'])
         pass
 
+    def check_status(self):
+        raise NotImplementedError
+
     def search_data_files(self, **kwargs):
         dt_fr = self.dt_fr
         dt_to = self.dt_to

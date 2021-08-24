@@ -1,9 +1,0 @@
-requests
-beautifulsoup4
-netcdf4
-h5py
-numpy
-scipy
-cdflib
-matplotlib
-madrigalweb

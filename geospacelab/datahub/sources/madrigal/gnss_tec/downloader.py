@@ -9,10 +9,6 @@ __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
 
-"""
-To download the EISCAT quickplots and analyzed data archived in http://portal.eiscat.se/schedule/schedule.cgi
-By Lei Cai on 2021.04.01
-"""
 import datetime
 from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse as dtparse
@@ -30,17 +26,23 @@ import geospacelab.toolbox.utilities.pydatetime as dttool
 
 
 def test():
-    sites = ['UHF', 'ESR']
     dt_fr = datetime.datetime(2021, 3, 10)
     dt_to = datetime.datetime(2021, 3, 10)
     download_obj = Downloader(dt_fr, dt_to)
 
 
+data_type_dict = {
+    'TEC-MAP': 'TEC binned',
+    'TEC-LOS': 'Line of sight',
+    'TEC-Sites': 'List of sites',
+}
+
+
 class Downloader(object):
-    """Download the quickplots and archieved analyzed results from EISCAT schedule webpage
+    """Download the GNSS TEC data
     """
 
-    def __init__(self, dt_fr, dt_to, data_file_root_dir=None,
+    def __init__(self, dt_fr, dt_to, data_file_root_dir=None, data_type='TEC-MAP',
                  user_fullname=madrigal.default_user_fullname,
                  user_email=madrigal.default_user_email,
                  user_affiliation=madrigal.default_user_affiliation):
@@ -50,56 +52,51 @@ class Downloader(object):
 
         dt_fr = dttool.get_start_of_the_day(dt_fr)
         dt_to = dttool.get_start_of_the_day(dt_to)
+        self.data_type = data_type
         if dt_fr == dt_to:
             dt_to = dt_to + datetime.timedelta(hours=23, minutes=59)
         self.dt_fr = dt_fr  # datetime from
         self.dt_to = dt_to  # datetime to
 
         if data_file_root_dir is None:
-            self.data_file_root_dir = pfr.datahub_data_root_dir / 'Madrigal' / 'EISCAT' / 'analyzed'
+            self.data_file_root_dir = pfr.datahub_data_root_dir / 'Madrigal' / 'GNSS' / 'TEC'
         else:
             self.data_file_root_dir = data_file_root_dir
         self.done = False
 
-        self.madrigal_url = "https://madrigal.eiscat.se/madrigal/"
+        self.madrigal_url = "http://cedar.openmadrigal.org/"
         self.download_madrigal_files()
 
     def download_madrigal_files(self, download_pp=False):
         icodes = []
-        for site in self.sites:
-            icodes.extend(instrument_codes[site])
+        icodes = [8000, ]
         for icode in icodes:
-            exp_list, _, database = madrigal.list_experiments(icode, self.dt_fr, self.dt_to,
-                                                              madrigal_url=self.madrigal_url)
+            exp_list, _, database = madrigal.utilities.list_experiments(
+                icode, self.dt_fr, self.dt_to, madrigal_url=self.madrigal_url
+            )
             for exp in exp_list:
                 files = database.getExperimentFiles(exp.id)
                 for file in files:
-                    if not download_pp and 'GUISDAP pp' in file.kindatdesc:
+                    if data_type_dict[self.data_type] not in file.kindatdesc:
                         continue
-                    file_path = pathlib.Path(file.name)
-                    site = file_path.name.split("@")[1][0:3].upper()
-                    if '32' in site or '42' in site:
-                        site = 'ESR'
+                    file_path_remote = pathlib.Path(file.name)
+                    file_name = file_path_remote.name
+                    res = re.search(r'/([\d]+[a-z]+[\d]+)', file.doi)
+                    dtstr = res.groups()[0]
+                    dtstr = dtstr[0:2] + dtstr[2].upper() + dtstr[3:]
+                    thisday = datetime.datetime.strptime(dtstr, "%d%b%y")
 
-                    match = re.search('\d{4}-\d{2}-\d{2}', file_path.name)
-                    dt_str = match.group(0)
-                    thisday = datetime.datetime.strptime(dt_str, "%Y-%m-%d")
-                    if thisday < self.dt_fr or thisday > self.dt_to:
-                        continue
-
-                    # sub_dir = file_path.name.split('_', maxsplit=1)[1]
-                    search_pattern = re.search("\d{4}-\d{2}-\d{2}_[a-zA-Z0-9]*", file_path.name).group(0)
-                    sub_dir = search_pattern + '@' + site
-                    data_file_dir = self.data_file_root_dir / site / dt_str[0:4] / sub_dir
+                    data_file_dir = self.data_file_root_dir / thisday.strftime("%Y") / \
+                                    ("GNSS_TEC_" + thisday.strftime('%Y%m%d'))
                     data_file_dir.mkdir(parents=True, exist_ok=True)
-                    data_file_path = data_file_dir / file_path.name
+                    data_file_path = data_file_dir / file_name
                     if data_file_path.is_file():
                         mylog.simpleinfo.info("The file {} has been downloaded.".format(data_file_path.name))
                         continue
 
-                    mylog.simpleinfo.info("Downloading  {} from the Madrigal database ...".format(file_path.name))
+                    mylog.simpleinfo.info("Downloading  {} from the Madrigal database ...".format(file_name))
                     database.downloadFile(
-                        file_path, data_file_path,
+                        file_path_remote, data_file_path,
                         self.user_fullname, self.user_email, self.user_affiliation,
                         "hdf5"
                     )
@@ -108,3 +105,6 @@ class Downloader(object):
 
 
         # fhdf5 = h5py.File(outDir + fn, 'r')
+
+if __name__ == "__main__":
+    test()
