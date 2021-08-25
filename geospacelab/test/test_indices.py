@@ -1,7 +1,7 @@
 import datetime
 import matplotlib.pyplot as plt
 
-import geospacelab.visualization.ts_viewer as ts
+import geospacelab.visualization.mpl.ts_viewer as ts
 
 
 def test():

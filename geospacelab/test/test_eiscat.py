@@ -1,7 +1,7 @@
 import datetime
 import matplotlib.pyplot as plt
 
-import geospacelab.visualization.eiscat_viewer as eiscat
+import geospacelab.express.eiscat_viewer as eiscat
 
 
 def test_UHF_CP2():
@@ -164,6 +164,7 @@ def test_vhf_lowel():
     viewer.add_title()
     viewer.add_panel_labels()
     return viewer
+
 
 if __name__ == "__main__":
     test_vhf_lowel()

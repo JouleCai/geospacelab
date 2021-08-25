@@ -1,25 +1,12 @@
-
-import numpy as np
-from scipy.interpolate import interp1d
-import os
-import datetime
-from scipy.interpolate import griddata
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
-from cartopy.mpl.ticker import (
-    LongitudeLocator, LatitudeLocator,
-    LongitudeFormatter, LatitudeFormatter)
-import matplotlib.ticker as mticker
-import matplotlib.path as mpath
-import matplotlib.cm as cm
 from loaders.load_uta_gitm_201602_newrun import *
 import utilities.datetime_utilities as du
 
 import visualization.time_series as ts
-import scipy.signal as sig
 
-from geospacelab.visualization.map_proj.geopanel import PolarPanel
+from geospacelab.visualization.mpl.map_proj import PolarPanel
 
 
 def get_swarm_data(dt_fr, dt_to, satID="C"):
@@ -109,7 +96,6 @@ def show_rho_n(dt_fr, dt_to):
     #panel.major_ax.plot(data[:,0], data[:,1], linewidth=3)
 
     from matplotlib.collections import LineCollection
-    from matplotlib.colors import ListedColormap, BoundaryNorm
     coords = {'lat': sc_lat, 'lon': sc_lon, 'height': 250.}
     cs_new = panel.cs_transform(cs_fr='GEO', cs_to=cs, coords=coords)
     data = panel.proj.transform_points(ccrs.PlateCarree(), cs_new['lon'], cs_new['lat'])
@@ -226,7 +212,6 @@ def show_n_e(dt_fr, dt_to):
     #panel.major_ax.plot(data[:,0], data[:,1], linewidth=3)
 
     from matplotlib.collections import LineCollection
-    from matplotlib.colors import ListedColormap, BoundaryNorm
     coords = {'lat': sc_lat, 'lon': sc_lon, 'height': 250.}
     cs_new = panel.cs_transform(cs_fr='GEO', cs_to=cs, coords=coords)
     data = panel.proj.transform_points(ccrs.PlateCarree(), cs_new['lon'], cs_new['lat'])
@@ -340,7 +325,6 @@ def show_T_e(dt_fr, dt_to):
     #panel.major_ax.plot(data[:,0], data[:,1], linewidth=3)
 
     from matplotlib.collections import LineCollection
-    from matplotlib.colors import ListedColormap, BoundaryNorm
 
     data = panel.proj.transform_points(ccrs.PlateCarree(), sc_lon, sc_lat)
     x = data[:, 0]

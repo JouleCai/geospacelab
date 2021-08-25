@@ -11,7 +11,7 @@ __docformat__ = "reStructureText"
 
 import datetime
 
-from geospacelab.visualization.ts_viewer import TimeSeriesViewer
+from geospacelab.visualization.mpl.ts_viewer import TimeSeriesViewer
 
 
 class EISCATViewer(TimeSeriesViewer):

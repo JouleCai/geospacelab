@@ -22,13 +22,13 @@ from scipy.interpolate import interp1d
 
 from geospacelab.datahub import DataHub
 from geospacelab import preferences as pfr
-import geospacelab.visualization.mpl_toolbox.dashboard as dashboard
-# from geospacelab.visualization.mpl_toolbox.figure import Figure
-import geospacelab.visualization.mpl_toolbox.colormaps as mycmap
+import geospacelab.visualization.mpl.dashboard as dashboard
+# from geospacelab.visualization.mpl.figure import Figure
+import geospacelab.visualization.mpl.colormaps as mycmap
 import geospacelab.toolbox.utilities.numpyarray as arraytool
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pybasic as basic
-import geospacelab.visualization.mpl_toolbox.axis_ticks as ticktool
+import geospacelab.visualization.mpl.axis_ticks as ticktool
 
 
 # plt.style.use('seaborn-dark-palette')

@@ -19,7 +19,7 @@ import matplotlib.path as mpath
 import matplotlib.cm as cm
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
-import geospacelab.visualization.mpl_toolbox as mpl
+import geospacelab.visualization.mpl as mpl
 import geospacelab.toolbox.utilities.pylogging as mylog
 
 
@@ -291,7 +291,37 @@ class PolarMap(mpl.Panel):
         if time_minor_tick:
             pass
 
-    def add
+    def add_sc_coloured_line(self):
+        pass
+
+    def add_colorbar(self, ax, im, cscale='linear', clabel=None, cticks=None, cticklabels=None, ticklabelstep=1):
+        pos = ax.get_position()
+        left = pos.x1 + 0.02
+        bottom = pos.y0
+        width = 0.02
+        height = pos.y1 - pos.y0 - 0.03
+        cax = self.figure.add_axes([left, bottom, width, height])
+        cb = self.figure.colorbar(im, cax=cax)
+        ylim = cax.get_ylim()
+
+        cb.set_label(clabel, rotation=270, va='bottom', size='medium')
+        if cticks is not None:
+            cb.ax.yaxis.set_ticks(cticks)
+            if cticklabels is not None:
+                cb.ax.yaxis.set_ticklabels(cticklabels)
+        else:
+            if cscale == 'log':
+                num_major_ticks = int(np.ceil(np.diff(np.log10(ylim)))) * 2
+                cax.yaxis.set_major_locator(mpl.ticker.LogLocator(base=10.0, numticks=num_major_ticks))
+                n = ticklabelstep
+                [l.set_visible(False) for (i, l) in enumerate(cax.yaxis.get_ticklabels()) if i % n != 0]
+                # [l.set_ha('right') for (i, l) in enumerate(cax.yaxis.get_ticklabels()) if i % n != 0]
+                minorlocator = mpl.ticker.LogLocator(base=10.0, subs=(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
+                                                     numticks=12)
+                cax.yaxis.set_minor_locator(minorlocator)
+                cax.yaxis.set_minor_formatter(mpl.ticker.NullFormatter())
+        cax.yaxis.set_tick_params(labelsize='x-small')
+        return [cax, cb]
 
     @property
     def pole(self):

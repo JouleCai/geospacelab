@@ -12,7 +12,7 @@ __docformat__ = "reStructureText"
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-from geospacelab.visualization.mpl_toolbox.dashboard import Dashboard
+from geospacelab.visualization.mpl.dashboard import Dashboard
 
 
 def test():
