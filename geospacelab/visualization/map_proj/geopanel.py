@@ -26,7 +26,7 @@ import geospacelab.toolbox.utilities.pylogging as mylog
 def test():
     import matplotlib.pyplot as plt
     dt = datetime.datetime(2012, 1, 19, 10, 0)
-    p = PolarPanel(pole='N', lon_c=None, ut=dt, mlt_c=0)
+    p = PolarMap(pole='N', lon_c=None, ut=dt, mlt_c=0)
     p.add_subplot(major=True)
 
     p.set_extent(boundary_style='circle')
@@ -37,7 +37,7 @@ def test():
     pass
 
 
-class PolarPanel(mpl.Panel):
+class PolarMap(mpl.Panel):
     def __init__(self, cs='AACGM', style=None, lon_c=None, pole='N', ut=None, lst_c=None, mlt_c=None, mlon_c=None,
                  boundary_lat=30., boundary_style='circle',
                  grid_lat_res=10., grid_lon_res=15., mirror_south=True,
@@ -95,6 +95,8 @@ class PolarPanel(mpl.Panel):
         proj = getattr(ccrs, proj_type)
         self.proj = proj(central_latitude=self.lat_c, central_longitude=self.lon_c)
 
+        self.set_extent()
+
     @staticmethod
     def _transform_mlt_to_lon(mlt):
         lon = mlt / 24. * 360.
@@ -126,14 +128,17 @@ class PolarPanel(mpl.Panel):
     #         for ind2, polygon in enumerate(land_polygons):
     #             x, y = polygon.exterior.coords.xy
     #
-    def cs_transform(self, cs_fr=None, cs_to=None, coords=None):
+    def cs_transform(self, cs_fr=None, cs_to=None, coords=None, ut=None):
         import geospacelab.cs as geo_cs
 
+        if cs_to is None:
+            cs_to = self.cs
         if cs_fr == cs_to:
             return coords
-
+        if ut is None:
+            ut = self.ut
         cs_class = getattr(geo_cs, cs_fr.upper())
-        cs1 = cs_class(coords=coords, ut=self.ut)
+        cs1 = cs_class(coords=coords, ut=ut)
         cs2 = cs1(cs_to=cs_to, append_mlt=self.depend_mlt)
         if self.depend_mlt:
             lon = self._transform_mlt_to_lon(cs2.coords.mlt)
@@ -261,6 +266,32 @@ class PolarPanel(mpl.Panel):
             self.major_ax.set_boundary(circle, transform=self.proj)
         else:
             raise NotImplementedError
+
+    def add_pcolormesh(self, data, coords=None, cs=None, **kwargs):
+        cs_new = self.cs_transform(cs_fr=cs, coords=coords)
+        self.major_ax.pcolormesh(cs_new['lon'], cs_new['lat'], data, transform=ccrs.PlateCarree(), **kwargs)
+
+    def add_sc_trajectory(self, geo_lat, geo_lon, geo_alt, ut=None, show_trajectory=True,
+                          time_tick=False, time_tick_res=600.,
+                          time_minor_tick=False, time_minor_tick_res=60, **kwargs):
+        kwargs.setdefault('linewidth', 1)
+        kwargs.setdefault('color', 'k')
+        coords = {
+            'lat': geo_lat,
+            'lon': geo_lon,
+            'height': geo_alt,
+        }
+        cs_new = self.cs_transform(cs_fr='GEO', coords=coords, ut=ut)
+        if show_trajectory:
+            self.major_ax.plot(cs_new['lon'], cs_new['lat'], **kwargs)
+
+        if time_tick:
+            pass
+
+        if time_minor_tick:
+            pass
+
+    def add
 
     @property
     def pole(self):

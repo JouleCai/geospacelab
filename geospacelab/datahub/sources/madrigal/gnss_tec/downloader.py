@@ -42,7 +42,7 @@ class Downloader(object):
     """Download the GNSS TEC data
     """
 
-    def __init__(self, dt_fr, dt_to, data_file_root_dir=None, data_type='TEC-MAP',
+    def __init__(self, dt_fr, dt_to, data_file_root_dir=None, file_type='TEC-MAP',
                  user_fullname=madrigal.default_user_fullname,
                  user_email=madrigal.default_user_email,
                  user_affiliation=madrigal.default_user_affiliation):
@@ -52,7 +52,7 @@ class Downloader(object):
 
         dt_fr = dttool.get_start_of_the_day(dt_fr)
         dt_to = dttool.get_start_of_the_day(dt_to)
-        self.data_type = data_type
+        self.file_type = file_type
         if dt_fr == dt_to:
             dt_to = dt_to + datetime.timedelta(hours=23, minutes=59)
         self.dt_fr = dt_fr  # datetime from
@@ -68,16 +68,16 @@ class Downloader(object):
         self.download_madrigal_files()
 
     def download_madrigal_files(self, download_pp=False):
-        icodes = []
         icodes = [8000, ]
         for icode in icodes:
+            mylog.simpleinfo.info("Searching data from the Madrigal database ...")
             exp_list, _, database = madrigal.utilities.list_experiments(
                 icode, self.dt_fr, self.dt_to, madrigal_url=self.madrigal_url
             )
             for exp in exp_list:
                 files = database.getExperimentFiles(exp.id)
                 for file in files:
-                    if data_type_dict[self.data_type] not in file.kindatdesc:
+                    if data_type_dict[self.file_type] not in file.kindatdesc:
                         continue
                     file_path_remote = pathlib.Path(file.name)
                     file_name = file_path_remote.name
@@ -86,10 +86,11 @@ class Downloader(object):
                     dtstr = dtstr[0:2] + dtstr[2].upper() + dtstr[3:]
                     thisday = datetime.datetime.strptime(dtstr, "%d%b%y")
 
-                    data_file_dir = self.data_file_root_dir / thisday.strftime("%Y") / \
-                                    ("GNSS_TEC_" + thisday.strftime('%Y%m%d'))
+                    data_file_dir = self.data_file_root_dir / thisday.strftime("%Y") / thisday.strftime('%Y%m%d')
                     data_file_dir.mkdir(parents=True, exist_ok=True)
-                    data_file_path = data_file_dir / file_name
+                    file_name_new = 'GNSS_' + self.file_type.replace('-', '_') + '_' + thisday.strftime('%Y%m%d') + \
+                                    '.' + file_name.split('.')[-2] + '.' + file_name.split('.')[-1]
+                    data_file_path = data_file_dir / file_name_new
                     if data_file_path.is_file():
                         mylog.simpleinfo.info("The file {} has been downloaded.".format(data_file_path.name))
                         continue
@@ -101,10 +102,9 @@ class Downloader(object):
                         "hdf5"
                     )
                     self.done = True
-                    mylog.simpleinfo.info("Done!")
+                    mylog.simpleinfo.info("Save the file as {} in the directory {}".format(file_name_new, data_file_dir))
 
 
-        # fhdf5 = h5py.File(outDir + fn, 'r')
 
 if __name__ == "__main__":
     test()

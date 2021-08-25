@@ -54,7 +54,28 @@ class GeoMapViewer(datahub.DataHub, mpl.Dashboard):
         super().set_layout(num_rows=num_rows, num_cols=num_cols, left=left, right=right, bottom=bottom, top=top,
                            hspace=hspace, wspace=wspace, **kwargs)
 
-    def add_panel(self, row_ind=None, col_ind=None, label=None, panel_class=geopanel.PolarPanel, **kwargs):
-        super().add_panel(row_ind=row_ind, col_ind=col_ind, index=None, label=label, panel_class=panel_class, **kwargs)
+    def add_polar_map(self, **kwargs):
+        kwargs.setdefault('row_ind', None)
+        kwargs.setdefault('col_ind', None)
+        kwargs.setdefault('label', None)
+        kwargs.setdefault('panel_class', geopanel.PolarMap)
+        kwargs.setdefault('cs', 'GEO')
+        kwargs.setdefault('style', 'lon-fixed')
+        kwargs.setdefault('pole', 'N')
+        kwargs.setdefault('ut', None)
+        kwargs.setdefault('lon_c', None)
+        kwargs.setdefault('lst_c', None)
+        kwargs.setdefault('mlt_c', None)
+        kwargs.setdefault('mlon_c', None)
+        kwargs.setdefault('boundary_lat', 30.)
+        kwargs.setdefault('boundary_style', 'circle')
+        kwargs.setdefault('grid_lat_res', 10.)
+        kwargs.setdefault('grid_lon_res', 15.)
+        kwargs.setdefault('mirror_south', False)
+        kwargs.setdefault('proj_type', 'Stereographic')
+        super().add_panel(**kwargs)
+
+
+
 
 

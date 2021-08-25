@@ -118,20 +118,25 @@ class DatasetModel(object):
             raise AttributeError
         self.data_file_num = len(self.data_file_paths)
 
-    def time_filter_by_range(self):
-        if self['DATETIME'].value is None:
-            return
-        inds = np.where((self['DATETIME'].value.flatten() >= self.dt_fr) & (self['DATETIME'].value.flatten() <= self.dt_to))[0]
-        self.time_filter_by_inds(inds)
+    def time_filter_by_range(self, var_datetime=None):
+        if var_datetime is None:
+            var_datetime = self['DATETIME']
 
-    def time_filter_by_inds(self, inds):
+        if var_datetime.value is None:
+            return
+        inds = np.where((var_datetime.value.flatten() >= self.dt_fr) & (var_datetime.value.flatten() <= self.dt_to))[0]
+        self.time_filter_by_inds(inds, var_datetime=var_datetime)
+
+    def time_filter_by_inds(self, inds, var_datetime=None):
         if inds is None:
             return
         if not list(inds):
             return
-        shape_0 = self['DATETIME'].value.shape[0]
+        if var_datetime is None:
+            var_datetime = self['DATETIME']
+        shape_0 = var_datetime.value.shape[0]
         for var in self._variables.values():
-            if var.value.shape[0] == shape_0:
+            if var.value.shape[0] == shape_0 and len(var.value.shape) > 1:
                 var.value = var.value[inds, ::]
 
     def label(self, fields=None, separator=' | ', lowercase=True):
