@@ -85,24 +85,30 @@ class Dataset(datahub.DatasetModel):
             load_obj = self.loader(file_path=file_path, file_type=self.data_file_type)
 
             for var_name in self._variables.keys():
+                if var_name in ['GEO_LAT', 'GEO_LON']:
+                    self._variables[var_name].value = load_obj.variables[var_name]
+                    continue
                 self._variables[var_name].join(load_obj.variables[var_name])
 
             # self.select_beams(field_aligned=True)
         if self.time_clip:
             self.time_filter_by_range()
 
+    def merge_tec_map(self, dt_fr, time_res=20*60):
+        return
+
     def search_data_files(self, **kwargs):
         dt_fr = self.dt_fr
         dt_to = self.dt_to
         diff_days = dttool.get_diff_days(dt_fr, dt_to)
-        dt0 = dttool.get_first_day_of_month(dt_fr)
+        dt0 = dttool.get_start_of_the_day(dt_fr)
         for i in range(diff_days + 1):
-            thisday = dttool.get_next_n_months(dt0, i)
+            thisday = dt0 + datetime.timedelta(days=i)
 
             initial_file_dir = kwargs.pop('initial_file_dir', None)
             if initial_file_dir is None:
                 initial_file_dir = self.data_root_dir / thisday.strftime("%Y") / thisday.strftime('%Y%m%d')
-            file_patterns = [self.data_file_type.replace('-', '_'), thisday.strftime("%Y%m")]
+            file_patterns = [self.data_file_type.replace('-', '_'), thisday.strftime("%Y%m%d"), self.data_file_version]
             # remove empty str
             file_patterns = [pattern for pattern in file_patterns if str(pattern)]
 
@@ -125,11 +131,8 @@ class Dataset(datahub.DatasetModel):
         return done
 
     def download_data(self):
-        if self.data_file_ext == 'nc':
-            download_obj = self.downloader(self.dt_fr, self.dt_to, file_type=self.data_file_type,
-                                           data_file_root_dir=self.data_root_dir)
-        else:
-            raise NotImplementedError
+        download_obj = self.downloader(self.dt_fr, self.dt_to, file_type=self.data_file_type,
+                                       data_file_root_dir=self.data_root_dir)
         return download_obj.done
 
     @property

@@ -17,31 +17,33 @@ def check_panel_ax(func):
         obj = args[0]
         kwargs.setdefault('ax', None)
         if kwargs['ax'] is None:
-            kwargs['ax'] = obj.axex['major']
+            kwargs['ax'] = obj.axes['major']
         result = func(*args, **kwargs)
         return result
     return wrapper
 
 
 class Panel(object):
-    def __init__(self, figure=None, **kwargs):
+    def __init__(self, *args, figure=None, **kwargs):
         if figure is None:
             figure = plt.gcf()
         self.figure = figure
         self.axes = {}
         self.label = kwargs.pop('label', None)
         # self.objectives = kwargs.pop('objectives', {})
-
-    def add_subplot(self, *args, major=False, label=None, **kwargs):
-        if major:
-            label = 'major'
-        else:
-            if label is None:
-                label = len(self.axes.keys())
-
         ax = self.figure.add_subplot(*args, **kwargs)
-        self.axes[label] = ax
-        return ax
+        self.axes['major'] = ax
+
+    # def add_subplot(self, *args, major=False, label=None, **kwargs):
+    #     if major:
+    #         label = 'major'
+    #     else:
+    #         if label is None:
+    #             label = len(self.axes.keys())
+    #
+    #     ax = self.figure.add_subplot(*args, **kwargs)
+    #     self.axes[label] = ax
+    #     return ax
 
     def add_axes(self, *args, major=False, label=None, **kwargs):
         if major:

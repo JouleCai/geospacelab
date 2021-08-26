@@ -53,12 +53,10 @@ class Loader:
             )
             variables['DATETIME'] = np.reshape(t, (t.size, 1))
 
-            glat = fh5['Data']['Array Layout']['gdlat'][:]
-            variables['GEO_LAT'] = glat
-
             glon =fh5['Data']['Array Layout']['glon'][:]
-            variables['GEO_LON'] = glon
-
+            glat = fh5['Data']['Array Layout']['gdlat'][:]
+            variables['GEO_LAT'] = np.tile(glat.reshape(glat.size, 1), (1, glon.size))
+            variables['GEO_LON'] = np.tile(glon.reshape(1, glon.size), (glat.size, 1))
         self.variables = variables
 
 

@@ -54,26 +54,25 @@ class GeoMapViewer(datahub.DataHub, mpl.Dashboard):
         super().set_layout(num_rows=num_rows, num_cols=num_cols, left=left, right=right, bottom=bottom, top=top,
                            hspace=hspace, wspace=wspace, **kwargs)
 
-    def add_polar_map(self, **kwargs):
-        kwargs.setdefault('row_ind', None)
-        kwargs.setdefault('col_ind', None)
-        kwargs.setdefault('label', None)
-        kwargs.setdefault('panel_class', geopanel.PolarMap)
-        kwargs.setdefault('cs', 'GEO')
-        kwargs.setdefault('style', 'lon-fixed')
-        kwargs.setdefault('pole', 'N')
-        kwargs.setdefault('ut', None)
-        kwargs.setdefault('lon_c', None)
-        kwargs.setdefault('lst_c', None)
-        kwargs.setdefault('mlt_c', None)
-        kwargs.setdefault('mlon_c', None)
-        kwargs.setdefault('boundary_lat', 30.)
-        kwargs.setdefault('boundary_style', 'circle')
-        kwargs.setdefault('grid_lat_res', 10.)
-        kwargs.setdefault('grid_lon_res', 15.)
-        kwargs.setdefault('mirror_south', False)
-        kwargs.setdefault('proj_type', 'Stereographic')
-        super().add_panel(**kwargs)
+    def add_polar_map(self, row_ind, col_ind, label=None, cs='GEO', style='lon-fixed', pole='N',
+                      ut=None, lon_c=None, lst_c=None, mlt_c=None, mlon_c=None, boundary_lat=30.,
+                      boundary_style='circle', grid_lat_res=10., grid_lon_res=15., mirror_south=False,
+                      proj_type='Stereographic', **kwargs):
+        """
+
+        :param pole:
+        :param row_ind: the row
+        :param style: 'lon-fixed', 'lst-fixed', 'mlt-fixed'  or 'mlon-fixed'
+        :return:
+        """
+
+        panel_id = super().add_panel(row_ind=row_ind, col_ind=col_ind, panel_class=geopanel.PolarMap,
+                                     label=label, cs=cs, style=style, pole=pole,
+                                     ut=ut, lon_c=lon_c, lst_c=lst_c, mlt_c=mlt_c, mlon_c=mlon_c, boundary_lat=boundary_lat,
+                                     boundary_style=boundary_style, grid_lat_res=grid_lat_res, grid_lon_res=grid_lon_res,
+                                     mirror_south=mirror_south,
+                                     proj_type=proj_type, **kwargs)
+        return panel_id
 
 
 

@@ -53,7 +53,8 @@ class Dashboard(object):
         self.gs = self.figure.add_gridspec(num_rows, num_cols)
         self.gs.update(**kwargs)
 
-    def add_panel(self, row_ind=None, col_ind=None, index=None, label=None, panel_class=None, **kwargs):
+    def add_panel(self, row_ind=None, col_ind=None,
+                  index=None, label=None, panel_class=None, **kwargs):
         if isinstance(row_ind, int):
             row_ind = [row_ind, row_ind+1]
         if isinstance(col_ind, int):
@@ -63,8 +64,10 @@ class Dashboard(object):
         elif not issubclass(panel_class, mpl_panel.Panel):
             raise TypeError
 
-        panel = panel_class(label=label, **kwargs)
-        panel.add_subplot(self.gs[row_ind[0]:row_ind[1], col_ind[0]:col_ind[1]], major=True, **kwargs)
+        args = [self.gs[row_ind[0]:row_ind[1], col_ind[0]:col_ind[1]]]
+        panel = panel_class(*args, label=label, **kwargs)
+
+        # panel.add_subplot(self.gs[row_ind[0]:row_ind[1], col_ind[0]:col_ind[1]], major=True, **kwargs)
 
         if index is None:
             index = len(self.panels.keys()) + 1

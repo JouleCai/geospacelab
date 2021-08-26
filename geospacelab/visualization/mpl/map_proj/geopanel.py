@@ -40,7 +40,7 @@ def test():
 
 
 class PolarMap(mpl.Panel):
-    def __init__(self, cs='AACGM', style=None, lon_c=None, pole='N', ut=None, lst_c=None, mlt_c=None, mlon_c=None,
+    def __init__(self, *args, cs='AACGM', style=None, lon_c=None, pole='N', ut=None, lst_c=None, mlt_c=None, mlon_c=None,
                  boundary_lat=30., boundary_style='circle',
                  grid_lat_res=10., grid_lon_res=15., mirror_south=True,
                  proj_type='Stereographic', **kwargs):
@@ -92,11 +92,10 @@ class PolarMap(mpl.Panel):
         self.mlt_c = mlt_c
         self.mirror_south = mirror_south
         self._extent = None
-        super().__init__(**kwargs)
-
         proj = getattr(ccrs, proj_type)
         self.proj = proj(central_latitude=self.lat_c, central_longitude=self.lon_c)
-
+        kwargs.setdefault('projection', self.proj)
+        super().__init__(*args, **kwargs)
         self.set_extent()
 
     @staticmethod
@@ -105,10 +104,11 @@ class PolarMap(mpl.Panel):
         lon = np.mod(lon, 360.)
         return lon
 
-    def add_subplot(self, *args, major=False, label=None, **kwargs):
-        if major:
-            kwargs.setdefault('projection', self.proj)
-        super().add_subplot(*args, major=major, label=label, **kwargs)
+    # def add_subplot(self, *args, major=False, label=None, **kwargs):
+    #     if major:
+    #         kwargs.setdefault('projection', self.proj)
+    #     super().add_subplot(*args, major=major, label=label, **kwargs)
+    #     self.set_extent()
 
     def add_axes(self, *args, major=False, label=None, **kwargs):
         if major:
@@ -269,8 +269,32 @@ class PolarMap(mpl.Panel):
         else:
             raise NotImplementedError
 
-    def add_pcolormesh(self, data, coords=None, cs=None, **kwargs):
-        cs_new = self.cs_transform(cs_fr=cs, coords=coords)
+    def add_pcolor(self, data, lat=None, lon=None, alt=None, cs=None, **kwargs):
+        if self.cs in ['AACGM', 'APEX'] and cs == 'GEO':
+            from scipy.interpolate import griddata
+            ind_data = np.where(np.isfinite(data))
+            data_pts = data[ind_data]
+            lat_pts = lat[ind_data]
+            lon_pts = lon[ind_data]
+            cs_new = self.cs_transform(cs_fr=cs, coords={'lat': lat_pts, 'lon': lon_pts, 'height': alt})
+
+            grid_lat_res = kwargs.pop('grid_lat_res', 0.5)
+            grid_lon_res = kwargs.pop('grid_lon_res', 1.)
+            grid_lon, grid_lat = np.meshgrid(
+                np.arange(0., 360., grid_lon_res),
+                np.append(np.arange(self.boundary_lat, self.lat_c, np.sign(self.lat_c)*grid_lat_res), self.lat_c)
+            )
+
+            grid_data = griddata((cs_new['lon'], cs_new['lat']), data_pts, (grid_lon, grid_lat), method='nearest')
+            grid_data_lat = griddata(
+                (cs_new['lon'], cs_new['lat']), cs_new['lat'], (grid_lon, grid_lat), method='nearest'
+            )
+            grid_data_lon = griddata(
+               (cs_new['lon'], cs_new['lat']), cs_new['lon'], (grid_lon, grid_lat), method='nearest'
+            )
+            big_circle_d = 
+            grid_data = np.where()
+
         im = self.major_ax.pcolormesh(cs_new['lon'], cs_new['lat'], data, transform=ccrs.PlateCarree(), **kwargs)
         return im
 

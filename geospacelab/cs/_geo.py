@@ -377,10 +377,12 @@ class GEOCSpherical(SpaceSphericalCS):
             uts = np.array(self.ut)
         elif ut_type is np.ndarray:
             uts = self.ut
-
+        lat_shape = self.coords.lat.shape
+        lon_shape = self.coords.lon.shape
         if ut_type is datetime.datetime:
-            lat, lon, r = aacgm.convert_latlon_arr(in_lat=self.coords.lat,
-                                                   in_lon=self.coords.lon, height=self.coords.height,
+
+            lat, lon, r = aacgm.convert_latlon_arr(in_lat=self.coords.lat.flatten(),
+                                                   in_lon=self.coords.lon.flatten(), height=self.coords.height.flatten(),
                                                    dtime=self.ut, method_code=method_code)
         else:
             if uts.shape[0] != self.coords.lat.shape[0]:
@@ -395,15 +397,19 @@ class GEOCSpherical(SpaceSphericalCS):
                                                                                in_lon=self.coords.lon[ind_dt],
                                                                                height=self.coords.height[ind_dt],
                                                                                dtime=dt, method_code=method_code)
-        cs_new = AACGM(coords={'lat': lat, 'lon': lon, 'r': r, 'r_unit': 'R_E'}, ut=self.ut)
+        cs_new = AACGM(coords={'lat': lat.reshape(lat_shape),
+                               'lon': lon.reshape(lon_shape),
+                               'r': r.reshape(lat_shape), 'r_unit': 'R_E'},
+                       ut=self.ut)
         if append_mlt:
+            lon = lon.flatten()
             if ut_type is datetime.datetime:
                 mlt = aacgm.convert_mlt(lon, self.ut)
             else:
-                mlt = np.empty_like(self.coords.lat)
+                mlt = np.empty_like(lon)
                 for ind_dt, dt in enumerate(self.ut.flatten()):
                     mlt[ind_dt] = aacgm.convert_mlt(lon[ind_dt], dt)
-            cs_new['mlt'] = mlt
+            cs_new['mlt'] = mlt.reshape(lon_shape)
         return cs_new
 
     def to_APEX(self, append_mlt=False, **kwargs):
