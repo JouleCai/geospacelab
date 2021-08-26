@@ -10,6 +10,8 @@ __docformat__ = "reStructureText"
 
 
 import numpy as np
+from numpy.polynomial import Polynomial
+
 
 def trig_arctan_to_sph_lon(x, y):
     isscalar = False
@@ -26,3 +28,24 @@ def trig_arctan_to_sph_lon(x, y):
         angle = angle[0]
     return angle
 
+
+def calc_curve_tangent_slope(x, y, degree=2, unit='radians'):
+    poly = Polynomial.fit(x, y, degree)
+    c = poly.convert().coef
+    c_deriv = [i * cd for i, cd in enumerate(c)]
+    c_deriv = c[1:]
+    f_deriv = Polynomial(c_deriv)
+    tan_slope = f_deriv(x)
+
+    slope = np.arctan(tan_slope)
+
+    if unit == 'degree':
+        slope = slope / np.pi * 180.
+
+    return slope
+
+
+if __name__ == "__main__":
+    x1 = np.array(range(10))
+    y1 = np.array(range(10)) * 5
+    calc_curve_tangent_slope(x1, y1)

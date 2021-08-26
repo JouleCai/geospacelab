@@ -22,6 +22,7 @@ from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import geospacelab.visualization.mpl as mpl
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
+import geospacelab.toolbox.utilities.numpymath as mathtool
 
 
 def test():
@@ -270,7 +271,8 @@ class PolarMap(mpl.Panel):
 
     def add_pcolormesh(self, data, coords=None, cs=None, **kwargs):
         cs_new = self.cs_transform(cs_fr=cs, coords=coords)
-        self.major_ax.pcolormesh(cs_new['lon'], cs_new['lat'], data, transform=ccrs.PlateCarree(), **kwargs)
+        im = self.major_ax.pcolormesh(cs_new['lon'], cs_new['lat'], data, transform=ccrs.PlateCarree(), **kwargs)
+        return im
 
     def add_sc_trajectory(self, sc_lat, sc_lon, sc_alt, sc_dt=None, show_trajectory=True,
                           time_tick=False, time_tick_res=600., time_tick_scale=0.02,
@@ -322,39 +324,105 @@ class PolarMap(mpl.Panel):
             f = interp1d(sectime, ydata, fill_value='extrapolate')
             y_i = f(time_ticks)
 
-            new_series = np.polynomial.polynomial.Polynomial.fit(xdata, ydata, deg=3)
-            p = new_series.convert().coef
-            x_i
+            slope = mathtool.calc_curve_tangent_slope(xdata, ydata)
+            l = np.empty_like(x_i)
+            l[:] = (self._extent[1] - self._extent[0]) * time_tick_scale
 
-            tick_length = (self._extent[1] - self._extent[0]) * time_tick_scale
+            xq = x_i
+            yq = y_i
+            uq1 = - l * np.sin(slope)
+            vq1 = l * np.cos(slope)
+
+            self.major_ax.quiver(xq, yq, uq1, vq1, units='xy')
+
+            uq2 = l * np.sin(slope)
+            vq2 = - l * np.cos(slope)
+
+            self.major_ax.quiver(xq, yq, uq2, vq2, units='xy')
+
+            if time_tick_label:
+                for ind, time_tick in enumerate(time_ticks):
+                    time = dt0 + datetime.timedelta(seconds=time_tick)
+                    x_time_tick = x_i[ind]
+                    y_time_tick = y_i[ind]
+
+                    self.major_ax.text(
+                        x_time_tick + uq1[ind], y_time_tick + vq1[ind], time.strftime(time_tick_label_format),
+                        fontsize=time_tick_label_fontsize,
+                        rotation=slope[ind] * 180. / np.pi + 90.,
+                        ha='left', va='middle'
+                    )
+
             # self.major_ax.plot(x_time_ticks, y_time_ticks, **kwargs['time_tick_config'])
 
         if time_minor_tick:
             pass
 
-    def add_sc_coloured_line(self):
-        pass
+    def add_sc_coloured_line(self, sc_lat, sc_lon, sc_alt, sc_data, sc_dt=None, label='', unit='', scale='linear',
+                             vmin=None, vmax=None, colormap=None):
+        from matplotlib.collections import LineCollection
+        import matplotlib.colors as mpl_color
 
-    def add_colorbar(self, ax, im, cscale='linear', clabel=None, cticks=None, cticklabels=None, ticklabelstep=1):
+        if self.pole == 'N':
+            ind_lat = np.where(sc_lat > self.boundary_lat)[0]
+        else:
+            ind_lat = np.where(sc_lat < self.boundary_lat)[0]
+
+        sc_lat = sc_lat.flatten()[ind_lat]
+        sc_lon = sc_lon.flatten()[ind_lat]
+        sc_alt = sc_alt.flatten()[ind_lat]
+        sc_data = sc_data.flatten()[ind_lat]
+        sc_dt = sc_dt.flatten()[ind_lat]
+
+        coords = {'lat': sc_lat, 'lon': sc_lon, 'height': sc_alt}
+        cs_new = self.cs_transform(cs_fr='GEO', coords=coords)
+        data = self.proj.transform_points(ccrs.PlateCarree(), cs_new['lon'], cs_new['lat'])
+        x = data[:, 0]
+        y = data[:, 1]
+        z = sc_data.flatten()
+        points = np.array([x, y]).T.reshape(-1, 1, 2)
+        segments = np.concatenate([points[:-1], points[1:]], axis=1)
+        if scale == 'linear':
+            norm = mpl_color.LogNorm(vmin=vmin, vmax=vmax)
+        elif scale == 'log':
+            norm = mpl_color.Normalize(vmin, vmax)
+        else:
+            raise ValueError
+        lc = LineCollection(segments, cmap=colormap, norm=norm)
+        lc.set_array(z)
+        lc.set_linewidth(6)
+        im = self.major_ax.add_collection(lc)
+        return im
+        # clabel = label + ' (' + unit + ')'
+        # self.add_colorbar(self.major_ax, line, cscale=scale, clabel=clabel)
+        # cbar = plt.gcf().colorbar(line, ax=panel.major_ax, pad=0.1, fraction=0.03)
+        # cbar.set_label(r'$n_e$' + '\n' + r'(cm$^{-3}$)', rotation=270, labelpad=25)
+
+    def add_colorbar(self, im, ax=None, figure=None, c_scale='linear', c_label=None,
+                     c_ticks=None, c_tick_labels=None, c_tick_label_step=1,
+                     left=1.05, bottom=0.01, width=0.02, height=0.8, **kwargs
+                     ):
         pos = ax.get_position()
-        left = pos.x1 + 0.02
-        bottom = pos.y0
-        width = 0.02
-        height = pos.y1 - pos.y0 - 0.03
-        cax = self.figure.add_axes([left, bottom, width, height])
-        cb = self.figure.colorbar(im, cax=cax)
+        ax_width = pos.x1 - pos.x0
+        ax_height = pos.y1 - pos.y0
+        ca_left = pos.x0 + ax_width * left
+        ca_bottom = pos.y0 + ax_height * bottom
+        ca_width = ax_width * width
+        ca_height = ax_height * height
+        cax = self.figure.add_axes([ca_left, ca_bottom, ca_width, ca_height])
+        cb = self.figure.colorbar(im, cax=cax, **kwargs)
         ylim = cax.get_ylim()
 
-        cb.set_label(clabel, rotation=270, va='bottom', size='medium')
-        if cticks is not None:
-            cb.ax.yaxis.set_ticks(cticks)
-            if cticklabels is not None:
-                cb.ax.yaxis.set_ticklabels(cticklabels)
+        cb.set_label(c_label, rotation=270, va='bottom', size='medium')
+        if c_ticks is not None:
+            cb.ax.yaxis.set_ticks(c_ticks)
+            if c_tick_labels is not None:
+                cb.ax.yaxis.set_ticklabels(c_tick_labels)
         else:
-            if cscale == 'log':
+            if c_scale == 'log':
                 num_major_ticks = int(np.ceil(np.diff(np.log10(ylim)))) * 2
                 cax.yaxis.set_major_locator(mpl.ticker.LogLocator(base=10.0, numticks=num_major_ticks))
-                n = ticklabelstep
+                n = c_tick_label_step
                 [l.set_visible(False) for (i, l) in enumerate(cax.yaxis.get_ticklabels()) if i % n != 0]
                 # [l.set_ha('right') for (i, l) in enumerate(cax.yaxis.get_ticklabels()) if i % n != 0]
                 minorlocator = mpl.ticker.LogLocator(base=10.0, subs=(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9),

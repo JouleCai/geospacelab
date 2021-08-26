@@ -6,7 +6,7 @@ import utilities.datetime_utilities as du
 
 import visualization.time_series as ts
 
-from geospacelab.visualization.mpl.map_proj import PolarPanel
+from geospacelab.visualization.mpl.map_proj.geopanel import PolarMap
 
 
 def get_swarm_data(dt_fr, dt_to, satID="C"):
