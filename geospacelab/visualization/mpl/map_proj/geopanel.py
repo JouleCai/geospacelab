@@ -21,6 +21,7 @@ from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
 import geospacelab.visualization.mpl as mpl
 import geospacelab.toolbox.utilities.pylogging as mylog
+import geospacelab.toolbox.utilities.pydatetime as dttool
 
 
 def test():
@@ -271,22 +272,62 @@ class PolarMap(mpl.Panel):
         cs_new = self.cs_transform(cs_fr=cs, coords=coords)
         self.major_ax.pcolormesh(cs_new['lon'], cs_new['lat'], data, transform=ccrs.PlateCarree(), **kwargs)
 
-    def add_sc_trajectory(self, geo_lat, geo_lon, geo_alt, ut=None, show_trajectory=True,
-                          time_tick=False, time_tick_res=600.,
+    def add_sc_trajectory(self, sc_lat, sc_lon, sc_alt, sc_dt=None, show_trajectory=True,
+                          time_tick=False, time_tick_res=600., time_tick_scale=0.02,
+                          time_tick_label=True, time_tick_label_format="%M:%H", time_tick_label_fontsize=8,
                           time_minor_tick=False, time_minor_tick_res=60, **kwargs):
+        kwargs.setdefault('trajectory_config', {
+            'linewidth': 1,
+            'linestyle': '-',
+            'color':    'k',
+        })
         kwargs.setdefault('linewidth', 1)
         kwargs.setdefault('color', 'k')
+
+        if self.pole == 'N':
+            ind_lat = np.where(sc_lat > self.boundary_lat)[0]
+        else:
+            ind_lat = np.where(sc_lat < self.boundary_lat)[0]
+
+        sc_lat = sc_lat.flatten()[ind_lat]
+        sc_lon = sc_lon.flatten()[ind_lat]
+        sc_alt = sc_alt.flatten()[ind_lat]
+        sc_dt = sc_dt.flatten()[ind_lat]
+
         coords = {
-            'lat': geo_lat,
-            'lon': geo_lon,
-            'height': geo_alt,
+            'lat': sc_lat,
+            'lon': sc_lon,
+            'height': sc_alt,
         }
-        cs_new = self.cs_transform(cs_fr='GEO', coords=coords, ut=ut)
+        cs_new = self.cs_transform(cs_fr='GEO', coords=coords, ut=sc_dt)
         if show_trajectory:
-            self.major_ax.plot(cs_new['lon'], cs_new['lat'], **kwargs)
+            self.major_ax.plot(cs_new['lon'], cs_new['lat'], proj=ccrs.Geodetic(), **kwargs['trajectory_config'])
 
         if time_tick:
-            pass
+            data = self.proj.transform_points(ccrs.PlateCarree(), cs_new['lon'], cs_new['lat'])
+            xdata = data[:, 0]
+            ydata = data[:, 1]
+
+            sectime, dt0 = dttool.convert_datetime_to_sectime(
+                sc_dt, datetime.datetime(self.ut.year, self.ut.month, self.ut.day)
+            )
+
+            time_ticks = np.arange(np.floor(sectime[0] / time_tick_res) * time_tick_res,
+                                   np.ceil(sectime[-1] / time_tick_res) * time_tick_res, time_tick_res)
+
+            from scipy.interpolate import interp1d
+
+            f = interp1d(sectime, xdata, fill_value='extrapolate')
+            x_i = f(time_ticks)
+            f = interp1d(sectime, ydata, fill_value='extrapolate')
+            y_i = f(time_ticks)
+
+            new_series = np.polynomial.polynomial.Polynomial.fit(xdata, ydata, deg=3)
+            p = new_series.convert().coef
+            x_i
+
+            tick_length = (self._extent[1] - self._extent[0]) * time_tick_scale
+            # self.major_ax.plot(x_time_ticks, y_time_ticks, **kwargs['time_tick_config'])
 
         if time_minor_tick:
             pass
