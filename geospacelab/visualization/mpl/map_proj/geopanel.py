@@ -105,12 +105,6 @@ class PolarMap(mpl.Panel):
         lon = np.mod(lon, 360.)
         return lon
 
-    # def add_subplot(self, *args, major=False, label=None, **kwargs):
-    #     if major:
-    #         kwargs.setdefault('projection', self.proj)
-    #     super().add_subplot(*args, major=major, label=label, **kwargs)
-    #     self.set_extent()
-
     def add_axes(self, *args, major=False, label=None, **kwargs):
         if major:
             kwargs.setdefault('projection', self.proj)
@@ -448,7 +442,7 @@ class PolarMap(mpl.Panel):
     def add_colorbar(self, im, ax=None, figure=None,
                      c_scale='linear', c_label=None,
                      c_ticks=None, c_tick_labels=None, c_tick_label_step=1,
-                     left=1.05, bottom=0.01, width=0.02, height=0.8, **kwargs
+                     left=1.1, bottom=0.1, width=0.05, height=0.7, **kwargs
                      ):
         if figure is None:
             figure = plt.gcf()

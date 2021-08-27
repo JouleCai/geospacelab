@@ -11,6 +11,7 @@ __docformat__ = "reStructureText"
 
 import copy
 from geospacelab.datahub import VariableModel as Var
+import geospacelab.visualization.mpl.colormaps as cm
 
 database = 'Madrigal'
 
@@ -28,7 +29,7 @@ depend_0 = {'UT': 'DATETIME', 'TIME_1': 'DATETIME_1', 'TIME_2': 'DATETIME_2'}
 depend_1 = {'HEIGHT': 'HEIGHT', 'RANGE': 'RANGE', 'GEO_LAT': 'GEO_LAT', 'GEO_LON': 'GEO_LON',
             'GEO_ALT': 'GEO_ALT', 'AACGM_LAT': 'AACGM_LAT', 'AACGM_LON': 'AACGM_LON'}
 
-default_colormap = "gist_ncar"
+default_colormap = cm.cmap_gist_ncar_modified()
 
 default_axis_dict_2d = {
     1:     {
@@ -167,7 +168,7 @@ axis[2].data = "@v.value"
 axis[1].lim = [90, 350]
 axis[1].label = 'h'
 axis[1].unit = 'km'
-axis[2].lim = [-200, 200]
+axis[2].lim = [-400, 400]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'

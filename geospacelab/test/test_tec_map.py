@@ -8,7 +8,7 @@ import geospacelab.visualization.mpl.map_proj.geomap_viewer as geomap
 
 def test_tec():
     dt_fr = datetime.datetime(2016, 3, 15, 12)
-    dt_to = datetime.datetime(2016, 3, 16, 2)
+    dt_to = datetime.datetime(2016, 3, 16, 12)
     viewer = geomap.GeoMapViewer(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (10, 5)})
     viewer.dock(datasource_contents=['madrigal', 'gnss_tec'])
     viewer.set_layout(1, 2)
@@ -18,23 +18,26 @@ def test_tec():
     glat = viewer.assign_variable('GEO_LAT', dataset_index=1).value
     glon = viewer.assign_variable('GEO_LON', dataset_index=1).value
 
-    time1 = datetime.datetime(2016, 3, 15, 14, 10)
+    time1 = datetime.datetime(2016, 3, 15, 14, 30)
     ind_t = np.where(dts == time1)[0]
 
-    pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time1)
+    #pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1)
+    pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time1)
+    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1, boundary_lat=50)
     panel1 = viewer.panels[pid]
+    panel1.add_coastlines()
+    panel1.add_grids()
 
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
-    pcolormesh_config.update(c_lim=[0, 35])
+    pcolormesh_config.update(c_lim=[0, 25])
+    import geospacelab.visualization.mpl.colormaps as cm
+    pcolormesh_config.update(cmap=cm.cmap_jhuapl_ssj_like())
     ipc = panel1.add_pcolor(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
     panel1.add_colorbar(
         ipc, ax=panel1.major_ax, c_label="TECU", c_scale='linear',
         left=1.1, bottom=0.1, width=0.05, height=0.7
     )
-    panel1.add_coastlines()
-    panel1.add_grids()
 
     plt.show()
 

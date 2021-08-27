@@ -5,6 +5,9 @@ import os
 import zlib
 
 import geospacelab.toolbox.utilities.pydatetime as dttool
+import geospacelab.toolbox.utilities.pylogging as mylog
+from geospacelab import preferences as pfr
+
 
 class Downloader(object):
     """
@@ -20,84 +23,89 @@ class Downloader(object):
             dt_to = dt_to + datetime.timedelta(hours=23, minutes=59)
         self.dt_fr = dt_fr  # datetime from
         self.dt_to = dt_to  # datetime to
+        self.sat_id = sat_id
+        self.orbit_id = orbit_id
 
         if data_file_root_dir is None:
-            self.data_file_root_dir = pfr.datahub_data_root_dir / 'Madrigal' / 'GNSS' / 'TEC'
+            self.data_file_root_dir = pfr.datahub_data_root_dir / 'JHUAPL' / 'DMSP' / 'SSUSI'
         else:
             self.data_file_root_dir = data_file_root_dir
         self.done = False
 
-        self.madrigal_url = "http://cedar.openmadrigal.org/"
-        self.download_madrigal_files()
-
         self.url_base = "https://ssusi.jhuapl.edu/"
 
+        self.download_files()
 
-    def download_files(self, inpDate, dataTypeList, satNum, orbitNum):
+    def download_files(self):
         """
         Get a list of the urls from input date
         and datatype and download the files
         and also move them to the corresponding
         folders.!!!
         """
-        noData = True
+        diff_days = dttool.get_diff_days(self.dt_fr, self.dt_to)
+        dt0 = dttool.get_start_of_the_day(self.dt_fr)
 
-        # construct day of year from date
-        inpDoY = inpDate.timetuple().tm_yday
-        inpDoY = "%03d" % inpDoY
-        strDoY = str(inpDoY)
-        #        if inpDoY < 10:
-        #            strDoY = "00" + str(inpDoY)
-        #        if ( inpDoY > 10) & (inpDoY < 100):
-        #            strDoY = "0" + str(inpDoY)
+        for iday in range(diff_days + 1):
+            thisday = dt0 + datetime.timedelta(days=iday)
 
-        # construct url to get the list of files for the day
-        for dataType in dataTypeList:
-            payload = {"spc": satNum, "type": dataType, \
-                       "Doy": strDoY, "year": str(inpDate.year)}
+            # construct day of year from date
+            doy = thisday.timetuple().tm_yday
+            doy_str = "{:03d}".format(doy)
+
+            payload = {"spc": self.sat_id, "type": self.file_type,
+                       "Doy": doy_str, "year": "{:d}".format(thisday.year)}
+
             # get a list of the files from dmsp ssusi website
             # based on the data type and date
-            r = requests.get(self.baseUrl + "data_retriver/", \
-                             params=payload, verify=False)
+            r = requests.get(self.url_base + "data_retriver/",
+                             params=payload, verify=True)
             soup = bs4.BeautifulSoup(r.text, 'html.parser')
-            divFList = soup.find("div", {"id": "filelist"})
-            hrefList = divFList.find_all(href=True)
-            urlList = [self.baseUrl + hL["href"] for hL in hrefList]
+            div_filelist = soup.find("div", {"id": "filelist"})
+            href_list = div_filelist.find_all(href=True)
+            url_list = [self.url_base + href["href"] for href in href_list]
 
-            for fUrl in urlList:
+            for f_url in url_list:
 
                 # we only need data files which have .NC
-                if ".NC" not in fUrl:
+                if ".NC" not in f_url:
                     continue
                 # If working with sdr data use only
                 # sdr-disk files
-                if dataType == "sdr":
-                    if "SDR-DISK" not in fUrl:
+                if self.file_type == "sdr":
+                    if "SDR-DISK" not in f_url:
                         continue
 
-                if len(orbitNum) == 5:
-                    strOrbit = orbitNum
-                    if strOrbit not in fUrl:
+                if self.orbit_id is not None:
+                    if len(self.orbit_id) != 5:
+                        raise ValueError
+                    if self.orbit_id not in f_url:
                         continue
-                noData = False
-                print("currently downloading-->", fUrl)
-                rf = requests.get(fUrl, verify=False)
-                currFName = rf.url.split("/")[-1]
-                outDir = self.outBaseDir
-                if not os.path.exists(outDir):
-                    os.makedirs(outDir)
-                with open(outDir + currFName, "wb") as ssusiData:
-                    ssusiData.write(rf.content)
-                self.filepath = outDir
-                self.filename = currFName
-            if noData:
-                print("Warning: no available data!")
+
+                mylog.simpleinfo.info("Downloading {} from the online database ...".format(f_url.split('/')[-1]))
+                rf = requests.get(f_url, verify=True)
+                file_name = rf.url.split("/")[-1]
+
+                file_dir = self.data_file_root_dir / self.sat_id.lower() / thisday.strftime("%Y%m%d")
+                file_dir.mkdir(parents=True, exist_ok=True)
+                with open(file_dir / file_name, "wb") as ssusi_data:
+                    ssusi_data.write(rf.content)
+                mylog.simpleinfo.info("Done. The file has been saved to {}".format(file_dir))
+                self.done = True
+                if self.orbit_id is not None:
+                    return
+                # self.file_dir = file_dir
+                # self.file_name = file_name
+            if not self.done:
+                mylog.StreamLogger.warning("Cannot find the requested data from the online database!")
 
 
 if __name__ == "__main__":
-    ssObj = Downloader()
-    inpDate = datetime.datetime(2015, 12, 5)
-    dataTypeList = ["sdr"]  # , "l1b", "edr-aur" ]
-    satNum = "f17"
-    orbitNum = "46871"
-    ssObj.download_files(inpDate, dataTypeList, satNum, orbitNum)
+    dt_fr = datetime.datetime(2015, 12, 5)
+    dt_to = datetime.datetime(2015, 12, 6)
+    file_type = 'edr-aur'
+    sat_id = 'f17'
+    orbit_id = '46871'
+    orbit_id = None
+
+    Downloader(dt_fr, dt_to, sat_id=sat_id, orbit_id=orbit_id, file_type=file_type)
