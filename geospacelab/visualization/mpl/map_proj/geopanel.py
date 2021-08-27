@@ -47,7 +47,7 @@ class PolarMap(mpl.Panel):
                  proj_type='Stereographic', **kwargs):
         if style is None:
             style = input("Specify the mapping style: lon-fixed, lst-fixed, mlon-fixed, or mlt-fixed? ")
-
+        self.style = style
         if style in ['lon-fixed']:
             if lon_c is None:
                 raise ValueError
@@ -182,36 +182,62 @@ class PolarMap(mpl.Panel):
 
         return
 
-    def add_grids(self, lat_res=None, lon_res=None):
+    def add_grids(self, lat_res=None, lon_res=None, 
+                  lat_label=True, lat_label_clock=5.5, 
+                  lon_mlt_label=True):
         if lat_res is not None:
             self.grid_lat_res = lat_res
-        else:
-            lat_res = self.grid_lat_res
+
         if lon_res is not None:
             self.grid_lon_res = lon_res
-        else:
-            lon_res = self.grid_lon_res
+        
+        # xlocator    
+        num_lons = 360. // self.grid_lon_res + 1.
+        lons = np.linspace(-180., 180., int(num_lons))
+        xlocator = mticker.FixedLocator(lons)
 
-        if lon_res is None:
-            xlocator = LongitudeLocator()
-        else:
-            num_lons = 360. // lon_res + 1.
-            lons = np.linspace(-180., 180., int(num_lons))
-            xlocator = mticker.FixedLocator(lons)
-
-        if lat_res is None:
-            ylocator = LatitudeLocator()
-        else:
-            lat_fr = np.abs(self.boundary_lat) + np.mod(90 - np.abs(self.boundary_lat), lat_res)
-            lat_to = 85.
-            # num_lats = (lat_to - lat_fr) / lat_res + 1.
-            lats = np.arange(lat_fr, lat_to, lat_res) * np.sign(self.lat_c)
-            ylocator = mticker.FixedLocator(lats)
+        # ylocator
+        lat_fr = np.abs(self.boundary_lat) + np.mod(90 - np.abs(self.boundary_lat), self.grid_lat_res)
+        lat_to = 85.
+        # num_lats = (lat_to - lat_fr) / lat_res + 1.
+        lats = np.arange(lat_fr, lat_to, self.grid_lat_res) * np.sign(self.lat_c)
+        ylocator = mticker.FixedLocator(lats)
+        
         gl = self.major_ax.gridlines(crs=ccrs.PlateCarree(), color='b', linewidth=0.3, linestyle=':', draw_labels=False)
-
 
         gl.xlocator = xlocator
         gl.ylocator = ylocator
+        
+        if lat_label:
+            clock = np.mod(np.pi - lat_label_clock/12 * 2 * np.pi, 2*np.pi)
+            label_lon = self.lon_c + clock * 180. / np.pi
+            for lat in lats:
+                label = r'' + '{:d}'.format(int(lat)) + r'$^{\circ}$'
+                self.major_ax.text(label_lon, lat, label, transform=ccrs.PlateCarree(), fontsize=10, fontweight='medium')
+
+        if lon_mlt_label:
+            lb_lons = np.arange(0, 360, 45)
+            lb_lons_loc = np.mod(lb_lons - self.lon_c, 360)
+            if self.boundary_style == 'circle':
+                lb_lats = np.empty_like(lb_lons)
+                lb_lats[:] = self.boundary_lat
+                data = self.proj.transform_points(ccrs.PlateCarree(), lb_lons, lb_lats)
+                xdata = data[:, 0]
+                ydata = data[:, 1]
+                scale = (self._extent[1] - self._extent[0]) * 0.02
+                xdata = xdata + scale * np.cos(-np.pi/2 + lb_lons_loc * np.pi / 180.)
+                ydata = ydata + scale * np.sin(-np.pi/2 + lb_lons_loc * np.pi / 180.)
+                for ind, lb_lon in enumerate(lb_lons):
+                    x = xdata[ind]
+                    y = ydata[ind]
+                    if self.style in ['lon-fixed', 'mlon-fixed']:
+                        label = '{:d}'.format(int(lb_lon))
+                    elif self.style == 'mlt-fixed':
+                        label = '{:d}'.format(int(lb_lon/15)) + ' MLT'
+                    elif self.style == 'lst-fixed':
+                        label = '{:d}'.format(int(lb_lon/15)) + ' LT'
+                    self.major_ax.text(x, y, label )
+
 
         #gl.xformatter = LONGITUDE_FORMATTER()
         # gl.yformatter = LATITUDE_FORMATTER()
