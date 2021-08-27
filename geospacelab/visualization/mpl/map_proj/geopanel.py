@@ -16,6 +16,7 @@ from cartopy.mpl.ticker import (
     LongitudeFormatter, LatitudeFormatter)
 import matplotlib.ticker as mticker
 import matplotlib.path as mpath
+import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
@@ -113,7 +114,8 @@ class PolarMap(mpl.Panel):
     def add_axes(self, *args, major=False, label=None, **kwargs):
         if major:
             kwargs.setdefault('projection', self.proj)
-        super().add_axes(*args, major=major, label=label, **kwargs)
+        ax = super().add_axes(*args, major=major, label=label, **kwargs)
+        return ax
 
     # def add_lands(self):
     #     import cartopy.io.shapereader as shpreader
@@ -309,15 +311,15 @@ class PolarMap(mpl.Panel):
                 np.cos(grid_data_lat*factor) * np.cos(grid_lat*factor) * np.cos((grid_lon-grid_data_lon)*factor)
             )
             grid_data = np.where(big_circle_d < 75., grid_data, np.nan)
-            im = self.major_ax.pcolormesh(grid_lon, grid_lat, grid_data, transform=ccrs.PlateCarree(), **kwargs)
+            ipc = self.major_ax.pcolormesh(grid_lon, grid_lat, grid_data, transform=ccrs.PlateCarree(), **kwargs)
         else:
             cs_new = self.cs_transform(cs_fr=cs, coords=coords)
-            im = self.major_ax.pcolormesh(cs_new['lon'], cs_new['lat'], data, transform=ccrs.PlateCarree(), **kwargs)
+            ipc = self.major_ax.pcolormesh(cs_new['lon'], cs_new['lat'], data, transform=ccrs.PlateCarree(), **kwargs)
 
-        self.add_colorbar(im, ax=self.major_ax, figure=None, c_scale=c_scale, c_label=c_label,
-                     left=1.1, bottom=0.1, width=0.05, height=0.7
-                     )
-        return im
+        # self.add_colorbar(im, ax=self.major_ax, figure=None, c_scale=c_scale, c_label=c_label,
+        #              left=1.1, bottom=0.1, width=0.05, height=0.7
+        #             )
+        return ipc
 
     def add_sc_trajectory(self, sc_lat, sc_lon, sc_alt, sc_dt=None, show_trajectory=True,
                           time_tick=False, time_tick_res=600., time_tick_scale=0.02,
@@ -443,10 +445,13 @@ class PolarMap(mpl.Panel):
         # cbar = plt.gcf().colorbar(line, ax=panel.major_ax, pad=0.1, fraction=0.03)
         # cbar.set_label(r'$n_e$' + '\n' + r'(cm$^{-3}$)', rotation=270, labelpad=25)
 
-    def add_colorbar(self, im, ax=None, figure=None, c_scale='linear', c_label=None,
+    def add_colorbar(self, im, ax=None, figure=None,
+                     c_scale='linear', c_label=None,
                      c_ticks=None, c_tick_labels=None, c_tick_label_step=1,
                      left=1.05, bottom=0.01, width=0.02, height=0.8, **kwargs
                      ):
+        if figure is None:
+            figure = plt.gcf()
         pos = ax.get_position()
         ax_width = pos.x1 - pos.x0
         ax_height = pos.y1 - pos.y0
@@ -454,8 +459,8 @@ class PolarMap(mpl.Panel):
         ca_bottom = pos.y0 + ax_height * bottom
         ca_width = ax_width * width
         ca_height = ax_height * height
-        cax = self.figure.add_axes([ca_left, ca_bottom, ca_width, ca_height])
-        cb = self.figure.colorbar(im, cax=cax, **kwargs)
+        cax = self.add_axes([ca_left, ca_bottom, ca_width, ca_height], major=False, label=c_label)
+        cb = figure.colorbar(im, cax=cax, **kwargs)
         ylim = cax.get_ylim()
 
         cb.set_label(c_label, rotation=270, va='bottom', size='medium')

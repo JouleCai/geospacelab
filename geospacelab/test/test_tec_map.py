@@ -28,7 +28,11 @@ def test_tec():
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
     pcolormesh_config.update(c_lim=[0, 35])
-    panel1.add_pcolor(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
+    ipc = panel1.add_pcolor(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
+    panel1.add_colorbar(
+        ipc, ax=panel1.major_ax, c_label="TECU", c_scale='linear',
+        left=1.1, bottom=0.1, width=0.05, height=0.7
+    )
     panel1.add_coastlines()
     panel1.add_grids()
 
