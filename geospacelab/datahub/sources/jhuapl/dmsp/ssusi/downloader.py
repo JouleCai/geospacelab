@@ -30,13 +30,8 @@ class Downloader(object):
         self.madrigal_url = "http://cedar.openmadrigal.org/"
         self.download_madrigal_files()
 
-    def __init__(self, ):
-        """
-        Set up some constants.
-        Used for fitting.
-        """
-        self.baseUrl = "https://ssusi.jhuapl.edu/"
-        self.outBaseDir = outBaseDir
+        self.url_base = "https://ssusi.jhuapl.edu/"
+
 
     def download_files(self, inpDate, dataTypeList, satNum, orbitNum):
         """
