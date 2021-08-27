@@ -135,18 +135,16 @@ class PolarMap(mpl.Panel):
 
         if cs_to is None:
             cs_to = self.cs
-        if cs_fr == cs_to:
-            return coords
         if ut is None:
             ut = self.ut
         cs_class = getattr(geo_cs, cs_fr.upper())
         cs1 = cs_class(coords=coords, ut=ut)
-        cs2 = cs1(cs_to=cs_to, append_mlt=self.depend_mlt)
-        if self.depend_mlt:
-            lon = self._transform_mlt_to_lon(cs2.coords.mlt)
+        if cs_fr != cs_to:
+            cs2 = cs1(cs_to=cs_to, append_mlt=self.depend_mlt)
         else:
-            lon = cs2.coords.lon
-        cs2.coords.lon = lon
+            cs2 = cs1
+        if self.depend_mlt:
+            cs2.coords.lon = self._transform_mlt_to_lon(cs2.coords.mlt)
         return cs2
 
     def add_coastlines(self):
@@ -182,7 +180,7 @@ class PolarMap(mpl.Panel):
         y_new = coords['lat']
         # x_new, y_new = x, y
         self.major_ax.plot(x_new, y_new, transform=ccrs.Geodetic(),
-                           linestyle='-', linewidth=0.5, color='#778088', zorder=100, alpha=0.6)
+                           linestyle='-', linewidth=0.5, color='#797A7D', zorder=100, alpha=1)
         # self.ax.scatter(x_new, y_new, transform=self.default_transform,
         #             marker='.', edgecolors='none', color='#C0C0C0', s=1)
 
@@ -269,17 +267,30 @@ class PolarMap(mpl.Panel):
         else:
             raise NotImplementedError
 
-    def add_pcolor(self, data, lat=None, lon=None, alt=None, cs=None, **kwargs):
-        if self.cs in ['AACGM', 'APEX'] and cs == 'GEO':
+    def add_pcolor(self, data, coords=None, cs=None,
+                   c_lim=None, c_scale='linear', c_label=None, **kwargs):
+
+        if c_lim is None:
+            c_lim = [np.nanmin(data.flatten()), np.nanmax(data.flatten())]
+
+        if c_scale == 'log':
+            norm = mpl.colors.LogNorm(vmin=c_lim[0], vmax=c_lim[1])
+            kwargs.update(norm=norm)
+        else:
+            kwargs.update(vmin=c_lim[0])
+            kwargs.update(vmax=c_lim[1])
+
+        if cs != self.cs:
             from scipy.interpolate import griddata
             ind_data = np.where(np.isfinite(data))
             data_pts = data[ind_data]
-            lat_pts = lat[ind_data]
-            lon_pts = lon[ind_data]
-            cs_new = self.cs_transform(cs_fr=cs, coords={'lat': lat_pts, 'lon': lon_pts, 'height': alt})
+            lat_pts = coords['lat'][ind_data]
+            lon_pts = coords['lon'][ind_data]
+            height = coords['height']
+            cs_new = self.cs_transform(cs_fr=cs, coords={'lat': lat_pts, 'lon': lon_pts, 'height': height})
 
-            grid_lat_res = kwargs.pop('grid_lat_res', 0.5)
-            grid_lon_res = kwargs.pop('grid_lon_res', 1.)
+            grid_lat_res = kwargs.pop('grid_lat_res', 0.25)
+            grid_lon_res = kwargs.pop('grid_lon_res', .5)
             grid_lon, grid_lat = np.meshgrid(
                 np.arange(0., 360., grid_lon_res),
                 np.append(np.arange(self.boundary_lat, self.lat_c, np.sign(self.lat_c)*grid_lat_res), self.lat_c)
@@ -292,10 +303,20 @@ class PolarMap(mpl.Panel):
             grid_data_lon = griddata(
                (cs_new['lon'], cs_new['lat']), cs_new['lon'], (grid_lon, grid_lat), method='nearest'
             )
-            big_circle_d = 
-            grid_data = np.where()
+            factor = np.pi / 180.
+            big_circle_d = 6371. * np.arccos(
+                np.sin(grid_data_lat*factor) * np.sin(grid_lat*factor) +
+                np.cos(grid_data_lat*factor) * np.cos(grid_lat*factor) * np.cos((grid_lon-grid_data_lon)*factor)
+            )
+            grid_data = np.where(big_circle_d < 75., grid_data, np.nan)
+            im = self.major_ax.pcolormesh(grid_lon, grid_lat, grid_data, transform=ccrs.PlateCarree(), **kwargs)
+        else:
+            cs_new = self.cs_transform(cs_fr=cs, coords=coords)
+            im = self.major_ax.pcolormesh(cs_new['lon'], cs_new['lat'], data, transform=ccrs.PlateCarree(), **kwargs)
 
-        im = self.major_ax.pcolormesh(cs_new['lon'], cs_new['lat'], data, transform=ccrs.PlateCarree(), **kwargs)
+        self.add_colorbar(im, ax=self.major_ax, figure=None, c_scale=c_scale, c_label=c_label,
+                     left=1.1, bottom=0.1, width=0.05, height=0.7
+                     )
         return im
 
     def add_sc_trajectory(self, sc_lat, sc_lon, sc_alt, sc_dt=None, show_trajectory=True,

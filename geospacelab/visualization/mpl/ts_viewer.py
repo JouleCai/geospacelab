@@ -633,7 +633,7 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
         pcolormesh_config = var.visual.plot_config.pcolormesh
         z_lim = var.visual.axis[2].lim
         if z_lim is None:
-            z_lim = [numpy.nanmin[z.flatten()], numpy.nanmax[z.flatten()]]
+            z_lim = [numpy.nanmin(z.flatten()), numpy.nanmax(z.flatten())]
         z_scale = var.visual.axis[2].scale
         if z_scale == 'log':
             norm = mpl.colors.LogNorm(vmin=z_lim[0], vmax=z_lim[1])

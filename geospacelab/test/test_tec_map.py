@@ -22,11 +22,15 @@ def test_tec():
     ind_t = np.where(dts == time1)[0]
 
     pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1)
+    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time1)
     panel1 = viewer.panels[pid]
 
     tec_ = tec.value[ind_t[0], :, :]
-    panel1.add_pcolor(tec_, coords={'lat': glat, 'lon': glon, 'height': 300.}, cs='GEO', **tec.visual.plot_config.pcolormesh)
+    pcolormesh_config = tec.visual.plot_config.pcolormesh
+    pcolormesh_config.update(c_lim=[0, 35])
+    panel1.add_pcolor(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
     panel1.add_coastlines()
+    panel1.add_grids()
 
     plt.show()
 
