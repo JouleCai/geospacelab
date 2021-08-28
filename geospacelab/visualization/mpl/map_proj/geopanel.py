@@ -41,9 +41,10 @@ def test():
 
 
 class PolarMap(mpl.Panel):
-    def __init__(self, *args, cs='AACGM', style=None, lon_c=None, pole='N', ut=None, lst_c=None, mlt_c=None, mlon_c=None,
+    def __init__(self, *args, cs='AACGM', style=None, lon_c=None, pole='N', ut=None, lst_c=None, mlt_c=None,
+                 mlon_c=None,
                  boundary_lat=30., boundary_style='circle',
-                 grid_lat_res=10., grid_lon_res=15., mirror_south=True,
+                 mirror_south=False,
                  proj_type='Stereographic', **kwargs):
         if style is None:
             style = input("Specify the mapping style: lon-fixed, lst-fixed, mlon-fixed, or mlt-fixed? ")
@@ -76,16 +77,14 @@ class PolarMap(mpl.Panel):
             lon_c = None
             mlon_c = None
 
-        if lon_c is not None and pole == 'S':
-            lon_c = lon_c + 180.
+        # if lon_c is not None and pole == 'S':
+        #    lon_c = lon_c + 180.
 
         self.lat_c = None
         self.lon_c = lon_c
         self.ut = ut
         self.boundary_lat = boundary_lat
         self.boundary_style = boundary_style
-        self.grid_lat_res = grid_lat_res
-        self.grid_lon_res = grid_lon_res
         self.pole = pole
         self.lst_c = lst_c
         self.cs = cs
@@ -176,70 +175,160 @@ class PolarMap(mpl.Panel):
         y_new = coords['lat']
         # x_new, y_new = x, y
         self.major_ax.plot(x_new, y_new, transform=ccrs.Geodetic(),
-                           linestyle='-', linewidth=0.5, color='#797A7D', zorder=100, alpha=1)
+                           linestyle='-', linewidth=0.8, color='#797A7D', zorder=100, alpha=0.7)
         # self.ax.scatter(x_new, y_new, transform=self.default_transform,
         #             marker='.', edgecolors='none', color='#C0C0C0', s=1)
 
         return
 
-    def add_grids(self, lat_res=None, lon_res=None, 
-                  lat_label=True, lat_label_clock=5.5, 
-                  lon_mlt_label=True):
-        if lat_res is not None:
-            self.grid_lat_res = lat_res
+    def add_gridlines(self,
+                      lat_res=None, lon_res=None, lat_label_separator=None, lon_label_separator=None,
+                      lat_label=True, lat_label_clock=6.5, lat_label_config={},
+                      lon_label=True, lon_label_config={}):
+        default_gridlines_label_config = {
+            'lon-fixed': {
+                'lat_res': 10.,
+                'lon_res': 30.,
+                'lat_label_separator': 0,
+                'lon_label_separator': 0,
+            },
+            'mlon-fixed': {
+                'lat_res': 10.,
+                'lon_res': 30.,
+                'lat_label_separator': 0,
+                'lon_label_separator': 0,
+            },
+            'lst-fixed': {
+                'lat_res': 10.,
+                'lon_res': 15.,
+                'lat_label_separator': 0,
+                'lon_label_separator': 2,
+            },
+            'mlt-fixed': {
+                'lat_res': 10.,
+                'lon_res': 15.,
+                'lat_label_separator': 0,
+                'lon_label_separator': 2,
+            },
+        }
 
-        if lon_res is not None:
-            self.grid_lon_res = lon_res
-        
-        # xlocator    
-        num_lons = 360. // self.grid_lon_res + 1.
-        lons = np.linspace(-180., 180., int(num_lons))
+        default_label_config = default_gridlines_label_config[self.style]
+        if lat_res is None:
+            lat_res = default_label_config['lat_res']
+        if lon_res is None:
+            lon_res = default_label_config['lon_res']
+        if lat_label_separator is None:
+            lat_label_separator = default_label_config['lat_label_separator']
+        if lon_label_separator is None:
+            lon_label_separator = default_label_config['lon_label_separator']
+
+        # xlocator
+        if self.style == 'lst-fixed':
+            lon_shift = (self.ut - datetime.datetime(
+                self.ut.year, self.ut.month, self.ut.day, self.ut.hour
+            )).total_seconds() / 86400. * 360
+        else:
+            lon_shift = 0
+        num_lons = 360. // lon_res + 1.
+        lons = np.linspace(-180., 180., int(num_lons)) - lon_shift
         xlocator = mticker.FixedLocator(lons)
 
         # ylocator
-        lat_fr = np.abs(self.boundary_lat) + np.mod(90 - np.abs(self.boundary_lat), self.grid_lat_res)
+        lat_fr = np.abs(self.boundary_lat) + np.mod(90 - np.abs(self.boundary_lat), lat_res)
         lat_to = 85.
         # num_lats = (lat_to - lat_fr) / lat_res + 1.
-        lats = np.arange(lat_fr, lat_to, self.grid_lat_res) * np.sign(self.lat_c)
+        lats = np.arange(lat_fr, lat_to, lat_res) * np.sign(self.lat_c)
         ylocator = mticker.FixedLocator(lats)
-        
-        gl = self.major_ax.gridlines(crs=ccrs.PlateCarree(), color='b', linewidth=0.3, linestyle=':', draw_labels=False)
+
+        gl = self.major_ax.gridlines(crs=ccrs.PlateCarree(), color='#331900', linewidth=0.5, linestyle=':',
+                                     draw_labels=False)
 
         gl.xlocator = xlocator
         gl.ylocator = ylocator
-        
-        if lat_label:
-            clock = np.mod(np.pi - lat_label_clock/12 * 2 * np.pi, 2*np.pi)
-            label_lon = self.lon_c + clock * 180. / np.pi
-            for lat in lats:
-                label = r'' + '{:d}'.format(int(lat)) + r'$^{\circ}$'
-                self.major_ax.text(label_lon, lat, label, transform=ccrs.PlateCarree(), fontsize=10, fontweight='medium')
 
-        if lon_mlt_label:
-            lb_lons = np.arange(0, 360, 45)
-            lb_lons_loc = np.mod(lb_lons - self.lon_c, 360)
+        if lat_label:
+            if self.pole == 'S':
+                clock = lat_label_clock / 12 * 360
+                rotation = 180 - clock
+                if self.mirror_south:
+                    clock = - clock
+                    rotation = 180 + clock
+            else:
+                clock = np.mod(180. - lat_label_clock / 12 * 360, 360)
+                rotation = clock
+            label_lon = self.lon_c + clock
+            for ind, lat in enumerate(lats):
+                if np.mod(ind, lat_label_separator+1) != 0:
+                    continue
+                if lat > 0:
+                    label = r'' + '{:d}'.format(int(lat)) + r'$^{\circ}$N'
+                elif lat < 0:
+                    label = r'' + '{:d}'.format(int(-lat)) + r'$^{\circ}$S'
+                else:
+                    label = r'' + '{:d}'.format(int(0)) + r'$^{\circ}$S'
+
+                self.major_ax.text(
+                    label_lon, lat, label, transform=ccrs.PlateCarree(),
+                    fontsize=plt.rcParams['font.size'] - 2, fontweight='roman',
+                    ha='center', va='center',
+                    rotation=rotation,
+                    family='fantasy', color='grey', alpha=0.9
+                )
+
+        if lon_label:
+            lb_lons = np.arange(0, 360., lon_res)
+            if self.pole == 'S':
+                lon_shift_south = 180.
+            else:
+                lon_shift_south = 0
+            if self.style == 'lon-fixed' or self.style == 'mlon-fixed':
+                lb_lons_loc = lb_lons
+            elif self.style == 'lst-fixed':
+                lb_lons_loc = np.mod(self.lon_c + (lb_lons - self.lst_c / 24 * 360) + lon_shift_south, 360)
+            elif self.style == 'mlt-fixed':
+                lb_lons_loc = lb_lons
+
             if self.boundary_style == 'circle':
                 lb_lats = np.empty_like(lb_lons)
                 lb_lats[:] = self.boundary_lat
-                data = self.proj.transform_points(ccrs.PlateCarree(), lb_lons, lb_lats)
+                data = self.proj.transform_points(ccrs.PlateCarree(), lb_lons_loc, lb_lats)
                 xdata = data[:, 0]
                 ydata = data[:, 1]
-                scale = (self._extent[1] - self._extent[0]) * 0.02
-                xdata = xdata + scale * np.cos(-np.pi/2 + lb_lons_loc * np.pi / 180.)
-                ydata = ydata + scale * np.sin(-np.pi/2 + lb_lons_loc * np.pi / 180.)
+                scale = (self._extent[1] - self._extent[0]) * 0.03
+                xdata = xdata + scale * np.sin((lb_lons_loc - self.lon_c) * np.pi / 180.)
+                ydata = ydata - np.sign(self.lat_c) * scale * np.cos((lb_lons_loc - self.lon_c) * np.pi / 180.)
                 for ind, lb_lon in enumerate(lb_lons):
+                    if np.mod(ind, lon_label_separator+1) != 0:
+                        continue
                     x = xdata[ind]
                     y = ydata[ind]
                     if self.style in ['lon-fixed', 'mlon-fixed']:
-                        label = '{:d}'.format(int(lb_lon))
+                        lb_lon = np.mod(lb_lon + 180, 360) - 180
+                        if lb_lon == 0 or np.abs(lb_lon) == 180.:
+                            label = r'' + '{:d}'.format(int(np.abs(lb_lon))) + r'$^{\circ}$'
+                        if lb_lon < 0:
+                            label = r'' + '{:d}'.format(int(-lb_lon)) + r'$^{\circ}$W'
+                        else:
+                            label = r'' + '{:d}'.format(int(lb_lon)) + r'$^{\circ}$E'
                     elif self.style == 'mlt-fixed':
-                        label = '{:d}'.format(int(lb_lon/15)) + ' MLT'
+                        label = '{:d}'.format(int(lb_lon / 15)) + ' MLT'
                     elif self.style == 'lst-fixed':
-                        label = '{:d}'.format(int(lb_lon/15)) + ' LT'
-                    self.major_ax.text(x, y, label )
+                        label = '{:d}'.format(int(lb_lon / 15)) + ' LT'
 
+                    if self.pole == 'S':
+                        rotation = self.lon_c - lb_lons_loc[ind]
+                        if self.mirror_south:
+                            rotation = -self.lon_c + lb_lons_loc[ind]
+                    else:
+                        rotation = (lb_lons_loc[ind] - self.lon_c) + 180
+                    self.major_ax.text(
+                        x, y, label,
+                        va='center', ha='center',
+                        rotation=rotation,
+                        family='fantasy', fontweight='ultralight', color='grey'
+                    )
 
-        #gl.xformatter = LONGITUDE_FORMATTER()
+        # gl.xformatter = LONGITUDE_FORMATTER()
         # gl.yformatter = LATITUDE_FORMATTER()
         # for ea in gl.label_artists:
         #     if ea[1]==False:
@@ -315,7 +404,7 @@ class PolarMap(mpl.Panel):
             grid_lon_res = kwargs.pop('grid_lon_res', .5)
             grid_lon, grid_lat = np.meshgrid(
                 np.arange(0., 360., grid_lon_res),
-                np.append(np.arange(self.boundary_lat, self.lat_c, np.sign(self.lat_c)*grid_lat_res), self.lat_c)
+                np.append(np.arange(self.boundary_lat, self.lat_c, np.sign(self.lat_c) * grid_lat_res), self.lat_c)
             )
 
             grid_data = griddata((cs_new['lon'], cs_new['lat']), data_pts, (grid_lon, grid_lat), method='nearest')
@@ -323,12 +412,12 @@ class PolarMap(mpl.Panel):
                 (cs_new['lon'], cs_new['lat']), cs_new['lat'], (grid_lon, grid_lat), method='nearest'
             )
             grid_data_lon = griddata(
-               (cs_new['lon'], cs_new['lat']), cs_new['lon'], (grid_lon, grid_lat), method='nearest'
+                (cs_new['lon'], cs_new['lat']), cs_new['lon'], (grid_lon, grid_lat), method='nearest'
             )
             factor = np.pi / 180.
             big_circle_d = 6371. * np.arccos(
-                np.sin(grid_data_lat*factor) * np.sin(grid_lat*factor) +
-                np.cos(grid_data_lat*factor) * np.cos(grid_lat*factor) * np.cos((grid_lon-grid_data_lon)*factor)
+                np.sin(grid_data_lat * factor) * np.sin(grid_lat * factor) +
+                np.cos(grid_data_lat * factor) * np.cos(grid_lat * factor) * np.cos((grid_lon - grid_data_lon) * factor)
             )
             grid_data = np.where(big_circle_d < 75., grid_data, np.nan)
             ipc = self.major_ax.pcolormesh(grid_lon, grid_lat, grid_data, transform=ccrs.PlateCarree(), **kwargs)
@@ -339,6 +428,7 @@ class PolarMap(mpl.Panel):
         # self.add_colorbar(im, ax=self.major_ax, figure=None, c_scale=c_scale, c_label=c_label,
         #              left=1.1, bottom=0.1, width=0.05, height=0.7
         #             )
+        # self._check_mirror_south()
         return ipc
 
     def add_sc_trajectory(self, sc_lat, sc_lon, sc_alt, sc_dt=None, show_trajectory=True,
@@ -348,7 +438,7 @@ class PolarMap(mpl.Panel):
         kwargs.setdefault('trajectory_config', {
             'linewidth': 1,
             'linestyle': '-',
-            'color':    'k',
+            'color': 'k',
         })
         kwargs.setdefault('linewidth', 1)
         kwargs.setdefault('color', 'k')
@@ -529,9 +619,9 @@ class PolarMap(mpl.Panel):
         if lst is None:
             return
         if self.pole == 'N':
-            self.lon_c = (self.lst_c - (self.ut.hour + self.ut.minute / 60)) * 15.
+            self.lon_c = np.mod((self.lst_c - (self.ut.hour + self.ut.minute / 60)) * 15., 360.)
         elif self.pole == 'S':
-            self.lon_c = (self.lst_c - (self.ut.hour + self.ut.minute / 60)) * 15. + 180.
+            self.lon_c = np.mod((self.lst_c - (self.ut.hour + self.ut.minute / 60)) * 15. + 180., 360.)
 
     @property
     def mlt_c(self):
@@ -543,7 +633,7 @@ class PolarMap(mpl.Panel):
             self.depend_mlt = True
             self.lon_c = self._transform_mlt_to_lon(mlt)
             if self.pole == 'S':
-                self.lon_c = np.mod(self.lon_c+180., 360)
+                self.lon_c = np.mod(self.lon_c + 180., 360)
             if self.cs == "GEO":
                 raise AttributeError('A magnetic coordinate system must be specified (Set the attribute "cs")!')
         self._mlt_c = mlt

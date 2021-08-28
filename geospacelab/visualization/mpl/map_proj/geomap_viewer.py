@@ -56,7 +56,7 @@ class GeoMapViewer(datahub.DataHub, mpl.Dashboard):
 
     def add_polar_map(self, row_ind, col_ind, label=None, cs='GEO', style='lon-fixed', pole='N',
                       ut=None, lon_c=None, lst_c=None, mlt_c=None, mlon_c=None, boundary_lat=30.,
-                      boundary_style='circle', grid_lat_res=10., grid_lon_res=15., mirror_south=False,
+                      boundary_style='circle', mirror_south=False,
                       proj_type='Stereographic', **kwargs):
         """
 
@@ -69,7 +69,7 @@ class GeoMapViewer(datahub.DataHub, mpl.Dashboard):
         panel_id = super().add_panel(row_ind=row_ind, col_ind=col_ind, panel_class=geopanel.PolarMap,
                                      label=label, cs=cs, style=style, pole=pole,
                                      ut=ut, lon_c=lon_c, lst_c=lst_c, mlt_c=mlt_c, mlon_c=mlon_c, boundary_lat=boundary_lat,
-                                     boundary_style=boundary_style, grid_lat_res=grid_lat_res, grid_lon_res=grid_lon_res,
+                                     boundary_style=boundary_style,
                                      mirror_south=mirror_south,
                                      proj_type=proj_type, **kwargs)
         return panel_id
