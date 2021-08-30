@@ -1,9 +1,8 @@
 import datetime
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 
-import geospacelab.visualization.mpl.map_proj.geomap_viewer as geomap
+import geospacelab.visualization.map_proj.geomap_viewer as geomap
 
 
 def test_tec():
@@ -21,7 +20,7 @@ def test_tec():
     time1 = datetime.datetime(2016, 3, 15, 14, 10)
     ind_t = np.where(dts == time1)[0]
 
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1)
+    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time2)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time1, mirror_south=True)
     pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=3., pole='N', ut=time1)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)

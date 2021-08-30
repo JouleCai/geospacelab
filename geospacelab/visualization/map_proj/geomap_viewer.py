@@ -11,7 +11,7 @@ __docformat__ = "reStructureText"
 
 import geospacelab.visualization.mpl as mpl
 import geospacelab.datahub as datahub
-import geospacelab.visualization.mpl.map_proj.geopanel as geopanel
+import geospacelab.visualization.map_proj.geopanel as geopanel
 
 default_layout_config = {
     'left': 0.15,

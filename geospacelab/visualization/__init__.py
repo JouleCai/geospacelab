@@ -9,4 +9,3 @@ __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
 from geospacelab.visualization.mpl.ts_viewer import TimeSeriesViewer
-from geospacelab.visualization.mpl.map_proj.geomap_viewer import GeoMapViewer

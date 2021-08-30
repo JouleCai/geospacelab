@@ -1,9 +1,7 @@
 import datetime
-import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 
-import geospacelab.visualization.mpl.map_proj.geomap_viewer as geomap
+import geospacelab.visualization.map_proj.geomap_viewer as geomap
 
 
 def test_ssusi():
