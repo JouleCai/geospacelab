@@ -29,8 +29,8 @@ default_dataset_attrs = {
     'product': 'Dst',
     'data_file_ext': 'nc',
     'data_root_dir': prf.datahub_data_root_dir / 'WDC' / 'Dst',
-    'load_data': True,
-    'downloadable': True,
+    'allow_load': True,
+    'allow_download': True,
     'data_search_recursive': False,
     'label_fields': ['database', 'product', 'data_file_ext'],
     'time_clip': True,
@@ -51,11 +51,11 @@ class Dataset(datahub.DatasetModel):
 
         self.database = kwargs.pop('database', '')
         self.product = kwargs.pop('product', '')
-        self.downloadable = kwargs.pop('downloadable', True)
+        self.allow_download = kwargs.pop('allow_download', True)
 
         self.metadata = None
 
-        load_data = kwargs.pop('load_data', False)
+        allow_load = kwargs.pop('allow_load', False)
 
         # self.config(**kwargs)
 
@@ -72,7 +72,7 @@ class Dataset(datahub.DatasetModel):
 
         self._validate_attrs()
 
-        if load_data:
+        if allow_load:
             self.load_data()
 
     def _validate_attrs(self):
@@ -121,7 +121,7 @@ class Dataset(datahub.DatasetModel):
 
             # Validate file paths
 
-            if not done and self.downloadable:
+            if not done and self.allow_download:
                 done = self.download_data()
                 if done:
                     done = super().search_data_files(

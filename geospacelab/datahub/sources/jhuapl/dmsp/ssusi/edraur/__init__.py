@@ -21,8 +21,8 @@ default_dataset_attrs = {
     'product': 'EDR-AUR',
     'data_file_ext': 'NC',
     'data_root_dir': prf.datahub_data_root_dir / 'JHUAPL' / 'DMSP' / 'SSUSI',
-    'load_data': True,
-    'downloadable': True,
+    'allow_load': True,
+    'allow_download': True,
     'data_search_recursive': False,
     'label_fields': ['database', 'facility', 'instrument', 'product'],
     'time_clip': True,
@@ -49,7 +49,7 @@ class Dataset(datahub.DatasetModel):
         self.facility = kwargs.pop('facility', 'DMSP')
         self.instrument = kwargs.pop('instrument', 'SSUSI')
         self.product = kwargs.pop('product', 'EDR-EUR')
-        self.downloadable = kwargs.pop('downloadable', True)
+        self.allow_download = kwargs.pop('allow_download', True)
 
         self.sat_id = kwargs.pop('sat_id', 'f16')
         self.orbit_id = kwargs.pop('orbit_id', None)
@@ -57,7 +57,7 @@ class Dataset(datahub.DatasetModel):
 
         self.metadata = None
 
-        load_data = kwargs.pop('load_data', False)
+        allow_load = kwargs.pop('allow_load', False)
 
         # self.config(**kwargs)
 
@@ -69,7 +69,7 @@ class Dataset(datahub.DatasetModel):
 
         self._validate_attrs()
 
-        if load_data:
+        if allow_load:
             self.load_data()
 
     def _validate_attrs(self):
@@ -139,7 +139,7 @@ class Dataset(datahub.DatasetModel):
             if self.orbit_id is not None:
                 multiple_files = False
             else:
-                fp_log = initial_file_dir / 'log_EDR-AUR.full'
+                fp_log = initial_file_dir / 'EDR-AUR.full.log'
                 if not fp_log.is_file():
                     self.download_data(dt_fr=thisday, dt_to=thisday)
                 multiple_files = True
@@ -153,7 +153,7 @@ class Dataset(datahub.DatasetModel):
 
             # Validate file paths
 
-            if not done and self.downloadable:
+            if not done and self.allow_download:
                 done = self.download_data(dt_fr=thisday, dt_to=thisday)
                 if done:
                     done = super().search_data_files(

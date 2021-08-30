@@ -23,10 +23,10 @@ class OMNIViewer(TimeSeriesViewer):
             'omni_type': kwargs.pop('omni_type', 'OMNI2'),
             'omni_res': kwargs.pop('omni_res', '1min'),
             'load_mode': kwargs.get('load_mode', 'AUTO'),
-            'load_data': kwargs.get('load_data', True)
+            'allow_load': kwargs.get('allow_load', True)
         }
         ds_1 = self.dock(datasource_contents=['cdaweb', 'omni'], **omni_config)
-        ds_2 = self.dock(datasource_contents=['wdc', 'ae'], load_data=True, load_mode='AUTO')
+        ds_2 = self.dock(datasource_contents=['wdc', 'ae'], allow_load=True, load_mode='AUTO')
         ds_2 = self.dock(datasource_contents=['wdc', 'asysym'])
         # ds_1.list_all_variables()
         self.title = kwargs.pop('title', ', '.join([ds_1.facility, ds_1.omni_res]))

@@ -7,11 +7,12 @@ import geospacelab.visualization.mpl.map_proj.geomap_viewer as geomap
 
 
 def test_ssusi():
-    dt_fr = datetime.datetime(2015, 12, 5, 2)
-    dt_to = datetime.datetime(2015, 12, 5, 23, 59)
+    dt_fr = datetime.datetime(2015, 9, 8, 0)
+    dt_to = datetime.datetime(2015, 9, 8, 23, 59)
     viewer = geomap.GeoMapViewer(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (10, 5)})
+    pole = 'N'
     # viewer.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole='N', sat_id='f17', orbit_id='46863')
-    viewer.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole='S', sat_id='f17', orbit_id=None)
+    viewer.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole=pole, sat_id='f16', orbit_id=None)
     viewer.set_layout(1, 2)
 
     lbhs = viewer.assign_variable('GRID_AUR_LBHS', dataset_index=1)
@@ -19,11 +20,11 @@ def test_ssusi():
     mlat = viewer.assign_variable('GRID_MLAT', dataset_index=1).value
     mlon = viewer.assign_variable('GRID_MLON', dataset_index=1).value
     mlt = viewer.assign_variable(('GRID_MLT'), dataset_index=1).value
-    time1 = datetime.datetime(2015, 12, 5, 8, 29)
+    time1 = datetime.datetime(2015, 9, 8, 20, 21)
     ind_t = viewer.datasets[1].get_time_ind(ut=time1)
 
-    pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time1, boundary_lat=50., mirror_south=True)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time1, mirror_south=True)
+    pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, boundary_lat=65., mirror_south=False)
+    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, mirror_south=True)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=3., pole='N', ut=time1)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='S', ut=time1,

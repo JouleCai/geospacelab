@@ -38,11 +38,11 @@ def test_tec():
     pcolormesh_config.update(c_lim=[0, 25])
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap=cm.cmap_jhuapl_ssj_like())
-    # ipc = panel1.add_pcolor(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
-    # panel1.add_colorbar(
-    #    ipc, ax=panel1.major_ax, c_label="TECU", c_scale='linear',
-    #    left=1.1, bottom=0.1, width=0.05, height=0.7
-    # )
+    ipc = panel1.add_pcolor(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
+    panel1.add_colorbar(
+       ipc, ax=panel1.major_ax, c_label="TECU", c_scale='linear',
+       left=1.1, bottom=0.1, width=0.05, height=0.7
+    )
 
 
     plt.show()

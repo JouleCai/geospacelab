@@ -65,6 +65,9 @@ class Downloader(object):
             href_list = div_filelist.find_all(href=True)
             url_list = [self.url_base + href["href"] for href in href_list]
 
+            import natsort
+            url_list = natsort.natsorted(url_list, reverse=False)
+
             for f_url in url_list:
 
                 # we only need data files which have .NC
@@ -102,8 +105,8 @@ class Downloader(object):
                     return
                 # self.file_dir = file_dir
                 # self.file_name = file_name
-            if self.orbit_id is None:
-                fp_log = file_dir / 'log_EDR-AUR.full'
+            if self.orbit_id is None and self.done:
+                fp_log = file_dir / (self.file_type.upper() + '.full.log')
                 fp_log.touch()
             if not self.done:
                 mylog.StreamLogger.warning(
