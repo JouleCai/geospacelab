@@ -50,6 +50,7 @@ setuptools.setup(
     install_requires=[            # I get to this in a second
               'requests>=2.26.0',
               'beautifulsoup4>=4.9.3',
+              'natsort>=7.1.1',
               'numpy>=1.20',
               'scipy>=1.6.0',
               'h5py>=3.2.1',

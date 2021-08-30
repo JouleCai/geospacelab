@@ -194,7 +194,7 @@ def get_doy(dts, year=None, decimal=False):
 
 def convert_doy_to_datetime(year, doys):
     type_in = type(doys)
-    if isinstance(type_in, (int, float)):
+    if isinstance(doys, (int, float)):
         doys = [doys]
     doys = numpy.array(doys)
     dts = numpy.empty_like(doys, dtype=datetime)

@@ -11,16 +11,14 @@ __docformat__ = "reStructureText"
 from geospacelab.datahub import VariableModel as Var
 import geospacelab.visualization.mpl.colormaps as cm
 
-database = 'Madrigal'
+database = 'jhuapl'
 
 timestamps = {
     'DATETIME': 'DATETIME',
 }
 
-depend_0 = {'UT': 'DATETIME'}
-depend_1 = {'GEO_LAT': 'GEO_LAT', 'GEO_LON': 'GEO_LON', 'GEO_ALT': 'GEO_ALT'}
 
-default_colormap = cm.cmap_jhuapl_ssj_like()
+default_colormap = "gist_ncar"
 
 default_plot_config = {
     'line':         {
@@ -37,16 +35,18 @@ default_plot_config = {
 configured_variables = {}
 visual = 'on'
 
+depend_0 = {'UT': 'DATETIME'}
+depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
 
 ####################################################################################################################
-var_name = 'TEC_MAP'
-var = Var(name=var_name, ndim=3, variable_type='scalar', visual=visual)
+var_name = 'GRID_AUR_1216'
+var = Var(name=var_name, ndim=4, variable_type='scalar', visual=visual)
 # set variable attrs
-var.fullname = 'GNSS TEC MAP'
-var.label = r'TEC'
-var.group = r'TEC'
-var.unit = 'TECu'
-var.depends = {0: depend_0, 1: depend_1}
+var.fullname = 'Auroral emission intensity at 121.6 nm'
+var.label = r'1216'
+var.group = 'Emission intensity'
+var.unit = 'R'
+var.depends = {0: depend_0, 1: {'AACGM_LAT': 'GRID_MLAT'}, 3: {'AACGM_LON': 'GRID_MLON'}}
 # set plot attrs
 plot_config = var.visual.plot_config
 plot_config.config(**default_plot_config)

@@ -82,13 +82,19 @@ class Downloader(object):
                     if self.orbit_id not in f_url:
                         continue
 
-                mylog.simpleinfo.info("Downloading {} from the online database ...".format(f_url.split('/')[-1]))
+                file_dir = self.data_file_root_dir / self.sat_id.lower() / thisday.strftime("%Y%m%d")
+                file_dir.mkdir(parents=True, exist_ok=True)
+                file_name = f_url.split('/')[-1]
+                file_path = file_dir / file_name
+                if file_path.is_file():
+                    self.done = True
+                    mylog.simpleinfo.info("The file {} exists.".format(file_name))
+                    continue
+                mylog.simpleinfo.info("Downloading {} from the online database ...".format(file_name))
                 rf = requests.get(f_url, verify=True)
                 file_name = rf.url.split("/")[-1]
 
-                file_dir = self.data_file_root_dir / self.sat_id.lower() / thisday.strftime("%Y%m%d")
-                file_dir.mkdir(parents=True, exist_ok=True)
-                with open(file_dir / file_name, "wb") as ssusi_data:
+                with open(file_path, "wb") as ssusi_data:
                     ssusi_data.write(rf.content)
                 mylog.simpleinfo.info("Done. The file has been saved to {}".format(file_dir))
                 self.done = True
@@ -96,8 +102,12 @@ class Downloader(object):
                     return
                 # self.file_dir = file_dir
                 # self.file_name = file_name
+            if self.orbit_id is None:
+                fp_log = file_dir / 'log_EDR-AUR.full'
+                fp_log.touch()
             if not self.done:
-                mylog.StreamLogger.warning("Cannot find the requested data from the online database!")
+                mylog.StreamLogger.warning(
+                    "Cannot find the requested data on {} from the online database!".format(thisday.strftime("%Y-%m-%d")))
 
 
 if __name__ == "__main__":

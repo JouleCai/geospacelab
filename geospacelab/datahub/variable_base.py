@@ -185,19 +185,24 @@ class VariableModel(object):
 
     def join(self, var_new):
         if issubclass(var_new.__class__, VariableModel):
-            value = var_new.value
+            v = var_new.value
         else:
-            value = var_new
-
-        if np.isscalar(value):
-            if value != self.value:
-                mylog.StreamLogger.warning("The scalar variables have different values!")
-            return
+            v = var_new
 
         if self.value is None:
-            self.value = value
+            self.value = v
+            return
+
+        if type(v) is np.ndarray:
+            self.value = np.concatenate((self.value, v), axis=0)
         else:
-            self.value = np.concatenate((self.value, var_new), axis=0)
+            if np.isscalar(v):
+                v = tuple([v])
+            elif isinstance(v, (list, tuple)):
+                v = tuple(v)
+            if v != self.value:
+                mylog.StreamLogger.warning("The scalar variables have different values!")
+            return
 
     @property
     def visual(self):
@@ -254,23 +259,25 @@ class VariableModel(object):
 
     @value.setter
     def value(self, v):
-        # type check
         if v is None:
             self._value = None
             return
+        # type check
         if type(v) is str:
             self._value = v
             return
         if not isinstance(v, np.ndarray):
             if basic.isnumeric(v):
-                v = np.array([v])
+                v = tuple([v])
             elif isinstance(v, (list, tuple)):
-                v = np.array(v)
+                v = tuple(v)
             else:
                 raise TypeError
+            self._value = v
+            return
             # reshape np.array with shape like (m,) m>1
-        if len(v.shape) == 1 and v.shape != (1,):
-            v = v.reshape((v.shape[0], 1))
+        # if len(v.shape) == 1 and v.shape != (1,):
+        #     v = v.reshape((v.shape[0], 1))
         self._value = v
 
     @property

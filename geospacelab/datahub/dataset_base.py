@@ -49,19 +49,26 @@ class DatasetModel(object):
         initial_file_dir = kwargs.pop('initial_file_dir', self.data_root_dir)
         search_pattern = kwargs.pop('search_pattern', '*')
         recursive = kwargs.pop('recursive', self.data_search_recursive)
+        allow_multiple_files = kwargs.pop('allow_multiple_files', False)
         if str(self.data_file_ext):
             search_pattern = search_pattern + '.' + self.data_file_ext
         if recursive:
             search_pattern = '**/' + search_pattern
         paths = list(initial_file_dir.glob(search_pattern))
 
+        import natsort
+        paths = natsort.natsorted(paths, reverse=False)
         if len(paths) == 1:
             done = True
             self.data_file_paths.append(paths[0])
         elif len(paths) > 1:
-            mylog.StreamLogger.error("Multiple files found! Restrict the search condition.")
-            print(paths)
-            raise FileExistsError
+            if allow_multiple_files:
+                done = True
+                self.data_file_paths.extend(paths)
+            else:
+                mylog.StreamLogger.error("Multiple files found! Restrict the search condition.")
+                print(paths)
+                raise FileExistsError
         else:
             print('Cannot find the requested data file in {}'.format(initial_file_dir))
 

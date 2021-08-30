@@ -17,6 +17,7 @@ from cartopy.mpl.ticker import (
 import matplotlib.ticker as mticker
 import matplotlib.path as mpath
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import matplotlib.cm as cm
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
@@ -385,7 +386,7 @@ class PolarMap(mpl.Panel):
             c_lim = [np.nanmin(data.flatten()), np.nanmax(data.flatten())]
 
         if c_scale == 'log':
-            norm = mpl.colors.LogNorm(vmin=c_lim[0], vmax=c_lim[1])
+            norm = mcolors.LogNorm(vmin=c_lim[0], vmax=c_lim[1])
             kwargs.update(norm=norm)
         else:
             kwargs.update(vmin=c_lim[0])
@@ -581,14 +582,14 @@ class PolarMap(mpl.Panel):
         else:
             if c_scale == 'log':
                 num_major_ticks = int(np.ceil(np.diff(np.log10(ylim)))) * 2
-                cax.yaxis.set_major_locator(mpl.ticker.LogLocator(base=10.0, numticks=num_major_ticks))
+                cax.yaxis.set_major_locator(mticker.LogLocator(base=10.0, numticks=num_major_ticks))
                 n = c_tick_label_step
                 [l.set_visible(False) for (i, l) in enumerate(cax.yaxis.get_ticklabels()) if i % n != 0]
                 # [l.set_ha('right') for (i, l) in enumerate(cax.yaxis.get_ticklabels()) if i % n != 0]
-                minorlocator = mpl.ticker.LogLocator(base=10.0, subs=(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
+                minorlocator = mticker.LogLocator(base=10.0, subs=(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
                                                      numticks=12)
                 cax.yaxis.set_minor_locator(minorlocator)
-                cax.yaxis.set_minor_formatter(mpl.ticker.NullFormatter())
+                cax.yaxis.set_minor_formatter(mticker.NullFormatter())
         cax.yaxis.set_tick_params(labelsize='x-small')
         return [cax, cb]
 
