@@ -11,6 +11,8 @@ __docformat__ = "reStructureText"
 import numpy as np
 import datetime
 import cartopy.crs as ccrs
+import re
+import copy
 from cartopy.mpl.ticker import (
     LongitudeLocator, LatitudeLocator,
     LongitudeFormatter, LatitudeFormatter)
@@ -25,6 +27,7 @@ import geospacelab.visualization.mpl as mpl
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.numpymath as mathtool
+import geospacelab.toolbox.utilities.pybasic as pybasic
 
 
 def test():
@@ -183,35 +186,91 @@ class PolarMap(mpl.Panel):
         return
 
     def add_gridlines(self,
-                      lat_res=None, lon_res=None, lat_label_separator=None, lon_label_separator=None,
+                      lat_res=None, lon_res=None,
+                      lat_label_separator=None, lon_label_separator=None,
+                      lat_label_format=None, lon_label_format=None,
                       lat_label=True, lat_label_clock=6.5, lat_label_config={},
-                      lon_label=True, lon_label_config={}):
+                      lon_label=True, lon_label_config={},
+                      gridlines_config={}):
+
         default_gridlines_label_config = {
             'lon-fixed': {
                 'lat_res': 10.,
                 'lon_res': 30.,
                 'lat_label_separator': 0,
                 'lon_label_separator': 0,
+                'lat_label_format': '%d%D%N',
+                'lon_label_format': '%d%D%E',
             },
             'mlon-fixed': {
                 'lat_res': 10.,
                 'lon_res': 30.,
                 'lat_label_separator': 0,
                 'lon_label_separator': 0,
+                'lat_label_format': '%d%D%N',
+                'lon_label_format': '%d%D%E',
             },
             'lst-fixed': {
                 'lat_res': 10.,
                 'lon_res': 15.,
                 'lat_label_separator': 0,
-                'lon_label_separator': 2,
+                'lon_label_separator': 5,
+                'lat_label_format': '%d%D%N',
+                'lon_label_format': '%d LT',
             },
             'mlt-fixed': {
                 'lat_res': 10.,
                 'lon_res': 15.,
                 'lat_label_separator': 0,
-                'lon_label_separator': 2,
+                'lon_label_separator': 5,
+                'lat_label_format': '%d%D%N',
+                'lon_label_format': '%d MLT',
             },
         }
+
+        def label_formatter(value, fmt=''):
+            ms = re.findall(r"(%[0-9]*[a-zA-Z])", fmt)
+            fmt_new = copy.deepcopy(fmt)
+            patterns = []
+            if "%N" in ms:
+                if value > 0:
+                    lb_ns = 'N'
+                elif value < 0:
+                    lb_ns = 'S'
+                else:
+                    lb_ns = ''
+                value = np.abs(value)
+
+            if "%E" in ms:
+                mod_value = np.mod(value - 180, 360) - 180.
+                if mod_value == 0 or mod_value == 180:
+                    lb_ew = ''
+                elif mod_value < 0:
+                    lb_ew = 'W'
+                else:
+                    lb_ew = 'E'
+                value = np.abs(mod_value)
+
+            for ind_m, m in enumerate(ms):
+                if m == "%N":
+                    fmt_new = fmt_new.replace(m, '{}')
+                    patterns.append(lb_ns)
+                elif m == "%E":
+                    fmt_new = fmt_new.replace(m, '{}')
+                    patterns.append(lb_ew)
+                elif m == "%D":
+                    continue
+                else:
+                    if 'd' in m:
+                        value = int(value)
+                    fmt_new = fmt_new.replace(m, '{:' + m[1:] + '}')
+                    patterns.append(value)
+            string_new = fmt_new.format(*patterns)
+            if "%D" in string_new:
+                splits = string_new.split("%D")
+                string_new = splits[0] + r'$^{\circ}$' + splits[1]
+
+            return string_new
 
         default_label_config = default_gridlines_label_config[self.style]
         if lat_res is None:
@@ -222,6 +281,10 @@ class PolarMap(mpl.Panel):
             lat_label_separator = default_label_config['lat_label_separator']
         if lon_label_separator is None:
             lon_label_separator = default_label_config['lon_label_separator']
+        if lat_label_format is None:
+            lat_label_format = default_label_config['lat_label_format']
+        if lon_label_format is None:
+            lon_label_format = default_label_config['lon_label_format']
 
         # xlocator
         if self.style == 'lst-fixed':
@@ -241,13 +304,18 @@ class PolarMap(mpl.Panel):
         lats = np.arange(lat_fr, lat_to, lat_res) * np.sign(self.lat_c)
         ylocator = mticker.FixedLocator(lats)
 
-        gl = self.major_ax.gridlines(crs=ccrs.PlateCarree(), color='#331900', linewidth=0.5, linestyle=':',
+        pybasic.dict_set_default(gridlines_config, color='#331900', linewidth=0.5, linestyle=':',
                                      draw_labels=False)
+        gl = self.major_ax.gridlines(crs=ccrs.PlateCarree(), **gridlines_config)
 
         gl.xlocator = xlocator
         gl.ylocator = ylocator
 
         if lat_label:
+            pybasic.dict_set_default(lat_label_config, fontsize=plt.rcParams['font.size'] - 2, fontweight='roman',
+                    ha='center', va='center',
+                    family='fantasy', color='k', alpha=0.9
+                )
             if self.pole == 'S':
                 clock = lat_label_clock / 12 * 360
                 rotation = 180 - clock
@@ -261,22 +329,24 @@ class PolarMap(mpl.Panel):
             for ind, lat in enumerate(lats):
                 if np.mod(ind, lat_label_separator+1) != 0:
                     continue
-                if lat > 0:
-                    label = r'' + '{:d}'.format(int(lat)) + r'$^{\circ}$N'
-                elif lat < 0:
-                    label = r'' + '{:d}'.format(int(-lat)) + r'$^{\circ}$S'
-                else:
-                    label = r'' + '{:d}'.format(int(0)) + r'$^{\circ}$S'
-
+                # if lat > 0:
+                #     label = r'' + '{:d}'.format(int(lat)) + r'$^{\circ}$N'
+                # elif lat < 0:
+                #     label = r'' + '{:d}'.format(int(-lat)) + r'$^{\circ}$S'
+                # else:
+                #     label = r'' + '{:d}'.format(int(0)) + r'$^{\circ}$S'
+                label = label_formatter(lat, fmt=lat_label_format)
                 self.major_ax.text(
                     label_lon, lat, label, transform=ccrs.PlateCarree(),
-                    fontsize=plt.rcParams['font.size'] - 2, fontweight='roman',
-                    ha='center', va='center',
                     rotation=rotation,
-                    family='fantasy', color='grey', alpha=0.9
+                    **lat_label_config
                 )
 
         if lon_label:
+            pybasic.dict_set_default(
+                lon_label_config,
+                va='center', ha='center',
+                family='fantasy', fontweight='ultralight', color='grey')
             lb_lons = np.arange(0, 360., lon_res)
             if self.pole == 'S':
                 lon_shift_south = 180.
@@ -303,19 +373,23 @@ class PolarMap(mpl.Panel):
                         continue
                     x = xdata[ind]
                     y = ydata[ind]
+                    # if self.style in ['lon-fixed', 'mlon-fixed']:
+                    #     lb_lon = np.mod(lb_lon + 180, 360) - 180
+                    #     if lb_lon == 0 or np.abs(lb_lon) == 180.:
+                    #         label = r'' + '{:d}'.format(int(np.abs(lb_lon))) + r'$^{\circ}$'
+                    #     if lb_lon < 0:
+                    #         label = r'' + '{:d}'.format(int(-lb_lon)) + r'$^{\circ}$W'
+                    #     else:
+                    #         label = r'' + '{:d}'.format(int(lb_lon)) + r'$^{\circ}$E'
+                    # elif self.style == 'mlt-fixed':
+                    #     label = '{:d}'.format(int(lb_lon / 15)) + ' MLT'
+                    # elif self.style == 'lst-fixed':
+                    #     label = '{:d}'.format(int(lb_lon / 15)) + ' LT'
                     if self.style in ['lon-fixed', 'mlon-fixed']:
-                        lb_lon = np.mod(lb_lon + 180, 360) - 180
-                        if lb_lon == 0 or np.abs(lb_lon) == 180.:
-                            label = r'' + '{:d}'.format(int(np.abs(lb_lon))) + r'$^{\circ}$'
-                        if lb_lon < 0:
-                            label = r'' + '{:d}'.format(int(-lb_lon)) + r'$^{\circ}$W'
-                        else:
-                            label = r'' + '{:d}'.format(int(lb_lon)) + r'$^{\circ}$E'
-                    elif self.style == 'mlt-fixed':
-                        label = '{:d}'.format(int(lb_lon / 15)) + ' MLT'
-                    elif self.style == 'lst-fixed':
-                        label = '{:d}'.format(int(lb_lon / 15)) + ' LT'
-
+                        lb_value = lb_lon
+                    elif self.style in ['lst-fixed', 'mlt-fixed']:
+                        lb_value = lb_lon / 15
+                    label = label_formatter(lb_value, fmt=lon_label_format)
                     if self.pole == 'S':
                         rotation = self.lon_c - lb_lons_loc[ind]
                         if self.mirror_south:
@@ -324,9 +398,8 @@ class PolarMap(mpl.Panel):
                         rotation = (lb_lons_loc[ind] - self.lon_c) + 180
                     self.major_ax.text(
                         x, y, label,
-                        va='center', ha='center',
                         rotation=rotation,
-                        family='fantasy', fontweight='ultralight', color='grey'
+                        **lon_label_config
                     )
 
         # gl.xformatter = LONGITUDE_FORMATTER()
