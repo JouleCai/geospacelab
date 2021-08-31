@@ -214,7 +214,7 @@ class PolarMap(mpl.Panel):
                 'lat_res': 10.,
                 'lon_res': 15.,
                 'lat_label_separator': 0,
-                'lon_label_separator': 5,
+                'lon_label_separator': 2,
                 'lat_label_format': '%d%D%N',
                 'lon_label_format': '%d LT',
             },
@@ -222,7 +222,7 @@ class PolarMap(mpl.Panel):
                 'lat_res': 10.,
                 'lon_res': 15.,
                 'lat_label_separator': 0,
-                'lon_label_separator': 5,
+                'lon_label_separator': 2,
                 'lat_label_format': '%d%D%N',
                 'lon_label_format': '%d MLT',
             },
@@ -346,7 +346,7 @@ class PolarMap(mpl.Panel):
             pybasic.dict_set_default(
                 lon_label_config,
                 va='center', ha='center',
-                family='fantasy', fontweight='ultralight', color='grey')
+                family='fantasy', fontweight='ultralight', color='k')
             lb_lons = np.arange(0, 360., lon_res)
             if self.pole == 'S':
                 lon_shift_south = 180.
