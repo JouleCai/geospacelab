@@ -200,6 +200,11 @@ class DatasetModel(object):
         del self._variables[key]
         pass
 
+    def __repr__(self):
+        rep = f"GeospaceLab Dataset object <{self.label()}, " + \
+              f"starting time: {str(self.dt_fr)}, stopping time: {str(self.dt_to)}>"
+        return rep.replace('geospacelab.datahub.sources.', '')
+
     # def add_variable(self, variable, name=None):
     #     if issubclass(variable, VariableModel):
     #         pass

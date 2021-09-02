@@ -144,14 +144,6 @@ class VariableModel(object):
             raise TypeError
         self.depends[axis] = depend_dict
 
-    # def get_visual_data(self, attr_name):
-    #     data = []
-    #     if 'data' not in attr_name:
-    #         raise AttributeError("Input must be a data attribute in the visual instance!")
-    #
-    #     attr = getattr(self.visual, attr_name)
-    #     axis = ord('z') - ord(attr[0])
-    #     if attr is None:
     def get_attr_from_string(self, string):
         if not str(string):
             return string

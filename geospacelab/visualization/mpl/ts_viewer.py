@@ -80,8 +80,8 @@ def test():
     T_i = ts.assign_variable('T_i')
     T_e = ts.assign_variable('T_e')
     v_i= ts.assign_variable('v_i_los')
-    az = ts.assign_variable('az')
-    el = ts.assign_variable('el')
+    az = ts.assign_variable('AZ')
+    el = ts.assign_variable('EL')
 
     ds_1.list_all_variables()
     ts.list_assigned_variables()

@@ -10,8 +10,10 @@ __docformat__ = "reStructureText"
 
 import importlib
 import datetime
+import pathlib
 
 import geospacelab.toolbox.utilities.pylogging as mylog
+import geospacelab.toolbox.utilities.pybasic as pybasic
 from geospacelab.datahub.metadata_base import *
 from geospacelab.datahub.dataset_base import DatasetModel
 from geospacelab.datahub.variable_base import VariableModel
@@ -25,6 +27,7 @@ def example():
     facility_name = 'eiscat'
 
     dh = DataHub(dt_fr, dt_to)
+    dh.list_sourced_datasets()
     ds_1 = dh.dock(datasource_contents=[database_name, facility_name],
                           site='UHF', antenna='UHF', modulation='ant', data_file_type='eiscat-hdf5')
     ds_1.load_data()
@@ -52,7 +55,7 @@ class DataHub(object):
         module_keys.extend(datasource_contents)
         try:
             module = importlib.import_module('.'.join(module_keys))
-            dataset = module.Dataset(**kwargs)
+            dataset = getattr(module, 'Dataset')(**kwargs)
             dataset.kind = 'sourced'
         except ImportError or ModuleNotFoundError:
             mylog.StreamLogger.error(
@@ -149,6 +152,49 @@ class DataHub(object):
         ind = len(self.variables.keys()) + 1
         self.variables[ind] = var
 
+    @staticmethod
+    def list_sourced_datasets():
+        this_file_dir = pathlib.Path(__file__).resolve().parent
+        data_source_dir = this_file_dir / 'sources'
+        sub_dirs = list(data_source_dir.glob("**"))
+        data_sources = {}
+        for sub_dir in sub_dirs:
+            init_file = sub_dir / "__init__.py"
+            if not init_file.is_file():
+                continue
+            module_name = str(sub_dir).replace('/', '.').split(pfr.package_name + '.', 1)[-1]
+            try:
+                module = importlib.import_module(module_name)
+            except:
+                continue
+            try:
+                getattr(module, 'Dataset')
+            except AttributeError:
+                continue
+
+            contents = module_name.split('sources.')[-1].split('.')
+            current_dict = data_sources
+            try:
+                required_inputs = getattr(module, 'default_attrs_required')
+            except AttributeError:
+                required_inputs = []
+
+            for ind, content in enumerate(contents):
+                content = content.upper()
+                current_dict.setdefault(content, {})
+                if ind == len(contents) - 1:
+                    c_str = ', '.join(['"' + c + '"' for c in contents])
+                    required_inputs = ['datasource_contents', *required_inputs]
+                    current_dict[content] = {
+                        'Required inputs when load_mode="AUTO"': ' & '.join(required_inputs),
+                        'datasource_contents': f"[{c_str}]",
+                    }
+                    continue
+                current_dict = current_dict[content]
+
+        pybasic.dict_print_tree(data_sources, full_value=False, dict_repr=False, value_repr=True, max_level=None)
+
+
     def list_datasets(self):
         # print header
         mylog.simpleinfo.info("Listing datasets ...")
@@ -175,6 +221,9 @@ class DataHub(object):
     def save_to_cdf(self):
         pass
 
+    def __repr__(self):
+        rep = f"GeospaceLab DataHub object <starting time: {str(self.dt_fr)} and stopping time: {str(self.dt_to)}>"
+        return rep
 
 if __name__ == "__main__":
     example()
