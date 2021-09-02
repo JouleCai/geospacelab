@@ -423,10 +423,10 @@ class VisualAxis(object):
         self.data_scale = 1.
         self.data_res = None
         self.mask_gap = None
-        self.label = None
+        self.label = ''
         self.label_style = 'double'   # or 'single
         self.label_pos = None       # label position
-        self.unit = None
+        self.unit = ''
         self.lim = None
         self.scale = 'linear'
         self.invert = False

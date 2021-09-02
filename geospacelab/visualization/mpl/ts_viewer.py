@@ -648,12 +648,11 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
         #ax.objects.setdefault('pcolormesh', [])
         #ax.objects['pcolormesh'].append(im)
 
-        z_label = var.get_visual_axis_attr(axis=2, attr_name='label')
-        z_unit = var.get_visual_axis_attr(axis=2, attr_name='unit')
-        if str(z_unit):
-            c_label = z_label + '\n' + '(' + z_unit + ')'
-        else:
-            c_label = z_label
+        zlabel = var.get_visual_axis_attr('label', axis=2)
+        zunit = var.get_visual_axis_attr('unit', axis=2)
+        zlabel_style = var.get_visual_axis_attr('label_style', axis=2)
+
+        c_label = self.generate_label(zlabel, unit=zunit, style=zlabel_style)
         z_ticks = var.visual.axis[2].ticks
         z_tick_labels = var.visual.axis[2].tick_labels
         cax = self.__add_colorbar(ax, im, cscale=z_scale, clabel=c_label, cticks=z_ticks, cticklabels=z_tick_labels)

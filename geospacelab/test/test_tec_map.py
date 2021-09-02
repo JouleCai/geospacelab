@@ -20,9 +20,9 @@ def test_tec():
     time1 = datetime.datetime(2016, 3, 15, 14, 10)
     ind_t = np.where(dts == time1)[0]
 
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1)
+    pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time1, mirror_south=True)
-    pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='S', ut=time1)
+    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='S', ut=time1)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='S', ut=time1,
     #                          boundary_lat=0, mirror_south=False)
@@ -30,13 +30,13 @@ def test_tec():
     #                          boundary_lat=0, mirror_south=False)
     panel1 = viewer.panels[pid]
     panel1.add_coastlines()
-    panel1.add_gridlines(lon_label_format='%d', lat_label_format='%d%D')
+    panel1.add_gridlines(lon_label_format='%02d', lat_label_format='%d%D')
 
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
     pcolormesh_config.update(c_lim=[0, 25])
     import geospacelab.visualization.mpl.colormaps as cm
-    pcolormesh_config.update(cmap=cm.cmap_jhuapl_ssj_like())
+    pcolormesh_config.update(cmap='Spectral_r')
     ipc = panel1.add_pcolor(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
     panel1.add_colorbar(
        ipc, ax=panel1.major_ax, c_label="TECU", c_scale='linear',
@@ -44,7 +44,7 @@ def test_tec():
     )
 
     viewer.add_text(0.5, 1.1, "dashboard title")
-    panel1.major_ax.text(0.5, 1.0, 'panel title', transform=panel1.major_ax.transAxes)
+    # panel1.major_ax.text(0.5, 1.0, 'panel title', transform=panel1.major_ax.transAxes)
 
     plt.show()
 
