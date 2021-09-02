@@ -183,11 +183,10 @@ class DataHub(object):
                 content = content.upper()
                 current_dict.setdefault(content, {})
                 if ind == len(contents) - 1:
-                    c_str = ', '.join(['"' + c + '"' for c in contents])
                     required_inputs = ['datasource_contents', *required_inputs]
                     current_dict[content] = {
-                        'Required inputs when load_mode="AUTO"': ' & '.join(required_inputs),
-                        'datasource_contents': f"[{c_str}]",
+                        'Required inputs when load_mode="AUTO"': required_inputs,
+                        'datasource_contents': contents,
                     }
                     continue
                 current_dict = current_dict[content]

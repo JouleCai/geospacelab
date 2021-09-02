@@ -196,6 +196,11 @@ class VariableModel(object):
                 mylog.StreamLogger.warning("The scalar variables have different values!")
             return
 
+    def __repr__(self):
+        value_repr = repr(self.value)
+        rep = f"GeospaceLab Variable object <name: {self.name}, value: {value_repr}, unit: {self.unit}>"
+        return rep
+
     @property
     def visual(self):
         return self._visual
