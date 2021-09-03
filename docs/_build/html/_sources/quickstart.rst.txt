@@ -15,11 +15,11 @@ Dock a Dataset
 --------------
 
 The example below shows how to dock a sourced dataset (Madrigal/EISCAT data) to the datahub.
-See also the code in ``dock_a_dataset.py``.
 
     .. literalinclude:: ../examples/dock_a_dataset.py
         :language: python
         :linenos:
+        :caption: examples/dock_a_dataset.py
 
 
 Quicklook Plots
@@ -33,28 +33,25 @@ indices, as well as the EISCAT data, respectively.
 Solar Wind and Geomagnetic Indices from OMNI and WDC
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Source code: ``quicklook_omni_wdc.py``
-
-    .. literalinclude:: examples/quicklook_omni_wdc.py
+    .. literalinclude:: ../examples/quicklook_omni_wdc.py
         :language: python
         :linenos:
+        :caption: examples/quicklook_omni_wdc.py
 
 Output:
 
-    .. image:: examples/OMNI_1min_20160314-060000-20160320-060000.png
+    .. image:: ../examples/OMNI_1min_20160314-060000-20160320-060000.png
         :alt: OMNI solar wind and WDC geomagnetic indices
 
 EISCAT from Madrigal with Marking Tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Source code: ``quicklook_eiscat.py``
-
-   .. literalinclude:: examples/quicklook_eiscat.py
+   .. literalinclude:: ../examples/quicklook_eiscat.py
         :language: python
         :linenos:
-        :caption: quicklook_eiscat.py
+        :caption: examples/quicklook_eiscat.py
 
 Output:
 
-    .. image:: examples/EISCAT_UHF_beata_cp1_2.1u_CP_20201209-180000-20201210-060000.png
+    .. image:: ../examples/EISCAT_UHF_beata_cp1_2.1u_CP_20201209-180000-20201210-060000.png
         :alt: EISCAT quicklook
