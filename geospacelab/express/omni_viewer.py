@@ -36,7 +36,7 @@ class OMNIViewer(TimeSeriesViewer):
         self.datasets[2].list_all_variables()
 
     def save_figure(self, **kwargs):
-        file_name = kwargs.pop('filename', self.title.replace(', ', '_'))
+        file_name = kwargs.pop('filen_ame', self.title.replace(', ', '_'))
         super().save_figure(file_name=file_name, **kwargs)
 
     def add_title(self, **kwargs):
