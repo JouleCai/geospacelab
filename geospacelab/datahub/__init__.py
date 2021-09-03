@@ -73,7 +73,7 @@ Typically used for the viewers or outputs.
         """To dock a sourced dataset.
 
         :param datasource_contents: the contents that required for docking a sourced dataset. \
-To look up the sourced dataset and the associated contents, call :func:`~__init__.DataHub.list_sourced_datasets()`.
+To look up the sourced dataset and the associated contents, call :func:`~geospacelab.datahub.DataHub.list_sourced_datasets()`.
         :type datasource_contents: list
         :param dt_fr: starting time, optional, use datahub.dt_fr if not specified.
         :type dt_fr: datetime.datetime
@@ -113,6 +113,7 @@ To look up the sourced dataset and the associated contents, call :func:`~__init_
 
     def add_dataset(self, *args, kind='temporary', **kwargs):
         """Add one or multiple datasets, which is not sourced in the package.
+
         :param args: a list of the datasets.
         :param kind: the kind of a dataset, options: ['temporary'], or 'user-defined'. \
 if temporary, a new dataset will be created from the DatasetModel.

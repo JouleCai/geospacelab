@@ -1,9 +1,10 @@
-name: docs
+name: geospacelab-docs
 channels:
   - conda-forge
   - defaults
 dependencies:
   - sphinx==4.1.2
   - nbsphinx==0.8.7
+  - cartopy
   - pip:
     - sphinx_rtd_theme==0.5.2

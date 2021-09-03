@@ -1,0 +1,323 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>&lt;no title&gt; &mdash; GeospaceLab beta-v0.2.7 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> GeospaceLab
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide.html">User’s guide</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GeospaceLab</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>&lt;no title&gt;</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/user/datamanager.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <dl class="py class">
+<dt class="sig sig-object py" id="geospacelab.datahub.DataHub">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geospacelab.datahub.</span></span><span class="sig-name descname"><span class="pre">DataHub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt_fr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'off'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub" title="Permalink to this definition">¶</a></dt>
+<dd><p>The core of the data manager in GeospaceLab to dock different datasets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dt_fr</strong> (<em>datetime.datetime</em>) – starting time.</p></li>
+<li><p><strong>dt_to</strong> (<em>datetime.datetime</em>) – stopping time.</p></li>
+<li><p><strong>visual</strong> (<em>str</em>) – decide if a Visual object will be added to the variable objects. Options:[‘off’], ‘on’.</p></li>
+<li><p><strong>datasets</strong> (<em>dict</em>) – A dictionary that stores the datasets docked or added to the datahub. The keys (indices) are the integer numbers starting from 1.</p></li>
+<li><p><strong>variables</strong> (<em>dict</em>) – A dictionary that stores the variables assigned from their own datasets to the datahub. Typically used for the viewers or outputs.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Example</dt>
+<dd class="field-even"><p></p></dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.datahub.DataHub.dock">
+<span class="sig-name descname"><span class="pre">dock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasource_contents</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub.dock" title="Permalink to this definition">¶</a></dt>
+<dd><p>To dock a sourced dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datasource_contents</strong> (<em>list</em>) – the contents that required for docking a sourced dataset. To look up the sourced dataset and the associated contents, call <a class="reference internal" href="guide.html#geospacelab.datahub.DataHub.list_sourced_datasets" title="geospacelab.datahub.DataHub.list_sourced_datasets"><code class="xref py py-func docutils literal notranslate"><span class="pre">list_sourced_datasets()</span></code></a>.</p></li>
+<li><p><strong>dt_fr</strong> (<em>datetime.datetime</em>) – starting time, optional, use datahub.dt_fr if not specified.</p></li>
+<li><p><strong>dt_to</strong> (<em>datetime.datetime</em>) – stopping time, optional, use datahub.dt_to if not specified.</p></li>
+<li><p><strong>visual</strong> (<em>str</em>) – variable attribute, use datahub.visual if not specified.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a dataset</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Dataset object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.datahub.DataHub.add_dataset">
+<span class="sig-name descname"><span class="pre">add_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'temporary'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub.add_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add one or multiple datasets, which is not sourced in the package.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – a list of the datasets.</p></li>
+<li><p><strong>kind</strong> – the kind of a dataset, options: [‘temporary’], or ‘user-defined’. if temporary, a new dataset will be created from the DatasetModel.</p></li>
+<li><p><strong>kwargs</strong> – other keywords</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dataset or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.datahub.DataHub.get_variable">
+<span class="sig-name descname"><span class="pre">get_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub.get_variable" title="Permalink to this definition">¶</a></dt>
+<dd><p>To get a variable from the docked or added dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>var_name</strong> – the name of the queried variable</p></li>
+<li><p><strong>dataset</strong> – the dataset storing the queried variable.</p></li>
+<li><p><strong>dataset_index</strong> – the index of the dataset in datahub.datasets. if both dataset or dataset_index are not specified, the function will get the variable from the assigned variables.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None or the queried variable (A VariableModel or its subclass object)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.datahub.DataHub.assign_variable">
+<span class="sig-name descname"><span class="pre">assign_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_new</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub.assign_variable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign a variable from the docked or added dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>var_name</strong> – The name of the variable</p></li>
+<li><p><strong>dataset</strong> – The dataset that stores the variable</p></li>
+<li><p><strong>dataset_index</strong> – The index of the dataset in the datahub.datasets.</p></li>
+<li><p><strong>add_new</strong> – if True, add the variable to the specified dataset and assign to the datahub</p></li>
+<li><p><strong>kwargs</strong> – other keywords to configure the attributes of the variable.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the variable.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.datahub.DataHub.list_sourced_datasets">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">list_sourced_datasets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub.list_sourced_datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>To list all the sourced datasets bult-in this package</p>
+<p>The list will be printed in the python console in a “tree” view.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.datahub.DataHub.list_datasets">
+<span class="sig-name descname"><span class="pre">list_datasets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub.list_datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>To list all the datasets that have been docked or added to the datahub</p>
+<p>The list will be printed in the console as a table</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.datahub.DataHub.list_assigned_variables">
+<span class="sig-name descname"><span class="pre">list_assigned_variables</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub.list_assigned_variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>To list all the assigned variables that have been docked or added to the datahub</p>
+<p>The list will be printed in the console as a table</p>
+</dd></dl>
+
+</dd></dl>
+
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Lei Cai.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
