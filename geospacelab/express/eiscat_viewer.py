@@ -31,7 +31,7 @@ class EISCATViewer(TimeSeriesViewer):
         self.datasets[1].list_all_variables()
 
     def save_figure(self, **kwargs):
-        file_name = kwargs.pop('filename', self.title.replace(', ', '_'))
+        file_name = kwargs.pop('file_name', self.title.replace(', ', '_'))
         super().save_figure(file_name=file_name, **kwargs)
 
     def add_title(self, **kwargs):
