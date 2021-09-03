@@ -1,7 +1,7 @@
 Installation
 ==============
 
-Python environment
+Python Environment
 -------------------
 The python distribution `Anaconda <https://www.anaconda.com/>`_ is recommended. The package was tested with the anaconda distribution
 with Python>=3.7 under Ubuntu 20.04 and MacOS Big Sur. Some of the dependencies are more easily installed by using
@@ -24,7 +24,7 @@ Remember to activate the virtual environment, before installing the package and 
 More detailed information to manage the anaconda environment can be found
 `here <https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_,
 
-Quick installation
+Quick Installation
 ----------------------
 
 Install from the pre-built release (recommended):
@@ -74,7 +74,7 @@ Please install the packages above, if needed.
 .. _cartopy:  <https://scitools.org.uk/cartopy/docs/latest/installing.html>
 
 
-First-time startup and basic configuration
+First-time Startup and Basic Configuration
 ------------------------------------------
 
 Some basic configurations will be set when the package is imported for the first time. Please pay attention on the message

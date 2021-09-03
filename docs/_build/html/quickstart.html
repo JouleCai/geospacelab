@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Quick start &mdash; GeospaceLab beta-v0.2.7 documentation</title>
+  <title>Quick Start &mdash; GeospaceLab beta-v0.2.7 documentation</title>
   
 
   
@@ -41,6 +41,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
     <link rel="next" title="User’s guide" href="user/guide.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
 </head>
@@ -90,16 +91,18 @@
               <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick start</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#dock-a-dataset">Dock a dataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#view-the-quicklook-plots">View the quicklook plots</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#solar-wind-and-geomagnetic-indices-from-omni-and-wdc">Solar wind and geomagnetic indices from OMNI and WDC</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#eiscat-from-madrigal-with-marking-tools">EISCAT from Madrigal with marking tools</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dock-a-dataset">Dock a Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quicklook-plots">Quicklook Plots</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#solar-wind-and-geomagnetic-indices-from-omni-and-wdc">Solar Wind and Geomagnetic Indices from OMNI and WDC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#eiscat-from-madrigal-with-marking-tools">EISCAT from Madrigal with Marking Tools</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="user/guide.html">User’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">Copyright and Licensing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citation and Acknowledgements</a></li>
 </ul>
 
             
@@ -148,7 +151,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Quick start</li>
+      <li>Quick Start</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -168,12 +171,12 @@
            <div itemprop="articleBody">
             
   <div class="section" id="quick-start">
-<h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
+<h1>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
 <p>This page will show some examples to load a sourced dataset or to make quicklook plots. For more details, please see
 <a class="reference internal" href="user/guide.html#userguide"><span class="std std-ref">User’s guide</span></a>.</p>
 <p>More examples can be found <a class="reference external" href="https://github.com/JouleCai/geospacelab/tree/master/examples">here</a>.</p>
 <div class="section" id="dock-a-dataset">
-<h2>Dock a dataset<a class="headerlink" href="#dock-a-dataset" title="Permalink to this headline">¶</a></h2>
+<h2>Dock a Dataset<a class="headerlink" href="#dock-a-dataset" title="Permalink to this headline">¶</a></h2>
 <p>The example below shows how to dock a sourced dataset (Madrigal/EISCAT data) to the datahub.
 See also the code in <code class="docutils literal notranslate"><span class="pre">dock_a_dataset.py</span></code>.</p>
 <blockquote>
@@ -219,14 +222,14 @@ See also the code in <code class="docutils literal notranslate"><span class="pre
 </div>
 </div></blockquote>
 </div>
-<div class="section" id="view-the-quicklook-plots">
-<h2>View the quicklook plots<a class="headerlink" href="#view-the-quicklook-plots" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="quicklook-plots">
+<h2>Quicklook Plots<a class="headerlink" href="#quicklook-plots" title="Permalink to this headline">¶</a></h2>
 <p>The quicklook plots are produced by the method “quicklook” of a viewer,
 which is custom-designed for a data source. Those specialized viewer can be imported
 from <code class="docutils literal notranslate"><span class="pre">geospacelab.express</span></code>. The two examples below show the solar wind and geomagnetic
 indices, as well as the EISCAT data, respectively.</p>
 <div class="section" id="solar-wind-and-geomagnetic-indices-from-omni-and-wdc">
-<h3>Solar wind and geomagnetic indices from OMNI and WDC<a class="headerlink" href="#solar-wind-and-geomagnetic-indices-from-omni-and-wdc" title="Permalink to this headline">¶</a></h3>
+<h3>Solar Wind and Geomagnetic Indices from OMNI and WDC<a class="headerlink" href="#solar-wind-and-geomagnetic-indices-from-omni-and-wdc" title="Permalink to this headline">¶</a></h3>
 <p>Source code: <code class="docutils literal notranslate"><span class="pre">quicklook_omni_wdc.py</span></code></p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">datetime</span>
@@ -259,10 +262,12 @@ indices, as well as the EISCAT data, respectively.</p>
 </div></blockquote>
 </div>
 <div class="section" id="eiscat-from-madrigal-with-marking-tools">
-<h3>EISCAT from Madrigal with marking tools<a class="headerlink" href="#eiscat-from-madrigal-with-marking-tools" title="Permalink to this headline">¶</a></h3>
+<h3>EISCAT from Madrigal with Marking Tools<a class="headerlink" href="#eiscat-from-madrigal-with-marking-tools" title="Permalink to this headline">¶</a></h3>
 <p>Source code: <code class="docutils literal notranslate"><span class="pre">quicklook_eiscat.py</span></code></p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">datetime</span>
+<div><div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">quicklook_eiscat.py</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">datetime</span>
 <span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">geospacelab.express.eiscat_viewer</span> <span class="k">as</span> <span class="nn">eiscat</span>
 <span class="linenos"> 3</span>
 <span class="linenos"> 4</span><span class="n">dt_fr</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20201209&#39;</span> <span class="o">+</span> <span class="s1">&#39;1800&#39;</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M&#39;</span><span class="p">)</span>
@@ -308,6 +313,7 @@ indices, as well as the EISCAT data, respectively.</p>
 <span class="linenos">44</span><span class="n">viewer</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
+</div>
 </div></blockquote>
 <p>Output:</p>
 <blockquote>
@@ -331,7 +337,7 @@ indices, as well as the EISCAT data, respectively.</p>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, Lei Cai.
+        &#169; <a href="copyright.html">Copyright</a> 2021, Lei Cai.
 
     </p>
   </div>

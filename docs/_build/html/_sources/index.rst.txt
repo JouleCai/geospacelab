@@ -8,16 +8,18 @@ GeospaceLab (geospacelab)
 A python-based library to collect, manage, and visualize the geospace data.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents
 
    installation
    quickstart
    user/guide
+   copyright
+   citation
 
 
 
-Indices and tables
+Indices and Tables
 ==================
 
 * :ref:`genindex`
