@@ -34,27 +34,25 @@ Solar wind and geomagnetic indices from OMNI and WDC
 
 Source code: ``quicklook_omni_wdc.py``
 
-    .. literalinclude:: ../examples/quicklook_omni_wdc.py
+    .. literalinclude:: examples/quicklook_omni_wdc.py
         :language: python
         :linenos:
 
 Output:
 
-    .. image:: ../examples/OMNI_1min_20160314-060000-20160320-060000.png
+    .. image:: examples/OMNI_1min_20160314-060000-20160320-060000.png
         :alt: OMNI solar wind and WDC geomagnetic indices
 
-EISCAT from Madrigal
-^^^^^^^^^^^^^^^^^^^^^
+EISCAT from Madrigal with marking tools
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Source code: ``quicklook_eiscat.py``
 
-   .. literalinclude:: ../examples/quicklook_eiscat.py
+   .. literalinclude:: examples/quicklook_eiscat.py
         :language: python
         :linenos:
 
 Output:
 
-    .. image:: ../examples/EISCAT_UHF_beata_cp1_2.1u_CP_20201209-180000-20201210-060000.png
+    .. image:: examples/EISCAT_UHF_beata_cp1_2.1u_CP_20201209-180000-20201210-060000.png
         :alt: EISCAT quicklook
-
-
