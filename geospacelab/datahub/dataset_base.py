@@ -8,7 +8,6 @@ __license__ = "BSD-3-Clause License"
 __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
-import numpy as np
 import pathlib
 
 from geospacelab.datahub.variable_base import *
@@ -20,9 +19,6 @@ import geospacelab.toolbox.utilities.pylogging as mylog
 
 
 class DatasetModel(object):
-    """ Template for the Dateset class
-
-    """
 
     def __init__(self, **kwargs):
         self._variables = {}
