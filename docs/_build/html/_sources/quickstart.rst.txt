@@ -43,8 +43,8 @@ Output:
     .. image:: ../examples/OMNI_1min_20160314-060000-20160320-060000.png
         :alt: OMNI solar wind and WDC geomagnetic indices
 
-EISCAT from Madrigal with marking tools
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+EISCAT from Madrigal
+^^^^^^^^^^^^^^^^^^^^^
 
 Source code: ``quicklook_eiscat.py``
 
