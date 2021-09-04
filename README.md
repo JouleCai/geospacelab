@@ -36,10 +36,10 @@ on [readthedocs.io](https://geospacelab.readthedocs.io/en/latest/).
 | CDAWeb/OMNI                   | Solar wind and IMF    |*cdf*                 | *True*        | __OMNIViewer__  | stable      |
 | Madrigal/EISCAT               | Ionospheric Ne, Te, Ti, ... | *EISCAT-hdf5*, *Madrigal-hdf5* | *True* | __EISCATViewer__ | stable    |
 | Madrigal/GNSS/TECMAP          | Ionospheric GPS TEC map | *hdf5*                | *True*        | -  | beta      |
-| Madrigal/DMSP/s1              | DMSP SSM, SSIES, etc  | *hdf5*                | *True*        | __DMSPSSMSSJViewer__  | beta      |
+| Madrigal/DMSP/s1              | DMSP SSM, SSIES, etc  | *hdf5*                | *True*        | __DMSPTSViewer__  | beta      |
 | Madrigal/DMSP/s4              | DMSP SSIES            | *hdf5*                | *True*        | __DMSPTSViewer__  | beta      |
 | Madrigal/DMSP/e               | DMSP SSJ              | *hdf5*                | *True*        | __DMSPTSViewer__  | beta      |
-| JHUAPL/DMSP/SSUSI             | DMSP SSUSI            | *netcdf*              | *True*        | __DMSPTSViewer__  | beta      |
+| JHUAPL/DMSP/SSUSI             | DMSP SSUSI            | *netcdf*              | *True*        | __DMSPSSUSIViewer__  | beta      |
 | WDC/Dst                       | Dst index             | *IAGA2002-ASCII*      | *True*        | - | stable |
 | WDC/ASYSYM                    | ASY/SYM indices       | *IAGA2002-ASCII*      | *True*        | __OMNIViewer__ | stable |
 | WDC/AE                        | AE indices            | *IAGA2002-ASCII*      | *True*        | __OMNIViewer__ | stable |
