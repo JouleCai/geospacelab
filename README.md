@@ -1,8 +1,8 @@
 # GeospaceLab (geospacelab)
 [![License: ](https://img.shields.io/badge/License-LGPLv3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0) 
-[![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/) 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/superdarn/pydarn)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3727269.svg)](https://doi.org/10.5281/zenodo.3727269)
+[![Python](https://raw.githubusercontent.com/JouleCai/geospacelab/5cb138c7e3e929f63e94f39351c61f05f714291e/docs/images/python-badge.svg)](https://www.python.org/) 
+[![DOI](https://zenodo.org/badge/347315860.svg)](https://zenodo.org/badge/latestdoi/347315860)
+
 
 To collect, manage, and visualize geospace data in an easy and fast way. The documentation can be found 
 on [readthedocs.io](https://geospacelab.readthedocs.io/en/latest/).
