@@ -1,5 +1,5 @@
 # GeospaceLab (geospacelab)
-[![License: ](https://img.shields.io/badge/License-LGPLv3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0) 
+[![License: ](https://raw.githubusercontent.com/JouleCai/geospacelab/4344a62dd5ae5245fe52822a7d0663bffb100ddd/docs/images/license-badge.svg)](https://opensource.org/licenses/BSD-3-Clause) 
 [![Python](https://raw.githubusercontent.com/JouleCai/geospacelab/5cb138c7e3e929f63e94f39351c61f05f714291e/docs/images/python-badge.svg)](https://www.python.org/) 
 [![DOI](https://zenodo.org/badge/347315860.svg)](https://zenodo.org/badge/latestdoi/347315860)
 
