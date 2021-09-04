@@ -1,22 +1,16 @@
 # GeospaceLab (geospacelab)
-To collect, manage, and visualize geospace data in an easy and fast way.
+To collect, manage, and visualize geospace data in an easy and fast way. The documentation can be found 
+on [readthedocs.io](https://geospacelab.readthedocs.io/en/latest/).
 
 ## Features
-- User-friendly data manager.
-  - With specially designed classes "DataHub", "Dataset", and "Variable" as the core modules.
-    - A "DataHub" object can be docked simultaneously with different datasets (Dataset objects). 
-    - A Dataset object ("dataset") responds to downloading and loading data from 
-a sourced or user-defined database, such as Madrigal/EISCAT, CDAWeb/OMNI, WDC/indices, etc.
-    - The loaded data are stored in the Variable objects within a dataset.
-    - A Variable object has both "value" and "error", as well as other attributes like name, unit, label, depends, ...
-  - Support I/O with multiple file formats (hdf, mat, sav, cdf, netcdf, ascii, and binary)
-  - Simplified and readable coding.
+- Class-based data manager, including
+  - __DataHub__: the core module to manage data from multiple sources,
+  - __DatasetModel__: the base class to download, load, and process data from a data source, 
+  - __VariableModel__: the base class to store the value, error, and other attributes for a variable.
 - Extendable
-  - Easy to include more databases.
-  - Easy to add useful functions for a specified dataset (e.g., filter for the EISCAT field-aligned beams).
-- Useful toolboxes
-  - Basic toolboxes for numpy array, datetime, logging, python dict, list, and class.
-  - Coordinate system transformation.
+  - Provide a standard procedure from downloading, loading, and post-processing the data.
+  - Easy to extend for a data source which has not been included in the package.
+  - Flexible to add functions for post-processing.
 - Visualization
   - Time series plots with 
     - automatically adjustable time ticks and tick labels.
@@ -31,6 +25,32 @@ a sourced or user-defined database, such as Madrigal/EISCAT, CDAWeb/OMNI, WDC/in
       - satellite tracks (time ticks and labels)
       - nadir colored 1-D plots
       - gridded surface plots 
+- Space coordinate system transformation
+- Toolboxes for data analysis
+  - Basic toolboxes for numpy array, datetime, logging, python dict, list, and class.
+  - Coordinate system transformation.
+
+## Built-in data sources:
+| Data Source                   | Variables             | File Format           | Downloadable  | Express         | Status      | 
+|-------------------------------|-----------------------|-----------------------|---------------|-----------------|-------------|
+| CDAWeb/OMNI                   | Solar wind and IMF    |*cdf*                 | *True*        | __OMNIViewer__  | stable      |
+| Madrigal/EISCAT               | Ionospheric Ne, Te, Ti, ... | *EISCAT-hdf5*, *Madrigal-hdf5* | *True* | __EISCATViewer__ | stable    |
+| Madrigal/GNSS/TECMAP          | Ionospheric GPS TEC map | *hdf5*                | *True*        | -  | beta      |
+| Madrigal/DMSP/s1              | DMSP SSM, SSIES, etc  | *hdf5*                | *True*        | __DMSPSSMSSJViewer__  | beta      |
+| Madrigal/DMSP/s4              | DMSP SSIES            | *hdf5*                | *True*        | __DMSPTSViewer__  | beta      |
+| Madrigal/DMSP/e               | DMSP SSJ              | *hdf5*                | *True*        | __DMSPTSViewer__  | beta      |
+| JHUAPL/DMSP/SSUSI             | DMSP SSUSI            | *netcdf*              | *True*        | __DMSPTSViewer__  | beta      |
+| WDC/Dst                       | Dst index             | *IAGA2002-ASCII*      | *True*        | - | stable |
+| WDC/ASYSYM                    | ASY/SYM indices       | *IAGA2002-ASCII*      | *True*        | __OMNIViewer__ | stable |
+| WDC/AE                        | AE indices            | *IAGA2002-ASCII*      | *True*        | __OMNIViewer__ | stable |
+| GFZ/Kp                        | Kp/Ap indices         | *ASCII*               | *True*        | -              | beta   |
+| GFZ/SNF107                    | SN, F107              | *ASCII*               | *True*        | -              | beta   |
+| ESA/SWARM/EFI_LP_1B           | SWARM Ne, Te, etc.    | *netcdf*              | *True*        | -              | beta   |
+| ESA/SWARM/AOB_FAC_2F          | SWARM FAC, auroral oval boundary | *netcdf*              | *True*        | -              | beta   |
+| UTA/GITM/2DALL                | GITM 2D output        | *binary*, *IDL-sav*   | *False*       | -              | beta   |
+| UTA/GITM/3DALL                | GITM 3D output        | *binary*, *IDL-sav*   | *False*       | -              | beta   |
+
+
 
 ## Installation
 ### 1. The python distribution "*__Anaconda__*" is recommended:
@@ -265,7 +285,12 @@ viewer.show()
 Output:
 > ![alt text](https://github.com/JouleCai/geospacelab/blob/master/examples/OMNI_1min_20160314-060000-20160320-060000.png?raw=true)
 
+## Citation and Acknowledgements
+Please acknowledge or cite GeospaceLab, if the library contributes to a project that leads
+to a scientific publication.
+
+
 ## Notes
 - The current version is a pre-released version. Many features will be added soon.
-- The full documentation has not been added.
+
 
