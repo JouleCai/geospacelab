@@ -38,9 +38,6 @@ def example():
 class DataHub(object):
     """The core of the data manager in GeospaceLab to dock different datasets.
 
-    Parameters, types, and returns
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     :param dt_fr: starting time.
     :type dt_fr: datetime.datetime
     :param dt_to: stopping time.
@@ -86,7 +83,7 @@ To look up the sourced dataset and the associated contents, call :func:`~geospac
         :param visual: variable attribute, use datahub.visual if not specified.
         :type visual: str
         :return: a dataset
-        :rtype: Dataset object
+        :rtype: object of :class:`~geospacelab.datahub.DatasetModel`
         """
         kwargs.setdefault('dt_fr', self.dt_fr)
         kwargs.setdefault('dt_to', self.dt_to)
@@ -122,7 +119,7 @@ To look up the sourced dataset and the associated contents, call :func:`~geospac
         :param kind: the kind of a dataset, options: ['temporary'], or 'user-defined'. \
 if temporary, a new dataset will be created from the DatasetModel.
         :param kwargs: other keywords
-        :return: dataset or None
+        :return: None
         """
         kwargs.setdefault('dt_fr', self.dt_fr)
         kwargs.setdefault('dt_to', self.dt_to)
@@ -146,7 +143,7 @@ if temporary, a new dataset will be created from the DatasetModel.
             else:
                 TypeError('A dataset instance\'s class must be a heritage of the class DatasetModel!')
 
-        return
+        return None
 
     def _append_dataset(self, dataset):
         """Append a dataset to the datahub
@@ -169,7 +166,7 @@ if temporary, a new dataset will be created from the DatasetModel.
         :param dataset_index: the index of the dataset in datahub.datasets. \
 if both dataset or dataset_index are not specified, the function will get the \
 variable from the assigned variables.
-        :return: None or the queried variable (A VariableModel or its subclass object)
+        :return: object of :class:`~geospacelab.datahub.VariableModel` or None if not existing.
         """
         if dataset is None and dataset_index is None:
             var = None
@@ -202,7 +199,7 @@ variable from the assigned variables.
         :param dataset_index: The index of the dataset in the datahub.datasets.
         :param add_new: if True, add the variable to the specified dataset and assign to the datahub
         :param kwargs: other keywords to configure the attributes of the variable.
-        :return: the variable.
+        :return: object of :class:`~geospacelab.datahub.VariableModel`
         """
         if dataset is None:
             if dataset_index is None:
@@ -229,7 +226,7 @@ variable from the assigned variables.
     def _append_variable(self, var):
         """ append a variable to datahub.variables
 
-        :param var: a variable object
+        :param var: a object of :class:`~geospacelab.datahub.VariableModel`
         :return: None
         """
         ind = len(self.variables.keys()) + 1

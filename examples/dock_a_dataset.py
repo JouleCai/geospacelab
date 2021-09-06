@@ -1,10 +1,14 @@
+"""
+This is an example showing how to dock a dataset to the datahub.
+"""
+
 import datetime
 
 from geospacelab.datahub import DataHub
 
-# settings
-dt_fr = datetime.datetime.strptime('20210309' + '0000', '%Y%m%d%H%M')   # datetime from
-dt_to = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')   # datetime to
+# pre-settings
+dt_fr = datetime.datetime.strptime('20210309' + '0000', '%Y%m%d%H%M')   # starting time
+dt_to = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')   # stopping time
 database_name = 'madrigal'      # built-in sourced database name
 facility_name = 'eiscat'        # facility name
 

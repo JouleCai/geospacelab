@@ -175,8 +175,8 @@ class Downloader(object):
         for site in self.sites:
             icodes.extend(instrument_codes[site])
         for icode in icodes:
-            exp_list, _, database = madrigal.list_experiments(icode, self.dt_fr, self.dt_to,
-                                                              madrigal_url=self.madrigal_url)
+            exp_list, _, database = madrigal.utilities.list_experiments(
+                icode, self.dt_fr, self.dt_to,madrigal_url=self.madrigal_url)
             for exp in exp_list:
                 files = database.getExperimentFiles(exp.id)
                 for file in files:
