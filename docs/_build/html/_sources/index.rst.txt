@@ -13,10 +13,19 @@ A python-based library to collect, manage, and visualize the geospace data.
 
    installation
    quickstart
-   user/guide
+   user/manual
    copyright
    citation
 
+
+Bult-in data sources
+--------------------
+
+.. _datasources:
+
+.. csv-table::
+   :file: datasources.csv
+   :header-rows: 1
 
 
 Indices and Tables

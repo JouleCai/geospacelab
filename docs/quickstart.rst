@@ -4,26 +4,36 @@
 Quick Start
 ============
 
-This page will show some examples to load a sourced dataset or to make quicklook plots. For more details, please see
-:ref:`userguide`.
+This page will show some examples to load a sourced dataset or to make quicklook plots. For more details, please refer to
+:ref:`the user manual <usermanual>`.
 
 More examples can be found here_.
 
 .. _here: https://github.com/JouleCai/geospacelab/tree/master/examples
 
-Dock a Dataset
---------------
+Use the Datahub and Dock a Dataset
+----------------------------------
 
-The example below shows how to dock a sourced dataset (Madrigal/EISCAT data) to the datahub.
+The example below shows how to dock a sourced dataset (Madrigal/EISCAT data) to a datahub. Please refer to
+:ref:`the list of the data sources <datasources>` for loading other geospace data.
 
-    .. literalinclude:: ../examples/dock_a_dataset.py
-        :language: python
-        :linenos:
-        :caption: examples/dock_a_dataset.py
+.. literalinclude:: ../examples/dock_a_dataset.py
+    :language: python
+    :caption: examples/dock_a_dataset.py
 
 
-Quicklook Plots
-------------------------------------------------
+Use the Time-Series Viewer and Create a Figure
+-----------------------------------------------
+
+
+Add Indicators
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use the Geomap Viewer and Create a Map
+-------------------------------------------------------
+
+Use the Express Viewer and Create a Figure
+--------------------------------------------------
 
 The quicklook plots are produced by the method "quicklook" of a viewer,
 which is custom-designed for a data source. Those specialized viewer can be imported
@@ -33,9 +43,10 @@ indices, as well as the EISCAT data, respectively.
 Solar Wind and Geomagnetic Indices from OMNI and WDC
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Solar wind and geomagnetic indices data
+
     .. literalinclude:: ../examples/quicklook_omni_wdc.py
         :language: python
-        :linenos:
         :caption: examples/quicklook_omni_wdc.py
 
 Output:

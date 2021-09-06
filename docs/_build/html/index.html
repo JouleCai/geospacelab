@@ -91,7 +91,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="user/guide.html">User’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user/manual.html">User Manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="copyright.html">Copyright and Licensing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="citation.html">Citation and Acknowledgements</a></li>
 </ul>
@@ -177,19 +177,25 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="quickstart.html#dock-a-dataset">Dock a Dataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="quickstart.html#quicklook-plots">Quicklook Plots</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#use-the-datahub-and-dock-a-dataset">Use the Datahub and Dock a Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#use-the-time-series-viewer-and-create-a-figure">Use the Time-Series Viewer and Create a Figure</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#add-indicators">Add Indicators</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#use-the-geomap-viewer-and-create-a-map">Use the Geomap Viewer and Create a Map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#use-the-express-viewer-and-create-a-figure">Use the Express Viewer and Create a Figure</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="quickstart.html#solar-wind-and-geomagnetic-indices-from-omni-and-wdc">Solar Wind and Geomagnetic Indices from OMNI and WDC</a></li>
 <li class="toctree-l3"><a class="reference internal" href="quickstart.html#eiscat-from-madrigal-with-marking-tools">EISCAT from Madrigal with Marking Tools</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="user/guide.html">User’s guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="user/guide.html#data-manager">Data manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user/guide.html#visualization">Visualization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user/guide.html#express">Express</a></li>
-<li class="toctree-l2"><a class="reference internal" href="user/guide.html#space-coordinate-system-transformation">Space Coordinate System Transformation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user/manual.html">User Manual</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user/manual.html#data-manager-geospacelab-datahub">Data Manager: <code class="xref py py-mod docutils literal notranslate"><span class="pre">geospacelab.datahub</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="user/manual.html#visualization-geospacelab-visualization">Visualization: <code class="xref py py-mod docutils literal notranslate"><span class="pre">geospacelab.visualization</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="user/manual.html#express-geospace-express">Express: <code class="xref py py-mod docutils literal notranslate"><span class="pre">geospace.express</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="user/manual.html#space-coordinate-system-transformation-geospace-cs">Space Coordinate System Transformation: <code class="xref py py-mod docutils literal notranslate"><span class="pre">geospace.cs</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="user/manual.html#toolbox-geospace-toolbox">Toolbox: <code class="xref py py-mod docutils literal notranslate"><span class="pre">geospace.toolbox</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="copyright.html">Copyright and Licensing</a></li>
@@ -199,6 +205,166 @@
 </ul>
 </li>
 </ul>
+</div>
+<div class="section" id="bult-in-data-sources">
+<h2>Bult-in data sources<a class="headerlink" href="#bult-in-data-sources" title="Permalink to this headline">¶</a></h2>
+<table class="docutils align-default" id="datasources">
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Data Source</p></th>
+<th class="head"><p>Variables</p></th>
+<th class="head"><p>File Format</p></th>
+<th class="head"><p>Downloadable</p></th>
+<th class="head"><p>Express</p></th>
+<th class="head"><p>Status</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CDAWeb/OMNI</p></td>
+<td><p>Solar wind and IMF</p></td>
+<td><p>cdf</p></td>
+<td><p>True</p></td>
+<td><p>OMNIViewer</p></td>
+<td><p>stable</p></td>
+</tr>
+<tr class="row-odd"><td><p>Madrigal/EISCAT</p></td>
+<td><p>Ionospheric Ne, Te, Ti, …</p></td>
+<td><p>EISCAT-hdf5, Madrigal-hdf5</p></td>
+<td><p>True</p></td>
+<td><p>EISCATViewer</p></td>
+<td><p>stable</p></td>
+</tr>
+<tr class="row-even"><td><p>Madrigal/GNSS/TECMAP</p></td>
+<td><p>Ionospheric GPS TEC map</p></td>
+<td><p>hdf5</p></td>
+<td><p>True</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>beta</p></td>
+</tr>
+<tr class="row-odd"><td><p>Madrigal/DMSP/s1</p></td>
+<td><p>DMSP SSM, SSIES, etc</p></td>
+<td><p>hdf5</p></td>
+<td><p>True</p></td>
+<td><p>DMSPTSViewer</p></td>
+<td><p>beta</p></td>
+</tr>
+<tr class="row-even"><td><p>Madrigal/DMSP/s4</p></td>
+<td><p>DMSP SSIES</p></td>
+<td><p>hdf5</p></td>
+<td><p>True</p></td>
+<td><p>DMSPTSViewer</p></td>
+<td><p>beta</p></td>
+</tr>
+<tr class="row-odd"><td><p>Madrigal/DMSP/e</p></td>
+<td><p>DMSP SSJ</p></td>
+<td><p>hdf5</p></td>
+<td><p>True</p></td>
+<td><p>DMSPTSViewer</p></td>
+<td><p>beta</p></td>
+</tr>
+<tr class="row-even"><td><p>JHUAPL/DMSP/SSUSI</p></td>
+<td><p>DMSP SSUSI</p></td>
+<td><p>netcdf</p></td>
+<td><p>True</p></td>
+<td><p>DMSPSSUSIViewer</p></td>
+<td><p>beta</p></td>
+</tr>
+<tr class="row-odd"><td><p>WDC/Dst</p></td>
+<td><p>Dst index</p></td>
+<td><p>IAGA2002-ASCII</p></td>
+<td><p>True</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>stable</p></td>
+</tr>
+<tr class="row-even"><td><p>WDC/ASYSYM</p></td>
+<td><p>ASY/SYM indices</p></td>
+<td><p>IAGA2002-ASCII</p></td>
+<td><p>True</p></td>
+<td><p>OMNIViewer</p></td>
+<td><p>stable</p></td>
+</tr>
+<tr class="row-odd"><td><p>WDC/AE</p></td>
+<td><p>AE indices</p></td>
+<td><p>IAGA2002-ASCII</p></td>
+<td><p>True</p></td>
+<td><p>OMNIViewer</p></td>
+<td><p>stable</p></td>
+</tr>
+<tr class="row-even"><td><p>GFZ/Kp</p></td>
+<td><p>Kp/Ap indices</p></td>
+<td><p>ASCII</p></td>
+<td><p>True</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>beta</p></td>
+</tr>
+<tr class="row-odd"><td><p>GFZ/SNF107</p></td>
+<td><p>SN, F107</p></td>
+<td><p>ASCII</p></td>
+<td><p>True</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>beta</p></td>
+</tr>
+<tr class="row-even"><td><p>ESA/SWARM/EFI_LP_1B</p></td>
+<td><p>SWARM Ne, Te, etc.</p></td>
+<td><p>netcdf</p></td>
+<td><p>True</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>beta</p></td>
+</tr>
+<tr class="row-odd"><td><p>ESA/SWARM/AOB_FAC_2F</p></td>
+<td><p>SWARM FAC, auroral oval boundary</p></td>
+<td><p>netcdf</p></td>
+<td><p>True</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>beta</p></td>
+</tr>
+<tr class="row-even"><td><p>UTA/GITM/2DALL</p></td>
+<td><p>GITM 2D output</p></td>
+<td><p>binary, IDL-sav</p></td>
+<td><p>False</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>beta</p></td>
+</tr>
+<tr class="row-odd"><td><p>UTA/GITM/3DALL</p></td>
+<td><p>GITM 3D output</p></td>
+<td><p>binary, IDL-sav</p></td>
+<td><p>False</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>beta</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div class="section" id="indices-and-tables">

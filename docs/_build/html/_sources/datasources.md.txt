@@ -1,0 +1,21 @@
+
+
+| Data Source                   | Variables             | File Format           | Downloadable  | Express         | Status      | 
+|-------------------------------|-----------------------|-----------------------|---------------|-----------------|-------------|
+| CDAWeb/OMNI                   | Solar wind and IMF    |*cdf*                 | *True*        | __OMNIViewer__  | stable      |
+| Madrigal/EISCAT               | Ionospheric Ne, Te, Ti, ... | *EISCAT-hdf5*, *Madrigal-hdf5* | *True* | __EISCATViewer__ | stable    |
+| Madrigal/GNSS/TECMAP          | Ionospheric GPS TEC map | *hdf5*                | *True*        | -  | beta      |
+| Madrigal/DMSP/s1              | DMSP SSM, SSIES, etc  | *hdf5*                | *True*        | __DMSPTSViewer__  | beta      |
+| Madrigal/DMSP/s4              | DMSP SSIES            | *hdf5*                | *True*        | __DMSPTSViewer__  | beta      |
+| Madrigal/DMSP/e               | DMSP SSJ              | *hdf5*                | *True*        | __DMSPTSViewer__  | beta      |
+| JHUAPL/DMSP/SSUSI             | DMSP SSUSI            | *netcdf*              | *True*        | __DMSPSSUSIViewer__  | beta      |
+| WDC/Dst                       | Dst index             | *IAGA2002-ASCII*      | *True*        | - | stable |
+| WDC/ASYSYM                    | ASY/SYM indices       | *IAGA2002-ASCII*      | *True*        | __OMNIViewer__ | stable |
+| WDC/AE                        | AE indices            | *IAGA2002-ASCII*      | *True*        | __OMNIViewer__ | stable |
+| GFZ/Kp                        | Kp/Ap indices         | *ASCII*               | *True*        | -              | beta   |
+| GFZ/SNF107                    | SN, F107              | *ASCII*               | *True*        | -              | beta   |
+| ESA/SWARM/EFI_LP_1B           | SWARM Ne, Te, etc.    | *netcdf*              | *True*        | -              | beta   |
+| ESA/SWARM/AOB_FAC_2F          | SWARM FAC, auroral oval boundary | *netcdf*              | *True*        | -              | beta   |
+| UTA/GITM/2DALL                | GITM 2D output        | *binary*, *IDL-sav*   | *False*       | -              | beta   |
+| UTA/GITM/3DALL                | GITM 3D output        | *binary*, *IDL-sav*   | *False*       | -              | beta   |
+
