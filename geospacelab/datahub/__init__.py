@@ -38,6 +38,8 @@ def example():
 class DataHub(object):
     """The core of the data manager in GeospaceLab to dock different datasets.
 
+    Parameters, types, and returns
+    ==============================
     :param dt_fr: starting time.
     :type dt_fr: datetime.datetime
     :param dt_to: stopping time.
@@ -51,6 +53,8 @@ The keys (indices) are the integer numbers starting from 1.
 Typically used for the viewers or outputs.
     :type variables: dict
 
+    Examples
+    ========
     :example:
 
     """

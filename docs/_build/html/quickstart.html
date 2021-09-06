@@ -235,27 +235,7 @@ indices, as well as the EISCAT data, respectively.</p>
 <blockquote>
 <div><div class="literal-block-wrapper docutils container" id="id2">
 <div class="code-block-caption"><span class="caption-text">examples/quicklook_omni_wdc.py</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">datetime</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">geospacelab.express.omni_viewer</span> <span class="k">as</span> <span class="nn">omni</span>
-<span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="n">dt_fr</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20160314&#39;</span> <span class="o">+</span> <span class="s1">&#39;0600&#39;</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M&#39;</span><span class="p">)</span>
-<span class="linenos"> 5</span><span class="n">dt_to</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20160320&#39;</span> <span class="o">+</span> <span class="s1">&#39;0600&#39;</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M&#39;</span><span class="p">)</span>
-<span class="linenos"> 6</span>
-<span class="linenos"> 7</span><span class="n">omni_type</span> <span class="o">=</span> <span class="s1">&#39;OMNI2&#39;</span>
-<span class="linenos"> 8</span><span class="n">omni_res</span> <span class="o">=</span> <span class="s1">&#39;1min&#39;</span>
-<span class="linenos"> 9</span><span class="n">load_mode</span> <span class="o">=</span> <span class="s1">&#39;AUTO&#39;</span>
-<span class="linenos">10</span><span class="n">viewer</span> <span class="o">=</span> <span class="n">omni</span><span class="o">.</span><span class="n">OMNIViewer</span><span class="p">(</span>
-<span class="linenos">11</span>    <span class="n">dt_fr</span><span class="p">,</span> <span class="n">dt_to</span><span class="p">,</span> <span class="n">omni_type</span><span class="o">=</span><span class="n">omni_type</span><span class="p">,</span> <span class="n">omni_res</span><span class="o">=</span><span class="n">omni_res</span><span class="p">,</span> <span class="n">load_mode</span><span class="o">=</span><span class="n">load_mode</span>
-<span class="linenos">12</span><span class="p">)</span>
-<span class="linenos">13</span><span class="n">viewer</span><span class="o">.</span><span class="n">quicklook</span><span class="p">()</span>
-<span class="linenos">14</span>
-<span class="linenos">15</span><span class="c1"># data can be retrieved in the same way as in Example 1:</span>
-<span class="linenos">16</span><span class="n">viewer</span><span class="o">.</span><span class="n">list_assigned_variables</span><span class="p">()</span>
-<span class="linenos">17</span><span class="n">B_x_gsm</span> <span class="o">=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="s1">&#39;B_x_GSM&#39;</span><span class="p">)</span>
-<span class="linenos">18</span><span class="c1"># save figure</span>
-<span class="linenos">19</span><span class="n">viewer</span><span class="o">.</span><span class="n">save_figure</span><span class="p">()</span>
-<span class="linenos">20</span><span class="c1"># show on screen</span>
-<span class="linenos">21</span><span class="n">viewer</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span>
 </pre></div>
 </div>
 </div>
@@ -270,50 +250,7 @@ indices, as well as the EISCAT data, respectively.</p>
 <blockquote>
 <div><div class="literal-block-wrapper docutils container" id="id3">
 <div class="code-block-caption"><span class="caption-text">examples/quicklook_eiscat.py</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">datetime</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">geospacelab.express.eiscat_viewer</span> <span class="k">as</span> <span class="nn">eiscat</span>
-<span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="n">dt_fr</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20201209&#39;</span> <span class="o">+</span> <span class="s1">&#39;1800&#39;</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M&#39;</span><span class="p">)</span>
-<span class="linenos"> 5</span><span class="n">dt_to</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20201210&#39;</span> <span class="o">+</span> <span class="s1">&#39;0600&#39;</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M&#39;</span><span class="p">)</span>
-<span class="linenos"> 6</span>
-<span class="linenos"> 7</span><span class="c1"># check the eiscat-hdf5 filename from the EISCAT schedule page, e.g., &quot;EISCAT_2020-12-10_beata_60@uhfa.hdf5&quot;</span>
-<span class="linenos"> 8</span><span class="n">site</span> <span class="o">=</span> <span class="s1">&#39;UHF&#39;</span>
-<span class="linenos"> 9</span><span class="n">antenna</span> <span class="o">=</span> <span class="s1">&#39;UHF&#39;</span>
-<span class="linenos">10</span><span class="n">modulation</span> <span class="o">=</span> <span class="s1">&#39;60&#39;</span>
-<span class="linenos">11</span><span class="n">load_mode</span> <span class="o">=</span> <span class="s1">&#39;AUTO&#39;</span>
-<span class="linenos">12</span><span class="c1"># The code will download and load the data automatically as long as the parameters above are set correctly.</span>
-<span class="linenos">13</span><span class="n">viewer</span> <span class="o">=</span> <span class="n">eiscat</span><span class="o">.</span><span class="n">EISCATViewer</span><span class="p">(</span>
-<span class="linenos">14</span>      <span class="n">dt_fr</span><span class="p">,</span> <span class="n">dt_to</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">antenna</span><span class="o">=</span><span class="n">antenna</span><span class="p">,</span> <span class="n">modulation</span><span class="o">=</span><span class="n">modulation</span><span class="p">,</span> <span class="n">load_mode</span><span class="o">=</span><span class="s1">&#39;AUTO&#39;</span>
-<span class="linenos">15</span><span class="p">)</span>
-<span class="linenos">16</span><span class="n">viewer</span><span class="o">.</span><span class="n">quicklook</span><span class="p">()</span>
-<span class="linenos">17</span><span class="c1"># viewer.save_figure() # comment this if you need to run the following codes</span>
-<span class="linenos">18</span><span class="c1"># viewer.show()   # comment this if you need to run the following codes.</span>
-<span class="linenos">19</span>
-<span class="linenos">20</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="linenos">21</span><span class="sd">The viewer is an instance of the class EISCATViewer, which is a heritage of the class Datahub.</span>
-<span class="linenos">22</span><span class="sd">Thus, the variables can be retrieved in the same ways as shown in Example 1. </span>
-<span class="linenos">23</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="linenos">24</span><span class="n">n_e</span> <span class="o">=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="s1">&#39;n_e&#39;</span><span class="p">)</span>
-<span class="linenos">25</span>
-<span class="linenos">26</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="linenos">27</span><span class="sd">Several marking tools (vertical lines, shadings, and top bars) can be added as the overlays </span>
-<span class="linenos">28</span><span class="sd">on the top of the quicklook plot.</span>
-<span class="linenos">29</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="linenos">30</span><span class="c1"># add vertical line</span>
-<span class="linenos">31</span><span class="n">dt_fr_2</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20201209&#39;</span> <span class="o">+</span> <span class="s1">&#39;2030&#39;</span><span class="p">,</span> <span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">%H%M&quot;</span><span class="p">)</span>
-<span class="linenos">32</span><span class="n">dt_to_2</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20201210&#39;</span> <span class="o">+</span> <span class="s1">&#39;0130&#39;</span><span class="p">,</span> <span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">%H%M&quot;</span><span class="p">)</span>
-<span class="linenos">33</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_vertical_line</span><span class="p">(</span><span class="n">dt_fr_2</span><span class="p">,</span> <span class="n">bottom_extend</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">top_extend</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Line 1&#39;</span><span class="p">,</span> <span class="n">label_position</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
-<span class="linenos">34</span><span class="c1"># add shading</span>
-<span class="linenos">35</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_shading</span><span class="p">(</span><span class="n">dt_fr_2</span><span class="p">,</span> <span class="n">dt_to_2</span><span class="p">,</span> <span class="n">bottom_extend</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">top_extend</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Shading 1&#39;</span><span class="p">,</span> <span class="n">label_position</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
-<span class="linenos">36</span><span class="c1"># add top bar</span>
-<span class="linenos">37</span><span class="n">dt_fr_3</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20201210&#39;</span> <span class="o">+</span> <span class="s1">&#39;0130&#39;</span><span class="p">,</span> <span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">%H%M&quot;</span><span class="p">)</span>
-<span class="linenos">38</span><span class="n">dt_to_3</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20201210&#39;</span> <span class="o">+</span> <span class="s1">&#39;0430&#39;</span><span class="p">,</span> <span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">%H%M&quot;</span><span class="p">)</span>
-<span class="linenos">39</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_top_bar</span><span class="p">(</span><span class="n">dt_fr_3</span><span class="p">,</span> <span class="n">dt_to_3</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Top bar 1&#39;</span><span class="p">)</span>
-<span class="linenos">40</span>
-<span class="linenos">41</span><span class="c1"># save figure</span>
-<span class="linenos">42</span><span class="n">viewer</span><span class="o">.</span><span class="n">save_figure</span><span class="p">()</span>
-<span class="linenos">43</span><span class="c1"># show on screen</span>
-<span class="linenos">44</span><span class="n">viewer</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span>
 </pre></div>
 </div>
 </div>
