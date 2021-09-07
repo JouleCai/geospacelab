@@ -216,7 +216,7 @@ class PolarMap(mpl.Panel):
                 'lat_label_separator': 0,
                 'lon_label_separator': 2,
                 'lat_label_format': '%d%D%N',
-                'lon_label_format': '%d LT',
+                'lon_label_format': '%02d LT',
             },
             'mlt-fixed': {
                 'lat_res': 10.,
@@ -224,7 +224,7 @@ class PolarMap(mpl.Panel):
                 'lat_label_separator': 0,
                 'lon_label_separator': 2,
                 'lat_label_format': '%d%D%N',
-                'lon_label_format': '%d MLT',
+                'lon_label_format': '%02d MLT',
             },
         }
 
@@ -299,7 +299,7 @@ class PolarMap(mpl.Panel):
 
         # ylocator
         lat_fr = np.abs(self.boundary_lat) + np.mod(90 - np.abs(self.boundary_lat), lat_res)
-        lat_to = 85.
+        lat_to = 90.
         # num_lats = (lat_to - lat_fr) / lat_res + 1.
         lats = np.arange(lat_fr, lat_to, lat_res) * np.sign(self.lat_c)
         ylocator = mticker.FixedLocator(lats)

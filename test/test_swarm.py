@@ -5,6 +5,8 @@ from loaders.load_uta_gitm_201602_newrun import *
 import utilities.datetime_utilities as du
 
 import visualization.time_series as ts
+from geospacelab.visualization.map_proj.geopanel import PolarMap
+import geospacelab.visualization.mpl.colormaps as cm
 
 
 def get_swarm_data(dt_fr, dt_to, satID="C"):
@@ -52,7 +54,7 @@ def show_rho_n(dt_fr, dt_to):
     # cs = 'GEO'
     # panel = PolarView(cs='GEO', sytle='lst-fixed', pole='N', lon_c=None, lst_c=0, mlt_c=None, ut=dt_fr, boundary_lat=30., proj_style='Stereographic')
     cs = 'AACGM'
-    panel = PolarPanel(cs=cs, style='mlt-fixed', pole='N', lon_c=None, lst_c=None, mlt_c=0, ut=dt_fr, boundary_lat=30., proj_style='Stereographic')
+    panel = PolarMap(cs=cs, style='mlt-fixed', pole='N', lon_c=None, lst_c=None, mlt_c=0, ut=dt_fr, boundary_lat=30., proj_style='Stereographic')
 
     panel.add_subplot(major=True)
     panel.set_extent(boundary_style='circle')
@@ -165,12 +167,13 @@ def show_n_e(dt_fr, dt_to):
     rho_n_sc = n_e[ind_dt]
 
     plt.figure(figsize=(8,8))
-    # cs = 'GEO'
-    # panel = PolarView(cs='GEO', sytle='lst-fixed', pole='N', lon_c=None, lst_c=0, mlt_c=None, ut=dt_fr, boundary_lat=30., proj_style='Stereographic')
-    cs = 'AACGM'
-    panel = PolarPanel(cs=cs, style='mlt-fixed', pole='N', lon_c=None, lst_c=None, mlt_c=0, ut=dt_fr, boundary_lat=30.,
-                       proj_style='Stereographic')
-    panel.add_subplot(major=True)
+    cs = 'GEO'
+    panel = PolarMap(
+        cs='GEO', style='lst-fixed', pole='N', lon_c=None, lst_c=0, mlt_c=None, ut=dt_fr,
+        boundary_lat=0., proj_type='Stereographic')
+    # cs = 'AACGM'
+    #panel = PolarMap(cs=cs, style='mlt-fixed', pole='N', lon_c=None, lst_c=None, mlt_c=0, ut=dt_fr, boundary_lat=30.,
+    #                 proj_type='Stereographic')
     panel.set_extent(boundary_style='circle')
 
     data = panel.proj.transform_points(ccrs.PlateCarree(), sc_lon, sc_lat)
@@ -218,8 +221,8 @@ def show_n_e(dt_fr, dt_to):
     z = rho_n_sc.flatten()
     points = np.array([x, y]).T.reshape(-1, 1, 2)
     segments = np.concatenate([points[:-1], points[1:]], axis=1)
-    norm = colors.LogNorm(vmin=8e3, vmax=2e5)
-    lc = LineCollection(segments, cmap='gist_ncar', norm=norm)
+    norm = colors.LogNorm(vmin=8e3, vmax=1e6)
+    lc = LineCollection(segments, cmap=cm.cmap_gist_ncar_modified(), norm=norm)
     lc.set_array(z)
     lc.set_linewidth(6)
     line = panel.major_ax.add_collection(lc)
@@ -251,10 +254,10 @@ def show_n_e(dt_fr, dt_to):
         panel.major_ax.text( x_time_tick, y_time_tick, time.strftime("%d %H:%M"), fontsize=6)
 
     panel.add_coastlines()
-    panel.add_grids()
+    panel.add_gridlines()
 
-    plt.gcf().suptitle('Swarm-C electron density\n 2016-02-03T07:00 - 2016-02-03T07:50')
-    plt.savefig('test_n_e_aacgm.png', dpi=300)
+    plt.gcf().suptitle('Swarm-C electron density\n' + dt_fr.strftime("%Y%m%dT%H%M") + ' - ' + dt_to.strftime("%Y%m%dT%H%M"))
+    plt.savefig('swarm_ne_' + cs + '_' + dt_fr.strftime("%Y%m%d_%H%M") + '-' + dt_to.strftime('%H%M'), dpi=300)
     plt.show()
     
 def show_T_e(dt_fr, dt_to):
@@ -371,8 +374,8 @@ def show_T_e(dt_fr, dt_to):
     plt.show()
 
 if __name__ == "__main__":
-    dt_fr = datetime.datetime(2016, 2, 3, 7)
-    dt_to = datetime.datetime(2016, 2, 3, 7, 50)
+    dt_fr = datetime.datetime(2016, 2, 3, 0, 40)
+    dt_to = datetime.datetime(2016, 2, 3, 1, 40)
 
     # show_rho_n(dt_fr, dt_to)
     
