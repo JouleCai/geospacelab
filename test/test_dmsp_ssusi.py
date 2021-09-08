@@ -5,9 +5,9 @@ import geospacelab.visualization.map_proj.geomap_viewer as geomap
 
 
 def test_ssusi():
-    dt_fr = datetime.datetime(2015, 10, 13, 0)
-    dt_to = datetime.datetime(2015, 10, 13, 23, 59)
-    time1 = datetime.datetime(2015, 10, 13, 13, 32)
+    dt_fr = datetime.datetime(2015, 12, 23, 0)
+    dt_to = datetime.datetime(2015, 12, 23, 23, 59)
+    time1 = datetime.datetime(2015, 12, 23, 16, 31)
     pole = 'S'
     sat_id = 'f16'
     band = 'LBHS'
@@ -41,9 +41,11 @@ def test_ssusi():
     lbhs_ = lbhs.value[ind_t, :, :]
     pcolormesh_config = lbhs.visual.plot_config.pcolormesh
     pcolormesh_config.update(c_scale='log')
-    pcolormesh_config.update(c_lim=[100, 2000])
+    pcolormesh_config.update(c_lim=[100, 1500])
     import geospacelab.visualization.mpl.colormaps as cm
-    pcolormesh_config.update(cmap=cm.cmap_jhuapl_ssj_like())
+    cmap = cm.cmap_gist_ncar_modified()
+    cmap = 'viridis'
+    pcolormesh_config.update(cmap=cmap)
     ipc = panel1.add_pcolor(lbhs_, coords={'lat': mlat[ind_t, ::], 'lon': mlon[ind_t, ::], 'mlt': mlt[ind_t, ::], 'height': 250.}, cs='AACGM', **pcolormesh_config)
     panel1.add_colorbar(
        ipc, ax=panel1.major_ax, c_label=band + " (R)", c_scale=pcolormesh_config['c_scale'],
@@ -52,7 +54,7 @@ def test_ssusi():
 
     polestr = 'North' if pole == 'N' else 'South'
     panel1.add_title('DMSP/SSUSI, ' + band + ', ' + sat_id.upper() + ', ' + polestr + ', ' + time1.strftime('%Y-%m-%d %H%M UT'), pad=20)
-    plt.savefig('DMSP_SSUSI_' + band + '_' + sat_id.upper() + '_' + pole + '_' + time1.strftime('%Y%m%d-%H%M'), dpi=300)
+    plt.savefig('DMSP_SSUSI_' + time1.strftime('%Y%m%d-%H%M') + '_' + band + '_' + sat_id.upper() + '_' + pole, dpi=300)
     plt.show()
 
 

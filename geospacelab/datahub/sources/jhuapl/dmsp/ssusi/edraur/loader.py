@@ -43,16 +43,6 @@ class Loader(object):
         variables['SC_LON'] = np.array(dataset.variables['LONGITUDE'])
         variables['SC_ALT'] = np.array(dataset.variables['ALTITUDE'])
 
-        # Auroral map, #colors: 0: '1216', 1: '1304', 2: '1356', 3: 'LBHS', 4: 'LBHL'.
-        variables['EMISSION_SPECTRA'] = ['1216', '1304', '1356', 'LBHS', 'LBHL']
-        disk_aur = np.array(dataset.variables['DISK_RADIANCEDATA_INTENSITY_' + pole_str])
-        disk_aur[disk_aur <= 0] = np.nan
-        variables['GRID_AUR_1216'] = disk_aur[0, ::]
-        variables['GRID_AUR_1304'] = disk_aur[1, ::]
-        variables['GRID_AUR_1356'] = disk_aur[2, ::]
-        variables['GRID_AUR_LBHS'] = disk_aur[3, ::]
-        variables['GRID_AUR_LBHL'] = disk_aur[4, ::]
-
         variables['GRID_MLAT'] = np.array(dataset.variables['LATITUDE_GEOMAGNETIC_GRID_MAP'])
         variables['GRID_MLON'] = np.array(
             dataset.variables['LONGITUDE_GEOMAGNETIC_' + pole_str + '_GRID_MAP'])
@@ -69,6 +59,20 @@ class Loader(object):
             ind_mid_t = np.where(lat == np.nanmin(lat.flatten()))
         sectime0 = variables['GRID_UT'][ind_mid_t][0] * 3600
         variables['DATETIME'] = dt0 + datetime.timedelta(seconds=int(sectime0))
+
+        invalid_ut_inds = np.where(ut == 0)
+        # Auroral map, #colors: 0: '1216', 1: '1304', 2: '1356', 3: 'LBHS', 4: 'LBHL'.
+        variables['EMISSION_SPECTRA'] = ['1216', '1304', '1356', 'LBHS', 'LBHL']
+        disk_aur = np.array(dataset.variables['DISK_RADIANCEDATA_INTENSITY_' + pole_str])
+        # disk_aur[:, invalid_ut_inds] = np.nan
+        disk_aur[disk_aur <= 0] = 0.1
+        variables['GRID_AUR_1216'] = disk_aur[0, ::]
+
+        variables['GRID_AUR_1304'] = disk_aur[1, ::]
+        variables['GRID_AUR_1356'] = disk_aur[2, ::]
+        variables['GRID_AUR_LBHS'] = disk_aur[3, ::]
+        variables['GRID_AUR_LBHS'][invalid_ut_inds] = np.nan
+        variables['GRID_AUR_LBHL'] = disk_aur[4, ::]
 
         # Auroral oval boundary
         variables['AOB_EQ_MLAT'] = np.array(dataset.variables[pole_str + '_GEOMAGNETIC_LATITUDE'])
