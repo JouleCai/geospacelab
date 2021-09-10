@@ -7,8 +7,8 @@ import geospacelab.visualization.map_proj.geomap_viewer as geomap
 def test_ssusi():
     dt_fr = datetime.datetime(2015, 12, 23, 0)
     dt_to = datetime.datetime(2015, 12, 23, 23, 59)
-    time1 = datetime.datetime(2015, 12, 23, 16, 31)
-    pole = 'S'
+    time1 = datetime.datetime(2015, 12, 23, 17, 10)
+    pole = 'N'
     sat_id = 'f16'
     band = 'LBHS'
 

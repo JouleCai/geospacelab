@@ -5,8 +5,8 @@ import geospacelab.visualization.mpl.ts_viewer as ts
 
 
 def test():
-    dt_fr = datetime.datetime(2016, 3, 13, 12)
-    dt_to = datetime.datetime(2016, 3, 16, 12)
+    dt_fr = datetime.datetime(2016, 1, 30, 0)
+    dt_to = datetime.datetime(2016, 2, 4, 0)
     tsviewer = ts.TimeSeriesViewer(dt_fr=dt_fr, dt_to=dt_to)
     ds1 = tsviewer.dock(datasource_contents=['cdaweb', 'omni'])
     ds1.load_data()
@@ -19,9 +19,21 @@ def test():
     v_sw = tsviewer.assign_variable('v_sw')
     p_dyn = tsviewer.assign_variable('p_dyn')
 
-    layout = [[Bx, By, Bz], [v_sw], [n_p], [p_dyn]]
+    ds2 = tsviewer.dock(datasource_contents=['wdc', 'asysym'])
+
+    sym_h = tsviewer.assign_variable('SYM_H')
+
+    ds3 = tsviewer.dock(datasource_contents=['wdc', 'ae'])
+
+    ae = tsviewer.assign_variable('AE')
+    au = tsviewer.assign_variable('AU')
+    al = tsviewer.assign_variable('AL')
+
+    layout = [[Bx, By, Bz], [v_sw], [n_p], [p_dyn], [sym_h], [ae, au, al]]
+
     tsviewer.set_layout(panel_layouts=layout, hspace=0.1)
     tsviewer.draw()
+    tsviewer.save_figure(file_name='example_omni_6', append_time=False)
     pass
 
 

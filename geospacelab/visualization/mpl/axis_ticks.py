@@ -64,8 +64,8 @@ def set_timeline(dt_start, dt_stop, **kwargs):
 
     default_year = {
         'range':            [1, 2, 3, 5, 10, 15, 20, 30, 50, 100, 200, 400, 800],
-        'major_scale':      [3/12, 4/12, 6/12, 1, 2, 3, 5, 5, 10, 20, 50, 100],
-        'minor_scale':      [1/12, 1/12, 2/12, 3/12, 4/12, 6/12, 1, 1, 2, 5, 10, 20],
+        'majorscale':      [3/12, 4/12, 6/12, 1, 2, 3, 5, 5, 10, 20, 50, 100],
+        'minorscale':      [1/12, 1/12, 2/12, 3/12, 4/12, 6/12, 1, 1, 2, 5, 10, 20],
         'scale': 12
     }
 
@@ -108,7 +108,7 @@ def set_timeline(dt_start, dt_stop, **kwargs):
             elif ind == 5:
                 diff = dttool.get_diff_months(dt_start, dt_stop)
             elif ind == 6:
-                diff = dt_stop.Year - dt_start.Year
+                diff = dt_stop.year - dt_start.year
 
     setting = default_settings[ind]
     range_ = setting['range']
@@ -245,7 +245,7 @@ def set_timeline(dt_start, dt_stop, **kwargs):
             return dtx.strftime(fmt1)
         func_formatter = mpl.ticker.FuncFormatter(formatter_day)
     if minorlocatorclass is mdates.DayLocator:
-        temp = np.floor(31.5 / minorscale)
+        temp = int(np.floor(31.5 / minorscale))
         by1 = range(1, temp * minorscale, minorscale)
         minorlocator = minorlocatorclass(bymonthday=by1, interval=1)
 
