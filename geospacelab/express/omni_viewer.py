@@ -75,8 +75,8 @@ class OMNIViewer(TimeSeriesViewer):
 
 def example():
 
-    dt_fr = datetime.datetime.strptime('20210314' + '0600', '%Y%m%d%H%M')
-    dt_to = datetime.datetime.strptime('20210320' + '0600', '%Y%m%d%H%M')
+    dt_fr = datetime.datetime.strptime('20180922' + '0600', '%Y%m%d%H%M')
+    dt_to = datetime.datetime.strptime('20180922' + '1800', '%Y%m%d%H%M')
 
     omni_type = 'OMNI2'
     omni_res = '1min'
