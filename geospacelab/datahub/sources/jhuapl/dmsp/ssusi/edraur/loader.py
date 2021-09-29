@@ -67,12 +67,15 @@ class Loader(object):
         # disk_aur[:, invalid_ut_inds] = np.nan
         disk_aur[disk_aur <= 0] = 0.1
         variables['GRID_AUR_1216'] = disk_aur[0, ::]
-
+        variables['GRID_AUR_1216'][invalid_ut_inds] = np.nan
         variables['GRID_AUR_1304'] = disk_aur[1, ::]
+        variables['GRID_AUR_1304'][invalid_ut_inds] = np.nan
         variables['GRID_AUR_1356'] = disk_aur[2, ::]
+        variables['GRID_AUR_1356'][invalid_ut_inds] = np.nan
         variables['GRID_AUR_LBHS'] = disk_aur[3, ::]
         variables['GRID_AUR_LBHS'][invalid_ut_inds] = np.nan
         variables['GRID_AUR_LBHL'] = disk_aur[4, ::]
+        variables['GRID_AUR_LBHL'][invalid_ut_inds] = np.nan
 
         # Auroral oval boundary
         variables['AOB_EQ_MLAT'] = np.array(dataset.variables[pole_str + '_GEOMAGNETIC_LATITUDE'])

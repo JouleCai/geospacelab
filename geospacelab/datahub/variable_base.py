@@ -136,7 +136,7 @@ class VariableModel(object):
                     except KeyError:
                         print('The variable {} has not been assigned!'.format(key))
                         value = None
-                depend_new[key] = value
+                depend_new[key] = copy.deepcopy(value)
         return depend_new
 
     def set_depend(self, axis, depend_dict):
@@ -170,7 +170,7 @@ class VariableModel(object):
                 result = self.get_attr_from_string(a)
             else:
                 result = a
-            results.append(result)
+            results.append(copy.deepcopy(result))
         if type_attr is not list:
             results = results[0]
         return results

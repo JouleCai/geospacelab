@@ -5,12 +5,12 @@ import geospacelab.visualization.map_proj.geomap_viewer as geomap
 
 
 def test_ssusi():
-    dt_fr = datetime.datetime(2015, 12, 23, 0)
-    dt_to = datetime.datetime(2015, 12, 23, 23, 59)
-    time1 = datetime.datetime(2015, 12, 23, 17, 10)
+    dt_fr = datetime.datetime(2018, 1, 31, 8)
+    dt_to = datetime.datetime(2018, 1, 31, 14, 59)
+    time1 = datetime.datetime(2018, 1, 31, 14, 22)
     pole = 'N'
-    sat_id = 'f16'
-    band = 'LBHS'
+    sat_id = 'f18'
+    band = '1356'
 
     viewer = geomap.GeoMapViewer(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (5, 5)})
 
@@ -36,7 +36,7 @@ def test_ssusi():
     #                          boundary_lat=0, mirror_south=False)
     panel1 = viewer.panels[pid]
     panel1.add_coastlines()
-    panel1.add_gridlines(lat_res=5, lon_label_separator=5)
+
 
     lbhs_ = lbhs.value[ind_t, :, :]
     pcolormesh_config = lbhs.visual.plot_config.pcolormesh
@@ -51,6 +51,8 @@ def test_ssusi():
        ipc, ax=panel1.major_ax, c_label=band + " (R)", c_scale=pcolormesh_config['c_scale'],
        left=1.1, bottom=0.1, width=0.05, height=0.7
     )
+
+    panel1.add_gridlines(lat_res=5, lon_label_separator=5)
 
     polestr = 'North' if pole == 'N' else 'South'
     panel1.add_title('DMSP/SSUSI, ' + band + ', ' + sat_id.upper() + ', ' + polestr + ', ' + time1.strftime('%Y-%m-%d %H%M UT'), pad=20)

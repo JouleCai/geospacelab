@@ -31,7 +31,7 @@ default_dataset_attrs = {
 default_variable_names = [
     'DATETIME', 'STARTING_TIME', 'STOPPING_TIME',
     'GRID_MLAT', 'GRID_MLON', 'GRID_MLT', 'GRID_UT',
-    'GRID_AUR_1216', 'GRID_AUR_LBHS', 'GRID_AUR_LBHL',
+    'GRID_AUR_1216', 'GRID_AUR_1304', 'GRID_AUR_1356', 'GRID_AUR_LBHS', 'GRID_AUR_LBHL',
 ]
 
 # default_data_search_recursive = True

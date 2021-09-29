@@ -15,6 +15,7 @@ import datetime
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import pathlib
+import copy
 
 import numpy as np
 from scipy.interpolate import interp1d

@@ -399,7 +399,7 @@ class PolarMap(mpl.Panel):
                     self.major_ax.text(
                         x, y, label,
                         rotation=rotation,
-                        **lon_label_config
+                        **lon_label_config,
                     )
 
         # gl.xformatter = LONGITUDE_FORMATTER()

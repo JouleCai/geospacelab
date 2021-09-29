@@ -27,15 +27,15 @@ def test_UHF_CP2():
     v_i = viewer.assign_variable('v_i_los')
     az = viewer.assign_variable('AZ')
     el = viewer.assign_variable('EL')
-    T_r = viewer.dataset.add_variable('T_r', ndim=2)
-    T_r.value = T_e.value / T_i.value
-    T_r.visual.plot_config.style = '2P'
-    T_r.depends = T_i.depends
-    T_r.visual.axis[2].label = 'Te/Ti'
-    T_r.visual.axis[2].unit = ''
+    # T_r = viewer.dataset.add_variable('T_r', ndim=2)
+    # T_r.value = T_e.value / T_i.value
+    # T_r.visual.plot_config.style = '2P'
+    # T_r.depends = T_i.depends
+    # T_r.visual.axis[2].label = 'Te/Ti'
+    # T_r.visual.axis[2].unit = ''
 
-    layout = [[n_e], [T_e], [T_i], [T_r], [v_i], [az, el]]
-    viewer.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 5, 3])
+    layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
+    viewer.set_layout(panel_layouts=layout, )
     viewer.draw()
     viewer.add_title()
     viewer.add_panel_labels()
@@ -173,8 +173,8 @@ def test_vhf_lowel():
 
 
 if __name__ == "__main__":
-    # test_vhf_lowel()
-    # test_uhf_cp3()
+    test_vhf_lowel()
+    test_uhf_cp3()
     test_UHF_CP2()
-    # test_esr_32m()
+    test_esr_32m()
     plt.show()
