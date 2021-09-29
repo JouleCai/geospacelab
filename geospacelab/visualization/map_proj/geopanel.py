@@ -498,7 +498,7 @@ class PolarMap(mpl.Panel):
         else:
             cs_new = self.cs_transform(cs_fr=cs, coords=coords)
             ipc = self.major_ax.pcolormesh(cs_new['lon'], cs_new['lat'], data, transform=ccrs.PlateCarree(), **kwargs)
-
+            # ipc = self.major_ax.imshow(data.T, origin='upper', extent=[0, 360, 40, 90], transform=ccrs.PlateCarree(), cmap='jet', interpolation='bessel')
         # self.add_colorbar(im, ax=self.major_ax, figure=None, c_scale=c_scale, c_label=c_label,
         #              left=1.1, bottom=0.1, width=0.05, height=0.7
         #             )
