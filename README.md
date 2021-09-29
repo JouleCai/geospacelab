@@ -45,6 +45,7 @@ on [readthedocs.io](https://geospacelab.readthedocs.io/en/latest/).
 | Madrigal/DMSP/s4              | DMSP SSIES            | *hdf5*                | *True*        | __DMSPTSViewer__  | beta      |
 | Madrigal/DMSP/e               | DMSP SSJ              | *hdf5*                | *True*        | __DMSPTSViewer__  | beta      |
 | JHUAPL/DMSP/SSUSI             | DMSP SSUSI            | *netcdf*              | *True*        | __DMSPSSUSIViewer__  | beta      |
+| JHUAPL/AMPERE/fitted          | AMPERE FAC            | *netcdf*              | *False*        | __AMPEREViewer__  | stable      |
 | WDC/Dst                       | Dst index             | *IAGA2002-ASCII*      | *True*        | - | stable |
 | WDC/ASYSYM                    | ASY/SYM indices       | *IAGA2002-ASCII*      | *True*        | __OMNIViewer__ | stable |
 | WDC/AE                        | AE indices            | *IAGA2002-ASCII*      | *True*        | __OMNIViewer__ | stable |
