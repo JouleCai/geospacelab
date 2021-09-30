@@ -5,12 +5,12 @@ import geospacelab.visualization.map_proj.geomap_viewer as geomap
 
 
 def test_ssusi():
-    dt_fr = datetime.datetime(2018, 1, 31, 8)
-    dt_to = datetime.datetime(2018, 1, 31, 14, 59)
-    time1 = datetime.datetime(2018, 1, 31, 14, 22)
+    dt_fr = datetime.datetime(2021, 8, 24, 8)
+    dt_to = datetime.datetime(2021, 8, 24, 14, 59)
+    time1 = datetime.datetime(2021, 8, 24, 11, 32)
     pole = 'N'
-    sat_id = 'f18'
-    band = '1356'
+    sat_id = 'f17'
+    band = 'LBHL'
 
     viewer = geomap.GeoMapViewer(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (5, 5)})
 
