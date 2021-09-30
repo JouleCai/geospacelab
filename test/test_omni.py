@@ -5,8 +5,8 @@ import geospacelab.visualization.mpl.ts_viewer as ts
 
 
 def test():
-    dt_fr = datetime.datetime(2020, 8, 24, 0)
-    dt_to = datetime.datetime(2020, 8, 24, 23)
+    dt_fr = datetime.datetime(2014, 11, 29, 0)
+    dt_to = datetime.datetime(2014, 12, 1, 23)
     tsviewer = ts.TimeSeriesViewer(dt_fr=dt_fr, dt_to=dt_to)
     ds1 = tsviewer.dock(datasource_contents=['cdaweb', 'omni'])
     ds1.load_data()
