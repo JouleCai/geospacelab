@@ -8,12 +8,13 @@ import geospacelab.visualization.map_proj.geomap_viewer as geomap
 def test_ampere():
     dt_fr = datetime.datetime(2016, 3, 14, 8)
     dt_to = datetime.datetime(2016, 3, 14, 23, 59)
-    time1 = datetime.datetime(2016, 3, 14, 22, 10)
+    time1 = datetime.datetime(2016, 3, 14, 22, 5)
     pole = 'N'
     load_mode = 'assigned'
+    # specify the file full path
     data_file_paths = ['/home/lei/afys-data/JHUAPL/AMPERE/Fitted/201603/AMPERE_fitted_20160314.0000.86400.600.north.grd.ncdf']
 
-    viewer = geomap.GeoMapViewer(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (5, 5)})
+    viewer = geomap.GeoMapViewer(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)})
     # viewer.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole='N', sat_id='f17', orbit_id='46863')
     viewer.dock(datasource_contents=['jhuapl', 'ampere', 'fitted'], load_mode=load_mode, data_file_paths=data_file_paths)
     viewer.set_layout(1, 1)
@@ -25,16 +26,18 @@ def test_ampere():
     mlt = viewer.assign_variable(('GRID_MLT'), dataset_index=1).value
 
     ind_t = dataset_ampere.get_time_ind(ut=time1)
-
+    # initialize the polar map
     pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, boundary_lat=40, mirror_south=True)
 
     panel1 = viewer.panels[pid]
     panel1.add_coastlines()
 
     fac_ = fac.value[ind_t, :, :]
+    # re-grid the original data with higher spatial resolution, default mlt_res = 0.05, mlat_res = 0.5. used for plotting.
+    grid_mlat, grid_mlt, grid_fac = dataset_ampere.grid_fac(fac_, mlt_res=0.05, mlat_res=0.05, interp_method='linear')
 
-    grid_mlat, grid_mlt, grid_fac = dataset_ampere.grid_fac(fac_)
-
+    # remove values less than 0.2
+    grid_fac[np.abs(grid_fac)<0.2] = np.nan
     # fac_[np.abs(fac_) < 0.2] = np.nan
     pcolormesh_config = fac.visual.plot_config.pcolormesh
     pcolormesh_config.update(c_scale='linear')
@@ -55,7 +58,7 @@ def test_ampere():
 
     polestr = 'North' if pole == 'N' else 'South'
     # panel1.add_title('DMSP/SSUSI, ' + band + ', ' + sat_id.upper() + ', ' + polestr + ', ' + time1.strftime('%Y-%m-%d %H%M UT'), pad=20)
-    # plt.savefig('DMSP_SSUSI_' + time1.strftime('%Y%m%d-%H%M') + '_' + band + '_' + sat_id.upper() + '_' + pole, dpi=300)
+    plt.savefig('ampere_example', dpi=300)
     plt.show()
 
 
