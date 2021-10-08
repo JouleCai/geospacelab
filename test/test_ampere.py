@@ -8,7 +8,7 @@ import geospacelab.visualization.map_proj.geomap_viewer as geomap
 def test_ampere():
     dt_fr = datetime.datetime(2016, 3, 14, 8)
     dt_to = datetime.datetime(2016, 3, 14, 23, 59)
-    time1 = datetime.datetime(2016, 3, 14, 22, 5)
+    time1 = datetime.datetime(2016, 3, 14, 21, 10)
     pole = 'N'
     load_mode = 'assigned'
     # specify the file full path
