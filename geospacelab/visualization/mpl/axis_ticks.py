@@ -190,7 +190,7 @@ def set_timeline(dt_start, dt_stop, **kwargs):
             dtx = dtx.replace(tzinfo=None)
             delta = dtx - dt.datetime(dtx.year, dtx.month, dtx.day, 0, 0, 0)
             if delta.total_seconds() == 0:
-                fmt1 = "%d/%m %H:%M"
+                fmt1 = "%b %d"
             else:
                 fmt1 = "%H:%M"
             return dtx.strftime(fmt1)
