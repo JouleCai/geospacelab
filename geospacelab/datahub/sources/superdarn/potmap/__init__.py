@@ -6,20 +6,20 @@ import numpy as np
 
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, InstrumentModel, ProductModel
-from geospacelab.datahub.sources.jhuapl import jhuapl_database
+from geospacelab.datahub.sources.superdarn import superdarn_database
 from geospacelab import preferences as prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
-from geospacelab.datahub.sources.jhuapl.ampere.fitted.loader import Loader as default_Loader
-import geospacelab.datahub.sources.jhuapl.ampere.fitted.variable_config as var_config
+from geospacelab.datahub.sources.superdarn.potmap.loader import Loader as default_Loader
+import geospacelab.datahub.sources.superdarn.potmap.variable_config as var_config
 
 
 default_dataset_attrs = {
-    'database': jhuapl_database,
-    'facility': 'AMPERE',
-    'product': 'Fitted',
-    'data_file_ext': 'ncdf',
-    'data_root_dir': prf.datahub_data_root_dir / 'JHUAPL' / 'AMPERE',
+    'database': superdarn_database,
+    'facility': 'SuperDARN',
+    'product': 'POTMAP',
+    'data_file_ext': 'nc',
+    'data_root_dir': prf.datahub_data_root_dir / 'SuperDARN' / 'PotentialMap',
     'allow_load': True,
     'allow_download': False,
     'data_search_recursive': False,
@@ -30,8 +30,8 @@ default_dataset_attrs = {
 
 default_variable_names = [
     'DATETIME', 'DATETIME_1', 'DATETIME_2',
-    'GRID_MLAT', 'GRID_MLT',
-    'GRID_Jr'
+    'GRID_MLAT', 'GRID_MLON', 'GRID_MLT',
+    'GRID_phi'
     ]
 
 # default_data_search_recursive = True
@@ -45,14 +45,11 @@ class Dataset(datahub.DatasetModel):
 
         super().__init__(**kwargs)
 
-        self.database = kwargs.pop('database', 'JHUAPL')
-        self.facility = kwargs.pop('facility', 'DMSP')
-        self.instrument = kwargs.pop('instrument', 'SSUSI')
-        self.product = kwargs.pop('product', 'EDR-EUR')
+        self.database = kwargs.pop('database', 'SuperDARN')
+        self.facility = kwargs.pop('facility', 'SuperDARN')
+        self.product = kwargs.pop('product', 'POTMAP')
         self.allow_download = kwargs.pop('allow_download', False)
 
-        self.sat_id = kwargs.pop('sat_id', 'f16')
-        self.orbit_id = kwargs.pop('orbit_id', None)
         self.pole = kwargs.pop('pole', 'N')
 
         self.metadata = None

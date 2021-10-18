@@ -37,6 +37,14 @@ class Loader(object):
         variables['DATETIME'] = np.reshape(dts, (ntime, 1))
 
         variables['GRID_MLAT'] = np.array(dataset.variables['MLAT'][::])
+        variables['GRID_MLON'] = np.array(dataset.variables['MLON'][::])
+        variables['GRID_MLT'] = np.array(dataset.variables['MLT'][::])
+        variables['GRID_E_E'] = np.array(dataset.variables['E_E'][::])
+        variables['GRID_E_E'] = np.array(dataset.variables['E_E'][::])
+        variables['GRID_E_N'] = np.array(dataset.variables['E_N'][::])
+        variables['GRID_v_i_E'] = np.array(dataset.variables['v_i_E'][::])
+        variables['GRID_v_i_N'] = np.array(dataset.variables['v_i_E'][::])
+        variables['GRID_phi'] = np.array(dataset.variables['phi'][::])
 
         dataset.close()
 

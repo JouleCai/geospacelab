@@ -74,17 +74,23 @@ class Downloader(object):
             if ntime != int(ntime):
                 raise ValueError
             ntime = int(ntime)
-            mlat_arr = np.array(results[3]).reshape([ntime, nlat, nlon], order='C').transpose((0, 2, 1))
-            mlon_arr = np.array(results[4]).reshape([ntime, nlat, nlon], order='C').transpose((0, 2, 1))
-            EF_N_arr = np.array(results[5]).reshape([ntime, nlat, nlon], order='C').transpose((0, 2, 1))
-            EF_E_arr = np.array(results[6]).reshape([ntime, nlat, nlon], order='C').transpose((0, 2, 1))
-            v_N_arr = np.array(results[7]).reshape([ntime, nlat, nlon], order='C').transpose((0, 2, 1))
-            v_E_arr = np.array(results[8]).reshape([ntime, nlat, nlon], order='C').transpose((0, 2, 1))
-            phi_arr = np.array(results[9]).reshape([ntime, nlat, nlon], order='C').transpose((0, 2, 1))
+            mlat_arr = np.array(results[3]).reshape([ntime, nlat, nlon], order='C').transpose((0, 2, 1)).astype(np.float32)
+            mlon_arr = np.array(results[4]).reshape([ntime, nlat, nlon], order='C').transpose((0, 2, 1)).astype(np.float32)
+            EF_N_arr = np.array(results[5]).reshape([ntime, nlat, nlon], order='C').transpose((0, 2, 1)).astype(np.float32)
+            EF_E_arr = np.array(results[6]).reshape([ntime, nlat, nlon], order='C').transpose((0, 2, 1)).astype(np.float32)
+            v_N_arr = np.array(results[7]).reshape([ntime, nlat, nlon], order='C').transpose((0, 2, 1)).astype(np.float32)
+            v_E_arr = np.array(results[8]).reshape([ntime, nlat, nlon], order='C').transpose((0, 2, 1)).astype(np.float32)
+            phi_arr = np.array(results[9]).reshape([ntime, nlat, nlon], order='C').transpose((0, 2, 1)).astype(np.float32)
 
             dts = np.array(results[10])[::nlon * nlat]
             dts = [datetime.datetime.strptime(dtstr, "%Y-%m-%d/%H:%M:%S") for dtstr in dts]
             time_array = np.array(cftime.date2num(dts, units='seconds since 1970-01-01 00:00:00.0'))
+
+            import aacgmv2
+            mlt_arr = np.empty_like(mlat_arr)
+            for i in range(ntime):
+                mlt1 = aacgmv2.convert_mlt(mlon_arr[i].flatten(), dts[i]).reshape((nlon, nlat))
+                mlt_arr[i, ::] = mlt1[::]
 
             fp = pathlib.Path(file_path.with_suffix('.nc'))
             fp.parent.resolve().mkdir(parents=True, exist_ok=True)
@@ -103,6 +109,8 @@ class Downloader(object):
             mlat[::] = mlat_arr[::]
             mlon = fnc.createVariable('MLON', np.float32, ('UNIX_TIME', 'MLON', 'MLAT'))
             mlon[::] = mlon_arr[::]
+            mlt = fnc.createVariable('MLT', np.float32, ('UNIX_TIME', 'MLON', 'MLAT'))
+            mlt[::] = mlt_arr[::]
             EF_N = fnc.createVariable('E_N', np.float32, ('UNIX_TIME', 'MLON', 'MLAT'))
             EF_N[::] = EF_N_arr[::]
             EF_E = fnc.createVariable('E_E', np.float32, ('UNIX_TIME', 'MLON', 'MLAT'))
