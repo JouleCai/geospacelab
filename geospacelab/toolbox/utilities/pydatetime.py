@@ -249,21 +249,3 @@ def convert_unix_time_to_datetime_cftime(times):
     elif 'numpy' in str(type_in):
         return dts
 
-
-def convert_datetime_to_unix_time_cftime(times):
-    type_in = type(times)
-
-    ts = numpy.array(times)
-    dts = numpy.empty_like(ts, dtype=datetime)
-
-    dts = numpy.array(
-        cftime.date2num(ts.flatten(),
-                        units='seconds since 1970-01-01 00:00:00.0')
-    )
-
-    if type_in in (int, float):
-        return dts[0]
-    elif type_in is list:
-        return dts.tolist()
-    elif 'numpy' in str(type_in):
-        return dts

@@ -43,7 +43,7 @@ class Downloader(object):
         self.download()
 
     def download(self):
-        diff_years = self.dt_to.year - self.dt_fr.year
+        diff_years = self.dt_to.year - self.dt_fr.year + 1
 
         for i in range(diff_years + 1):
             dt1 = datetime.datetime(self.dt_fr.year + i, 1, 1)
@@ -120,7 +120,7 @@ class Downloader(object):
             fnc.createDimension('UNIX_TIME', num_rows)
 
             fnc.title = "GFZ SN/F10.7 index"
-            time = fnc.createVariable('UNIX_TIME', np.float32, ('UNIX_TIME',))
+            time = fnc.createVariable('UNIX_TIME', np.float64, ('UNIX_TIME',))
             time.units = 'Unix Time since 1970-1-1'
             f107o = fnc.createVariable('F107_OBS', np.float32, ('UNIX_TIME',))
             f107a = fnc.createVariable('F107_ADJ', np.float32, ('UNIX_TIME',))
@@ -151,7 +151,7 @@ class Downloader(object):
             fnc.createDimension('UNIX_TIME', num_rows*8)
 
             fnc.title = "GFZ SN/F10.7 index"
-            time = fnc.createVariable('UNIX_TIME', np.float32, ('UNIX_TIME',))
+            time = fnc.createVariable('UNIX_TIME', np.float64, ('UNIX_TIME',))
             kp = fnc.createVariable('Kp', np.float32, ('UNIX_TIME',))
             ap = fnc.createVariable('ap', np.float32, ('UNIX_TIME',))
             Ap = fnc.createVariable('Ap', np.float32, ('UNIX_TIME',))
