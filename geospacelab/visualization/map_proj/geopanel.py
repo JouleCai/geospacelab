@@ -505,6 +505,17 @@ class PolarMap(mpl.Panel):
         # self._check_mirror_south()
         return ipc
 
+    def add_contour(self, data, coords=None, cs=None, **kwargs):
+        levels = kwargs.pop('levels', 10)
+        if cs is None:
+            cs = self.cs
+        if cs !=self.cs:
+            raise NotImplemented
+        else:
+            cs_new = self.cs_transform(cs_fr=cs, coords=coords)
+            ict = self.major_ax.contour(cs_new['lon'], cs_new['lat'], data, levels, transform=ccrs.PlateCarree(), **kwargs)
+        return ict
+
     def add_sc_trajectory(self, sc_lat, sc_lon, sc_alt, sc_dt=None, show_trajectory=True,
                           time_tick=False, time_tick_res=600., time_tick_scale=0.02,
                           time_tick_label=True, time_tick_label_format="%M:%H", time_tick_label_fontsize=8,
