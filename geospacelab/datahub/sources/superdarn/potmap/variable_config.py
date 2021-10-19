@@ -39,18 +39,18 @@ depend_0 = {'UT': 'DATETIME'}
 depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
 
 ####################################################################################################################
-var_name = 'GRID_Jr'
+var_name = 'GRID_phi'
 var = Var(name=var_name, ndim=4, variable_type='scalar', visual=visual)
 # set variable attrs
-var.fullname = 'Field-aligned current'
-var.label = r'FAC'
-var.group = 'Emission intensity'
+var.fullname = 'Electric potential map'
+var.label = r'$\phi$'
+var.group = 'Electric potential'
 var.unit = r'$\mu$A/m$^2$'
 var.depends = {0: depend_0, 1: {'AACGM_LAT': 'GRID_MLAT'}, 2: {'AACGM_MLT': 'GRID_MLT'}}
 # set plot attrs
 plot_config = var.visual.plot_config
 plot_config.config(**default_plot_config)
-plot_config.style = '2P'
+plot_config.style = '2C'
 # set axis attrs
 axis = var.visual.axis
 

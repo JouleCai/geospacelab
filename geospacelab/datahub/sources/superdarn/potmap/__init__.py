@@ -29,7 +29,7 @@ default_dataset_attrs = {
 }
 
 default_variable_names = [
-    'DATETIME', 'DATETIME_1', 'DATETIME_2',
+    'DATETIME',
     'GRID_MLAT', 'GRID_MLON', 'GRID_MLT',
     'GRID_phi'
     ]
@@ -87,7 +87,7 @@ class Dataset(datahub.DatasetModel):
             configured_variables=var_config.configured_variables
         )
         for file_path in self.data_file_paths:
-            load_obj = self.loader(file_path, file_type=self.product.lower(), pole=self.pole)
+            load_obj = self.loader(file_path, file_ext=self.data_file_ext, pole=self.pole)
 
             for var_name in self._variables.keys():
                 value = load_obj.variables[var_name]
@@ -102,32 +102,32 @@ class Dataset(datahub.DatasetModel):
         ind = np.where(np.abs(delta_sectime) == np.min(np.abs(delta_sectime)))[0][0]
         return ind
 
-    def grid_fac(self, fac_data, mlat_data=None, mlt_data=None, mlt_res=0.05, mlat_res=0.05, interp_method='cubic'):
-        import scipy.interpolate as si
-        x = np.arange(0, 24, mlt_res)
-        y = np.arange(40, 89, mlat_res)
-        grid_x, grid_y = np.meshgrid(x, y, indexing='ij')
+    # def grid_fac(self, fac_data, mlat_data=None, mlt_data=None, mlt_res=0.05, mlat_res=0.05, interp_method='cubic'):
+    #     import scipy.interpolate as si
+    #     x = np.arange(0, 24, mlt_res)
+    #     y = np.arange(40, 89, mlat_res)
+    #     grid_x, grid_y = np.meshgrid(x, y, indexing='ij')
 
-        if mlt_data is None:
-            mlt_data = self['GRID_MLT'].value[0, ::]
-        if mlat_data is None:
-            mlat_data = self['GRID_MLAT'].value[0, ::]
+    #     if mlt_data is None:
+    #         mlt_data = self['GRID_MLT'].value[0, ::]
+    #     if mlat_data is None:
+    #         mlat_data = self['GRID_MLAT'].value[0, ::]
 
-        xdata = np.vstack((mlt_data, mlt_data[0, :]))
-        xdata[mlt_data.shape[0], :] = 24.
+    #     xdata = np.vstack((mlt_data, mlt_data[0, :]))
+    #     xdata[mlt_data.shape[0], :] = 24.
 
-        ydata = np.vstack((mlat_data, mlat_data[0, :]))
-        zdata = np.vstack((fac_data, fac_data[0, :]))
+    #     ydata = np.vstack((mlat_data, mlat_data[0, :]))
+    #     zdata = np.vstack((fac_data, fac_data[0, :]))
 
-        grid_fac = si.griddata(
-            (xdata.flatten(), ydata.flatten()),
-            zdata.flatten(),
-            (grid_x, grid_y),
-            method=interp_method
-        )
-        grid_mlat = grid_y
-        grid_mlt = grid_x
-        return grid_mlat, grid_mlt, grid_fac
+    #     grid_fac = si.griddata(
+    #         (xdata.flatten(), ydata.flatten()),
+    #         zdata.flatten(),
+    #         (grid_x, grid_y),
+    #         method=interp_method
+    #     )
+    #     grid_mlat = grid_y
+    #     grid_mlt = grid_x
+    #     return grid_mlat, grid_mlt, grid_fac
 
     # def search_data_files(self, **kwargs):
     #     dt_fr = self.dt_fr
