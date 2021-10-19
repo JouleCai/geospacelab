@@ -8,7 +8,7 @@ import geospacelab.visualization.map_proj.geomap_viewer as geomap
 def test_ampere():
     dt_fr = datetime.datetime(2016, 3, 15, 0)
     dt_to = datetime.datetime(2016, 3, 15, 23, 59)
-    time1 = datetime.datetime(2016, 3, 15, 1, 10)
+    time1 = datetime.datetime(2016, 3, 15, 10, 10)
     pole = 'N'
     load_mode = 'assigned'
     # specify the file full path
@@ -37,7 +37,8 @@ def test_ampere():
     mlt_ = mlt.value[ind_t]
     mlon_ = mlon.value[ind_t]
 
-    grid_mlat, grid_mlt, grid_phi = dataset_superdarn.grid_phi(mlat_, mlt_, phi_, interp_method='cubic')
+    # grid_mlat, grid_mlt, grid_phi = dataset_superdarn.grid_phi(mlat_, mlt_, phi_, interp_method='cubic')
+    grid_mlat, grid_mlt, grid_phi = dataset_superdarn.postprocess_roll(mlat_, mlt_, phi_)
     # re-grid the original data with higher spatial resolution, default mlt_res = 0.05, mlat_res = 0.5. used for plotting.
     # grid_mlat, grid_mlt, grid_fac = dataset_ampere.grid_fac(phi_, mlt_res=0.05, mlat_res=0.05, interp_method='linear')
 

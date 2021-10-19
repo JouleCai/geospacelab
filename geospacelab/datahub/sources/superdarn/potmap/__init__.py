@@ -122,6 +122,13 @@ class Dataset(datahub.DatasetModel):
         grid_mlt = grid_x
         return grid_mlat, grid_mlt, grid_phi
 
+    def postprocess_roll(self, mlat_data, mlt_data, phi_data):
+        ind_min = np.argmin(mlt_data, axis=0)[0]
+        mlat_data = np.roll(mlat_data, -ind_min, axis=0)
+        mlt_data = np.roll(mlt_data, -ind_min, axis=0)
+        phi_data = np.roll(phi_data, -ind_min, axis=0)
+        return mlat_data, mlt_data, phi_data
+
     # def search_data_files(self, **kwargs):
     #     dt_fr = self.dt_fr
     #     if self.dt_to.hour > 22:
