@@ -12,7 +12,7 @@ def test_ampere():
     pole = 'N'
     load_mode = 'assigned'
     # specify the file full path
-    data_file_paths = ['/home/lei/afys-data/SuperDARN/PotentialMap/2016/SuperDARN_POTMAP_2min_20160315_N.nc']
+    data_file_paths = ['/home/lei/afys-data/SuperDARN/PotentialMap/2016/SuperDARN_POTMAP_2min_20160315_N.dat']
 
     viewer = geomap.GeoMapViewer(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)})
     viewer.dock(datasource_contents=['superdarn', 'potmap'], load_mode=load_mode, data_file_paths=data_file_paths)
