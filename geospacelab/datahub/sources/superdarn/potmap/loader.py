@@ -66,10 +66,15 @@ class Loader(object):
         with open(file_path, 'r') as f:
             text = f.read()
 
+            # results = re.findall(
+            #     r'^\s*(\d+)\s*\[(\d+),(\d+)]\s*([-\d.]+)\s*' +
+            #     r'([-\d.]+)\s*([-\d.]+)\s*([-\d.]+)\s*([-\d.]+)\s*([-\d.]+)\s*([-\d.]+)\s*' +
+            #     r'([\S]+)',
+            #     text,
+            #     re.M
+            # )
             results = re.findall(
-                r'^\s*(\d+)\s*\[(\d+),(\d+)]\s*([-\d.]+)\s*' +
-                r'([-\d.]+)\s*([-\d.]+)\s*([-\d.]+)\s*([-\d.]+)\s*([-\d.]+)\s*([-\d.]+)\s*' +
-                r'([\S]+)',
+                r'^\s*(\d+)\s*\[(\d+),(\d+)]\s*([\S]+)\s*([\S]+)\s*([\S]+)\s*([\S]+)\s*([\S]+)\s*([\S]+)\s*([\S]+)\s*([\S]+)',
                 text,
                 re.M
             )
