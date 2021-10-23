@@ -249,6 +249,47 @@ class DatasetModel(object):
         self._data_root_dir = pathlib.Path(path)
 
 
+class DownloaderModel(object):
+    """
+    Downloader Model for downloading data files from different data sources
+
+    Parameters
+    ===========
+    :param dt_fr: starting time.
+    :type dt_fr: datetime.datetime
+    :param dt_to: stopping time.
+    :type dt_to: datetime.datetime
+    :param data_file_root_dir: the root directory storing the data.
+    :type data_file_root_dir: str or pathlib.Path object
+    :param done: if the files are downloaded or not [False].
+    :type done: bool
+    :param force: Force the downloader to download the data files, [True].
+    :type force: bool
+    :param direct_download: Download the data directly without calling the function download [True].
+    :type direct_download: bool
+    """
+
+    def __init__(self, dt_fr, dt_to, data_file_root_dir=None, force=True, direct_download=True, **kwargs):
+
+        self.dt_fr = dt_fr
+        self.dt_to = dt_to
+        self.data_file_root_dir = data_file_root_dir
+
+        self.files = []
+
+        self.force = force
+        self.direct_download = direct_download
+        self.done = False
+
+        if self.direct_download:
+            self.done = self.download(**kwargs)
+
+    def download(self, **kwargs):
+        """
+        Download the data from a http or ftp server. Implementation must be added according to different data sources
+        :param kwargs: keywords for downloading the data files.
+        """
+        raise NotImplemented
 
 # class LoaderBase(object):
 #
