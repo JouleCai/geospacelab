@@ -42,7 +42,7 @@ class Downloader(DownloaderModel):
                  dt_fr, dt_to,
                  data_file_root_dir=None, ftp_data_dir=None, force=True, direct_download=True, file_version=None,
                  **kwargs):
-        self.ftp_host = "swarm-diss.eo.esa.int"
+        self.ftp_host = "swarm-diss.eo.esa_eo.int"
         self.ftp_port = 21
         if ftp_data_dir is None:
             raise ValueError

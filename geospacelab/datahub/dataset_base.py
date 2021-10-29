@@ -130,13 +130,15 @@ class DatasetModel(object):
         inds = np.where((var_datetime.value.flatten() >= self.dt_fr) & (var_datetime.value.flatten() <= self.dt_to))[0]
         self.time_filter_by_inds(inds, var_datetime=var_datetime)
 
-    def time_filter_by_inds(self, inds, var_datetime=None):
+    def time_filter_by_inds(self, inds, var_datetime=None, var_datetime_name=None):
         if inds is None:
             return
         if not list(inds):
             return
         if var_datetime is None:
             var_datetime = self['DATETIME']
+        if var_datetime_name is not None:
+            var_datetime = self[var_datetime_name]
         shape_0 = var_datetime.value.shape[0]
         for var in self._variables.values():
             if var.value.shape[0] == shape_0 and len(var.value.shape) > 1:

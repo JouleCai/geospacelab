@@ -41,7 +41,6 @@ class Loader:
         self.load_data()
 
     def load_data(self):
-        load_func = None
         if self.file_type == 'eiscat-hdf5':
             self.load_eiscat_hdf5()
         elif self.file_type == 'eiscat-mat':
@@ -50,7 +49,6 @@ class Loader:
             self.load_madrigal_hdf5()
         else:
             raise ValueError
-        return load_func
 
     def load_eiscat_hdf5(self):
         """

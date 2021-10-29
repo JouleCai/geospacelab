@@ -31,7 +31,7 @@ class Downloader(DownloaderModel):
         ftp_data_dir.replace('2Hz', data_type)
 
         if data_file_root_dir is None:
-            data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Advanced" / "EFI-TII"
+            data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Advanced" / "EFI-TCT"
 
         super(Downloader, self).__init__(
             dt_fr, dt_to,
