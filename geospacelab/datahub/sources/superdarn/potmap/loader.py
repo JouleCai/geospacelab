@@ -26,7 +26,7 @@ class Loader(object):
         self.load_data()
 
     def load_data(self):
-        if self.file_path.suffix == '.dat' or self.file_ext == 'ascii':
+        if self.file_path.suffix == '.dat' or self.file_ext == '.txt':
             file_nc = pathlib.Path(self.file_path.with_suffix('.nc'))
             if not file_nc.is_file():
                 self.save_to_nc(self.file_path)

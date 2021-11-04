@@ -14,6 +14,7 @@ import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
 from geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_tct.loader import Loader as default_Loader
+from geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_tct.downloader import Downloader as default_Downloader
 import geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_tct.variable_config as var_config
 
 
@@ -23,19 +24,19 @@ default_dataset_attrs = {
     'instrument': 'EFI-TII',
     'product': 'TCT02',
     'data_file_ext': '.cdf',
-    'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Advanced' / 'EFI-TCT',
+    'product_version': '',
+    'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Advanced',
     'allow_load': True,
-    'allow_download': False,
+    'allow_download': True,
+    'force_download': False,
     'data_search_recursive': False,
     'label_fields': ['database', 'facility', 'product'],
-    'load_mode': 'assigned',
+    'load_mode': 'AUTO',
     'time_clip': True,
 }
 
 default_variable_names = [
-    'DATETIME', 'DATETIME_1', 'DATETIME_2',
-    'GRID_MLAT', 'GRID_MLT',
-    'GRID_Jr'
+    'DATETIME', 'v_i_H_x', 'v_i_H_y'
     ]
 
 # default_data_search_recursive = True
@@ -53,7 +54,10 @@ class Dataset(datahub.DatasetModel):
         self.facility = kwargs.pop('facility', 'SWARM')
         self.instrument = kwargs.pop('instrument', 'EFI-TII')
         self.product = kwargs.pop('product', 'TCT02')
+        self.product_version = kwargs.pop('product', '')
+        self.local_latest_version = ''
         self.allow_download = kwargs.pop('allow_download', False)
+        self.force_download = kwargs.pop('force_download', False)
 
         self.sat_id = kwargs.pop('sat_id', 'A')
 
@@ -67,7 +71,7 @@ class Dataset(datahub.DatasetModel):
             self.loader = default_Loader
 
         if self.downloader is None:
-            self.downloader = None
+            self.downloader = default_Downloader
 
         self._validate_attrs()
 
@@ -79,6 +83,27 @@ class Dataset(datahub.DatasetModel):
             attr = getattr(self, attr_name)
             if not list(attr):
                 mylog.StreamLogger.warning("The parameter {} is required before loading data!".format(attr_name))
+
+        self.data_root_dir = self.data_root_dir / self.instrument / self.product
+
+        if str(self.product_version) and self.product_version != 'latest':
+            self.data_root_dir = self.data_root_dir / self.product_version
+        else:
+            try:
+                dirs_product_version = [f for f in self.data_root_dir.iterdir() if f.is_dir()]
+            except FileNotFoundError:
+                dirs_product_version = []
+                self.force_download = True
+
+            if list(dirs_product_version):
+                self.local_latest_version = max(dirs_product_version)
+                self.data_root_dir = self.data_root_dir / self.local_latest_version
+                if not self.force_download:
+                    mylog.StreamLogger.info(
+                        "Note: Currently loading the local data " +
+                        "whose the latest version is {} ".format(self.local_latest_version) +
+                        "Keep an eye on the latest baselines online!"
+                    )
 
     def label(self, **kwargs):
         label = super().label()
@@ -100,7 +125,7 @@ class Dataset(datahub.DatasetModel):
 
             # self.select_beams(field_aligned=True)
         if self.time_clip:
-            self.time_filter_by_range(var_datetime_name = 'SC_DATETIME')
+            self.time_filter_by_range(var_datetime_name='SC_DATETIME')
 
     def get_time_ind(self, ut):
         delta_sectime = [delta_t.total_seconds() for delta_t in (self['DATETIME'].value.flatten() - ut)]
@@ -108,54 +133,44 @@ class Dataset(datahub.DatasetModel):
         return ind
 
     def search_data_files(self, **kwargs):
+
         dt_fr = self.dt_fr
-        if self.dt_to.hour > 22:
-            dt_to = self.dt_to + datetime.timedelta(days=1)
-        else:
-            dt_to = self.dt_to
+        dt_to = self.dt_to
+
         diff_days = dttool.get_diff_days(dt_fr, dt_to)
+
         dt0 = dttool.get_start_of_the_day(dt_fr)
+
         for i in range(diff_days + 1):
-            thisday = dt0 + datetime.timedelta(days=i)
-            initial_file_dir = kwargs.pop('initial_file_dir', None)
-            if initial_file_dir is None:
-                initial_file_dir = self.data_root_dir / self.sat_id.lower() / thisday.strftime("%Y%m%d")
+            this_day = dt0 + datetime.timedelta(days=i)
+
+            initial_file_dir = kwargs.pop(
+                'initial_file_dir', self.data_root_dir / this_day.strftime("%Y%m%d")
+            )
+
             file_patterns = [
-                self.sat_id.upper(),
+                'EFI' + self.sat_id.upper(),
                 self.product.upper(),
-                thisday.strftime("%Y%m%d"),
             ]
-            if self.orbit_id is not None:
-                file_patterns.append(self.orbit_id)
             # remove empty str
             file_patterns = [pattern for pattern in file_patterns if str(pattern)]
-
             search_pattern = '*' + '*'.join(file_patterns) + '*'
 
-            if self.orbit_id is not None:
-                multiple_files = False
-            else:
-                fp_log = initial_file_dir / 'EDR-AUR.full.log'
-                if not fp_log.is_file():
-                    self.download_data(dt_fr=thisday, dt_to=thisday)
-                multiple_files = True
             done = super().search_data_files(
                 initial_file_dir=initial_file_dir,
                 search_pattern=search_pattern,
-                allow_multiple_files=multiple_files,
+                allow_multiple_files=True,
             )
-            if done and self.orbit_id is not None:
-                return True
-
             # Validate file paths
 
             if not done and self.allow_download:
-                done = self.download_data(dt_fr=thisday, dt_to=thisday)
+                done = self.download_data()
                 if done:
+                    initial_file_dir = initial_file_dir
                     done = super().search_data_files(
                         initial_file_dir=initial_file_dir,
                         search_pattern=search_pattern,
-                        allow_multiple_files=multiple_files
+                        allow_multiple_files=True
                     )
 
         return done
@@ -167,8 +182,18 @@ class Dataset(datahub.DatasetModel):
             dt_to = self.dt_to
         download_obj = self.downloader(
             dt_fr, dt_to,
-            orbit_id=self.orbit_id, sat_id=self.sat_id, file_type=self.product.lower(),
-            data_file_root_dir=self.data_root_dir)
+            sat_id=self.sat_id,
+            data_type='TCT02',
+            file_version=self.product_version,
+            force=self.force_download
+        )
+        if download_obj.file_version != self.local_latest_version and self.product_version == 'latest':
+            mylog.StreamLogger.warning(
+                f"A newer version of data files have been downloaded ({download_obj.file_version})"
+            )
+            self.product_version = download_obj.file_version
+            self._validate_attrs()
+
         return download_obj.done
 
     @property

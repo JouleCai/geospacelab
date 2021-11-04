@@ -31,10 +31,10 @@ import geospacelab.toolbox.utilities.pydatetime as dttool
 
 def test():
     sites = ['UHF', 'ESR']
-    dt_fr = datetime.datetime(2021, 3, 10)
-    dt_to = datetime.datetime(2021, 3, 10)
-    download_obj = Downloader(dt_fr, dt_to, sites=sites, kind_data="madrigal")
-    # schedule = EISCATSchedule(dt_fr=dt_fr, dt_to=dt_to)
+    dt_fr = datetime.datetime(2000, 1, 1)
+    dt_to = datetime.datetime(2021, 10, 30)
+    # download_obj = Downloader(dt_fr, dt_to, sites=sites, kind_data="madrigal")
+    schedule = EISCATSchedule(dt_fr=dt_fr, dt_to=dt_to)
 
 
 class Downloader(object):

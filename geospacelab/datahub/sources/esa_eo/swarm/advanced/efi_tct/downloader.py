@@ -10,7 +10,7 @@ __docformat__ = "reStructureText"
 
 from geospacelab import preferences as prf
 
-from geospacelab.datahub.sources.esa.swarm.downloader import Downloader as DownloaderModel
+from geospacelab.datahub.sources.esa_eo.swarm.downloader import Downloader as DownloaderModel
 
 
 class Downloader(DownloaderModel):
@@ -18,7 +18,7 @@ class Downloader(DownloaderModel):
     def __init__(
             self, dt_fr, dt_to,
             sat_id=None,
-            data_type='2Hz',
+            data_type='TCT02',
             file_version=None,
             data_file_root_dir=None,
             ftp_data_dir=None,
@@ -26,12 +26,19 @@ class Downloader(DownloaderModel):
     ):
 
         self.sat_id = sat_id
+
+        if data_type == 'TCT02':
+            frq_str = '2Hz'
+        elif data_type == 'TCT16':
+            frq_str = '16Hz'
+        else:
+            raise NotImplementedError
+
         if ftp_data_dir is None:
-            ftp_data_dir = 'Advanced/Plasma_Data/2Hz_TII_Cross-track_Dataset/New_baseline/Sat_' + sat_id.upper()
-        ftp_data_dir.replace('2Hz', data_type)
+            ftp_data_dir = f'Advanced/Plasma_Data/{frq_str}_TII_Cross-track_Dataset/New_baseline/Sat_{sat_id.upper()}'
 
         if data_file_root_dir is None:
-            data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Advanced" / "EFI-TCT"
+            data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Advanced" / "EFI-TII" / data_type
 
         super(Downloader, self).__init__(
             dt_fr, dt_to,
