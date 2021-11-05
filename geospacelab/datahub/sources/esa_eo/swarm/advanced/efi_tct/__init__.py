@@ -23,20 +23,29 @@ default_dataset_attrs = {
     'facility': swarm_facility,
     'instrument': 'EFI-TII',
     'product': 'TCT02',
-    'data_file_ext': '.cdf',
-    'product_version': '',
+    'data_file_ext': 'cdf',
+    'product_version': 'latest',
     'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Advanced',
     'allow_load': True,
     'allow_download': True,
     'force_download': False,
     'data_search_recursive': False,
-    'label_fields': ['database', 'facility', 'product'],
+    'label_fields': ['database', 'facility', 'instrument', 'product'],
     'load_mode': 'AUTO',
     'time_clip': True,
 }
 
 default_variable_names = [
-    'DATETIME', 'v_i_H_x', 'v_i_H_y'
+    'SC_DATETIME', 'SC_GEO_LAT', 'SC_GEO_LON', 'SC_GEO_r',
+    'SC_QD_LAT', 'SC_QD_MLT',
+    'v_i_H_x', 'v_i_H_x_err', 'v_i_V_x', 'v_i_V_x_err', 'v_i_H_y', 'v_i_H_y_err',
+    'v_i_V_z', 'v_i_V_z_err',
+    'v_SC_N', 'v_SC_E', 'v_SC_C',
+    'E_H_x', 'E_H_y', 'E_H_z',
+    'E_V_x', 'E_V_y', 'E_V_z',
+    'B_x', 'B_y', 'B_z',
+    'v_i_CR_x', 'v_i_CR_y', 'v_i_CR_z',
+    'QUALITY_FLAG', 'CALIB_FLAG',
     ]
 
 # default_data_search_recursive = True
@@ -89,8 +98,9 @@ class Dataset(datahub.DatasetModel):
         if str(self.product_version) and self.product_version != 'latest':
             self.data_root_dir = self.data_root_dir / self.product_version
         else:
+            self.product_version = 'latest'
             try:
-                dirs_product_version = [f for f in self.data_root_dir.iterdir() if f.is_dir()]
+                dirs_product_version = [f.name for f in self.data_root_dir.iterdir() if f.is_dir()]
             except FileNotFoundError:
                 dirs_product_version = []
                 self.force_download = True
@@ -99,9 +109,9 @@ class Dataset(datahub.DatasetModel):
                 self.local_latest_version = max(dirs_product_version)
                 self.data_root_dir = self.data_root_dir / self.local_latest_version
                 if not self.force_download:
-                    mylog.StreamLogger.info(
-                        "Note: Currently loading the local data " +
-                        "whose the latest version is {} ".format(self.local_latest_version) +
+                    mylog.simpleinfo.info(
+                        "Note: Loading the local files " +
+                        "with the latest version {} ".format(self.local_latest_version) +
                         "Keep an eye on the latest baselines online!"
                     )
 

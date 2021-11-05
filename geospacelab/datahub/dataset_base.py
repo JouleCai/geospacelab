@@ -122,7 +122,7 @@ class DatasetModel(object):
         self.data_file_num = len(self.data_file_paths)
 
     def time_filter_by_range(self, var_datetime=None, var_datetime_name=None):
-        if var_datetime is None:
+        if var_datetime is None and var_datetime_name is None:
             var_datetime = self['DATETIME']
         if var_datetime_name is not None:
             var_datetime = self[var_datetime_name]

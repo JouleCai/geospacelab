@@ -65,9 +65,9 @@ class Downloader(DownloaderModel):
             ftp.cwd(self.ftp_data_dir)
             file_list = ftp.nlst()
 
-            file_names = self.search_files(file_list=file_list)
+            file_names, versions = self.search_files(file_list=file_list)
             file_dir = self.data_file_root_dir
-            for file_name in file_names:
+            for ind_f, file_name in enumerate(file_names):
                 dt_regex = re.compile(r'(\d{8}T\d{6})_(\d{8}T\d{6})_(\d{4})')
                 rm = dt_regex.findall(file_name)
                 this_day = datetime.datetime.strptime(rm[0][0], '%Y%m%dT%H%M%S')
@@ -84,17 +84,29 @@ class Downloader(DownloaderModel):
                         continue
                 else:
                     file_path.parent.resolve().mkdir(parents=True, exist_ok=True)
-                with open(file_path, 'w+b') as f:
-                    done = False
-                    res = ftp.retrbinary('RETR ' + file_name, f.write)
-                    if not res.startswith('226 Transfer complete'):
-                        print('Downloaded of file {0} is not compile.'.format(file_name))
-                        pathlib.Path.unlink(file_path)
+                mylog.simpleinfo.info(
+                    f"Downloading the file {file_name} from the FTP ..."
+                )
+                try:
+                    with open(file_path, 'w+b') as f:
                         done = False
-                        return done
-                    with zipfile.ZipFile(file_path, 'r') as zip_ref:
-                        zip_ref.extractall(file_path.parent.resolve())
-                        file_path.unlink()
+                        res = ftp.retrbinary('RETR ' + file_name, f.write)
+                        print(res)
+                        if not res.startswith('226'):
+                            mylog.StreamLogger.warning('Downloaded of file {0} is not compile.'.format(file_name))
+                            pathlib.Path.unlink(file_path)
+                            done = False
+                            return done
+                        mylog.simpleinfo.info("Done.")
+                except:
+                    pathlib.Path.unlink(file_path)
+                    mylog.StreamLogger.warning('Downloaded of file {0} is not compile.'.format(file_name))
+                    return False
+                mylog.simpleinfo.info("Uncompressing the file ...")
+                with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                    zip_ref.extractall(file_path.parent.resolve())
+                    file_path.unlink()
+                mylog.simpleinfo.info("Done. The zip file has been removed.")
 
                 done = True
                 ftp.quit()
@@ -107,7 +119,7 @@ class Downloader(DownloaderModel):
         def extract_timeline(files):
             nf = len(files)
             dt_ranges = np.empty((nf, 2), dtype=datetime.datetime)
-            dts = np.empty((nf, ), dtype=datetime.datetime)
+            # dts = np.empty((nf, ), dtype=datetime.datetime)
             vers = np.empty((nf, ), dtype=object)
             for ind, fn in enumerate(files):
                 dt_regex = re.compile(r'(\d{8}T\d{6})_(\d{8}T\d{6})_(\d{4})')
@@ -119,7 +131,7 @@ class Downloader(DownloaderModel):
                 dt_ranges[ind, 1] = datetime.datetime.strptime(rm[0][1], '%Y%m%dT%H%M%S')
                 vers[ind] = rm[0][2]
 
-            return dt_ranges[:, 0], dt_ranges[:, 1], versions
+            return dt_ranges[:, 0], dt_ranges[:, 1], vers
 
         if file_name_patterns is None:
             file_name_patterns = []
@@ -132,15 +144,17 @@ class Downloader(DownloaderModel):
         start_dts, stop_dts, versions = extract_timeline(file_list)
 
         ind_dt = np.where((self.dt_fr < stop_dts) & (self.dt_to > start_dts))[0]
-
-        file_list = file_list[ind_dt]
-        versions = versions[ind_dt]
+        if not list(ind_dt):
+            raise FileExistsError
+        file_list = [file_list[ii] for ii in ind_dt]
+        versions = [versions[ii] for ii in ind_dt]
 
         if self.file_version == 'latest':
-            self.file_version = versions(np.argmax(versions.astype(np.int32)))
-        ind_v = np.where(versions == self.file_version)[0]
+            self.file_version = max(versions)
+        ind_v = np.where(np.array(versions) == self.file_version)[0]
 
-        file_list = file_list[ind_v]
+        file_list = [file_list[ii] for ii in ind_v]
+        versions = [versions[ii] for ii in ind_v]
         return file_list, versions
 
 

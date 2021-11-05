@@ -50,10 +50,12 @@ class Downloader(DownloaderModel):
 
     def download(self, **kwargs):
 
-        super(Downloader, self).download(**kwargs)
+        done = super(Downloader, self).download(**kwargs)
+        return done
 
     def search_files(self, **kwargs):
 
         file_list, versions = super(Downloader, self).search_files(**kwargs)
 
+        return file_list, versions
         # version control

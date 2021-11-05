@@ -56,14 +56,14 @@ class LoaderModel(object):
         variables = cdf_info['zVariables']
 
         if dict(self.variable_name_dict):
-            new_dict = {vn: vn for vn in variables.keys()}
+            new_dict = {vn: vn for vn in variables}
             self.variable_name_dict = pybasic.dict_set_default(self.variable_name_dict, **new_dict)
 
         for var_name, cdf_var_name in self.variable_name_dict.items():
             if var_name == 'CDF_EPOCH':
                 epochs = cdf_file.varget(variable=cdf_var_name)
                 epochs = cdflib.cdfepoch.unixtime(epochs)
-                dts = [datetime.timedelta(seconds=epochs) + datetime.datetime(1970, 1, 1, 0, 0, 0)]
+                dts = [datetime.timedelta(seconds=epoch) + datetime.datetime(1970, 1, 1, 0, 0, 0) for epoch in epochs]
                 self.variables['SC_DATETIME'] = np.array(dts).reshape((len(dts), 1))
                 continue
             var = cdf_file.varget(variable=cdf_var_name)
