@@ -30,6 +30,8 @@ default_dataset_attrs = {
     'allow_download': True,
     'force_download': False,
     'data_search_recursive': False,
+    'quality_control': False,
+    'calib_control': False,
     'label_fields': ['database', 'facility', 'instrument', 'product'],
     'load_mode': 'AUTO',
     'time_clip': True,
@@ -67,6 +69,8 @@ class Dataset(datahub.DatasetModel):
         self.local_latest_version = ''
         self.allow_download = kwargs.pop('allow_download', False)
         self.force_download = kwargs.pop('force_download', False)
+        self.quality_control = kwargs.pop('quality_control', False)
+        self.calib_control = kwargs.pop('calib_control', False)
 
         self.sat_id = kwargs.pop('sat_id', 'A')
 
@@ -136,11 +140,29 @@ class Dataset(datahub.DatasetModel):
             # self.select_beams(field_aligned=True)
         if self.time_clip:
             self.time_filter_by_range(var_datetime_name='SC_DATETIME')
+        if self.quality_control:
+            self.time_filter_by_quality()
+        if self.calib_control:
+            self.time_filter_by_calib()
 
-    def get_time_ind(self, ut):
-        delta_sectime = [delta_t.total_seconds() for delta_t in (self['DATETIME'].value.flatten() - ut)]
-        ind = np.where(np.abs(delta_sectime) == np.min(np.abs(delta_sectime)))[0][0]
-        return ind
+    def time_filter_by_quality(self, quality_flags=None):
+        if quality_flags is None:
+            quality_flags = np.array([1])
+
+        for qf in quality_flags:
+            inds = np.where(self['QUALITY_FLAG'].value.flatten() == qf)[0]
+            for key in self.keys():
+                self._variables[key].value = self._variables[key].value[inds, ::]
+
+    def time_filter_by_calib(self, calib_flags=None):
+
+        if calib_flags is None:
+            calib_flags = np.array([0])
+
+        for cf in calib_flags:
+            inds = np.where(self['CALIB_FLAG'].value.flatten() == cf)[0]
+            for key in self.keys():
+                self._variables[key].value = self._variables[key].value[inds, ::]
 
     def search_data_files(self, **kwargs):
 
@@ -173,7 +195,7 @@ class Dataset(datahub.DatasetModel):
             )
             # Validate file paths
 
-            if not done and self.allow_download:
+            if (not done and self.allow_download) or self.force_download:
                 done = self.download_data()
                 if done:
                     initial_file_dir = initial_file_dir
@@ -197,10 +219,13 @@ class Dataset(datahub.DatasetModel):
             file_version=self.product_version,
             force=self.force_download
         )
-        if download_obj.file_version != self.local_latest_version and self.product_version == 'latest':
-            mylog.StreamLogger.warning(
-                f"A newer version of data files have been downloaded ({download_obj.file_version})"
-            )
+        if download_obj.done:
+            self.force_download = False
+
+            if download_obj.file_version != self.local_latest_version and self.product_version == 'latest':
+                mylog.StreamLogger.warning(
+                    f"A newer version of data files have been downloaded ({download_obj.file_version})"
+                )
             self.product_version = download_obj.file_version
             self._validate_attrs()
 

@@ -108,8 +108,8 @@ class Downloader(DownloaderModel):
                     file_path.unlink()
                 mylog.simpleinfo.info("Done. The zip file has been removed.")
 
-                done = True
-                ftp.quit()
+            done = True
+            ftp.quit()
         except:
             print('Error during download from FTP')
             done = False
