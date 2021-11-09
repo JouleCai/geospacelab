@@ -27,6 +27,18 @@ class EISCATViewer(TimeSeriesViewer):
     def dataset(self):
         return self.datasets[1]
 
+    def status_mask(self, bad_status=None):
+        self.dataset.bad_status(bad_status=bad_status)
+
+    def residual_mask(self, residual_lim=None):
+        self.dataset.residual_mask(residual_lim=residual_lim)
+
+    def outlier_mask(self, condition, fill_value=None):
+        self.dataset.outlier_mask(condition, fill_value=fill_value)
+
+    def select_beams(self, field_aligned=False, az_el_pairs=None):
+        self.dataset.select_beams(field_aligned=field_aligned, az_el_pairs=az_el_pairs)
+
     def list_all_variables(self):
         self.datasets[1].list_all_variables()
 
