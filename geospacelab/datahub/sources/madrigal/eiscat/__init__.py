@@ -155,8 +155,8 @@ class Dataset(datahub.DatasetModel):
         :type bad_status: list
         """
         if bad_status is None:
-            status = [2, 3]
-        for flag in status:
+            bad_status = [2, 3]
+        for flag in bad_status:
             condition = self['STATUS'].value == flag
             self.outlier_mask(condition)
 
