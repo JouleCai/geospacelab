@@ -131,27 +131,46 @@ class Dataset(datahub.DatasetModel):
         if self.residual_control:
             self.residual_mask()
 
-    def status_mask(self, status_lim=None):
-        if status_lim is None:
-            status_lim = 1
-
-        inds = np.where(self['STATUS'].value > status_lim)
+    def outlier_mask(self, condition, fill_value=None):
+        """
+        Mask outliers of the 2D variables (Ne, Te, Ti, ...) depending on condition.
+        :param condition: a bool array with the same dimension as the 2D variables
+        :type condition: np.ndarray, bool
+        :param fill_value: the value filled as the outlier, [np.nan]
+        :type fill_value: np.nan or float
+        """
+        var_2d_names = [
+            'n_e', 'T_i', 'T_e', 'nu_i', 'v_i_los',
+            'comp_mix', 'comp_O_p', 'n_e_err', 'T_i_err', 'T_e_err',
+            'nu_i_err', 'v_i_los_err', 'comp_mix_err', 'comp_O_p_err'
+        ]
         for key in self.keys():
-            if self[key].value.shape == self['STATUS'].value.shape:
-                if key in ['HEIGHT', 'RANGE', ]:
-                    continue
-                self[key].value[inds] = np.nan
+            if key in var_2d_names:
+                self[key].value[condition] = np.nan
+
+    def status_mask(self, bad_status=None):
+        """
+        Mask the 2D variables depending on status.
+        :param bad_status: a list of the status flags, [2, 3].
+        :type bad_status: list
+        """
+        if bad_status is None:
+            status = [2, 3]
+        for flag in status:
+            condition = self['STATUS'].value == flag
+            self.outlier_mask(condition)
 
     def residual_mask(self, residual_lim=None):
+        """
+        Mask the 2D variables depending on residual
+        :param residual_lim: the lower limit of the bad residual, [10].
+        :type residual_lim: float
+        """
         if residual_lim is None:
             residual_lim = 10
 
-        inds = np.where(self['RESIDUAL'].value > residual_lim)
-        for key in self.keys():
-            if self[key].value.shape == self['RESIDUAL'].value.shape:
-                if key in ['HEIGHT', 'RANGE', ]:
-                    continue
-                self[key].value[inds] = np.nan
+        condition = self['RESIDUAL'].value > residual_lim
+        self.outlier_mask(condition)
 
     def select_beams(self, field_aligned=False, az_el_pairs=None):
         if field_aligned:
@@ -210,9 +229,6 @@ class Dataset(datahub.DatasetModel):
                                 configured_variables=configured_variables)
         # var = self.add_variable(var_name='AACGM_ALT', value=cs_new['height'])
         pass
-
-    def check_status(self):
-        raise NotImplementedError
 
     def search_data_files(self, **kwargs):
         dt_fr = self.dt_fr
