@@ -28,7 +28,7 @@ class EISCATViewer(TimeSeriesViewer):
         return self.datasets[1]
 
     def status_mask(self, bad_status=None):
-        self.dataset.bad_status(bad_status=bad_status)
+        self.dataset.status_mask(bad_status=bad_status)
 
     def residual_mask(self, residual_lim=None):
         self.dataset.residual_mask(residual_lim=residual_lim)

@@ -21,6 +21,7 @@ def test_UHF_CP2():
     # select beams before assign the variables
     # viewer.dataset.select_beams(field_aligned=True)
     # viewer.dataset.select_beams(az_el_pairs=[(188.6, 77.7)])
+    viewer.status_mask()
 
     n_e = viewer.assign_variable('n_e')
     T_i = viewer.assign_variable('T_i')
