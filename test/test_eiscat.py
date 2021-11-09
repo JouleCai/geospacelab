@@ -5,8 +5,8 @@ import geospacelab.express.eiscat_viewer as eiscat
 
 
 def test_UHF_CP2():
-    dt_fr = datetime.datetime.strptime('20210304' + '2300', '%Y%m%d%H%M')
-    dt_to = datetime.datetime.strptime('20210305' + '0300', '%Y%m%d%H%M')
+    dt_fr = datetime.datetime.strptime('20211010' + '1700', '%Y%m%d%H%M')
+    dt_to = datetime.datetime.strptime('20211010' + '2100', '%Y%m%d%H%M')
 
     site = 'UHF'
     antenna = 'UHF'
@@ -15,11 +15,12 @@ def test_UHF_CP2():
     data_file_type = 'eiscat-hdf5'
 
     viewer = eiscat.EISCATViewer(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
-                                 data_file_type=data_file_type, load_mode=load_mode)
+                                 data_file_type=data_file_type, load_mode=load_mode, status_control=True,
+                                 residual_control=True)
 
     # select beams before assign the variables
     # viewer.dataset.select_beams(field_aligned=True)
-    viewer.dataset.select_beams(az_el_pairs=[(188.6, 77.7)])
+    # viewer.dataset.select_beams(az_el_pairs=[(188.6, 77.7)])
 
     n_e = viewer.assign_variable('n_e')
     T_i = viewer.assign_variable('T_i')
@@ -173,8 +174,8 @@ def test_vhf_lowel():
 
 
 if __name__ == "__main__":
-    test_vhf_lowel()
-    test_uhf_cp3()
+    # test_vhf_lowel()
+    # test_uhf_cp3()
     test_UHF_CP2()
-    test_esr_32m()
+    # test_esr_32m()
     plt.show()

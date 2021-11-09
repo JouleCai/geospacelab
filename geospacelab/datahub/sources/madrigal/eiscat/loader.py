@@ -27,7 +27,7 @@ default_variable_names = [
     'AZ', 'EL', 'P_Tx', 'HEIGHT', 'RANGE',
     'n_e', 'T_i', 'T_e', 'nu_i', 'v_i_los', 'comp_mix', 'comp_O_p',
     'n_e_err', 'T_i_err', 'T_e_err', 'nu_i_err', 'v_i_los_err', 'comp_mix_err', 'comp_O_p_err',
-    'status', 'residual'
+    'STATUS', 'RESIDUAL'
 ]
 
 
@@ -108,8 +108,8 @@ class Loader:
             'v_i_los_var': 'var_Vi',
             'comp_mix_var': 'var_pm',
             'comp_O_p_var': 'var_po+',
-            'status': 'status',
-            'residual': 'res1'
+            'STATUS': 'status',
+            'RESIDUAL': 'res1'
         }
 
         site_info = {

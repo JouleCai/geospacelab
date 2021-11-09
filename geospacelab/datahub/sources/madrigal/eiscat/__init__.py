@@ -31,6 +31,8 @@ default_dataset_attrs = {
     'data_file_ext': 'hdf5',
     'data_root_dir': prf.datahub_data_root_dir / 'Madrigal' / 'EISCAT' / 'analyzed',
     'allow_download': True,
+    'status_control': False,
+    'rasidual_contorl': False,
     'data_search_recursive': True,
     'label_fields': ['database', 'facility', 'site', 'antenna', 'experiment'],
 }
@@ -40,7 +42,7 @@ default_variable_names = [
     'AZ', 'EL', 'P_Tx', 'HEIGHT', 'RANGE',
     'n_e', 'T_i', 'T_e', 'nu_i', 'v_i_los', 'comp_mix', 'comp_O_p',
     'n_e_err', 'T_i_err', 'T_e_err', 'nu_i_err', 'v_i_los_err', 'comp_mix_err', 'comp_O_p_err',
-    'status', 'residual'
+    'STATUS', 'RESIDUAL'
 ]
 
 # default_data_search_recursive = True
@@ -69,6 +71,8 @@ class Dataset(datahub.DatasetModel):
         self.beam_location = kwargs.pop('beam_location', True)
 
         allow_load = kwargs.pop('allow_load', False)
+        self.status_control = kwargs.pop('status_control', False)
+        self.residual_control = kwargs.pop('residual_control', False)
 
         # self.config(**kwargs)
 
@@ -122,6 +126,32 @@ class Dataset(datahub.DatasetModel):
             # self.select_beams(field_aligned=True)
         if self.time_clip:
             self.time_filter_by_range()
+        if self.status_control:
+            self.status_mask()
+        if self.residual_control:
+            self.residual_mask()
+
+    def status_mask(self, status_lim=None):
+        if status_lim is None:
+            status_lim = 1
+
+        inds = np.where(self['STATUS'].value > status_lim)
+        for key in self.keys():
+            if self[key].value.shape == self['STATUS'].value.shape:
+                if key in ['HEIGHT', 'RANGE', ]:
+                    continue
+                self[key].value[inds] = np.nan
+
+    def residual_mask(self, residual_lim=None):
+        if residual_lim is None:
+            residual_lim = 10
+
+        inds = np.where(self['RESIDUAL'].value > residual_lim)
+        for key in self.keys():
+            if self[key].value.shape == self['RESIDUAL'].value.shape:
+                if key in ['HEIGHT', 'RANGE', ]:
+                    continue
+                self[key].value[inds] = np.nan
 
     def select_beams(self, field_aligned=False, az_el_pairs=None):
         if field_aligned:
