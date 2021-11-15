@@ -15,7 +15,7 @@ import geospacelab.toolbox.utilities.pylogging as mylog
 
 class Loader(object):
 
-    def __init__(self, file_path, file_ext='.nc', pole='N'):
+    def __init__(self, file_path, file_ext='nc', pole='N'):
 
         self.variables = {}
         self.metadata = {}
@@ -26,14 +26,14 @@ class Loader(object):
         self.load_data()
 
     def load_data(self):
-        if self.file_path.suffix == '.dat' or self.file_ext == '.txt':
+        if self.file_path.suffix.strip('.') in ['dat', 'txt'] or self.file_ext == 'ascii':
             file_nc = pathlib.Path(self.file_path.with_suffix('.nc'))
             if not file_nc.is_file():
                 self.save_to_nc(self.file_path)
-            self.file_ext = '.nc'
+            self.file_ext = 'nc'
             self.file_path = file_nc
             
-        if self.file_ext == '.nc':
+        if self.file_ext == 'nc':
             self.load_data_nc()
     
     def load_data_nc(self):
