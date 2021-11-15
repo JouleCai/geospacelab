@@ -45,12 +45,12 @@ def test_UHF_CP2():
 
 
 def test_esr_32m():
-    dt_fr = datetime.datetime.strptime('20210304' + '2300', '%Y%m%d%H%M')
-    dt_to = datetime.datetime.strptime('20210305' + '0300', '%Y%m%d%H%M')
+    dt_fr = datetime.datetime.strptime('20001201' + '0400', '%Y%m%d%H%M')
+    dt_to = datetime.datetime.strptime('20001201' + '1200', '%Y%m%d%H%M')
 
     site = 'ESR'
     antenna = '42m'
-    modulation = 'ant'
+    modulation = '120'
     load_mode = 'AUTO'
     data_file_type = 'eiscat-hdf5'
 
@@ -177,6 +177,6 @@ def test_vhf_lowel():
 if __name__ == "__main__":
     # test_vhf_lowel()
     # test_uhf_cp3()
-    test_UHF_CP2()
-    # test_esr_32m()
+    # test_UHF_CP2()
+    test_esr_32m()
     plt.show()

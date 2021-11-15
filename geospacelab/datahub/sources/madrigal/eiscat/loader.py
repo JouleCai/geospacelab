@@ -19,6 +19,7 @@ import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as pylog
 import geospacelab.toolbox.utilities.numpyarray as arraytool
 import geospacelab.datahub.sources.madrigal.eiscat as eiscat
+import geospacelab.toolbox.utilities.pylogging as mylog
 
 
 default_variable_names = [
@@ -133,7 +134,12 @@ class Loader:
             nrec = h5_data[nrec_group][nrec_group_ind]
             num_row = h5_data['utime'][0].shape[0]
             for var_name, var_name_h5 in var_name_dict.items():
-                ind_v = var_info_list['name'].index(var_name_h5)
+                try:
+                    ind_v = var_info_list['name'].index(var_name_h5)
+                except ValueError:
+                    mylog.StreamLogger.warning(f"'{var_name_h5}' is not in the hdf5 file!")
+                    vars[var_name] = None
+                    continue
                 var_group = var_info_list['group'][ind_v]
                 var_ind = var_info_list['index'][ind_v]
                 var = h5_data[var_group][var_ind]
@@ -181,10 +187,18 @@ class Loader:
             metadata['pulse_code'] = h5_metadata['names'][0][1].decode('UTF-8').strip()
             metadata['antenna'] = h5_metadata['names'][2][1].decode('UTF-8').strip()
             metadata['GUISDAP_version'] = h5_metadata['software']['GUISDAP_ver'][0, 0].decode('UTF-8').strip()
-            metadata['rawdata_path'] = h5_metadata['software']['gfd']['data_path'][0, 0].decode('UTF-8').strip()
-            metadata['scan_mode'] = metadata['rawdata_path'].split('_')[1]
-            metadata['affiliation'] = metadata['rawdata_path'].split('@')[0].split('_')[-1]
-
+            try:
+                # 'gfd' not in list before 2001?
+                metadata['rawdata_path'] = h5_metadata['software']['gfd']['data_path'][0, 0].decode('UTF-8').strip()
+                metadata['scan_mode'] = metadata['rawdata_path'].split('_')[1]
+                metadata['affiliation'] = metadata['rawdata_path'].split('@')[0].split('_')[-1]
+            except KeyError:
+                mylog.StreamLogger.warning(
+                    "'gfd' is not in list in the metadata! Affect 'rawdata_path', 'scan_mode', and 'affiliation'."
+                )
+                metadata['rawdata_path'] = ''
+                metadata['scan_mode'] = ''
+                metadata['affiliation'] = ''
         vars_add = {}
         for var_name, value in vars.items():
             if '_var' in var_name:
