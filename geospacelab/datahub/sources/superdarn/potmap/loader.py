@@ -56,6 +56,16 @@ class Loader(object):
         variables['GRID_v_i_N'] = np.array(dataset.variables['v_i_E'][::])
         variables['GRID_phi'] = np.array(dataset.variables['phi'][::])
 
+        if self.append_support_data:
+            var_names_append = [
+                'VCNUM', 'IMF_MODEL', 'CLOCK_ANGLE', 'DIP_TILT', 'E_SW',
+                'SD_MODEL', 'FIT_ORDER', 'B_x_OMNI', 'B_y_OMNI', 'B_z_OMNI',
+                'phi_CPCP', 'phi_MAX', 'phi_MIN'
+            ]
+            for var_name in var_names_append:
+                variables[var_name] = np.array(dataset.variables[var_name][::]).reshape((ntime, 1))
+
+
         dataset.close()
 
         self.variables = variables
@@ -135,12 +145,40 @@ class Loader(object):
 
             # Support data such as IMF, VCNUM, potential drop
             results = re.findall(
+                r'^>[A-Za-z ]*\(VCNUM\):\s*([\d]+)',
+                text,
+                re.M
+            )
+            results = list(zip(*results))
+            vcnum_arr = np.array(results[0], dtype=np.int32).reshape([ntime, 1], order='C')
+            vcnum = fnc.createVariable('VCNUM', 'i2', ('UNIX_TIME',))
+            vcnum[::] = vcnum_arr[::]
+
+            results = re.findall(
                 r'^>\s*IMF Model: ([\S]+) Bang\s*([\S]+) deg\., '
                 + r'Esw\s*([\S]+) mV/m, tilt\s*([\S]+) deg\.,\s*([A-Za-z0-9]+), Fit Order:\s*([\d]+)',
                 text,
                 re.M
             )
             results = list(zip(*results))
+            imf_model_arr = np.array(results[0], dtype=object).reshape([ntime, 1], order='C')
+            imf_model = fnc.createVariable('IMF_MODEL', 'S8', ('UNIX_TIME',))
+            imf_model[::] = imf_model_arr[::]
+            B_angle_arr = np.array(results[1], dtype=np.float32).reshape([ntime, 1], order='C')
+            B_angle = fnc.createVariable('CLOCK_ANGLE', np.float32, ('UNIX_TIME',))
+            B_angle[::] = B_angle_arr[::]
+            E_sw_arr = np.array(results[2], dtype=np.float32).reshape([ntime, 1], order='C')
+            E_sw = fnc.createVariable('E_SW', np.float32, ('UNIX_TIME',))
+            E_sw[::] = E_sw_arr[::]
+            dipole_tilt_arr = np.array(results[3], dtype=np.float32).reshape([ntime, 1], order='C')
+            dipole_tilt = fnc.createVariable('DIP_TILT', np.float32, ('UNIX_TIME',))
+            dipole_tilt[::] = dipole_tilt_arr[::]
+            SD_model_arr = np.array(results[4], dtype=object).reshape([ntime, 1], order='C')
+            SD_model = fnc.createVariable('SD_MODEL', 'S8', ('UNIX_TIME',))
+            SD_model[::] = SD_model_arr[::]
+            fit_order_arr = np.array(results[5], dtype=np.int32).reshape([ntime, 1], order='C')
+            fit_order = fnc.createVariable('FIT_ORDER', 'i2', ('UNIX_TIME',))
+            fit_order[::] = fit_order_arr[::]
 
             results = re.findall(
                 r'^> OMNI IMF:\s*Bx=([\S]+) nT,\s*By=([\S]+) nT,\s*Bz=([\S]+) nT',
@@ -148,13 +186,32 @@ class Loader(object):
                 re.M
             )
             results = list(zip(*results))
+            B_x_OMNI_arr = np.array(results[0], dtype=np.float32).reshape([ntime, 1], order='C')
+            B_x_OMNI = fnc.createVariable('B_x_OMNI', np.float32, ('UNIX_TIME',))
+            B_x_OMNI[::] = B_x_OMNI_arr[::]
+            B_y_OMNI_arr = np.array(results[1], dtype=np.float32).reshape([ntime, 1], order='C')
+            B_y_OMNI = fnc.createVariable('B_y_OMNI', np.float32, ('UNIX_TIME',))
+            B_y_OMNI[::] = B_y_OMNI_arr[::]
+            B_z_OMNI_arr = np.array(results[2], dtype=np.float32).reshape([ntime, 1], order='C')
+            B_z_OMNI = fnc.createVariable('B_z_OMNI', np.float32, ('UNIX_TIME',))
+            B_z_OMNI[::] = B_z_OMNI_arr[::]
 
+            # > Potential: Drop = 33 kV, Min = -19 kV, Max = 14 kV
             results = re.findall(
-                r'^> OMNI IMF:\s*Bx=([\S]+) nT,\s*By=([\S]+) nT,\s*Bz=([\S]+) nT',
+                r'^> Potential:\s*Drop=([\S]+) kV,\s*Min=([\S]+) kV,\s*Max=([\S]+) kV',
                 text,
                 re.M
             )
             results = list(zip(*results))
+            phi_CPCP_arr = np.array(results[0], dtype=np.float32).reshape([ntime, 1], order='C')
+            phi_CPCP = fnc.createVariable('phi_CPCP', np.float32, ('UNIX_TIME',))
+            phi_CPCP[::] = phi_CPCP_arr[::]
+            phi_max_arr = np.array(results[1], dtype=np.float32).reshape([ntime, 1], order='C')
+            phi_max = fnc.createVariable('phi_MAX', np.float32, ('UNIX_TIME',))
+            phi_max[::] = phi_max_arr[::]
+            phi_min_arr = np.array(results[2], dtype=np.float32).reshape([ntime, 1], order='C')
+            phi_min = fnc.createVariable('phi_MIN', np.float32, ('UNIX_TIME',))
+            phi_min[::] = phi_min_arr[::]
 
             print('From {} to {}.'.format(
                 datetime.datetime.utcfromtimestamp(time_array[0]),
