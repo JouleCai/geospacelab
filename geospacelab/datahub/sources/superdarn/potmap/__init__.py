@@ -51,6 +51,7 @@ class Dataset(datahub.DatasetModel):
         self.allow_download = kwargs.pop('allow_download', False)
 
         self.pole = kwargs.pop('pole', 'N')
+        self.load_append_support_data = kwargs.pop('append_support_data', True)
 
         self.metadata = None
 
@@ -87,7 +88,10 @@ class Dataset(datahub.DatasetModel):
             configured_variables=var_config.configured_variables
         )
         for file_path in self.data_file_paths:
-            load_obj = self.loader(file_path, file_ext=self.data_file_ext, pole=self.pole)
+            load_obj = self.loader(
+                file_path, file_ext=self.data_file_ext, pole=self.pole,
+                append_support_data=self.load_append_support_data
+            )
 
             for var_name in self._variables.keys():
                 value = load_obj.variables[var_name]

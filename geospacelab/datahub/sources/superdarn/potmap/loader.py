@@ -12,16 +12,16 @@ import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as mylog
 
 
-
 class Loader(object):
 
-    def __init__(self, file_path, file_ext='nc', pole='N'):
+    def __init__(self, file_path, file_ext='nc', pole='N', append_support_data=True):
 
         self.variables = {}
         self.metadata = {}
         self.file_path = pathlib.Path(file_path)
         self.file_ext = file_ext
         self.pole = pole
+        self.append_support_data = append_support_data
 
         self.load_data()
 
@@ -132,6 +132,29 @@ class Loader(object):
             v_E[::] = v_E_arr[::]
             phi = fnc.createVariable('phi', np.float32, ('UNIX_TIME', 'MLON', 'MLAT'))
             phi[::] = phi_arr[::]
+
+            # Support data such as IMF, VCNUM, potential drop
+            results = re.findall(
+                r'^>\s*IMF Model: ([\S]+) Bang\s*([\S]+) deg\., '
+                + r'Esw\s*([\S]+) mV/m, tilt\s*([\S]+) deg\.,\s*([A-Za-z0-9]+), Fit Order:\s*([\d]+)',
+                text,
+                re.M
+            )
+            results = list(zip(*results))
+
+            results = re.findall(
+                r'^> OMNI IMF:\s*Bx=([\S]+) nT,\s*By=([\S]+) nT,\s*Bz=([\S]+) nT',
+                text,
+                re.M
+            )
+            results = list(zip(*results))
+
+            results = re.findall(
+                r'^> OMNI IMF:\s*Bx=([\S]+) nT,\s*By=([\S]+) nT,\s*Bz=([\S]+) nT',
+                text,
+                re.M
+            )
+            results = list(zip(*results))
 
             print('From {} to {}.'.format(
                 datetime.datetime.utcfromtimestamp(time_array[0]),
