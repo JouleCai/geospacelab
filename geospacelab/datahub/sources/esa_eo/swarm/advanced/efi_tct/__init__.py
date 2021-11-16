@@ -71,6 +71,7 @@ class Dataset(datahub.DatasetModel):
         self.force_download = kwargs.pop('force_download', False)
         self.quality_control = kwargs.pop('quality_control', False)
         self.calib_control = kwargs.pop('calib_control', False)
+        self._data_root_dir = self.data_root_dir    # Record the initial root dir
 
         self.sat_id = kwargs.pop('sat_id', 'A')
 
@@ -108,6 +109,9 @@ class Dataset(datahub.DatasetModel):
             except FileNotFoundError:
                 dirs_product_version = []
                 self.force_download = True
+            else:
+                if not list(dirs_product_version):
+                    self.force_download = True
 
             if list(dirs_product_version):
                 self.local_latest_version = max(dirs_product_version)
@@ -177,12 +181,13 @@ class Dataset(datahub.DatasetModel):
             this_day = dt0 + datetime.timedelta(days=i)
 
             initial_file_dir = kwargs.pop(
-                'initial_file_dir', self.data_root_dir / this_day.strftime("%Y%m%d")
+                'initial_file_dir', self.data_root_dir
             )
 
             file_patterns = [
                 'EFI' + self.sat_id.upper(),
                 self.product.upper(),
+                this_day.strftime('%Y%m%d') + 'T',
             ]
             # remove empty str
             file_patterns = [pattern for pattern in file_patterns if str(pattern)]
@@ -215,7 +220,7 @@ class Dataset(datahub.DatasetModel):
         download_obj = self.downloader(
             dt_fr, dt_to,
             sat_id=self.sat_id,
-            data_type='TCT02',
+            data_type=self.product,
             file_version=self.product_version,
             force=self.force_download
         )
@@ -227,6 +232,7 @@ class Dataset(datahub.DatasetModel):
                     f"A newer version of data files have been downloaded ({download_obj.file_version})"
                 )
             self.product_version = download_obj.file_version
+            self.data_root_dir = self._data_root_dir
             self._validate_attrs()
 
         return download_obj.done

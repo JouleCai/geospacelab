@@ -71,7 +71,7 @@ class Downloader(DownloaderModel):
                 dt_regex = re.compile(r'(\d{8}T\d{6})_(\d{8}T\d{6})_(\d{4})')
                 rm = dt_regex.findall(file_name)
                 this_day = datetime.datetime.strptime(rm[0][0], '%Y%m%dT%H%M%S')
-                file_path = file_dir / rm[0][2] / this_day.strftime("%Y%m%d") / file_name
+                file_path = file_dir / rm[0][2] / file_name
 
                 if file_path.is_file():
                     mylog.simpleinfo.info(
