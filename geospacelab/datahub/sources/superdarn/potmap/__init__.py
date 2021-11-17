@@ -31,7 +31,10 @@ default_dataset_attrs = {
 default_variable_names = [
     'DATETIME',
     'GRID_MLAT', 'GRID_MLON', 'GRID_MLT',
-    'GRID_phi'
+    'GRID_phi',
+    'VCNUM', 'IMF_MODEL', 'CLOCK_ANGLE', 'DIP_TILT', 'E_SW',
+    'SD_MODEL', 'FIT_ORDER', 'B_x_OMNI', 'B_y_OMNI', 'B_z_OMNI',
+    'phi_CPCP', 'phi_MAX', 'phi_MIN'
     ]
 
 # default_data_search_recursive = True

@@ -149,9 +149,8 @@ class Loader(object):
                 text,
                 re.M
             )
-            results = list(zip(*results))
-            vcnum_arr = np.array(results[0], dtype=np.int32).reshape([ntime, 1], order='C')
-            vcnum = fnc.createVariable('VCNUM', 'i2', ('UNIX_TIME',))
+            vcnum_arr = np.array(results, dtype=np.int32).reshape([ntime, 1], order='C')
+            vcnum = fnc.createVariable('VCNUM', 'i4', ('UNIX_TIME',))
             vcnum[::] = vcnum_arr[::]
 
             results = re.findall(
@@ -177,7 +176,7 @@ class Loader(object):
             SD_model = fnc.createVariable('SD_MODEL', 'S8', ('UNIX_TIME',))
             SD_model[::] = SD_model_arr[::]
             fit_order_arr = np.array(results[5], dtype=np.int32).reshape([ntime, 1], order='C')
-            fit_order = fnc.createVariable('FIT_ORDER', 'i2', ('UNIX_TIME',))
+            fit_order = fnc.createVariable('FIT_ORDER', 'i4', ('UNIX_TIME',))
             fit_order[::] = fit_order_arr[::]
 
             results = re.findall(
