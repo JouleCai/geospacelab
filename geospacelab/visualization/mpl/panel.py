@@ -152,6 +152,9 @@ class BasePanel(object):
         im = ax.imshow(*args, **kwargs)
         return im
 
+    def add_lines(self, xs, ys,):
+
+
     def add_label(self, x, y, label, ha='left', va='center', **kwargs):
         ax = self.axes['major']
         if label is None:
