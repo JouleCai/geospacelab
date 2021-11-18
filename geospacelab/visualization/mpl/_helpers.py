@@ -9,6 +9,12 @@ __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
 
-from geospacelab.visualization.mpl.dashboard import Dashboard
-from geospacelab.visualization.mpl.panel import Panel
-
+def check_panel_ax(func):
+    def wrapper(*args, **kwargs):
+        obj = args[0]
+        kwargs.setdefault('ax', None)
+        if kwargs['ax'] is None:
+            kwargs['ax'] = obj.axes['major']
+        result = func(*args, **kwargs)
+        return result
+    return wrapper

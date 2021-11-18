@@ -153,7 +153,7 @@ class BasePanel(object):
         return im
 
     def add_lines(self, xs, ys,):
-
+        pass
 
     def add_label(self, x, y, label, ha='left', va='center', **kwargs):
         ax = self.axes['major']

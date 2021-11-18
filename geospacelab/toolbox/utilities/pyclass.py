@@ -57,6 +57,28 @@ def get_object_attributes(obj):
     return attrs
 
 
+class StrBase(str):
+    """
+    Base class inherits from *str*. Useful when adding additional attributes to a string.
+    """
+    def __new__(cls, str_in):
+        if issubclass(str_in.__class__, StrBase):
+            obj = str_in
+        else:
+            obj = str.__new__(cls, str_in)
+        return obj
+
+    def config(self, logging=True, **kwargs):
+        """
+        A standard method used in this package to set attributes to the string.
+        :param logging: If ''True'', show logging.
+        :type logging: bool, default: True
+        :param kwargs: Other optional keyword arguments in :meth:'~geospacelab.toolbox.utilities.pyclass.set_object_attributes'
+        """
+        set_object_attributes(self, append=False, logging=logging, **kwargs)
+
+
+
 if __name__ == "__main__":
     class A(object):
         def __init__(self):
