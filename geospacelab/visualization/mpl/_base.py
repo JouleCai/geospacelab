@@ -3,6 +3,7 @@ import weakref
 import string
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from matplotlib.gridspec import GridSpec, SubplotSpec
 from matplotlib.figure import Figure
 
 from geospacelab.datahub import DataHub
@@ -40,7 +41,7 @@ class Canvas(Figure):
             label = len(self.dashboards) + 1
         self.dashboards[label] = Dashboard(*args, canvas=self, label=label, **kwargs)
 
-    def text(self, *args, **kwargs):
+    def add_text(self, *args, **kwargs):
         super().text(*args, **kwargs)
 
     def add_watermark(self, watermark=None, style=None):
@@ -50,9 +51,11 @@ class Canvas(Figure):
         if self.watermark.style.lower() == 'single box':
             bbox = dict(boxstyle='square', lw=3, ec='gray',
                         fc=(0.9, 0.9, .9, .5), alpha=0.5)
-            self.text(0.5, 0.5, watermark,
-                      ha='center', va='center', rotation=30,
-                      fontsize=40, color='gray', alpha=0.5, bbox=bbox)
+            self.add_text(
+                0.5, 0.5, watermark,
+                ha='center', va='center', rotation=30,
+                fontsize=40, color='gray', alpha=0.5, bbox=bbox
+            )
         else:
             raise NotImplemented
 
@@ -77,6 +80,13 @@ class Dashboard(DataHub):
     A dashboard is a collection of panels in a figure or GeospaceLab canvas. The class inherits
     from :class:`~geospacelab.datahub.DataHub`
 
+    :param canvas: The canvas that the dashboad will be placed.
+    :type canvas: Instance of :class:`GeospaceLab Canvas<geospacelab.visualization.mpl._base.Canvas>`.
+    :param panels: A collection of the panels that are placed in the dashboard.
+    :type panels: dict, default: {}, the keys are integers starting from 1 if not specified.
+    :param extra_axes: A collection of the axes additionally appended to the dashboard.
+    :type extra_axes: dict, default: {}.
+    :param gs:
     """
 
     _default_layout_config = {
@@ -189,7 +199,16 @@ class Dashboard(DataHub):
     #     panel.set_position(position)
     #     self.panels[index] = panel
 
-    def add_text(self, x=None, y=None, text=None, **kwargs):
+    def add_text(self, x, y, text, **kwargs):
+        # add text in dashboard cs
+
+        x_new = self.gs.left + x * (self.gs.right - self.gs.left)
+
+        y_new = self.gs.bottom + y * (self.gs.top - self.gs.bottom)
+
+        self.canvas.add_text(x_new, y_new, text, **kwargs)
+
+    def add_title(self, x=None, y=None, title=None, **kwargs):
         # add text in dashboard cs
         kwargs.setdefault('fontsize', self._default_dashboard_fontsize)
         kwargs.setdefault('ha', 'center')
@@ -199,12 +218,7 @@ class Dashboard(DataHub):
         if y is None:
             y = 1.05
 
-        # set in dashboard cs
-        x_new = self.gs.left + x * (self.gs.right - self.gs.left)
-
-        y_new = self.gs.bottom + y * (self.gs.top - self.gs.bottom)
-
-        self.canvas.text(x_new, y_new, text, **kwargs)
+        self.add_text(x, y, title, **kwargs)
 
     def add_panel_labels(self, panel_indices=None, style='alphabets', **kwargs):
         if panel_indices is None:
@@ -286,17 +300,22 @@ class Dashboard(DataHub):
 
 
 class Panel(object):
-    def __init__(self, *args, figure=None, add_subplot=True, **kwargs):
+    def __init__(self, *args, figure=None, from_subplot=True, **kwargs):
         if figure is None:
             figure = plt.gcf()
         self.figure = figure
         self.axes = {}
         self.label = kwargs.pop('label', None)
         # self.objectives = kwargs.pop('objectives', {})
-        if add_subplot:
+        if from_subplot:
             ax = self.figure.add_subplot(*args, **kwargs)
         else:
-            ax = self.add_axes(*args, **kwargs)
+            if len(args) > 0:
+                if isinstance(args[0], SubplotSpec):
+                    pos = args[0].get_position(self.figure)
+                    x, y, w, h = pos.x0, pos.y0, pos.x1-pos.x0, pos.y1-pos.y0
+                    args = ((x, y, w, h),)
+            ax = self.figure.add_axes(*args, **kwargs)
         self.axes['major'] = ax
 
     def __call__(self, ax_key=None):
@@ -315,6 +334,25 @@ class Panel(object):
         ax.patch.set_alpha(0)
         self.axes[label] = ax
         return ax
+
+    def add_text(self, x, y, text, ax=None, **kwargs):
+        if ax is None:
+            ax = self()
+        kwargs.setdefault('transform', ax.transAxes)
+        ax.text(x, y, text, **kwargs)
+
+    def add_label(self, x=0.02, y=0.9, label=None, **kwargs):
+        ax = self.axes['major']
+        if label is None:
+            label = self.label
+        kwargs.setdefault('ha', 'left')
+        kwargs.setdefault('va', 'center')
+        ax.text(x, y, label, **kwargs)
+
+    def add_title(self, x=0.5, y=1.02, title=None, **kwargs):
+        kwargs.setdefault('ha', 'center')
+        kwargs.setdefault('va', 'baseline')
+        self.axes['major'].set_title(x, y, title, **kwargs)
 
     @check_panel_ax
     def plot(self, *args, ax=None, **kwargs):
@@ -344,16 +382,7 @@ class Panel(object):
     def add_lines(self, xs, ys, ax=None, **kwargs):
         pass
 
-    def add_label(self, x, y, label, ha='left', va='center', **kwargs):
-        ax = self.axes['major']
-        if label is None:
-            label = ''
-        transform = kwargs.pop('transform', ax.transAxes)
-        ax.text(x, y, label, transform=transform, ha=ha, va=va, **kwargs)
-
-    def add_title(self, *args, **kwargs):
-        self.axes['major'].set_title(*args, **kwargs)
-
+    
 
 class Watermark(StrBase):
     def __new__(cls, str_in, **kwargs):
