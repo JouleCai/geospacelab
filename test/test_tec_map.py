@@ -40,10 +40,7 @@ def test_tec():
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
     ipc = panel1.add_pcolor(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
-    panel1.add_colorbar(
-       ipc, ax=panel1.major_ax, c_label="TECU", c_scale='linear',
-       left=1.1, bottom=0.1, width=0.05, height=0.7
-    )
+    panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
     panel1.major_ax.text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1.major_ax.transAxes)
@@ -71,10 +68,7 @@ def test_tec():
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
     ipc = panel1.add_pcolor(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
-    panel1.add_colorbar(
-       ipc, ax=panel1.major_ax, c_label="TECU", c_scale='linear',
-       left=1.1, bottom=0.1, width=0.05, height=0.7
-    )
+    panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
     panel1.major_ax.text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1.major_ax.transAxes)
@@ -102,10 +96,7 @@ def test_tec():
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
     ipc = panel1.add_pcolor(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
-    panel1.add_colorbar(
-       ipc, ax=panel1.major_ax, c_label="TECU", c_scale='linear',
-       left=1.1, bottom=0.1, width=0.05, height=0.7
-    )
+    panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
     panel1.major_ax.text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1.major_ax.transAxes)
@@ -133,10 +124,7 @@ def test_tec():
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
     ipc = panel1.add_pcolor(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
-    panel1.add_colorbar(
-       ipc, ax=panel1.major_ax, c_label="TECU", c_scale='linear',
-       left=1.1, bottom=0.1, width=0.05, height=0.7
-    )
+    panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
     panel1.major_ax.text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1.major_ax.transAxes)
@@ -164,10 +152,7 @@ def test_tec():
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
     ipc = panel1.add_pcolor(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
-    panel1.add_colorbar(
-       ipc, ax=panel1.major_ax, c_label="TECU", c_scale='linear',
-       left=1.1, bottom=0.1, width=0.05, height=0.7
-    )
+    panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
     panel1.major_ax.text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1.major_ax.transAxes)
@@ -195,10 +180,7 @@ def test_tec():
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
     ipc = panel1.add_pcolor(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
-    panel1.add_colorbar(
-       ipc, ax=panel1.major_ax, c_label="TECU", c_scale='linear',
-       left=1.1, bottom=0.1, width=0.05, height=0.7
-    )
+    panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
     panel1.major_ax.text(0.4, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1.major_ax.transAxes)
