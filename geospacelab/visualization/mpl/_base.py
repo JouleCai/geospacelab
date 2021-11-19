@@ -1,6 +1,7 @@
 
 import weakref
 import string
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.figure import Figure
@@ -299,10 +300,22 @@ class Panel(object):
             ax = self.add_axes(*args, **kwargs)
         self.axes['major'] = ax
 
-    def __call__(self, ax_key=None):
-        if ax_key is None:
-            ax_key = 'major'
-        return self.axes[ax_key]
+    def __call__(self, ax=None):
+        """
+        Get the axes instance.
+
+        :param ax: The axes key in the attribute axes.
+        :type ax: str or the ax instance.
+        :return: The ax instance.
+        """
+        if ax is None:
+            ax = 'major'
+        if type(ax) in [str]:
+            return self.axes[ax]
+        elif ax in self.axes:
+            return ax
+        else:
+            raise AttributeError
 
     def add_axes(self, *args, major=False, label=None, **kwargs):
         if major:
@@ -340,10 +353,100 @@ class Panel(object):
         im = ax.imshow(*args, **kwargs)
         return im
 
-    @check_panel_ax
-    def add_lines(self, xs, ys, ax=None, **kwargs):
-        pass
+    @staticmethod
+    def get_line_collection(
+            x, y, z,
+            linewidth=3, vmin=None, vmax=None, norm='linear', cmap='jet', **kwargs
+    ):
+        """
+        Create a set of line segments and a line collection, see also: :ref:`https://matplotlib.org/2.0.2/examples/pylab_examples/multicolored_line.html`
 
+        :param x, y, z: The line points (x, y) with the colored z values.
+        :type x, y, z: list or np.ndarray.
+        :type norm: Normalize z into color space.
+        :type norm: {'linear', 'log', ...} or matplotlib.colors.Normalize, default: 'linear'.
+        :param cmap: The color map for the plot.
+        :type cmap: str or matplotlib.colors.Colormap, default: 'jet'.
+        :param kwargs: Other optional keyword arguments forwarded to LineCollection.
+        :return: The line collection instance.
+        """
+
+        from matplotlib.collections import LineCollection
+        from matplotlib.colors import ListedColormap, Normalize, LogNorm
+
+        # Set norm
+        if norm == 'linear':
+            norm = Normalize(vmin, vmax)
+        elif norm == 'log':
+            norm = LogNorm(vmin, vmax)
+
+        # Create a set of line segments so that we can color them individually
+        # This creates the points as a N x 1 x 2 array so that we can stack points
+        # together easily to get the segments. The segments array for line collection
+        # needs to be numlines x points per line x 2 (x and y)
+        points = np.array([x, y]).T.reshape(-1, 1, 2)
+        segments = np.concatenate([points[:-1], points[1:]], axis=1)
+        lc = LineCollection(segments, cmap='cmap', norm=norm, **kwargs)
+        lc.set_array(z)
+        lc.set_linewidth(linewidth)
+
+        return lc
+
+    @check_panel_ax
+    def add_multicolored_line(self, *args, ax=None, line_collection=None, **kwargs):
+        if line_collection is None:
+            line_collection = self.get_line_collection(*args, **kwargs)
+
+        line = self(ax).add_collection(line_collection)
+
+        return line
+
+    @check_panel_ax
+    def add_colorbar(
+            self, im,
+            ax=None, cax=None, cax_position=None, cax_scale=None, cax_label=None, cax_ticks=None, cax_tick_labels=None,
+            cax_label_config=None,
+            **kwargs
+    ):
+        """
+        Add a colorbar appended to the parent ax.
+
+        :param im: the mappable
+        :param cax: If None, create a colorbar axes using the default settings, see also matplotlib.colorbar.Colorbar.
+        :type cax: axes instance or {None, 'new'}
+        :param ax: The appended ax instance.
+        :type ax: matplotlib.pyplot.Axes isntance.
+        :param cax_position: If not None, set the colorbar ax position at [x, y, width, height], which are normalized to the main ax coordinates.
+        :type cax_position: 4-tuple, default: [1.02, 0.01, 0.025, 0.85].
+        :param cax_label_config: Optional keyword arguments for setting the colorbar label.
+        :param kwargs: Other optional keyword arguments forwarded to matplotlib.colorbar.Colorbar.
+        :return: The colarbar instance
+        """
+
+        if cax_label_config is None:
+            cax_label_config = {}
+
+        if cax == 'new':
+            if cax_position is None:
+                cax_position = [1.02, 0.01, 0.025, 0.85]
+
+            pos_ax = ax.get_position()
+            pos_cax = [
+                pos_ax.x0 + (pos_ax.x1 - pos_ax.x0) * cax_position[0],
+                pos_ax.y0 + (pos_ax.y1 - pos_ax.y0) * cax_position[1],
+                (pos_ax.x1 - pos_ax.x0) * cax_position[2],
+                (pos_ax.y1 - pos_ax.y0) * cax_position[3],
+            ]
+            cax = self.figure.add_axes(pos_cax)
+            cax_label_config = dict(rotation=270, va='bottom', size='medium')
+
+        icb = self.figure.colorbar(im, cax=cax, **kwargs)
+
+        # set colorbar label
+        if cax_label is not None:
+            icb.set_label(cax_label, **cax_label_config)
+
+    @check_panel_ax
     def add_label(self, x, y, label, ha='left', va='center', **kwargs):
         ax = self.axes['major']
         if label is None:

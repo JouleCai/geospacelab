@@ -47,10 +47,8 @@ def test_ssusi():
     cmap = 'viridis'
     pcolormesh_config.update(cmap=cmap)
     ipc = panel1.add_pcolor(lbhs_, coords={'lat': mlat[ind_t, ::], 'lon': mlon[ind_t, ::], 'mlt': mlt[ind_t, ::], 'height': 250.}, cs='AACGM', **pcolormesh_config)
-    panel1.add_colorbar(
-       ipc, ax=panel1.major_ax, c_label=band + " (R)", c_scale=pcolormesh_config['c_scale'],
-       left=1.1, bottom=0.1, width=0.05, height=0.7
-    )
+    panel1.add_colorbar(ipc, c_label=band + " (R)", c_scale=pcolormesh_config['c_scale'], left=1.1, bottom=0.1,
+                        width=0.05, height=0.7)
 
     panel1.add_gridlines(lat_res=5, lon_label_separator=5)
 

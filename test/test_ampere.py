@@ -49,10 +49,8 @@ def test_ampere():
     pcolormesh_config.update(cmap=cmap)
     # ipc = panel1.add_pcolor(fac_, coords={'lat': mlat[ind_t, ::], 'lon': None, 'mlt': mlt[ind_t, ::], 'height': 250.}, cs='AACGM', **pcolormesh_config)
     ipc = panel1.add_pcolor(grid_fac, coords={'lat': grid_mlat, 'lon': None, 'mlt': grid_mlt, 'height': 250.}, cs='AACGM', **pcolormesh_config)
-    panel1.add_colorbar(
-       ipc, ax=panel1.major_ax, c_label=r'FAC ($\mu$A/m$^2$)', c_scale=pcolormesh_config['c_scale'],
-       left=1.1, bottom=0.1, width=0.05, height=0.7
-    )
+    panel1.add_colorbar(ipc, c_label=r'FAC ($\mu$A/m$^2$)', c_scale=pcolormesh_config['c_scale'], left=1.1, bottom=0.1,
+                        width=0.05, height=0.7)
 
     panel1.add_gridlines(lat_res=5, lon_label_separator=5)
 
