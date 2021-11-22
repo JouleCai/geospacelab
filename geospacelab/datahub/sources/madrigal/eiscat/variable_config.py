@@ -29,7 +29,7 @@ depend_0 = {'UT': 'DATETIME', 'TIME_1': 'DATETIME_1', 'TIME_2': 'DATETIME_2'}
 depend_1 = {'HEIGHT': 'HEIGHT', 'RANGE': 'RANGE', 'GEO_LAT': 'GEO_LAT', 'GEO_LON': 'GEO_LON',
             'GEO_ALT': 'GEO_ALT', 'AACGM_LAT': 'AACGM_LAT', 'AACGM_LON': 'AACGM_LON'}
 
-default_colormap = cm.cmap_gist_ncar_modified()
+default_colormap = cm.cmap_jet_modified()
 
 default_axis_dict_2d = {
     1:     {
