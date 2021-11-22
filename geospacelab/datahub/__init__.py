@@ -102,6 +102,7 @@ To look up the sourced dataset and the associated contents, call :func:`~geospac
                 + 'Check the built-in sourced data using the method: "list_sourced_dataset". \n'
                 + 'Or, add a temporary or user-defined dataset by the method of "add_dataset". '
             )
+            return
 
         # if dataset.label() in [ds.label() for ds in self.datasets]:
         #     mylog.simpleinfo.info('The same dataset has been docked!')
@@ -112,12 +113,14 @@ To look up the sourced dataset and the associated contents, call :func:`~geospac
 
         return dataset
 
-    def add_dataset(self, *args, kind='temporary', **kwargs):
+    def add_dataset(self, *args, kind='temporary', dataset_class=DatasetModel, **kwargs):
         """Add one or multiple datasets, which is not sourced in the package.
 
         :param args: a list of the datasets.
         :param kind: the kind of a dataset, options: ['temporary'], or 'user-defined'. \
 if temporary, a new dataset will be created from the DatasetModel.
+        :param dataset_class: The dataset class as a model.
+        :type dataset_class: DatasetModel subclass.
         :param kwargs: other keywords
         :return: None
         """
@@ -128,7 +131,7 @@ if temporary, a new dataset will be created from the DatasetModel.
 
         if kind == 'temporary':
             kwargs.pop('datasets', None)
-            dataset = DatasetModel(name='temporary', **kwargs)
+            dataset = dataset_class(name='temporary', **kwargs)
             self._append_dataset(dataset)
             return dataset
 

@@ -19,7 +19,42 @@ import geospacelab.toolbox.utilities.pylogging as mylog
 
 
 class DatasetModel(object):
+    """
+    A dataset is a dictionary-like object used for downloading and loading data from a data source. The items in
+    the dataset are the variables loaded from the data files. The parameters listed below are the general attributes used
+    for the dataset class and its inheritances.
 
+    :param name: The name of the dataset.
+    :type name: str or None.
+    :param kind: The type of the dataset. 'sourced': the data source has been added in the package,
+    'temporary': a dataset added temporarily, 'user-defined': a data source defined by the user.
+    :type kind: {'sourced', 'temporary', 'user-defined'}
+    :param dt_fr: the starting time of the data records.
+    :type dt_fr: datetime.datetime, default: None.
+    :param dt_to: the stopping time of the the data records.
+    :type dt_to: datetime.datetime, default: None.
+    :param load_mode: The mode for the dataset to load the data. "AUTO": Automatically searching the data files and
+    load the data; "dialog": Open a dialog window and select data files; "assigned": Assign files to
+    the attribute ``data_file_paths``.
+    :type: load_mode: {"AUTO", "dialog", "data_file_paths"}.
+    :param loader: the loader class used to load the data.
+    :type loader: LoaderModel.
+    :param downloader: the downloader class used to download the data.
+    :type downloader: DownloaderModel
+    :param data_root_dir: The root directory where the data files are stored.
+    :type data_root_dir: str or pathlib.Path
+    :param data_file_paths: A list of the full paths of the data files.
+    :type data_file_paths: list.
+    :param data_file_num: The number of the data files.
+    :type data_file_num: int.
+    :param data_file_ext: The extension of the data files.
+    :type data_file_ext: str.
+    :param data_search_recursive: If True, search the data files in a directory recursively.
+    :type data_search_recursive: bool.
+    :param visual: If "on", append the attribute visual to the vairables.
+    :type visual: {'on', 'off'}.
+    :param time_clip: Clip the time interval in the range of [dt_fr, dt_to].
+    """
     def __init__(self, **kwargs):
         self._variables = {}
         self.name = kwargs.pop('name', None)
@@ -40,7 +75,23 @@ class DatasetModel(object):
 
         self.label_fields = kwargs.pop('label_fields', [])
 
-    def search_data_files(self, **kwargs):
+    def search_data_files(self,  **kwargs):
+        """
+        Search the data files by the input pattern in the file name. The search method is based on pathlib.glob.
+        For a dataset inheritance, a wrapper can be added for a custom setting.
+
+        :param initial_file_dir: The initial file directory for searching.
+        :type initial_file_dir: str or pathlib.Path, default: DatasetModel.data_root_dir.
+        :param search_pattern: Unix style pathname pattern, see also pathlib.glob.
+        :type search_pattern: str.
+        :param recursive: Search recursively if True.
+        :type recursive: bool, default: DatasetModel.data_search_recursive.
+        :param allow_multiple_files: Allow multiple files as a result.
+        :type allow_mulitple_files: bool, default: False.
+
+        :return: done, bool, if False, no matches.
+        """
+
         done = False
         initial_file_dir = kwargs.pop('initial_file_dir', self.data_root_dir)
         search_pattern = kwargs.pop('search_pattern', '*')
@@ -71,8 +122,31 @@ class DatasetModel(object):
         return done
 
     def open_dialog(self, **kwargs):
+        """
+        Open a dialog to select the data files.
+        """
+        def tk_open_file():
+
+            import tkinter as tk
+            from tkinter import filedialog
+
+            root = tk.Tk()
+            root.withdraw()
+
+            dialog_title = "Select a data file ..."
+
+            if str(self.data_file_ext):
+                p1 = '*.' + self.data_file_ext
+            file_types = (('data files', p1), ('all files', '*.*'))
+            file_name = filedialog.askopenfilename(
+                title=dialog_title,
+                initialdir=initial_file_dir,
+                filetypes=file_types,
+            )
+
+            return file_name
+
         initial_file_dir = kwargs.pop('initial_file_dir', self.data_root_dir)
-        title = kwargs.pop('title', 'Open a file:')
 
         if initial_file_dir is None:
             initial_file_dir = self.data_root_dir
@@ -82,32 +156,22 @@ class DatasetModel(object):
             value = input("How many files will be loaded? Input the number: ")
             self.data_file_num = int(value)
         for nf in range(self.data_file_num):
-            value = input("Input the No. {} file's full path: ".format(str(nf)))
+            # value = input("Input the No. {} file's full path: ".format(str(nf)))
+            value = tk_open_file()
             fp = pathlib.Path(value)
             if not fp.is_file():
                 mylog.StreamLogger.warning("The input file does not exist!")
                 return
             self.data_file_paths.append(fp)
 
-        # import tkinter as tk
-        # from tkinter import simpledialog
-        # from tkinter import filedialog
-        #
-        # root = tk.Tk()
-        # root.withdraw()
-        # self.data_file_num = kwargs.pop('data_file_num', self.data_file_num)
-        # if self.data_file_num == 0:
-        #     self.data_file_num = simpledialog.askinteger('Input dialog', 'Input the number of files:', initialvalue=1)
-        #
-        # for nf in range(self.data_file_num):
-        #     file_types = (('eiscat files', '*.' + self.data_file_ext), ('all files', '*.*'))
-        #     file_name = filedialog.askopenfilename(
-        #         title=title,
-        #         initialdir=initial_file_dir
-        #     )
-        #     self.data_file_paths.append(pathlib.Path(file_name))
-
     def check_data_files(self, **kwargs):
+        """
+        Check the existing of the data files before loading the data, depending on the loading mode (``load_mode``).
+        This methods still needs to be improved as different datasets may have different variables as epochs. Two kinds
+        of things can be done: 1. write a wrapper in the new dataset inheritance. 2. Add a script to recognize the
+        epoch variables.
+
+        """
         self.load_mode = kwargs.pop('load_mode', self.load_mode)
         if self.load_mode == 'AUTO':
             self.search_data_files(**kwargs)
@@ -115,13 +179,19 @@ class DatasetModel(object):
             self.open_dialog(**kwargs)
         elif self.load_mode == 'assigned':
             self.data_file_paths = kwargs.pop('data_file_paths', self.data_file_paths)
-            if not list(self.data_file_paths):
-                raise ValueError
+            self.data_file_paths = [pathlib.Path(f) for f in self.data_file_paths]
         else:
-            raise AttributeError
+            raise NotImplementedError
         self.data_file_num = len(self.data_file_paths)
 
     def time_filter_by_range(self, var_datetime=None, var_datetime_name=None):
+        """
+        Clip the times.
+
+        :param var_datetime:
+        :param var_datetime_name:
+        :return:
+        """
         if var_datetime is None and var_datetime_name is None:
             var_datetime = self['DATETIME']
         if var_datetime_name is not None:
@@ -144,7 +214,31 @@ class DatasetModel(object):
             if var.value.shape[0] == shape_0 and len(var.value.shape) > 1:
                 var.value = var.value[inds, ::]
 
+    def add_variable(self, var_name, configured_variables=None, variable_class=None, **kwargs):
+        if variable_class is None:
+            variable_class = VariableModel
+        if configured_variables is None:
+            configured_variables = {}
+        if var_name in configured_variables.keys():
+            configured_variable = configured_variables[var_name]
+            if type(configured_variable) is dict:
+                self[var_name] = variable_class(**configured_variable)
+            elif issubclass(configured_variable.__class__, VariableModel):
+                self[var_name] = configured_variable.clone()
+            self[var_name].dataset = self
+            self[var_name].visual = self.visual
+        else:
+            self[var_name] = variable_class(dataset=self, visual=self.visual, **kwargs)
+        return self[var_name]
+
     def label(self, fields=None, separator=' | ', lowercase=True):
+        """
+        Return a label of the data set.
+        :param fields: The attribute names for the label.
+        :param separator: A separator between two attributes.
+        :param lowercase: Show lowercase letters only.
+        :return: label
+        """
         if fields is None:
             fields = self.label_fields
         sublabels = []
@@ -157,6 +251,13 @@ class DatasetModel(object):
         return label
 
     def config(self, logging=True, **kwargs):
+        """
+        Configure the attributes of the dataset.
+
+        :param logging: Show logging if True.
+        :param kwargs:
+        :return:
+        """
         pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
 
     def add_attr(self, logging=True, **kwargs):
@@ -220,21 +321,6 @@ class DatasetModel(object):
 
     def get_variable_names(self):
         return list(self._variables.keys())
-
-    def add_variable(self, var_name, configured_variables=None, **kwargs):
-        if configured_variables is None:
-            configured_variables = {}
-        if var_name in configured_variables.keys():
-            configured_variable = configured_variables[var_name]
-            if type(configured_variable) is dict:
-                self[var_name] = VariableModel(**configured_variable)
-            elif issubclass(configured_variable.__class__, VariableModel):
-                self[var_name] = configured_variable.clone()
-            self[var_name].dataset = self
-            self[var_name].visual = self.visual
-        else:
-            self[var_name] = VariableModel(dataset=self, visual=self.visual, **kwargs)
-        return self[var_name]
 
     def _set_default_variables(self, default_variable_names, configured_variables=None):
         if configured_variables is None:

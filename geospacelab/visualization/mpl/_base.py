@@ -436,10 +436,6 @@ class Panel(object):
             line_collection = self.get_line_collection(*args, **kwargs)
 
         line = self(ax).add_collection(line_collection)
-
-<<<<<<< HEAD
-    
-=======
         return line
 
     @check_panel_ax
@@ -498,7 +494,6 @@ class Panel(object):
     def add_title(self, *args, **kwargs):
         self.axes['major'].set_title(*args, **kwargs)
 
->>>>>>> f9106d0a69ffbd0678cb4f1fb23361096604da81
 
 class Watermark(StrBase):
     def __new__(cls, str_in, **kwargs):

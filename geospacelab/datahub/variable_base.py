@@ -42,25 +42,20 @@ class VariableModel(object):
     :param  quantity: The physical quantity associated with the variable, waiting for implementing. [None]
     :type   quantity: TBD.
     :param  value: the variable's value. Usually it's a np.ndarray. The axis=0 along the time, axis=1 along height, lat,
-    lon. For a scalar, value in a shape of (1, ). [None]
-    :type   value: np.ndarray
+    lon. For a scalar, value in a shape of (1, ).
+    :type   value: np.ndarray, default: None
     :param  error: the variable's error. Either a np.ndarray or a string. When it's a string, the string is a variable name
     indicating the variable in the associated dataset (see :attr:`dataset` below).
-    :type
-    :param
-    :type
-    :param
-    :type
-    :param
-    :type
-    :param
-    :type
-    :param
-    :type
-    :param
-    :type
-    :param
-    :type
+    :type error: str or np.ndarry
+    :param ndim: The number of dimension.
+    :type ndim: int
+    :param depends: The full depends of the variables. Usually Axis 0 for time, next for spatial distributions,
+    and then for components.
+    :type depends: dict
+    :param dataset: The dataset that the variable is appended.
+    :type dataset: DatasetModel object
+    :param visual: the attributes for visualization.
+    :type visual: dict or Visual object, default: None.
     """
 
     def __init__(self, **kwargs):
@@ -100,13 +95,30 @@ class VariableModel(object):
                                   'visual']
 
     def config(self, logging=True, **kwargs):
+        """
+        Configure the variable attributes. If the attribute is not the default attributes, return error.
+
+        :param logging: If True, show logging.
+        :param kwargs: A dictionary of the attributes.
+        :return: None
+        """
         pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
 
     def add_attr(self, logging=True, **kwargs):
+        """
+        Similar as config, but add a new attribute.
+        """
+
         self._attrs_registered.extend(kwargs.keys())
         pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
 
     def clone(self, omit_attrs=None):
+        """
+        Clone a variable and return a new instance.
+
+        :param omit_attrs: The attributes omitted to be copied. If None, copy all.
+        :return: new variable instance
+        """
         if omit_attrs is None:
             omit_attrs = {}
         kwargs = {}
@@ -122,6 +134,13 @@ class VariableModel(object):
         return self.__class__(**kwargs)
 
     def get_depend(self, axis=None, retrieve_data=True):
+        """
+        Get the dependence of the variable along an axis.
+
+        :param axis: The axis.
+        :param retrieve_data: If True, Convert identifier to data.
+        :return: A dictionary of dependence.
+        """
         # axis = 0, 1, 2
         if axis in self.depends.keys():
             depend = self.depends[axis]
@@ -140,11 +159,18 @@ class VariableModel(object):
         return depend_new
 
     def set_depend(self, axis, depend_dict):
+        """
+        Set the dependence along an axis.
+
+        :param axis: The axis.
+        :param depend_dict: the dictionary of the dependence, e.g., {'DATETIME': 'DATETIME'}.
+        :return:
+        """
         if not isinstance(depend_dict, dict):
             raise TypeError
         self.depends[axis] = depend_dict
 
-    def get_attr_from_string(self, string):
+    def _get_attr_from_string(self, string):
         if not str(string):
             return string
         if string[0] == '@':
@@ -160,6 +186,13 @@ class VariableModel(object):
         return result
 
     def get_visual_axis_attr(self, attr_name=None, axis=None):
+        """
+        Get the visual attributes along an axis.
+
+        :param attr_name:
+        :param axis:
+        :return:
+        """
         attr = getattr(self.visual.axis[axis], attr_name)
         type_attr = type(attr)
         if type_attr is not list:
@@ -167,7 +200,7 @@ class VariableModel(object):
         results = []
         for a in attr:
             if type(a) is str:
-                result = self.get_attr_from_string(a)
+                result = self._get_attr_from_string(a)
             else:
                 result = a
             results.append(copy.deepcopy(result))
@@ -176,6 +209,12 @@ class VariableModel(object):
         return results
 
     def join(self, var_new):
+        """
+        Join a numpy array or a variable instance to the current variable.
+        :param var_new: The input variable.
+        :type var_new: list, np.ndarray, or variable instance
+        :return:
+        """
         if issubclass(var_new.__class__, VariableModel):
             v = var_new.value
         else:
@@ -414,6 +453,11 @@ class VariableModel(object):
 
 
 class VisualAxis(object):
+    """
+    The attribute class appended to the Visual class for setting the attributes along an axis.
+
+
+    """
     def __init__(self):
         self.data = None
         self.data_err = None
@@ -439,9 +483,15 @@ class VisualAxis(object):
 
 
 class VisualPlotConfig(object):
+    """
+    The attribute class appended to the Visual class for setting the plots.
+
+
+    """
     def __init__(self):
         self.visible = True
         self.line = {}
+        self.pattern = {}
         self.errorbar = {}
         self.pcolormesh = {}
         self.imshow = {}
@@ -454,7 +504,11 @@ class VisualPlotConfig(object):
 
 
 class Visual(object):
+    """
+    The Visual class is used for setting the visualization attributes appending to a variable.
 
+
+    """
     def __init__(self, **kwargs):
         self._axis = {}
         self.variable = None
@@ -560,56 +614,56 @@ class Visual(object):
             self._plot.config(**value)
         else:
             raise TypeError
-
-
-class Visual_1(object):
-    def __init__(self, **kwargs):
-        self.plot_type = None
-        self.x_data = None
-        self.y_data = None
-        self.z_data = None
-        self.x_data_scale = 1
-        self.y_data_scale = 1
-        self.z_data_scale = 1
-        self.x_data_res = None
-        self.y_data_res = None
-        self.z_data_res = None
-        self.x_err_data = None
-        self.y_err_data = None
-        self.z_err_data = None
-        self.x_lim = None
-        self.y_lim = None
-        self.z_lim = None
-        self.x_label = None
-        self.y_label = None
-        self.z_label = None
-        self.x_scale = None
-        self.y_scale = None
-        self.z_scale = None
-        self.x_unit = None
-        self.y_unit = None
-        self.z_unit = None
-        self.x_ticks = None
-        self.y_ticks = None
-        self.z_ticks = None
-        self.x_tick_labels = None
-        self.y_tick_labels = None
-        self.z_tick_labels = None
-        self.color = None
-        self.visible = True
-        self.plot_config = {}
-        self.axis_config = {}
-        self.legend_config = {}
-        self.colorbar_config = {}
-        self.errorbar_config = {}
-        self.pcolormesh_config = {}
-        self.config(**kwargs)
-
-    def config(self, logging=True, **kwargs):
-        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
-
-    def add_attr(self, logging=True, **kwargs):
-        pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
+#
+#
+# class Visual_1(object):
+#     def __init__(self, **kwargs):
+#         self.plot_type = None
+#         self.x_data = None
+#         self.y_data = None
+#         self.z_data = None
+#         self.x_data_scale = 1
+#         self.y_data_scale = 1
+#         self.z_data_scale = 1
+#         self.x_data_res = None
+#         self.y_data_res = None
+#         self.z_data_res = None
+#         self.x_err_data = None
+#         self.y_err_data = None
+#         self.z_err_data = None
+#         self.x_lim = None
+#         self.y_lim = None
+#         self.z_lim = None
+#         self.x_label = None
+#         self.y_label = None
+#         self.z_label = None
+#         self.x_scale = None
+#         self.y_scale = None
+#         self.z_scale = None
+#         self.x_unit = None
+#         self.y_unit = None
+#         self.z_unit = None
+#         self.x_ticks = None
+#         self.y_ticks = None
+#         self.z_ticks = None
+#         self.x_tick_labels = None
+#         self.y_tick_labels = None
+#         self.z_tick_labels = None
+#         self.color = None
+#         self.visible = True
+#         self.plot_config = {}
+#         self.axis_config = {}
+#         self.legend_config = {}
+#         self.colorbar_config = {}
+#         self.errorbar_config = {}
+#         self.pcolormesh_config = {}
+#         self.config(**kwargs)
+#
+#     def config(self, logging=True, **kwargs):
+#         pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
+#
+#     def add_attr(self, logging=True, **kwargs):
+#         pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
 
     #
     # def to_dict(self):
