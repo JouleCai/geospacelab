@@ -117,6 +117,7 @@ class Dataset(datahub.DatasetModel):
             self.antenna = load_obj.metadata['antenna']
             self.pulse_code = load_obj.metadata['pulse_code']
             self.scan_mode = load_obj.metadata['scan_mode']
+            self.modulation = load_obj.metadata['modulation']
             rawdata_path = load_obj.metadata['rawdata_path']
             self.experiment = rawdata_path.split('/')[-1].split('@')[0]
             self.affiliation = load_obj.metadata['affiliation']

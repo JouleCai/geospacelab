@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import numpy
 
 # import geospacelab.visualization.mpl.figure as mpl_figure
-import geospacelab.visualization.mpl.panel as mpl_panel
+import geospacelab.visualization.mpl.panels as mpl_panel
 import geospacelab.toolbox.utilities.pybasic as basic
 
 default_layout_config = {

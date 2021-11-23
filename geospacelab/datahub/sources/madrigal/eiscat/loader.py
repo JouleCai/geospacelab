@@ -12,6 +12,7 @@ __docformat__ = "reStructureText"
 import h5py
 import numpy as np
 import pathlib
+import re
 
 from geospacelab import preferences as prf
 
@@ -187,6 +188,18 @@ class Loader:
             metadata['pulse_code'] = h5_metadata['names'][0][1].decode('UTF-8').strip()
             metadata['antenna'] = h5_metadata['names'][2][1].decode('UTF-8').strip()
             metadata['GUISDAP_version'] = h5_metadata['software']['GUISDAP_ver'][0, 0].decode('UTF-8').strip()
+            metadata['rawdata_path'] = ''
+            metadata['scan_mode'] = ''
+            metadata['affiliation'] = ''
+            try:
+                title = h5_metadata['schemes']['DataCite']['Title'][0][0].decode('UTF-8').strip()
+                rc = re.compile(r'\d{4}-\d{2}-\d{2}_([\S]+)@')
+                exp_id = rc.findall(title)[0]
+                metadata['modulation'] = exp_id.split('_')[-1]
+                metadata['pulse_code'] = exp_id.replace('_'+metadata['modulation'], '')
+            except KeyError:
+                mylog.StreamLogger.warning("'Title is not listed in the metadata!'")
+
             try:
                 # 'gfd' not in list before 2001?
                 metadata['rawdata_path'] = h5_metadata['software']['gfd']['data_path'][0, 0].decode('UTF-8').strip()
@@ -194,11 +207,9 @@ class Loader:
                 metadata['affiliation'] = metadata['rawdata_path'].split('@')[0].split('_')[-1]
             except KeyError:
                 mylog.StreamLogger.warning(
-                    "'gfd' is not in list in the metadata! Affect 'rawdata_path', 'scan_mode', and 'affiliation'."
+                    "'gfd' is not listed in the metadata! Affect 'rawdata_path', 'scan_mode', and 'affiliation'."
                 )
-                metadata['rawdata_path'] = ''
-                metadata['scan_mode'] = ''
-                metadata['affiliation'] = ''
+
         vars_add = {}
         for var_name, value in vars.items():
             if '_var' in var_name:

@@ -14,7 +14,8 @@ def check_panel_ax(func):
         obj = args[0]
         kwargs.setdefault('ax', None)
         if kwargs['ax'] is None:
-            kwargs['ax'] = obj.axes['major']
+            # kwargs['ax'] = obj.axes['major']
+            kwargs['ax'] = obj.gca()
         result = func(*args, **kwargs)
         return result
     return wrapper

@@ -307,6 +307,7 @@ class Panel(object):
         self.figure = figure
         self.axes = {}
         self.label = kwargs.pop('label', None)
+        self._current_ax = None
         # self.objectives = kwargs.pop('objectives', {})
         if from_subplot:
             ax = self.figure.add_subplot(*args, **kwargs)
@@ -318,6 +319,7 @@ class Panel(object):
                     args = ((x, y, w, h),)
             ax = self.figure.add_axes(*args, **kwargs)
         self.axes['major'] = ax
+        self._current_ax = ax
 
     def __call__(self, ax=None):
         """
@@ -336,7 +338,33 @@ class Panel(object):
         else:
             raise AttributeError
 
+    def sca(self, ax):
+        """
+        Set current axes.
+
+        :param ax: the ax instance belong to the attribute axes.
+        """
+        plt.sca(ax)
+        self._current_ax = ax
+
+    def gca(self):
+        """
+        Get the current ax.
+
+        :return: Axes instance.
+        """
+        return self._current_ax
+
     def add_axes(self, *args, major=False, label=None, **kwargs):
+        """
+        Add a new ax.
+
+        :param args:
+        :param major:
+        :param label:
+        :param kwargs:
+        :return:
+        """
         if major:
             label = 'major'
         else:
@@ -346,9 +374,36 @@ class Panel(object):
         ax = self.figure.add_axes(*args, **kwargs)
         ax.patch.set_alpha(0)
         self.axes[label] = ax
+        self.sca(ax)
         return ax
 
+    @check_panel_ax
+    def add_twin_axes(self, ax=None, label=None, which='y', location='right', offset_type='axes', offset=1.0, **kwargs):
+        if which == 'x':
+            twin_func = ax.twinx
+        elif which == 'y':
+            twin_func = ax.twiny
+        else:
+            raise ValueError
+
+        if label is None:
+            label = 'ax_' + str(len(self.axes.keys()))
+
+        ax_new = twin_func()
+        ax_new.spines[location].set_position((offset_type, offset))
+        self.axes[label] = ax_new
+        return ax_new
+
+    @check_panel_ax
+    def clear_axes(self, ax=None, collection_names=('lines', 'collections', 'images', 'patches')):
+        for cn in collection_names:
+            cs = getattr(ax, cn)
+            ncs = len(cs)
+            for i in range(ncs):
+                cs.pop(ncs-1-i)
+
     def add_text(self, x, y, text, ax=None, **kwargs):
+
         if ax is None:
             ax = self()
         kwargs.setdefault('transform', ax.transAxes)
@@ -368,28 +423,38 @@ class Panel(object):
         self.axes['major'].set_title(x, y, title, **kwargs)
 
     @check_panel_ax
-    def plot(self, *args, ax=None, **kwargs):
+    def overlay_plot(self, *args, ax=None, **kwargs):
         # plot_type="1P"
         ipl = ax.plot(*args, **kwargs)
         return ipl
 
     @check_panel_ax
-    def errorbar(self, *args, ax=None, **kwargs):
+    def overlay_errorbar(self, *args, ax=None, **kwargs):
         # plot_type = "1E"
         ieb = ax.errorbar(*args, **kwargs)
         return ieb
 
     @check_panel_ax
-    def pcolormesh(self, *args, ax=None, **kwargs):
+    def overlay_pcolormesh(self, *args, ax=None, **kwargs):
         # plot_type: "2P"
         ipm = ax.pcolormesh(*args, **kwargs)
         return ipm
 
     @check_panel_ax
-    def imshow(self, *args, ax=None, **kwargs):
+    def overlay_imshow(self, *args, ax=None, **kwargs):
         # plot_type = "2I"
         im = ax.imshow(*args, **kwargs)
         return im
+
+    @check_panel_ax
+    def overlay_fill_between_y(self, x, y1, y2=0, ax=None, where=None, interpolate=False, **kwargs):
+        ip = ax.fill_between(x, y1, y2=y2, where=where, interpolate=interpolate, **kwargs)
+        return ip
+
+    @check_panel_ax
+    def overlay_fill_between_x(self, y, x1, x2=0, ax=None, where=None, interpolate=False, **kwargs):
+        ip = ax.fill_between(y, x1, x2=x2, where=where, interpolate=interpolate, **kwargs)
+        return ip
 
     @staticmethod
     def get_line_collection(
@@ -479,6 +544,8 @@ class Panel(object):
 
         icb = self.figure.colorbar(im, cax=cax, **kwargs)
 
+        self.sca(ax)
+
         # set colorbar label
         if cax_label is not None:
             icb.set_label(cax_label, **cax_label_config)
@@ -491,8 +558,6 @@ class Panel(object):
         transform = kwargs.pop('transform', ax.transAxes)
         ax.text(x, y, label, transform=transform, ha=ha, va=va, **kwargs)
 
-    def add_title(self, *args, **kwargs):
-        self.axes['major'].set_title(*args, **kwargs)
 
 
 class Watermark(StrBase):

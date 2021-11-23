@@ -23,7 +23,8 @@ from scipy.interpolate import interp1d
 
 from geospacelab.datahub import DataHub
 from geospacelab import preferences as pfr
-import geospacelab.visualization.mpl.dashboard as dashboard
+import geospacelab.visualization.mpl.dashboards as dashboards
+import geospacelab.visualization.mpl.panels as panels
 # from geospacelab.visualization.mpl.figure import Figure
 import geospacelab.visualization.mpl.colormaps as mycmap
 import geospacelab.toolbox.utilities.numpyarray as arraytool
@@ -112,11 +113,12 @@ def test():
     pass
 
 
-class TimeSeriesViewer(DataHub, dashboard.Dashboard):
+class TimeSeriesViewer(DataHub, dashboards.Dashboard):
 
     def __init__(self, **kwargs):
         self.panel_layouts = []
         self.plot_styles = None
+        self._panels_configs = {}
         new_figure = kwargs.pop('new_figure', True)
         figure_config = kwargs.pop('figure_config', default_figure_config)
         self.time_gap = kwargs.pop('time_gap', True)
@@ -126,7 +128,7 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
 
         self._xlim = [self.dt_fr, self.dt_to]
 
-    def set_layout(self, panel_layouts=None, plot_styles=None, row_height_scales=1,
+    def set_layout(self, panel_layouts=None, panels_classes=None, plot_styles=None, row_height_scales=1,
                    left=None, right=None, bottom=None, top=None, hspace=None, **kwargs):
 
         if left is None:
@@ -140,12 +142,18 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
         if hspace is None:
             hspace = default_layout_config['hspace']
 
-        num_cols = 1
         num_rows = len(panel_layouts)
         self.panel_layouts = panel_layouts
         if type(plot_styles) is not list:
             self.plot_styles = [None] * num_rows
         elif len(plot_styles) != num_rows:
+            raise ValueError
+
+        if panels_classes is None:
+            panels_classes = [panels.Panel] * num_rows
+        elif issubclass(panels_classes, panels.Panel):
+            panels_classes = [panels_classes] * num_rows
+        elif len(panels_classes) != num_rows:
             raise ValueError
 
         if type(row_height_scales) is not list:
@@ -163,10 +171,16 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
                            hspace=hspace, **kwargs)
         rec = 0
         for ind, height in enumerate(row_height_scales):
-            row_ind = [rec, rec+height]
-            col_ind = [0, 1]
-            self.add_panel(row_ind=row_ind, col_ind=col_ind)
+            self._panels_configs[ind] = {
+                'row_ind': [rec, rec+height],
+                'col_ind': [0, 1],
+                'panel_class': panels_classes[ind],
+            }
             rec = rec + height
+            # row_ind = [rec, rec+height]
+            # col_ind = [0, 1]
+            # self.add_panel(row_ind=row_ind, col_ind=col_ind)
+            # rec = rec + height
 
     def draw(self, dt_fr=None, dt_to=None, axis_minor_grid=False, axis_major_grid=True):
 
@@ -176,7 +190,9 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
             self._xlim[1] = dt_to
 
         bottom = False
-        for ind, panel in enumerate(self.panels.values()):
+        for ind, panel_config in self._panels_configs.items():
+            panel_id = self.add_panel(**panel_config)
+            panel = self.panels[panel_id]
             plot_layout = self.panel_layouts[ind]
             plot_style = self.plot_styles[ind]
             plot_layout_flatten = basic.list_flatten(plot_layout)
@@ -184,7 +200,7 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
             if plot_style is None:
                 plot_style = var.visual.plot_config.style
             self._set_panel(panel, plot_style, plot_layout, var_for_config=var)
-            if ind == len(self.panels.keys())-1:
+            if ind == len(self._panels_configs)-1:
                 bottom = True
             self._set_xaxis(panel.axes['major'], var_for_config=var, bottom=bottom)
 
@@ -717,6 +733,7 @@ class TimeSeriesViewer(DataHub, dashboard.Dashboard):
         if append_time:
             dt_range_str = self.get_dt_range_str(style='title')
             title = title + ', ' + dt_range_str
+        title = title.replace(', , ', ', ')
         super().add_text(x=x, y=y, text=title, **kwargs)
 
     def get_dt_range_str(self, style='title'):

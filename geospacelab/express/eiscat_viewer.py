@@ -21,7 +21,7 @@ class EISCATViewer(TimeSeriesViewer):
         ds_1 = self.dock(datasource_contents=['madrigal', 'eiscat'], **kwargs)
         ds_1.load_data(load_mode=kwargs['load_mode'])
         # ds_1.list_all_variables()
-        self.title = kwargs.pop('title', ', '.join([ds_1.facility, ds_1.site, ds_1.experiment]))
+        self.title = kwargs.pop('title', ', '.join([ds_1.facility, ds_1.site, ds_1.pulse_code, ds_1.scan_mode, ds_1.modulation]))
 
     @property
     def dataset(self):

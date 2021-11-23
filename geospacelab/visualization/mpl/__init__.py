@@ -9,6 +9,6 @@ __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
 
-from geospacelab.visualization.mpl.dashboard import Dashboard
-from geospacelab.visualization.mpl.panel import Panel
+from geospacelab.visualization.mpl.dashboards import Dashboard
+from geospacelab.visualization.mpl.panels import Panel
 
