@@ -204,15 +204,15 @@ class TimeSeriesViewer(DataHub, dashboards.Dashboard):
                 bottom = True
             self._set_xaxis(panel.axes['major'], var_for_config=var, bottom=bottom)
 
-    def _validate_plot_layout(self, layout_in):
+    def _validate_plot_layout(self, layout_in, level=0):
         from geospacelab.datahub import VariableModel
-        if not isinstance(layout_in, list):
+        if (level == 0) and (not isinstance(layout_in, list)):
             raise TypeError("The plot layout must be a list!")
-
+        type_layout_in = type(layout_in)
         layout_out = []
         for ind, elem in enumerate(layout_in):
             if isinstance(elem, list):
-                layout_out.append(self._validate_plot_layout(elem))
+                layout_out.append(self._validate_plot_layout(elem, level=level+1))
             elif issubclass(elem.__class__, VariableModel):
                 var = elem
                 layout_out.append(var)
@@ -222,7 +222,7 @@ class TimeSeriesViewer(DataHub, dashboards.Dashboard):
                 layout_out.append(var)
             else:
                 raise TypeError
-        return layout_out
+        return type_layout_in(layout_out)
 
     def _set_panel(self, panel, plot_style, plot_layout, var_for_config=None):
         plot_layout = self._validate_plot_layout(plot_layout)

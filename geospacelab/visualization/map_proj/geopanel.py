@@ -178,7 +178,7 @@ class PolarMap(mpl.Panel):
         x_new = coords['lon']
         y_new = coords['lat']
         # x_new, y_new = x, y
-        self.major_ax.plot(x_new, y_new, transform=ccrs.Geodetic(),
+        self().plot(x_new, y_new, transform=ccrs.Geodetic(),
                            linestyle='-', linewidth=0.8, color='#797A7D', zorder=100, alpha=0.7)
         # self.ax.scatter(x_new, y_new, transform=self.default_transform,
         #             marker='.', edgecolors='none', color='#C0C0C0', s=1)
@@ -306,7 +306,7 @@ class PolarMap(mpl.Panel):
 
         pybasic.dict_set_default(gridlines_config, color='#331900', linewidth=0.5, linestyle=':',
                                      draw_labels=False)
-        gl = self.major_ax.gridlines(crs=ccrs.PlateCarree(), **gridlines_config)
+        gl = self().gridlines(crs=ccrs.PlateCarree(), **gridlines_config)
 
         gl.xlocator = xlocator
         gl.ylocator = ylocator
@@ -336,7 +336,7 @@ class PolarMap(mpl.Panel):
                 # else:
                 #     label = r'' + '{:d}'.format(int(0)) + r'$^{\circ}$S'
                 label = label_formatter(lat, fmt=lat_label_format)
-                self.major_ax.text(
+                self().text(
                     label_lon, lat, label, transform=ccrs.PlateCarree(),
                     rotation=rotation,
                     **lat_label_config
@@ -396,7 +396,7 @@ class PolarMap(mpl.Panel):
                             rotation = -self.lon_c + lb_lons_loc[ind]
                     else:
                         rotation = (lb_lons_loc[ind] - self.lon_c) + 180
-                    self.major_ax.text(
+                    self().text(
                         x, y, label,
                         rotation=rotation,
                         **lon_label_config,
@@ -426,7 +426,7 @@ class PolarMap(mpl.Panel):
         # self.axes.plot(x, y, '.', transform=ccrs.PlateCarree())
         ext = [np.nanmin(data[:, 0]), np.nanmax(data[:, 0]), np.nanmin(data[:, 1]), np.nanmax(data[:, 1])]
         self._extent = ext
-        self.major_ax.set_extent(ext, self.proj)
+        self().set_extent(ext, self.proj)
 
         self._set_boundary_style()
 
@@ -448,7 +448,7 @@ class PolarMap(mpl.Panel):
             radius = (self._extent[1] - self._extent[0]) / 2
             verts = np.vstack([np.sin(theta), np.cos(theta)]).T
             circle = mpath.Path(verts * radius + center)
-            self.major_ax.set_boundary(circle, transform=self.proj)
+            self().set_boundary(circle, transform=self.proj)
         else:
             raise NotImplementedError
 
@@ -494,10 +494,10 @@ class PolarMap(mpl.Panel):
                 np.cos(grid_data_lat * factor) * np.cos(grid_lat * factor) * np.cos((grid_lon - grid_data_lon) * factor)
             )
             grid_data = np.where(big_circle_d < 75., grid_data, np.nan)
-            ipc = self.major_ax.pcolormesh(grid_lon, grid_lat, grid_data, transform=ccrs.PlateCarree(), **kwargs)
+            ipc = self().pcolormesh(grid_lon, grid_lat, grid_data, transform=ccrs.PlateCarree(), **kwargs)
         else:
             cs_new = self.cs_transform(cs_fr=cs, coords=coords)
-            ipc = self.major_ax.pcolormesh(cs_new['lon'], cs_new['lat'], data, transform=ccrs.PlateCarree(), **kwargs)
+            ipc = self().pcolormesh(cs_new['lon'], cs_new['lat'], data, transform=ccrs.PlateCarree(), **kwargs)
             # ipc = self.major_ax.imshow(data.T, origin='upper', extent=[0, 360, 40, 90], transform=ccrs.PlateCarree(), cmap='jet', interpolation='bessel')
         # self.add_colorbar(im, ax=self.major_ax, figure=None, c_scale=c_scale, c_label=c_label,
         #              left=1.1, bottom=0.1, width=0.05, height=0.7
@@ -633,7 +633,7 @@ class PolarMap(mpl.Panel):
         lc = LineCollection(segments, cmap=colormap, norm=norm)
         lc.set_array(z)
         lc.set_linewidth(6)
-        im = self.major_ax.add_collection(lc)
+        im = self().add_collection(lc)
         return im
         # clabel = label + ' (' + unit + ')'
         # self.add_colorbar(self.major_ax, line, cscale=scale, clabel=clabel)
@@ -647,6 +647,8 @@ class PolarMap(mpl.Panel):
                      ):
         if figure is None:
             figure = plt.gcf()
+        if ax is None:
+            ax = self()
         pos = ax.get_position()
         ax_width = pos.x1 - pos.x0
         ax_height = pos.y1 - pos.y0

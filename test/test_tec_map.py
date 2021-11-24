@@ -43,7 +43,7 @@ def test_tec():
     panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
-    panel1.major_ax.text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1.major_ax.transAxes)
+    panel1().text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1().transAxes)
 
     ####
     time1 = datetime.datetime(2021, 8, 24, 10, 0)
@@ -71,7 +71,7 @@ def test_tec():
     panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
-    panel1.major_ax.text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1.major_ax.transAxes)
+    panel1().text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1().transAxes)
 
     ####
     time1 = datetime.datetime(2021, 8, 24, 10, 30)
@@ -99,7 +99,7 @@ def test_tec():
     panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
-    panel1.major_ax.text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1.major_ax.transAxes)
+    panel1().text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1().transAxes)
 
     ####
     time1 = datetime.datetime(2021, 8, 24, 11, 0)
@@ -127,7 +127,7 @@ def test_tec():
     panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
-    panel1.major_ax.text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1.major_ax.transAxes)
+    panel1().text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1().transAxes)
 
     ####
     time1 = datetime.datetime(2021, 8, 24, 11, 30)
@@ -155,7 +155,7 @@ def test_tec():
     panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
-    panel1.major_ax.text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1.major_ax.transAxes)
+    panel1().text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1().transAxes)
 
     ####
     time1 = datetime.datetime(2021, 8, 24, 12, 0)
@@ -183,7 +183,7 @@ def test_tec():
     panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
-    panel1.major_ax.text(0.4, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1.major_ax.transAxes)
+    panel1().text(0.4, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1().transAxes)
 
 
     plt.savefig('example_tec_aacgm_fixed_mlt', dpi=200)

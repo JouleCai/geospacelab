@@ -378,7 +378,7 @@ class Panel(object):
         return ax
 
     @check_panel_ax
-    def add_twin_axes(self, ax=None, label=None, which='y', location='right', offset_type='axes', offset=1.0, **kwargs):
+    def add_twin_axes(self, ax=None, label=None, which='y', location='right', offset_type='outward', offset=60, **kwargs):
         if which == 'x':
             twin_func = ax.twinx
         elif which == 'y':
@@ -550,13 +550,13 @@ class Panel(object):
         if cax_label is not None:
             icb.set_label(cax_label, **cax_label_config)
 
-    @check_panel_ax
-    def add_label(self, x, y, label, ha='left', va='center', **kwargs):
-        ax = self.axes['major']
-        if label is None:
-            label = ''
-        transform = kwargs.pop('transform', ax.transAxes)
-        ax.text(x, y, label, transform=transform, ha=ha, va=va, **kwargs)
+    @property
+    def major_ax(self):
+        return self.axes['major']
+
+    @major_ax.setter
+    def major_ax(self, ax):
+        self.axes['major'] = ax
 
 
 
