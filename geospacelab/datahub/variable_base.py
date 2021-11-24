@@ -58,38 +58,44 @@ class VariableModel(object):
     :type visual: dict or Visual object, default: None.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(
+            self, value=None, error=None, data_type=None,
+            name='', fullname='', label='', group='',
+            unit=None, unit_label=None, quantity=None,
+            variable_type='scalar',
+            ndim=None, depends=None, dataset=None, visual=None,
+            **kwargs):
         """Initial settings
         
         :params:
         """
         # set default values
 
-        self.name = kwargs.pop('name', '')
-        self.fullname = kwargs.pop('fullname', '')
+        self.name = name
+        self.fullname = fullname
 
-        self.label = kwargs.pop('label', '')
+        self.label = label
 
-        self.data_type = kwargs.pop('data_type', None)  # 'support_data', 'data', 'metadata'
-        self.group = kwargs.pop('group', '')
+        self.data_type = data_type # 'support_data', 'data', 'metadata'
+        self.group = group
 
-        self.unit = kwargs.pop('unit', None)
-        self.unit_label = kwargs.pop('unit_label', None)
+        self.unit = unit
+        self.unit_label = label
 
-        self.quantity = kwargs.pop('quantity', None)
+        self.quantity = quantity
 
-        self.value = kwargs.pop('value', None)
-        self.error = kwargs.pop('error', None)
+        self.value = value
+        self.error = error
 
-        self.variable_type = kwargs.pop('variable_type', 'scalar')    # scalar, vector, tensor, ...
-        self.ndim = kwargs.pop('ndim', None)
+        self.variable_type = variable_type   # scalar, vector, tensor, ...
+        self.ndim = ndim
         self._depends = {}
-        self.depends = kwargs.pop('depends', None)
+        self.depends = depends
 
-        self.dataset = kwargs.pop('dataset', None)
+        self.dataset = dataset
 
         self._visual = None
-        self.visual = kwargs.pop('visual', 'off')
+        self.visual = visual
         self._attrs_registered = ['name', 'fullname', 'label', 'data_type', 'group', 'unit', 'unit_label',
                                   'quantity', 'value', 'error', 'variable_type', 'ndim', 'depends', 'dataset',
                                   'visual']
@@ -170,19 +176,35 @@ class VariableModel(object):
             raise TypeError
         self.depends[axis] = depend_dict
 
-    def _get_attr_from_string(self, string):
+    def _string_parse_for_attr(self, string):
         if not str(string):
             return string
-        if string[0] == '@':
-            splits = string[1:].split('.')
-            if splits[0] in ['v']:
-                result = getattr(self, splits[1])
-            elif splits[0] in ['d']:
-                result = getattr(self.dataset[splits[1]], splits[2])
-            else:
-                raise ValueError
-        else:
-            result = string
+        rc = re.compile(r'^@(.+)')
+        rm = rc.match(string)
+        if rm is None:
+            return string
+
+        results = rm.groups()[0].split('.')
+
+        if results[0].lower() in ['v', 'var', 'variable']:
+            attr = getattr(self, results[1])
+        elif results[0].lower() in ['d', 'dataset']:
+            attr = getattr(self.dataset[results[1]], results[2])
+        elif results[0].lower() in ['vd', 'depends']:
+            depend = self.get_depend(axis=int(results[1]))
+            attr = depend[results[2]]
+        return attr
+        #
+        # if string[0] == '@':
+        #     splits = string[1:].split('.')
+        #     if splits[0] in ['v']:
+        #         result = getattr(self, splits[1])
+        #     elif splits[0] in ['d']:
+        #         result = getattr(self.dataset[splits[1]], splits[2])
+        #     else:
+        #         raise ValueError
+        # else:
+        #     result = string
         return result
 
     def get_visual_axis_attr(self, attr_name=None, axis=None):
@@ -200,7 +222,7 @@ class VariableModel(object):
         results = []
         for a in attr:
             if type(a) is str:
-                result = self._get_attr_from_string(a)
+                result = self._string_parse_for_attr(a)
             else:
                 result = a
             results.append(copy.deepcopy(result))
@@ -246,6 +268,7 @@ class VariableModel(object):
 
     @visual.setter
     def visual(self, value):
+
         if value == 'new':
             self._visual = Visual(variable=self)
         elif value == 'on':
@@ -438,6 +461,7 @@ class VariableModel(object):
     @depends.setter
     def depends(self, d_dict):
         if d_dict is None:
+            self._depends = {}
             return
 
         if type(d_dict) is not dict:
@@ -588,6 +612,8 @@ class Visual(object):
             return
         if type(a_dict) is dict:
             for key, value in a_dict.items():
+                if not type(key) is int:
+                    raise TypeError
                 if value is None:
                     self._axis[key] = VisualAxis()
                 elif type(value) is dict:

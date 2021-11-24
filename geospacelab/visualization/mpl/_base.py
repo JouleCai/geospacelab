@@ -1,4 +1,4 @@
-
+import copy
 import weakref
 import string
 import numpy as np
@@ -301,6 +301,17 @@ class Dashboard(DataHub):
 
 
 class Panel(object):
+    _ax_attr_model = {
+        'twinx_axes': [],
+        'twiny_axes': [],
+        'lines': [],
+        'collections': [],
+        'legend': None,
+        'colorbars': None,
+        'variables': [],
+    }
+    axes_overview = {}
+
     def __init__(self, *args, figure=None, from_subplot=True, **kwargs):
         if figure is None:
             figure = plt.gcf()
@@ -319,6 +330,7 @@ class Panel(object):
                     args = ((x, y, w, h),)
             ax = self.figure.add_axes(*args, **kwargs)
         self.axes['major'] = ax
+        self.axes_overview[ax] = copy.deepcopy(self._ax_attr_model)
         self._current_ax = ax
 
     def __call__(self, ax=None):
@@ -374,6 +386,7 @@ class Panel(object):
         ax = self.figure.add_axes(*args, **kwargs)
         ax.patch.set_alpha(0)
         self.axes[label] = ax
+        self.axes_overview[ax] = copy.deepcopy(self._ax_attr_model)
         self.sca(ax)
         return ax
 
@@ -392,6 +405,11 @@ class Panel(object):
         ax_new = twin_func()
         ax_new.spines[location].set_position((offset_type, offset))
         self.axes[label] = ax_new
+        if which == 'x':
+            self.axes_overview[ax]['twinx_axes'].append(ax_new)
+        else:
+            self.axes_overview[ax]['twiny_axes'].append(ax_new)
+        self.axes_overview[ax_new] = copy.deepcopy(self._ax_attr_model)
         return ax_new
 
     @check_panel_ax
@@ -557,6 +575,9 @@ class Panel(object):
     @major_ax.setter
     def major_ax(self, ax):
         self.axes['major'] = ax
+
+    def _raise_error(self, error):
+        raise error
 
 
 

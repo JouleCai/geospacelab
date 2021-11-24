@@ -8,22 +8,23 @@ __license__ = "BSD-3-Clause License"
 __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
-
+import numpy as np
+import re
+import datetime
 import matplotlib.pyplot as plt
+import matplotlib.colors as mpl_colors
+import matplotlib.ticker as mpl_ticker
+import matplotlib.dates as mpl_dates
+from scipy.interpolate import interp1d
 
 from geospacelab.visualization.mpl._base import Panel as PanelBase
 from geospacelab.datahub.variable_base import VariableModel
-
-
-def check_panel_ax(func):
-    def wrapper(*args, **kwargs):
-        obj = args[0]
-        kwargs.setdefault('ax', None)
-        if kwargs['ax'] is None:
-            kwargs['ax'] = obj.axes['major']
-        result = func(*args, **kwargs)
-        return result
-    return wrapper
+import geospacelab.toolbox.utilities.numpyarray as arraytool
+import geospacelab.visualization.mpl.axis_ticks as ticktool
+import geospacelab.toolbox.utilities.pybasic as basic
+import geospacelab.toolbox.utilities.pylogging as mylog
+from geospacelab.visualization.mpl._helpers import check_panel_ax
+import geospacelab.visualization.mpl.colormaps as mycmap
 
 
 class Panel(PanelBase):
@@ -31,73 +32,478 @@ class Panel(PanelBase):
     def __init__(self, *args, figure=None, from_subplot=True, **kwargs):
         super(Panel, self).__init__(*args, figure=figure, from_subplot=from_subplot, **kwargs)
 
-class TSPanel(Panel):
-    def __init__(self, *args, plot_layout=None, figure=None, from_subplot=True, **kwargs):
-        super(Panel, self).__init__(*args, figure=figure, from_subplot=from_subplot, **kwargs)
-        self._var_for_config = None
-        if plot_layout is not None:
-            self.overlay_from_variables(plot_layout)
 
-    def overlay_from_variables(self, layout_in, ax=None, level=0, num_y_axis=0):
+class TSPanel(Panel):
+
+    _default_plot_config = {
+            'linestyle': '-',
+            'linewidth': 1.5,
+            'marker': '.',
+            'markersize': 1
+        }
+
+    _default_legend_config = {
+        'loc': 'upper left',
+        'bbox_to_anchor': (1.0, 1.0),
+        'frameon': False,
+        'fontsize': 'medium'
+    }
+    _default_xtick_params = {
+        'labelsize': plt.rcParams['xtick.labelsize'],
+        'direction': 'inout',
+    }
+
+    def __init__(
+            self, *args, 
+            dt_fr=None, dt_to=None, figure=None, from_subplot=True,
+            bottom_panel=True, timeline_reverse=False, timeline_multiple_labels=None, **kwargs
+    ):
+        
+        super(Panel, self).__init__(*args, figure=figure, from_subplot=from_subplot, **kwargs)
+
+        self.dt_fr = dt_fr
+        self.dt_to = dt_to
+
+        self._xlim = [dt_fr, dt_to]
+        self.timeline_reverse = timeline_reverse
+        if timeline_multiple_labels is None:
+            timeline_multiple_labels = []
+        self.timeline_multiple_labels = timeline_multiple_labels
+        self._var_for_config = None
+        self.bottom_panel = bottom_panel
+
+    def draw(self, plot_layout, ax=None):
+        self.overlay_from_variables(plot_layout, ax=ax)
+
+    def overlay_from_variables(self, layout_in, ax=None, level=0):
         if ax is None:
             ax = self()
         self.sca(ax)
+
         if level == 0 and not list(layout_in):
-            raise ValueError
+            raise TypeError
+        elif level==0 and type(layout_in[0]) is list:
+            raise ValueError("The first element in the plot layout cannot be a list!")
 
         if level > 1:
             raise NotImplemented
 
+        iplts = []
         for ind, elem in enumerate(layout_in):
-            if isinstance(elem, list):
-                if ind > 0:
-                    num_y_axis = num_y_axis + 1
-                    ax_in = self.add_twin_axes(
-                        ax=ax, which='y', location='right', offset_type='outward', offset=40*(num_y_axis-1)
-                    )
-                else:
-                    ax_in = ax
-                self.overlay_from_variables(elem, ax=ax_in, level=level+1, num_y_axis=num_y_axis)
-            elif issubclass(elem.__class__, VariableModel):
-                if ind == 0:
-                    setattr(ax, '_var_for_config', elem)
-                self._overlay_variable(elem, ax=ax)
-            elif type(elem) is tuple:
-                self._overlay_variable(elem, ax=ax)
+
+            if ind == 0 or issubclass(elem.__class__, VariableModel):
+                var = elem[0] if type(elem) is list else elem
+                iplts_add = self.overlay_a_variable(var, ax=ax)
+            elif level==0 and isinstance(elem, list):
+                ax_in = self.add_twin_axes(
+                    ax=ax, which='y', location='right', offset_type='outward',
+                    offset=40*(len(self.axes_overview['twinx_axes']))
+                )
+                iplts_add = self.overlay_from_variables()
             else:
                 raise NotImplementedError
+            iplts.append(iplts_add)
 
-    def _overlay_variable(self, elem, ax=None):
-        plot_style = elem.visual.plot_config.style
+        if level == 0:
+            self._check_legend(ax)
+            self._check_colorbar(ax)
+            self._set_xaxis(ax=ax)
+
+        self._set_yaxis(ax=ax)
+        return iplts
+
+    def overlay_a_variable(self, var, ax=None):
+        self.axes_overview[ax]['variables'].extend(var)
+        var_for_config = self.axes_overview[ax]['variables'][0]
+        plot_style = var_for_config.plot_config.style
 
         if plot_style == '1P':
-            self.overlay_plot(elem, ax=ax)
+            iplt = self.overlay_line(var, ax=ax)
         elif plot_style in ['1', '1E']:
-            self.overlay_errorbar(elem, ax=ax)
+            iplt = self.overlay_line(var, ax=ax, errorbar='on')
         elif plot_style in ['2P']:
-            self.overlay_pcolormesh(elem, ax=ax)
+            iplt = self.overlay_pcolormesh(var, ax=ax)
         elif plot_style in ['2I']:
-            self.overlay_imshow(elem, ax=ax)
+            iplt = self.overlay_imshow(var, ax=ax)
         elif plot_style in ['1B']:
-            self.overlay_bar(elem, ax=ax)
+            iplt = self.overlay_bar(var, ax=ax)
         elif plot_style in ['1F0']:
-            self.overlay_fill_between_y_zero(elem, ax=ax)
+            iplt = self.overlay_fill_between_y_zero(var, ax=ax)
         elif plot_style in ['1S']:
-            self.overlay_scatter(elem, ax=ax)
+            iplt = self.overlay_scatter(var, ax=ax)
         elif plot_style in ['1C']:
-            self.overlay_multiple_colored_line(elem, ax=ax)
+            iplt = self.overlay_multiple_colored_line(var, ax=ax)
         else:
             raise NotImplementedError
 
-    def overlay_plot(self, *args, ax=None, **kwargs):
+        return iplt
+
+    @check_panel_ax
+    def overlay_line(self, var, ax=None, errorbar='off', **kwargs):
+        """
+        Overlay a line plot in the axes.
+        :param var: A GeospaceLab Variable object
+        :param ax: The axes to plot.
+        :param errorbar: If 'on', show errorbar.
+        :param kwargs: Other keyword arguments forwarded to ax.plot() or ax.errorbar()
+        :return:
+        """
+        il = None
+
+        data = self._retrieve_data_1d(var)
+        x = data['x']
+        y = data['y']
+        y_err = data['y_err']
+
+        plot_config = basic.dict_set_default(kwargs, **var.visual.plot_config.line)
+        plot_config = basic.dict_set_default(plot_config, **self._default_plot_config)
+        label = var.get_visual_axis_attr(axis=2, attr_name='label')
+        plot_config = basic.dict_set_default(plot_config, label=label)
+        if errorbar == 'off':
+            il = ax.plot(x, y, **kwargs)
+        elif errorbar == 'on':
+            errorbar_config = dict(plot_config)
+            errorbar_config.update(var.visual.plot_config.errorbar)
+            il = ax.errorbar(x, y, yerr=y_err, ax=ax, **errorbar_config)
+        self.axes_overview[ax]['lines'].append(il)
+        return il
+
+    @check_panel_ax
+    def overlay_pcolormesh(self, *args, ax=None, **kwargs):
         var = args[0]
 
-        super().overlay_plot()
+        data = self._retrieve_data_2d(var)
+        x = data['x']
+        y = data['y']
+        z = data['z']
+
+        if x.shape[0] == z.shape[0]:
+            delta_x = np.diff(x, axis=0)
+            x[:-1, :] = x[:-1, :] + delta_x/2
+            x = np.vstack((
+                np.array(x[0, 0] - delta_x[0, 0] / 2).reshape((1, 1)),
+                x[:-1, :],
+                np.array(x[-1, 0] + delta_x[-1, 0] / 2).reshape((1, 1))
+            ))
+
+        if y.shape[1] == z.shape[1]:
+            delta_y = np.diff(y, axis=1)
+            y[:, :-1] = y[:, :-1] + delta_y/2
+            y = np.hstack((
+                np.array(y[:, 0] - delta_y[:, 0]/2).reshape((y.shape[0], 1)),
+                y[:, :-1],
+                np.array(y[:, -1] + delta_y[:, -1]/2).reshape((y.shape[0], 1)),
+            ))
+
+        if y.shape[0] == z.shape[0]:
+            y = np.vstack((y, y[-1, :].reshape((1, y.shape[1]))))
+
+        pcolormesh_config = var.visual.plot_config.pcolormesh
+        z_lim = var.visual.axis[2].lim
+        if z_lim is None:
+            z_lim = [np.nanmin(z.flatten()), np.nanmax(z.flatten())]
+        z_scale = var.visual.axis[2].scale
+        if z_scale == 'log':
+            norm = mpl_colors.LogNorm(vmin=z_lim[0], vmax=z_lim[1])
+            pcolormesh_config.update(norm=norm)
+        else:
+            pcolormesh_config.update(vmin=z_lim[0])
+            pcolormesh_config.update(vmax=z_lim[1])
+        colormap = mycmap.get_colormap(var.visual.plot_config.pcolormesh.get('cmap', None))
+        pcolormesh_config.update(cmap=colormap)
+
+        im = ax.pcolormesh(x.T, y.T, z.T, **pcolormesh_config)
+        self.axes_overview[ax]['collections'].append(im)
+        return im
+
+    @check_panel_ax
+    def _get_var_for_config(self, ax=None, ind=0):
+        var_for_config = self.axes_overview[ax]['variables'][ind]
+        return var_for_config
+
+    def _set_xaxis(self, ax):
+
+        if self._xlim[0] is None:
+            self._xlim[0] = mpl_dates.num2date(ax.get_xlim()[0])
+        if self._xlim[1] is None:
+            self._xlim[1] = mpl_dates.num2date(ax.get_xlim()[1])
+        ax.set_xlim(self._xlim)
+        # reverse the x axis if timeline_reverse=True
+        if self.timeline_reverse:
+            ax.set_xlim((self._xlim[1], self._xlim[0]))
+
+        ax.xaxis.set_tick_params(labelsize=self._default_xtick_params['labelsize'])
+        ax.xaxis.set_tick_params(
+            which='both',
+            direction=self._default_xtick_params['direction'],
+            bottom=True, top=True
+        )
+        ax.xaxis.set_tick_params(which='major', length=8)
+        ax.xaxis.set_tick_params(which='minor', length=4)
+
+        # use date locators
+        majorlocator, minorlocator, majorformatter = ticktool.set_timeline(self._xlim[0], self._xlim[1])
+        if not self.bottom_panel:
+            majorformatter = mpl_ticker.NullFormatter()
+        ax.xaxis.set_major_locator(majorlocator)
+        ax.xaxis.set_major_formatter(majorformatter)
+        ax.xaxis.set_minor_locator(minorlocator)
+        if self.bottom_panel:
+            self._set_xaxis_ticklabels(ax, majorformatter=majorformatter)
+
+    def _set_xaxis_ticklabels(self, ax, majorformatter=None):
+        var_for_config = self._get_var_for_config(ax=ax)
+        # ax.tick_params(axis='x', labelsize=plt.rcParams['xtick.labelsize'])
+        # set UT timeline
+        if not list(self.timeline_multiple_labels):
+
+            ax.set_xlabel('UT', fontsize=12, fontweight='normal')
+            return
+
+        figlength = self.figure.get_size_inches()[1]*2.54
+        if figlength > 20:
+            yoffset = 0.02
+        else:
+            yoffset = 0.04
+        ticks = ax.get_xticks()
+        ylim0, _ = ax.get_ylim()
+        xy_fig = []
+        # transform from data cs to figure cs
+        for tick in ticks:
+            px = ax.transData.transform([tick, ylim0])
+            xy = self.figure.transFigure.inverted().transform(px)
+            xy_fig.append(xy)
+
+        xlabels = []
+        x_depend = var_for_config.get_depend(axis=0, retrieve_data=True)
+        x0 = np.array(mpl_dates.date2num(x_depend['UT'])).flatten()
+        x1 = np.array(ticks)
+        ys = [x1]       # list of tick labels
+        for ind, label in enumerate(self.timeline_multiple_labels):
+            if label in x_depend.keys():
+                y0 = x_depend[label].flatten()
+            elif label in var_for_config.dataset.keys():
+                    y0 = var_for_config.dataset[label].value
+            else:
+                raise KeyError
+            if label == 'MLT':
+                mlt_ind = ind + 1
+                y0_sin = np.sin(y0 / 24. * 2 * np.pi)
+                y0_cos = np.cos(y0 / 24. * 2 * np.pi)
+                itpf_sin = interp1d(x0, y0_sin, bounds_error=False, fill_value='extrapolate')
+                itpf_cos = interp1d(x0, y0_cos, bounds_error=False, fill_value="extrapolate")
+                y0_sin_i = itpf_sin(x1)
+                y0_cos_i = itpf_cos(x1)
+                rad = np.sign(y0_sin_i) * (np.pi / 2 - np.arcsin(y0_cos_i))
+                rad = np.where((rad >= 0), rad, rad + 2 * np.pi)
+                y1 = rad / 2. / np.pi * 24.
+            else:
+                itpf = interp1d(x0, y0, bounds_error=False, fill_value='extrapolate')
+                y1 = itpf(x1)
+            ys.append(y1)
+            xlabels.append(label)
+
+        ax.xaxis.set_major_formatter(mpl_ticker.NullFormatter())
+
+        # if self.major_timeline == 'MLT':
+        #     for ind_pos, xtick in enumerate(ys[mlt_ind]):
+        #         if xtick == np.nan:
+        #             continue
+        #         text = (datetime.datetime(1970, 1, 1) + datetime.timedelta(hours=xtick)).strftime('%H:%M')
+        #         plt.text(
+        #             xy_fig[ind_pos][0], xy_fig[ind_pos][1] - yoffset * ind - 0.15,
+        #             text,
+        #             fontsize=9,
+        #             horizontalalignment='center', verticalalignment='top',
+        #             transform=self.figure.transFigure
+        #         )
+        #     ax.set_xlabel('MLT')
+        #     return
+
+        for ind, xticks in enumerate(ys):
+            plt.text(
+                0.1, xy_fig[0][1] - yoffset * ind - 0.013,
+                xlabels[ind],
+                fontsize=plt.rcParams['xtick.labelsize'], fontweight='normal',
+                horizontalalignment='right', verticalalignment='top',
+                transform=self.figure.transFigure
+            )
+            for ind_pos, xtick in enumerate(xticks):
+                if np.isnan(xtick):
+                    continue
+                if ind == 0:
+                    text = majorformatter.format_data(xtick)
+                elif xlabels[ind] == 'MLT':
+                    text = (datetime.datetime(1970, 1, 1) + datetime.timedelta(hours=xtick)).strftime('%H:%M')
+                else:
+                    text = '%.1f' % xtick
+                plt.text(
+                    xy_fig[ind_pos][0], xy_fig[ind_pos][1] - yoffset * ind - 0.013,
+                    text,
+                    fontsize=plt.rcParams['xtick.labelsize'],
+                    horizontalalignment='center', verticalalignment='top',
+                    transform=self.figure.transFigure
+                )
+
+    @check_panel_ax
+    def _set_ylim(self, ax=None, zero_line='on'):
+
+        var_for_config = self.axes_overview[ax]['variables'][0]
+        ylim = var_for_config.visual.axis[1].lim
+
+        ylim_current = ax.get_ylim()
+        if ylim is None:
+            ylim = ylim_current
+        elif ylim[0] == -np.inf and ylim[1] == np.inf:
+            maxlim = np.max(np.abs(ylim_current))
+            ylim = [-maxlim, maxlim]
+        else:
+            if ylim[0] is None:
+                ylim[0] = ylim_current[0]
+            if ylim[1] is None:
+                ylim[1] = ylim_current[1]
+        if zero_line == 'on':
+            if (ylim[0] < 0) and (ylim[1] > 0):
+                ax.plot(ax.get_xlim(), [0, 0], 'k--', linewidth=0.5)
+        ax.set_ylim(ylim)
+        return
+
+    def _check_legend(self, ax):
+        ax_ov = self.axes_overview[ax]
+        if list(ax_ov['twinx_axes']):
+            nl = 0
+            axes = [ax]
+            axes.extend(ax_ov['twinx_axes'])
+            for ind, pax in enumerate(axes):
+
+                pax_ov = self.axes_overview[pax]
+                if list(pax_ov['lines']):
+                    il = pax_ov['lines'][0]
+                    pax.yaxis.label.set_color(il.get_color())
+                    pax.tick_params(axis='y', colors=il.get_color())
+                    pax.spines['right'].set_edgecolor(il.get_color())
+                else:
+                    continue
+        else:
+            var_for_config = ax_ov['variables'][0]
+            ax.legend(ax_ov['lines'], **var_for_config.visual.plot_config.legend)
+
+    def _check_colorbar(self, ax):
+        ax_ov = self.axes_overview[ax]
+        offset_scale = 60
+        offset = 0
+        if list(ax_ov['twinx_axes']):
+            offset = offset_scale * (len(ax_ov['twinx_axes']) - 1)
+        var_for_config = ax_ov['variables'][0]
+        colorbar_config = var_for_config.visual.plot_config.colorbar
+        self.add_colorbar(**colorbar_config)
+
+    def _retrieve_data_1d(self, var):
+        x_data = var.get_visual_axis_attr(axis=0, attr_name='data')
+        if type(x_data) == list:
+            x_data = x_data[0]
+        if x_data is None:
+            depend_0 = var.get_depend(axis=0)
+            x_data = depend_0['UT']  # numpy array, type=datetime
+            if x_data is None:
+                x_data = np.array([0, 1]).reshape(2, 1)
+                var.visual.axis[0].mask_gap = False
+
+        y_data = var.get_visual_axis_attr(axis=1, attr_name='data')
+        if y_data is None:
+            y_data = var.value
+            if y_data is None:
+                y_data = np.empty_like(x_data, dtype=np.float32)
+                y_data[::] = np.nan
+
+        y_err_data = var.get_visual_axis_attr(axis=1, attr_name='data_err')
+        if y_err_data is None:
+            y_err_data = var.error
+
+        x_data_res = var.visual.axis[0].data_res
+        x = x_data
+        y = y_data * var.visual.axis[1].data_scale
+        if y_err_data is None:
+            y_err = np.empty_like(y)
+            y_err[:] = 0
+        else:
+            y_err = y_err_data * var.visual.axis[1].data_scale
+
+        # resample time if needed
+        x_data = x
+        y_data = y
+        y_err_data = y_err
+        time_gap = var.visual.axis[0].mask_gap
+        if time_gap is None:
+            time_gap = self.time_gap
+        if time_gap:
+            x, y = arraytool.data_resample(
+                x_data, y_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
+
+            x, y_err = arraytool.data_resample(
+                x_data, y_err_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
+        data = {'x': x, 'y': y, 'y_err': y_err}
+        return data
+
+    def _retrieve_data_2d(self, var):
+        x_data = var.get_visual_axis_attr(axis=0, attr_name='data')
+        if type(x_data) == list:
+            x_data = x_data[0]
+        if x_data is None:
+            depend_0 = var.get_depend(axis=0)
+            x_data = depend_0['UT']  # numpy array, type=datetime
+            if x_data is None:
+                x_data = np.array([self._xlim[0], self._xlim[1]]).reshape(2, 1)
+                var.visual.axis[0].mask_gap = False
+
+        y_data = var.get_visual_axis_attr(axis=1, attr_name='data')
+        if type(y_data) == list:
+            y_data = y_data[0]
+        if y_data is None:
+            y_data = var.get_depend(axis=1, retrieve_data=True)
+            y_data_keys = list(y_data.keys())
+            y_data = y_data[y_data_keys[0]]
+            if y_data is None:
+                y_data = np.array([0, 1]).reshape(1, 2)
+        y_data = y_data * var.visual.axis[1].data_scale
+
+        z_data = var.get_visual_axis_attr(axis=2, attr_name='data')
+        if type(z_data) == list:
+            z_data = z_data[0]
+        if z_data is None:
+            z_data = var.value
+            if z_data is None:
+                z_data = np.array([[np.nan, np.nan], [np.nan, np.nan]])
+        if (x_data is None) or (z_data is None):
+            raise ValueError
+
+        z_data = z_data * var.visual.axis[2].data_scale
+        x_data_res = var.visual.axis[0].data_res
+        time_gap = var.visual.axis[0].mask_gap
+        if time_gap is None:
+            time_gap = self.time_gap
+        if time_gap:
+            x, y, z = arraytool.data_resample_2d(
+                x=x_data, y=y_data, z=z_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
+        else:
+            x = x_data
+            y = y_data
+            z = z_data
+
+        data = {'x': x, 'y': y, 'z': z}
+        return data
 
 
 
-
-
+def check_panel_ax(func):
+    def wrapper(*args, **kwargs):
+        obj = args[-1]
+        kwargs.setdefault('ax', None)
+        if kwargs['ax'] is None:
+            kwargs['ax'] = obj.axes['major']
+        result = func(*args, **kwargs)
+        return result
+    return wrapper
 
 
 class Panel1(object):
