@@ -16,8 +16,7 @@ from geospacelab.visualization.mpl.ts_viewer import TimeSeriesViewer
 
 class EISCATViewer(TimeSeriesViewer):
     def __init__(self, dt_fr, dt_to, **kwargs):
-        new_figure = kwargs.pop('new_figure', True)
-        super().__init__(dt_fr=dt_fr, dt_to=dt_to, new_figure=new_figure)
+        super().__init__(dt_fr=dt_fr, dt_to=dt_to,)
         ds_1 = self.dock(datasource_contents=['madrigal', 'eiscat'], **kwargs)
         ds_1.load_data(load_mode=kwargs['load_mode'])
         # ds_1.list_all_variables()

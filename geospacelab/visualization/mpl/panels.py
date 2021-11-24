@@ -56,7 +56,9 @@ class TSPanel(Panel):
     def __init__(
             self, *args, 
             dt_fr=None, dt_to=None, figure=None, from_subplot=True,
-            bottom_panel=True, timeline_reverse=False, timeline_multiple_labels=None, **kwargs
+            bottom_panel=True, timeline_reverse=False, timeline_multiple_labels=None,
+            time_gap=True,
+            **kwargs
     ):
         
         super(Panel, self).__init__(*args, figure=figure, from_subplot=from_subplot, **kwargs)
@@ -66,6 +68,7 @@ class TSPanel(Panel):
 
         self._xlim = [dt_fr, dt_to]
         self.timeline_reverse = timeline_reverse
+        self.time_gap = time_gap
         if timeline_multiple_labels is None:
             timeline_multiple_labels = []
         self.timeline_multiple_labels = timeline_multiple_labels
@@ -82,42 +85,50 @@ class TSPanel(Panel):
 
         if level == 0 and not list(layout_in):
             raise TypeError
-        elif level==0 and type(layout_in[0]) is list:
-            raise ValueError("The first element in the plot layout cannot be a list!")
+        elif level == 0:
+            if type(layout_in[0]) is list:
+                raise ValueError("The first element in the plot layout cannot be a list!")
+            if any(type(i) is list for i in layout_in):
+                self.axes_overview[ax]['twinx'] = 'on'
 
         if level > 1:
             raise NotImplemented
 
         iplts = []
+
         for ind, elem in enumerate(layout_in):
 
             if ind == 0 or issubclass(elem.__class__, VariableModel):
                 var = elem[0] if type(elem) is list else elem
                 iplts_add = self.overlay_a_variable(var, ax=ax)
-            elif level==0 and isinstance(elem, list):
+            elif level == 0 and isinstance(elem, list):
                 ax_in = self.add_twin_axes(
-                    ax=ax, which='y', location='right', offset_type='outward',
-                    offset=40*(len(self.axes_overview['twinx_axes']))
+                    ax=ax, which='x', location='right', offset_type='outward',
+                    offset=40*(len(self.axes_overview[ax]['twinx_axes']))
                 )
-                iplts_add = self.overlay_from_variables()
+                self.axes_overview[ax_in]['twinx'] = 'self'
+                ax_in._get_lines.prop_cycler = ax._get_lines.prop_cycler
+                iplts_add = self.overlay_from_variables(elem, ax=ax_in, level=level+1)
             else:
                 raise NotImplementedError
-            iplts.append(iplts_add)
+            iplts.extend(iplts_add)
 
         if level == 0:
-            self._check_legend(ax)
-            self._check_colorbar(ax)
+            if self.axes_overview[ax]['legend'] == 'on':
+                self._check_legend(ax)
+            if self.axes_overview[ax]['colorbar'] == 'on':
+                self._check_colorbar(ax)
             self._set_xaxis(ax=ax)
 
         self._set_yaxis(ax=ax)
         return iplts
 
     def overlay_a_variable(self, var, ax=None):
-        self.axes_overview[ax]['variables'].extend(var)
+        self.axes_overview[ax]['variables'].extend([var])
         var_for_config = self.axes_overview[ax]['variables'][0]
-        plot_style = var_for_config.plot_config.style
+        plot_style = var_for_config.visual.plot_config.style
 
-        if plot_style == '1P':
+        if plot_style in ['1P', '1noE']:
             iplt = self.overlay_line(var, ax=ax)
         elif plot_style in ['1', '1E']:
             iplt = self.overlay_line(var, ax=ax, errorbar='on')
@@ -157,6 +168,8 @@ class TSPanel(Panel):
 
         plot_config = basic.dict_set_default(kwargs, **var.visual.plot_config.line)
         plot_config = basic.dict_set_default(plot_config, **self._default_plot_config)
+        if self.axes_overview[ax]['twinx'] in ['on', 'self']:
+            var.visual.axis[1].label = '@v.label'
         label = var.get_visual_axis_attr(axis=2, attr_name='label')
         plot_config = basic.dict_set_default(plot_config, label=label)
         if errorbar == 'off':
@@ -165,7 +178,11 @@ class TSPanel(Panel):
             errorbar_config = dict(plot_config)
             errorbar_config.update(var.visual.plot_config.errorbar)
             il = ax.errorbar(x, y, yerr=y_err, ax=ax, **errorbar_config)
-        self.axes_overview[ax]['lines'].append(il)
+        if type(il) is not list:
+            il = [il]
+        self.axes_overview[ax]['lines'].extend(il)
+        if self.axes_overview[ax]['legend'] is None:
+            self.axes_overview[ax]['legend'] = 'on'
         return il
 
     @check_panel_ax
@@ -213,8 +230,10 @@ class TSPanel(Panel):
         pcolormesh_config.update(cmap=colormap)
 
         im = ax.pcolormesh(x.T, y.T, z.T, **pcolormesh_config)
-        self.axes_overview[ax]['collections'].append(im)
-        return im
+        self.axes_overview[ax]['collections'].extend([im])
+        if self.axes_overview[ax]['colorbar'] is None:
+            self.axes_overview[ax]['colorbar'] = 'on'
+        return [im]
 
     @check_panel_ax
     def _get_var_for_config(self, ax=None, ind=0):
@@ -274,12 +293,12 @@ class TSPanel(Panel):
             xy = self.figure.transFigure.inverted().transform(px)
             xy_fig.append(xy)
 
-        xlabels = []
+        xlabels = ['UT']
         x_depend = var_for_config.get_depend(axis=0, retrieve_data=True)
         x0 = np.array(mpl_dates.date2num(x_depend['UT'])).flatten()
         x1 = np.array(ticks)
         ys = [x1]       # list of tick labels
-        for ind, label in enumerate(self.timeline_multiple_labels):
+        for ind, label in enumerate(self.timeline_multiple_labels[1:]):
             if label in x_depend.keys():
                 y0 = x_depend[label].flatten()
             elif label in var_for_config.dataset.keys():
@@ -287,7 +306,6 @@ class TSPanel(Panel):
             else:
                 raise KeyError
             if label == 'MLT':
-                mlt_ind = ind + 1
                 y0_sin = np.sin(y0 / 24. * 2 * np.pi)
                 y0_cos = np.cos(y0 / 24. * 2 * np.pi)
                 itpf_sin = interp1d(x0, y0_sin, bounds_error=False, fill_value='extrapolate')
@@ -321,7 +339,7 @@ class TSPanel(Panel):
         #     return
 
         for ind, xticks in enumerate(ys):
-            plt.text(
+            ax.text(
                 0.1, xy_fig[0][1] - yoffset * ind - 0.013,
                 xlabels[ind],
                 fontsize=plt.rcParams['xtick.labelsize'], fontweight='normal',
@@ -337,13 +355,63 @@ class TSPanel(Panel):
                     text = (datetime.datetime(1970, 1, 1) + datetime.timedelta(hours=xtick)).strftime('%H:%M')
                 else:
                     text = '%.1f' % xtick
-                plt.text(
+                ax.text(
                     xy_fig[ind_pos][0], xy_fig[ind_pos][1] - yoffset * ind - 0.013,
                     text,
                     fontsize=plt.rcParams['xtick.labelsize'],
                     horizontalalignment='center', verticalalignment='top',
                     transform=self.figure.transFigure
                 )
+
+    @check_panel_ax
+    def _set_yaxis(self, ax=None):
+        var_for_config = self._get_var_for_config(ax=ax)
+        ax.tick_params(axis='y', which='major', labelsize=plt.rcParams['ytick.labelsize'])
+        # Set y axis lim
+        self._set_ylim(ax=ax)
+
+        # set y labels and alignment two methods: fig.align_ylabels(axs[:, 1]) or yaxis.set_label_coords
+        ylabel = var_for_config.get_visual_axis_attr('label', axis=1)
+        yunit = var_for_config.get_visual_axis_attr('unit', axis=1)
+        ylabel_style = var_for_config.get_visual_axis_attr('label_style', axis=1)
+
+        ylabel = self.generate_label(ylabel, unit=yunit, style=ylabel_style)
+        label_pos = var_for_config.visual.axis[1].label_pos
+        if label_pos is None:
+            label_pos = [-0.1, 0.5]
+        ax.set_ylabel(ylabel, va='bottom', fontsize=plt.rcParams['axes.labelsize'])
+        if self.axes_overview[ax]['twinx'] == 'off':
+            ax.yaxis.set_label_coords(label_pos[0], label_pos[1])
+        ylim = ax.get_ylim()
+
+        # set yaxis scale
+        yscale = var_for_config.visual.axis[1].scale
+        ax.set_yscale(yscale)
+
+        # set yticks and yticklabels, usually do not change the matplotlib default
+        yticks = var_for_config.visual.axis[1].ticks
+        yticklabels = var_for_config.visual.axis[1].tick_labels
+        if yticks is not None:
+            ax.set_yticks(yticks)
+            if yticklabels is not None:
+                ax.set_yticklabels(yticklabels)
+        if yscale == 'linear':
+            major_max = var_for_config.visual.axis[1].major_tick_max
+            minor_max = var_for_config.visual.axis[1].minor_tick_max
+            ax.yaxis.set_major_locator(mpl_ticker.MaxNLocator(major_max))
+            if minor_max is None:
+                ax.yaxis.set_minor_locator(mpl_ticker.AutoMinorLocator())
+            else:
+                ax.yaxis.set_minor_locator(mpl_ticker.MaxNLocator(minor_max))
+
+        if yscale == 'log':
+            locmin = mpl_ticker.LogLocator(base=10.0,
+                                           subs=(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
+                                           numticks=12
+                                           )
+            ax.yaxis.set_minor_locator(locmin)
+            # ax.yaxis.set_minor_formatter(mpl.ticker.NullFormatter())
+        ax.set_ylim(ylim)
 
     @check_panel_ax
     def _set_ylim(self, ax=None, zero_line='on'):
@@ -386,17 +454,35 @@ class TSPanel(Panel):
                     continue
         else:
             var_for_config = ax_ov['variables'][0]
-            ax.legend(ax_ov['lines'], **var_for_config.visual.plot_config.legend)
+            legend_config = var_for_config.visual.plot_config.legend
+            # get color
+            legend_config = basic.dict_set_default(legend_config, **self._default_legend_config)
+            ax.legend(handles=ax_ov['lines'], **legend_config)
 
     def _check_colorbar(self, ax):
         ax_ov = self.axes_overview[ax]
-        offset_scale = 60
-        offset = 0
-        if list(ax_ov['twinx_axes']):
-            offset = offset_scale * (len(ax_ov['twinx_axes']) - 1)
         var_for_config = ax_ov['variables'][0]
         colorbar_config = var_for_config.visual.plot_config.colorbar
-        self.add_colorbar(**colorbar_config)
+
+        c_scale = var_for_config.visual.axis[2].scale
+        c_label = var_for_config.get_visual_axis_attr('label', axis=2)
+        c_unit = var_for_config.get_visual_axis_attr('unit', axis=2)
+        c_label_style = var_for_config.get_visual_axis_attr('label_style', axis=2)
+
+        c_label = self.generate_label(c_label, unit=c_unit, style=c_label_style)
+        c_ticks = var_for_config.visual.axis[2].ticks
+        c_tick_labels = var_for_config.visual.axis[2].tick_labels
+        im = ax_ov['collections'][0]
+
+        offset = 0.02
+        ntwinx = len(ax_ov['twinx_axes'])
+        cax_position = [1.02 + offset * ntwinx, 0.01, 0.025, 0.85]
+        colorbar_config.update(
+            cax_scale=c_scale, cax_label=c_label, cax_ticks=c_ticks, cax_tick_labels=c_tick_labels,
+            cax_position=cax_position
+        )
+
+        self.add_colorbar(im, cax='new', **colorbar_config)
 
     def _retrieve_data_1d(self, var):
         x_data = var.get_visual_axis_attr(axis=0, attr_name='data')
@@ -493,6 +579,17 @@ class TSPanel(Panel):
         data = {'x': x, 'y': y, 'z': z}
         return data
 
+    @staticmethod
+    def generate_label(label, unit='', style='double'):
+        label = label
+        if str(unit):
+            if style == 'single':
+                label = label + " " + '(' + unit + ')'
+            elif style == 'double':
+                label = label + "\n" + '(' + unit + ')'
+            else:
+                raise NotImplementedError
+        return label
 
 
 def check_panel_ax(func):
@@ -582,3 +679,39 @@ class Panel1(object):
 
     def add_title(self, *args, **kwargs):
         self.axes['major'].set_title(*args, **kwargs)
+
+
+def test_tspanel():
+    from geospacelab.express.eiscat_viewer import EISCATViewer
+    dt_fr = datetime.datetime.strptime('20211010' + '1700', '%Y%m%d%H%M')
+    dt_to = datetime.datetime.strptime('20211010' + '2100', '%Y%m%d%H%M')
+
+    site = 'UHF'
+    antenna = 'UHF'
+    modulation = 'ant'
+    load_mode = 'AUTO'
+    data_file_type = 'eiscat-hdf5'
+
+    viewer = EISCATViewer(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
+                                 data_file_type=data_file_type, load_mode=load_mode, status_control=True,
+                                 residual_control=True)
+
+    # select beams before assign the variables
+    # viewer.dataset.select_beams(field_aligned=True)
+    # viewer.dataset.select_beams(az_el_pairs=[(188.6, 77.7)])
+    viewer.status_mask()
+
+    n_e = viewer.assign_variable('n_e')
+    T_i = viewer.assign_variable('T_i')
+    T_e = viewer.assign_variable('T_e')
+    v_i = viewer.assign_variable('v_i_los')
+    az = viewer.assign_variable('AZ')
+    el = viewer.assign_variable('EL')
+
+    panel1 = TSPanel(dt_fr=dt_fr, dt_to=dt_to)
+    panel1.draw([n_e])
+    plt.show()
+
+
+if __name__ == '__main__':
+    test_tspanel()

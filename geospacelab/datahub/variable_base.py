@@ -80,7 +80,7 @@ class VariableModel(object):
         self.group = group
 
         self.unit = unit
-        self.unit_label = label
+        self.unit_label = unit_label
 
         self.quantity = quantity
 
@@ -521,6 +521,10 @@ class VisualPlotConfig(object):
         self.imshow = {}
         self.scatter = {}
         self.legend = {}
+        self.colorbar = {}
+        self.bar = {}
+        self.scatter = {}
+        self.fill_between = {}
         self.style = None
 
     def config(self, logging=True, **kwargs):

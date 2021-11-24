@@ -76,7 +76,7 @@ class Canvas(Figure):
             raise TypeError
 
 
-class Dashboard(DataHub):
+class Dashboard(object):
     """
     A dashboard is a collection of panels in a figure or GeospaceLab canvas. The class inherits
     from :class:`~geospacelab.datahub.DataHub`
@@ -117,7 +117,7 @@ class Dashboard(DataHub):
         if canvas_config is None:
             canvas_config = dict()
         if canvas is None:
-            canvas = Canvas(**canvas_config)
+            canvas = plt.figure(FigureClass=Canvas, **canvas_config)
             print(canvas)
 
         self.canvas = canvas
@@ -209,7 +209,7 @@ class Dashboard(DataHub):
 
         self.canvas.add_text(x_new, y_new, text, **kwargs)
 
-    def add_title(self, x=None, y=None, title=None, **kwargs):
+    def add_title(self, x, y, title, **kwargs):
         # add text in dashboard cs
         kwargs.setdefault('fontsize', self._default_dashboard_fontsize)
         kwargs.setdefault('ha', 'center')
@@ -302,12 +302,13 @@ class Dashboard(DataHub):
 
 class Panel(object):
     _ax_attr_model = {
+        'twinx': 'off',
         'twinx_axes': [],
         'twiny_axes': [],
         'lines': [],
         'collections': [],
         'legend': None,
-        'colorbars': None,
+        'colorbar': None,
         'variables': [],
     }
     axes_overview = {}
@@ -315,6 +316,13 @@ class Panel(object):
     def __init__(self, *args, figure=None, from_subplot=True, **kwargs):
         if figure is None:
             figure = plt.gcf()
+        elif figure == 'new':
+            figure_config = kwargs.pop('figure_config', {})
+            figure = plt.figure(**figure_config)
+        elif issubclass(figure.__class__, plt.Figure):
+            figure = figure
+        else:
+            raise ValueError
         self.figure = figure
         self.axes = {}
         self.label = kwargs.pop('label', None)
@@ -391,7 +399,7 @@ class Panel(object):
         return ax
 
     @check_panel_ax
-    def add_twin_axes(self, ax=None, label=None, which='y', location='right', offset_type='outward', offset=60, **kwargs):
+    def add_twin_axes(self, ax=None, label=None, which='x', location='right', offset_type='outward', offset=60, **kwargs):
         if which == 'x':
             twin_func = ax.twinx
         elif which == 'y':
@@ -525,7 +533,7 @@ class Panel(object):
     def add_colorbar(
             self, im,
             ax=None, cax=None, cax_position=None, cax_scale=None, cax_label=None, cax_ticks=None, cax_tick_labels=None,
-            cax_label_config=None,
+            cax_label_config=None, cax_tick_label_step=1,
             **kwargs
     ):
         """
@@ -551,13 +559,14 @@ class Panel(object):
                 cax_position = [1.02, 0.01, 0.025, 0.85]
 
             pos_ax = ax.get_position()
+            # convert from Axes coordinates to Figure coordinates
             pos_cax = [
                 pos_ax.x0 + (pos_ax.x1 - pos_ax.x0) * cax_position[0],
                 pos_ax.y0 + (pos_ax.y1 - pos_ax.y0) * cax_position[1],
                 (pos_ax.x1 - pos_ax.x0) * cax_position[2],
                 (pos_ax.y1 - pos_ax.y0) * cax_position[3],
             ]
-            cax = self.figure.add_axes(pos_cax)
+            cax = self.add_axes(pos_cax)
             cax_label_config = dict(rotation=270, va='bottom', size='medium')
 
         icb = self.figure.colorbar(im, cax=cax, **kwargs)
@@ -565,8 +574,28 @@ class Panel(object):
         self.sca(ax)
 
         # set colorbar label
+        cax_label_config = pybasic.dict_set_default(cax_label_config, rotation=270, va='bottom', size='medium')
         if cax_label is not None:
             icb.set_label(cax_label, **cax_label_config)
+
+        ylim = cax.get_ylim()
+        # set cticks
+        if cax_ticks is not None:
+            icb.ax.yaxis.set_ticks(cax_ticks)
+            if cax_tick_labels is not None:
+                icb.ax.yaxis.set_ticklabels(cax_tick_labels)
+        else:
+            if cax_scale == 'log':
+                num_major_ticks = int(np.ceil(np.diff(np.log10(ylim)))) * 2
+                cax.yaxis.set_major_locator(mpl.ticker.LogLocator(base=10.0, numticks=num_major_ticks))
+                n = cax_tick_label_step
+                [l.set_visible(False) for (i, l) in enumerate(cax.yaxis.get_ticklabels()) if i % n != 0]
+                # [l.set_ha('right') for (i, l) in enumerate(cax.yaxis.get_ticklabels()) if i % n != 0]
+                minorlocator = mpl.ticker.LogLocator(base=10.0, subs=(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
+                                                     numticks=12)
+                cax.yaxis.set_minor_locator(minorlocator)
+                cax.yaxis.set_minor_formatter(mpl.ticker.NullFormatter())
+        cax.yaxis.set_tick_params(labelsize='x-small')
 
     @property
     def major_ax(self):
