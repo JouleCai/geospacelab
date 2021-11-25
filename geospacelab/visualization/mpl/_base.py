@@ -7,13 +7,13 @@ import matplotlib as mpl
 from matplotlib.gridspec import GridSpec, SubplotSpec
 from matplotlib.figure import Figure
 
-from geospacelab.datahub import DataHub
 from geospacelab.toolbox.utilities.pyclass import StrBase
 import geospacelab.toolbox.utilities.pybasic as pybasic
 from geospacelab.visualization.mpl._helpers import check_panel_ax
+import geospacelab.toolbox.utilities.pylogging as mylog
 
 
-class Canvas(Figure):
+class FigureBase(Figure):
     """
     GeospaceLab canvas inherits from ``matplotlib.figure.Figure`` with additional functions and settings.
 
@@ -28,7 +28,7 @@ class Canvas(Figure):
     _default_canvas_fontsize = 12
 
     def __init__(self, *args, watermark=None, watermark_style=None, **kwargs):
-        super(Canvas, self).__init__(*args, **kwargs)
+        super(FigureBase, self).__init__(*args, **kwargs)
 
         self.dashboards = {}
 
@@ -40,7 +40,7 @@ class Canvas(Figure):
     def add_dashboard(self, *args, label=None, **kwargs):
         if label is None:
             label = len(self.dashboards) + 1
-        self.dashboards[label] = Dashboard(*args, canvas=self, label=label, **kwargs)
+        self.dashboards[label] = Dashboard(*args, figure=self, label=label, **kwargs)
 
     def add_text(self, *args, **kwargs):
         super().text(*args, **kwargs)
@@ -76,7 +76,7 @@ class Canvas(Figure):
             raise TypeError
 
 
-class Dashboard(object):
+class DashboardBase(object):
     """
     A dashboard is a collection of panels in a figure or GeospaceLab canvas. The class inherits
     from :class:`~geospacelab.datahub.DataHub`
@@ -101,26 +101,25 @@ class Dashboard(object):
 
     _default_dashboard_fontsize = 12
 
-    def __init__(self, *args, canvas=None, canvas_config=None, **kwargs):
+    def __init__(self, *args, figure=None, figure_config=None, figure_class=FigureBase, **kwargs):
         """
         Initialization
 
-        :param canvas: If ``None``, a new canvas will be created.
-        :type canvas: Instance of :class:`GeospaceLab Canvas<geospacelab.visualization.mpl._base.Canvas>`.
-        :param canvas_config: The optional keyword arguments used to create the canvas.
-        :type canvas_config: dict, default: {}.
+        :param figure: If ``None``, a new canvas will be created.
+        :type figure: Instance of :class:`GeospaceLab Canvas<geospacelab.visualization.mpl._base.Canvas>`.
+        :param figure_config: The optional keyword arguments used to create the canvas.
+        :type figure_config: dict, default: {}.
         :param args: The arguments used to create a :class:`DataHub <geospacelab.datahub.DataHub>` instance..
         :param kwargs: Other keyword arguments used to create a :class:`DataHub <geospacelab.datahub.DataHub>` instance.
         """
         super().__init__(*args, **kwargs)
 
-        if canvas_config is None:
-            canvas_config = dict()
-        if canvas is None:
-            canvas = plt.figure(FigureClass=Canvas, **canvas_config)
-            print(canvas)
+        self._figure_class = figure_class
+        if figure_config is None:
+            figure_config = {}
+        self._figure_config = figure_config
 
-        self.canvas = canvas
+        self.figure = figure
 
         self.panels = {}
         self.title = kwargs.pop('title', None)
@@ -139,7 +138,7 @@ class Dashboard(object):
         :param kwargs: Optional keyword arguments used in **matplotlib GridSpec**.
         """
         kwargs = pybasic.dict_set_default(kwargs, **self._default_layout_config)
-        self.gs = self.canvas.add_gridspec(num_rows, num_cols)
+        self.gs = self.figure.add_gridspec(num_rows, num_cols)
         self.gs.update(**kwargs)
 
     def add_panel(self, row_ind=None, col_ind=None,
@@ -165,8 +164,8 @@ class Dashboard(object):
         if isinstance(col_ind, int):
             col_ind = [col_ind, col_ind + 1]
         if panel_class is None:
-            panel_class = Panel
-        elif not issubclass(panel_class, Panel):
+            panel_class = PanelBase
+        elif not issubclass(panel_class, PanelBase):
             raise TypeError
 
         args = [self.gs[row_ind[0]:row_ind[1], col_ind[0]:col_ind[1]]]
@@ -207,7 +206,7 @@ class Dashboard(object):
 
         y_new = self.gs.bottom + y * (self.gs.top - self.gs.bottom)
 
-        self.canvas.add_text(x_new, y_new, text, **kwargs)
+        self.figure.add_text(x_new, y_new, text, **kwargs)
 
     def add_title(self, x, y, title, **kwargs):
         # add text in dashboard cs
@@ -263,7 +262,7 @@ class Dashboard(object):
         else:
             label_str = label
         kwargs.setdefault('facecolor', 'none')
-        ax = self.canvas.add_axes(rect, label=label_str, **kwargs)
+        ax = self.figure.add_axes(rect, label=label_str, **kwargs)
         self.extra_axes[label] = ax
         return ax
 
@@ -282,25 +281,31 @@ class Dashboard(object):
         return ax
 
     @property
-    def canvas(self):
-        if self._canvas_ref is None:
+    def figure(self):
+        if self._figure_ref is None:
             return None
         else:
-            return self._canvas_ref()
+            return self._figure_ref()
 
-    @canvas.setter
-    def canvas(self, canvas_obj):
-        if canvas_obj is None:
-            self._canvas_ref = None
-            return
+    @figure.setter
+    def figure(self, figure_obj):
 
-        if issubclass(canvas_obj.__class__, Canvas):
-            self._canvas_ref = weakref.ref(canvas_obj)
+        if figure_obj == 'new':
+            figure = plt.figure(FigureClass=self._figure_class, **self._figure_config)
+            mylog.simpleinfo.info(f"Create a new figure: {figure}.")
+        elif figure_obj is None:
+            figure = plt.gcf()
+        elif issubclass(figure_obj.__class__, self._figure_class):
+            figure = figure_obj
+        elif issubclass(figure_obj.__class__, plt.Figure):
+            figure = figure_obj
         else:
             raise TypeError
 
+        self._figure_ref = weakref.ref(figure)
 
-class Panel(object):
+
+class PanelBase(object):
     _ax_attr_model = {
         'twinx': 'off',
         'twinx_axes': [],

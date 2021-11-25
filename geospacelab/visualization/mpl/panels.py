@@ -17,7 +17,7 @@ import matplotlib.ticker as mpl_ticker
 import matplotlib.dates as mpl_dates
 from scipy.interpolate import interp1d
 
-from geospacelab.visualization.mpl._base import Panel as PanelBase
+from geospacelab.visualization.mpl._base import PanelBase
 from geospacelab.datahub.variable_base import VariableModel
 import geospacelab.toolbox.utilities.numpyarray as arraytool
 import geospacelab.visualization.mpl.axis_ticks as ticktool
@@ -52,6 +52,7 @@ class TSPanel(Panel):
         'labelsize': plt.rcParams['xtick.labelsize'],
         'direction': 'inout',
     }
+    _default_colorbar_offset = 0.1
 
     def __init__(
             self, *args, 
@@ -114,8 +115,10 @@ class TSPanel(Panel):
             iplts.extend(iplts_add)
 
         if level == 0:
-            if self.axes_overview[ax]['legend'] == 'on':
+            if self.axes_overview[ax]['legend'] == 'on' and self.axes_overview[ax]['twinx'] == 'off':
                 self._check_legend(ax)
+            if self.axes_overview[ax]['twinx']=='on':
+                self._check_twinx(ax)
             if self.axes_overview[ax]['colorbar'] == 'on':
                 self._check_colorbar(ax)
             self._set_xaxis(ax=ax)
@@ -375,12 +378,16 @@ class TSPanel(Panel):
         yunit = var_for_config.get_visual_axis_attr('unit', axis=1)
         ylabel_style = var_for_config.get_visual_axis_attr('label_style', axis=1)
 
-        ylabel = self.generate_label(ylabel, unit=yunit, style=ylabel_style)
-        label_pos = var_for_config.visual.axis[1].label_pos
-        if label_pos is None:
-            label_pos = [-0.1, 0.5]
-        ax.set_ylabel(ylabel, va='bottom', fontsize=plt.rcParams['axes.labelsize'])
-        if self.axes_overview[ax]['twinx'] == 'off':
+        if self.axes_overview[ax]['twinx'] == 'self':
+            ylabel = self.generate_label(ylabel, unit=yunit, style='single')
+            ax.set_ylabel(ylabel, va='baseline', rotation=270, fontsize=plt.rcParams['axes.labelsize'])
+        else:
+            ylabel = self.generate_label(ylabel, unit=yunit, style=ylabel_style)
+            label_pos = var_for_config.visual.axis[1].label_pos
+            if label_pos is None:
+                label_pos = [-0.1, 0.5]
+
+            ax.set_ylabel(ylabel, va='bottom', fontsize=plt.rcParams['axes.labelsize'])
             ax.yaxis.set_label_coords(label_pos[0], label_pos[1])
         ylim = ax.get_ylim()
 
@@ -438,26 +445,26 @@ class TSPanel(Panel):
 
     def _check_legend(self, ax):
         ax_ov = self.axes_overview[ax]
-        if list(ax_ov['twinx_axes']):
-            nl = 0
-            axes = [ax]
-            axes.extend(ax_ov['twinx_axes'])
-            for ind, pax in enumerate(axes):
+        var_for_config = ax_ov['variables'][0]
+        legend_config = var_for_config.visual.plot_config.legend
+        # get color
+        legend_config = basic.dict_set_default(legend_config, **self._default_legend_config)
+        ax.legend(handles=ax_ov['lines'], **legend_config)
 
-                pax_ov = self.axes_overview[pax]
-                if list(pax_ov['lines']):
-                    il = pax_ov['lines'][0]
-                    pax.yaxis.label.set_color(il.get_color())
-                    pax.tick_params(axis='y', colors=il.get_color())
-                    pax.spines['right'].set_edgecolor(il.get_color())
-                else:
-                    continue
-        else:
-            var_for_config = ax_ov['variables'][0]
-            legend_config = var_for_config.visual.plot_config.legend
-            # get color
-            legend_config = basic.dict_set_default(legend_config, **self._default_legend_config)
-            ax.legend(handles=ax_ov['lines'], **legend_config)
+    def _check_twinx(self, ax):
+        ax_ov = self.axes_overview[ax]
+        axes = [ax]
+        axes.extend(ax_ov['twinx_axes'])
+        for ind, pax in enumerate(axes):
+
+            pax_ov = self.axes_overview[pax]
+            if list(pax_ov['lines']):
+                il = pax_ov['lines'][0]
+                pax.yaxis.label.set_color(il.get_color())
+                pax.tick_params(axis='y', which='both', colors=il.get_color())
+                pax.spines['right'].set_edgecolor(il.get_color())
+            else:
+                continue
 
     def _check_colorbar(self, ax):
         ax_ov = self.axes_overview[ax]
@@ -474,7 +481,7 @@ class TSPanel(Panel):
         c_tick_labels = var_for_config.visual.axis[2].tick_labels
         im = ax_ov['collections'][0]
 
-        offset = 0.02
+        offset = self._default_colorbar_offset
         ntwinx = len(ax_ov['twinx_axes'])
         cax_position = [1.02 + offset * ntwinx, 0.01, 0.025, 0.85]
         colorbar_config.update(
@@ -580,7 +587,7 @@ class TSPanel(Panel):
         return data
 
     @staticmethod
-    def generate_label(label, unit='', style='double'):
+    def generate_label(label: str, unit: str='', style: str='double'):
         label = label
         if str(unit):
             if style == 'single':

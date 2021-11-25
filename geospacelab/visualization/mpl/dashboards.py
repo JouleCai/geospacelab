@@ -10,6 +10,7 @@ __docformat__ = "reStructureText"
 
 
 import string
+import pathlib
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime
@@ -19,9 +20,20 @@ import matplotlib.dates as mdates
 from geospacelab.datahub import DataHub
 import geospacelab.visualization.mpl.panels as mpl_panel
 import geospacelab.toolbox.utilities.pybasic as basic
-from geospacelab.visualization.mpl._base import Dashboard as DashboardBase
+import geospacelab.toolbox.utilities.pydatetime as dttool
+from geospacelab.visualization.mpl._base import DashboardBase
 import geospacelab.visualization.mpl.panels as panels
 
+plt.rcParams['font.serif'] = 'Ubuntu'
+plt.rcParams['font.monospace'] = 'Ubuntu Mono'
+plt.rcParams['font.size'] = 10
+plt.rcParams['axes.labelsize'] = 10
+plt.rcParams['axes.labelweight'] = 'book'
+plt.rcParams['axes.titlesize'] = 10
+plt.rcParams['xtick.labelsize'] = 8
+plt.rcParams['ytick.labelsize'] = 8
+plt.rcParams['legend.fontsize'] = 10
+plt.rcParams['figure.titlesize'] = 12
 
 class Dashboard(DataHub, DashboardBase):
     _default_layout_config = {
@@ -33,27 +45,35 @@ class Dashboard(DataHub, DashboardBase):
         'wspace': 0.1
     }
 
-    def __init__(self, canvas=None, canvas_config=None, **kwargs):
-        super(Dashboard, self).__init__(canvas=canvas, canvas_config=canvas_config, **kwargs)
+    def __init__(self, figure=None, figure_config=None, **kwargs):
+        super(Dashboard, self).__init__(figure=figure, figure_config=figure_config, **kwargs)
 
 
 class TSDashboard(Dashboard):
-    _default_canvas_config = {
+    _default_figure_config = {
         'figsize': (8, 8),
     }
 
-    def __init__(self, canvas=None, canvas_config=None, **kwargs):
+    def __init__(
+            self,
+            figure=None, figure_config=None,
+            time_gap=True,
+            timeline_major='UT',
+            timeline_multiple_labels=None,
+            **kwargs
+    ):
         self.panel_layouts = []
         self.plot_styles = None
         self._panels_configs = {}
-        canvas = kwargs.pop('canvas', None)
-        canvas_config = kwargs.pop('cavans_config', self._default_canvas_config)
-        self.time_gap = kwargs.pop('time_gap', True)
-        self.major_timeline = kwargs.pop('major_timeline', 'UT')
-        self.timeline_extra_labels = kwargs.pop('timeline_extra_labels', [])  # e.g., ['MLT',
+
+        figure_config = self._default_figure_config if figure_config is None else figure_config
+
+        self.time_gap = time_gap
+        self.timeline_major = timeline_major
+        self.timeline_extra_labels = [] if timeline_multiple_labels is None else timeline_major # e.g., ['MLT',
         kwargs.update(visual='on')
 
-        super(Dashboard, self).__init__(canvas=canvas, canvas_config=canvas_config, **kwargs)
+        super(Dashboard, self).__init__(figure=figure, figure_config=figure_config, **kwargs)
 
         self._xlim = [self.dt_fr, self.dt_to]
 
@@ -152,6 +172,7 @@ class TSDashboard(Dashboard):
             else:
                 raise TypeError
         return type_layout_in(layout_out)
+
     def save_figure(self, file_dir=None, file_name=None, append_time=True, dpi=300, file_format='png', **kwargs):
         if file_dir is None:
             file_dir = pathlib.Path().cwd()
@@ -345,7 +366,7 @@ def test_tsdashboard():
     az = viewer.assign_variable('AZ')
     el = viewer.assign_variable('EL')
 
-    panel_layouts = [[n_e], [T_i], [T_e], [v_i], [az, [el]]]
+    panel_layouts = [[n_e, [az]], [T_i], [T_e], [v_i], [az, [el], [el]]]
     viewer.set_layout(panel_layouts=panel_layouts)
     viewer.draw()
     viewer.show()
