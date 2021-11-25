@@ -1,7 +1,7 @@
 import datetime
 import matplotlib.pyplot as plt
 
-import geospacelab.visualization.map_proj.geomap_viewer as geomap
+import geospacelab.visualization.mpl.geomap.geodashboards as geomap
 
 
 def test_ssusi():
@@ -12,7 +12,7 @@ def test_ssusi():
     sat_id = 'f17'
     band = 'LBHS'
 
-    viewer = geomap.GeoMapViewer(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (5, 5)})
+    viewer = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (5, 5)})
 
     # viewer.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole='N', sat_id='f17', orbit_id='46863')
     viewer.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole=pole, sat_id=sat_id, orbit_id=None)
@@ -53,7 +53,7 @@ def test_ssusi():
     panel1.add_gridlines(lat_res=5, lon_label_separator=5)
 
     polestr = 'North' if pole == 'N' else 'South'
-    panel1.add_title('DMSP/SSUSI, ' + band + ', ' + sat_id.upper() + ', ' + polestr + ', ' + time1.strftime('%Y-%m-%d %H%M UT'), pad=20)
+    panel1.add_title(title='DMSP/SSUSI, ' + band + ', ' + sat_id.upper() + ', ' + polestr + ', ' + time1.strftime('%Y-%m-%d %H%M UT'))
     plt.savefig('DMSP_SSUSI_' + time1.strftime('%Y%m%d-%H%M') + '_' + band + '_' + sat_id.upper() + '_' + pole, dpi=300)
     plt.show()
 

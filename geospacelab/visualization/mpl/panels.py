@@ -264,11 +264,18 @@ class TSPanel(Panel):
         ax.xaxis.set_tick_params(which='minor', length=4)
 
         # use date locators
-        majorlocator, minorlocator, majorformatter = ticktool.set_timeline(self._xlim[0], self._xlim[1])
+        # majorlocator, minorlocator, majorformatter = ticktool.set_timeline(self._xlim[0], self._xlim[1])
+        from geospacelab.visualization.mpl.axis_ticks import DatetimeMajorFormatter, DatetimeMajorLocator, DatetimeMinorLocator
+        majorlocator = DatetimeMajorLocator()
+        majorformatter = DatetimeMajorFormatter(majorlocator)
+
         if not self.bottom_panel:
             majorformatter = mpl_ticker.NullFormatter()
+            plt.setp(ax.get_xticklabels(), visible=False)
         ax.xaxis.set_major_locator(majorlocator)
         ax.xaxis.set_major_formatter(majorformatter)
+        # minor locator must be set up after setting the major locator
+        minorlocator = DatetimeMinorLocator(ax=ax, majorlocator=majorlocator)
         ax.xaxis.set_minor_locator(minorlocator)
         if self.bottom_panel:
             self._set_xaxis_ticklabels(ax, majorformatter=majorformatter)
@@ -402,22 +409,26 @@ class TSPanel(Panel):
             ax.set_yticks(yticks)
             if yticklabels is not None:
                 ax.set_yticklabels(yticklabels)
-        if yscale == 'linear':
-            major_max = var_for_config.visual.axis[1].major_tick_max
-            minor_max = var_for_config.visual.axis[1].minor_tick_max
-            ax.yaxis.set_major_locator(mpl_ticker.MaxNLocator(major_max))
-            if minor_max is None:
-                ax.yaxis.set_minor_locator(mpl_ticker.AutoMinorLocator())
-            else:
-                ax.yaxis.set_minor_locator(mpl_ticker.MaxNLocator(minor_max))
+        else:
+            if yscale == 'linear':
+                major_max = var_for_config.visual.axis[1].major_tick_max
+                minor_max = var_for_config.visual.axis[1].minor_tick_max
+                if major_max is None:
+                    ax.yaxis.set_minor_locator(mpl_ticker.AutoLocator())
+                else:
+                    ax.yaxis.set_major_locator(mpl_ticker.MaxNLocator(major_max))
+                if minor_max is None:
+                    ax.yaxis.set_minor_locator(mpl_ticker.AutoMinorLocator())
+                else:
+                    ax.yaxis.set_minor_locator(mpl_ticker.MaxNLocator(minor_max))
 
-        if yscale == 'log':
-            locmin = mpl_ticker.LogLocator(base=10.0,
+            if yscale == 'log':
+                locmin = mpl_ticker.LogLocator(base=10.0,
                                            subs=(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
                                            numticks=12
                                            )
-            ax.yaxis.set_minor_locator(locmin)
-            # ax.yaxis.set_minor_formatter(mpl.ticker.NullFormatter())
+                ax.yaxis.set_minor_locator(locmin)
+                # ax.yaxis.set_minor_formatter(mpl.ticker.NullFormatter())
         ax.set_ylim(ylim)
 
     @check_panel_ax

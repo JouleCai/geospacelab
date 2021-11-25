@@ -28,23 +28,18 @@ import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.numpymath as mathtool
 import geospacelab.toolbox.utilities.pybasic as pybasic
+from geospacelab.visualization.mpl.geomap._base import GeoPanelBase
 
 
-def test():
-    import matplotlib.pyplot as plt
-    dt = datetime.datetime(2012, 1, 19, 10, 0)
-    p = PolarMap(pole='N', lon_c=None, ut=dt, mlt_c=0)
-    p.add_subplot(major=True)
+class GeoPanel(GeoPanelBase):
 
-    p.set_extent(boundary_style='circle')
+    def __init__(self, *args, proj_class=None, proj_config: dict = None, **kwargs):
 
-    p.add_coastlines()
-    p.add_grids()
-    plt.show()
-    pass
+        super().__init__(*args, proj_class=proj_class, proj_config=proj_config, **kwargs)
 
 
-class PolarMap(mpl.Panel):
+class PolarMapPanel(GeoPanel):
+
     def __init__(self, *args, cs='AACGM', style=None, lon_c=None, pole='N', ut=None, lst_c=None, mlt_c=None,
                  mlon_c=None,
                  boundary_lat=30., boundary_style='circle',
@@ -96,10 +91,9 @@ class PolarMap(mpl.Panel):
         self.mlt_c = mlt_c
         self.mirror_south = mirror_south
         self._extent = None
-        proj = getattr(ccrs, proj_type)
-        self.proj = proj(central_latitude=self.lat_c, central_longitude=self.lon_c)
-        kwargs.setdefault('projection', self.proj)
-        super().__init__(*args, **kwargs)
+        proj_class = getattr(ccrs, proj_type)
+        proj_config = {'central_latitude': self.lat_c, 'central_longitude': self.lon_c}
+        super().__init__(*args, proj_class=proj_class, proj_config=proj_config, **kwargs)
         self.set_extent()
 
     @staticmethod
@@ -110,7 +104,7 @@ class PolarMap(mpl.Panel):
 
     def add_axes(self, *args, major=False, label=None, **kwargs):
         if major:
-            kwargs.setdefault('projection', self.proj)
+            kwargs.setdefault('projection', self.projection)
         ax = super().add_axes(*args, major=major, label=label, **kwargs)
         return ax
 
@@ -362,7 +356,7 @@ class PolarMap(mpl.Panel):
             if self.boundary_style == 'circle':
                 lb_lats = np.empty_like(lb_lons)
                 lb_lats[:] = self.boundary_lat
-                data = self.proj.transform_points(ccrs.PlateCarree(), lb_lons_loc, lb_lats)
+                data = self.projection.transform_points(ccrs.PlateCarree(), lb_lons_loc, lb_lats)
                 xdata = data[:, 0]
                 ydata = data[:, 1]
                 scale = (self._extent[1] - self._extent[0]) * 0.03
@@ -422,11 +416,11 @@ class PolarMap(mpl.Panel):
         x = np.arange(0., 360., 5.)
         y = np.empty_like(x)
         y[:] = 1. * self.boundary_lat
-        data = self.proj.transform_points(ccrs.PlateCarree(), x, y)
+        data = self.projection.transform_points(ccrs.PlateCarree(), x, y)
         # self.axes.plot(x, y, '.', transform=ccrs.PlateCarree())
         ext = [np.nanmin(data[:, 0]), np.nanmax(data[:, 0]), np.nanmin(data[:, 1]), np.nanmax(data[:, 1])]
         self._extent = ext
-        self().set_extent(ext, self.proj)
+        self().set_extent(ext, self.projection)
 
         self._set_boundary_style()
 
@@ -444,11 +438,11 @@ class PolarMap(mpl.Panel):
             return
         elif style == 'circle':
             theta = np.linspace(0, 2 * np.pi, 400)
-            center = self.proj.transform_point(self.lon_c, self.lat_c, ccrs.PlateCarree())
+            center = self.projection.transform_point(self.lon_c, self.lat_c, ccrs.PlateCarree())
             radius = (self._extent[1] - self._extent[0]) / 2
             verts = np.vstack([np.sin(theta), np.cos(theta)]).T
             circle = mpath.Path(verts * radius + center)
-            self().set_boundary(circle, transform=self.proj)
+            self().set_boundary(circle, transform=self.projection)
         else:
             raise NotImplementedError
 
@@ -548,7 +542,7 @@ class PolarMap(mpl.Panel):
             self.major_ax.plot(cs_new['lon'], cs_new['lat'], proj=ccrs.Geodetic(), **kwargs['trajectory_config'])
 
         if time_tick:
-            data = self.proj.transform_points(ccrs.PlateCarree(), cs_new['lon'], cs_new['lat'])
+            data = self.projection.transform_points(ccrs.PlateCarree(), cs_new['lon'], cs_new['lat'])
             xdata = data[:, 0]
             ydata = data[:, 1]
 
@@ -618,7 +612,7 @@ class PolarMap(mpl.Panel):
 
         coords = {'lat': sc_lat, 'lon': sc_lon, 'height': sc_alt}
         cs_new = self.cs_transform(cs_fr='GEO', coords=coords)
-        data = self.proj.transform_points(ccrs.PlateCarree(), cs_new['lon'], cs_new['lat'])
+        data = self.projection.transform_points(ccrs.PlateCarree(), cs_new['lon'], cs_new['lat'])
         x = data[:, 0]
         y = data[:, 1]
         z = sc_data.flatten()
@@ -724,7 +718,3 @@ class PolarMap(mpl.Panel):
             if self.cs == "GEO":
                 raise AttributeError('A magnetic coordinate system must be specified (Set the attribute "cs")!')
         self._mlt_c = mlt
-
-
-if __name__ == "__main__":
-    test()

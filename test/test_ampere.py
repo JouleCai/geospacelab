@@ -2,7 +2,7 @@ import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 
-import geospacelab.visualization.map_proj.geomap_viewer as geomap
+import geospacelab.visualization.mpl.geomap.geodashboards as geomap
 
 
 def test_ampere():
@@ -14,7 +14,7 @@ def test_ampere():
     # specify the file full path
     data_file_paths = ['/home/lei/afys-data/JHUAPL/AMPERE/Fitted/201603/AMPERE_fitted_20160314.0000.86400.600.north.grd.ncdf']
 
-    viewer = geomap.GeoMapViewer(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)})
+    viewer = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)})
     # viewer.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole='N', sat_id='f17', orbit_id='46863')
     viewer.dock(datasource_contents=['jhuapl', 'ampere', 'fitted'], load_mode=load_mode, data_file_paths=data_file_paths)
     viewer.set_layout(1, 1)

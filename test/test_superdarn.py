@@ -2,7 +2,7 @@ import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 
-import geospacelab.visualization.map_proj.geomap_viewer as geomap
+import geospacelab.visualization.mpl.geomap.geodashboards as geomap
 
 
 def test_ampere():
@@ -12,10 +12,10 @@ def test_ampere():
     pole = 'N'
     load_mode = 'assigned'
     # specify the file full path
-    # data_file_paths = ['/home/lei/afys-data/SuperDARN/PotentialMap/2016/test.dat']
-    data_file_paths = ['/Users/lcai/Geospacelab/Data/SuperDARN/POTMAP/2016/SuperDARM_POTMAP_20160314_10min_test.txt']
+    data_file_paths = ['/home/lei/afys-data/SuperDARN/PotentialMap/2016/test.dat']
+    # data_file_paths = ['/Users/lcai/Geospacelab/Data/SuperDARN/POTMAP/2016/SuperDARM_POTMAP_20160314_10min_test.txt']
 
-    viewer = geomap.GeoMapViewer(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)})
+    viewer = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)})
     viewer.dock(datasource_contents=['superdarn', 'potmap'], load_mode=load_mode, data_file_paths=data_file_paths)
     viewer.set_layout(1, 1)
     dataset_superdarn = viewer.datasets[1]

@@ -18,6 +18,71 @@ from matplotlib.ticker import LogFormatterSciNotation
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import os
 
+HOURS_PER_DAY = 24.
+MIN_PER_HOUR = 60.
+SEC_PER_MIN = 60.
+MONTHS_PER_YEAR = 12.
+
+DAYS_PER_WEEK = 7.
+DAYS_PER_MONTH = 30.
+DAYS_PER_YEAR = 365.0
+
+MINUTES_PER_DAY = MIN_PER_HOUR * HOURS_PER_DAY
+
+SEC_PER_HOUR = SEC_PER_MIN * MIN_PER_HOUR
+SEC_PER_DAY = SEC_PER_HOUR * HOURS_PER_DAY
+SEC_PER_WEEK = SEC_PER_DAY * DAYS_PER_WEEK
+
+
+class DatetimeMajorLocator(mdates.AutoDateLocator):
+    def __init__(self, tz=None, minticks=4, maxticks=7, interval_multiples=True):
+
+        super().__init__(tz=tz, minticks=minticks, maxticks=maxticks, interval_multiples=interval_multiples)
+
+
+class DatetimeMinorLocator(mdates.AutoDateLocator):
+
+    def __init__(self, ax=None, majorlocator=None, tz=None, minticks=12, maxticks=50, interval_multiples=True):
+
+        if majorlocator is not None:
+            tz = majorlocator.tz
+        if ax is not None:
+            minticks = 2 * len(ax.get_xticks())
+            maxticks = 6 * len(ax.get_xticks())
+        super().__init__(tz=tz, minticks=minticks, maxticks=maxticks, interval_multiples=interval_multiples)
+
+
+class DatetimeMajorFormatter(mdates.AutoDateFormatter):
+    def __init__(self, locator, scaled: dict or None = None, tz=None, defaultfmt='%Y-%m-%d', *, usetex=True):
+        super().__init__(locator, tz=None, defaultfmt='%Y-%m-%d', usetex=True)
+        self.scaled[1 / HOURS_PER_DAY] = formatter_hour_per_day
+        self.scaled[1 / MINUTES_PER_DAY] = formatter_minute_per_day
+        if scaled is not None:
+           self.scaled.update(**scaled)
+
+
+def formatter_hour_per_day(x, pos):
+    dtx = mpl.dates.num2date(x)
+    dtx = dtx.replace(tzinfo=None)
+    delta = dtx - dt.datetime(dtx.year, dtx.month, dtx.day)
+    if delta.total_seconds() == 0:
+        fmt1 = "%b %d"
+    else:
+        fmt1 = "%H:%M"
+    return dtx.strftime(fmt1)
+
+
+def formatter_minute_per_day(x, pos):
+    dtx = mpl.dates.num2date(x)
+    dtx = dtx.replace(tzinfo=None)
+    delta = dtx - dt.datetime(dtx.year, dtx.month, dtx.day)
+    if delta.total_seconds() == 0:
+        fmt1 = "%b %d"
+    else:
+        fmt1 = "%H:%M"
+    return dtx.strftime(fmt1)
+
+
 
 def set_timeline(dt_start, dt_stop, **kwargs):
     mdlocators = {

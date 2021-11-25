@@ -35,6 +35,7 @@ plt.rcParams['ytick.labelsize'] = 8
 plt.rcParams['legend.fontsize'] = 10
 plt.rcParams['figure.titlesize'] = 12
 
+
 class Dashboard(DataHub, DashboardBase):
     _default_layout_config = {
         'left': 0.15,
@@ -51,7 +52,7 @@ class Dashboard(DataHub, DashboardBase):
 
 class TSDashboard(Dashboard):
     _default_figure_config = {
-        'figsize': (8, 8),
+        'figsize': (16, 16),
     }
 
     def __init__(
@@ -134,12 +135,17 @@ class TSDashboard(Dashboard):
     def add_panels(self):
         bottom_panel = False
         for ind, panel_config in self._panels_configs.items():
-            if ind == len(self._panels_configs.keys()):
+            # share x
+            if ind > 0:
+                panel_config.update(sharex=self.panels[1]())
+            if ind == len(self._panels_configs.keys())-1:
                 bottom_panel = True
+            else:
+                bottom_panel = False
             panel_config.update(bottom_panel=bottom_panel)
             self.add_panel(**panel_config)
 
-    def draw(self, dt_fr=None, dt_to=None):
+    def draw(self, dt_fr=None, dt_to=None, auto_grid=True):
         if dt_fr is not None:
             self._xlim[0] = dt_fr
         if dt_to is not None:
@@ -152,6 +158,23 @@ class TSDashboard(Dashboard):
             plot_layout = self._validate_plot_layout(plot_layout)
             panel.draw(plot_layout)
             npanel = npanel + 1
+
+        if auto_grid:
+            self.add_grid(panel_id=0, visible=True, which='major', axis='both', lw=0.5, color='grey', alpha=0.3)
+            self.add_grid(panel_id=0, visible=True, which='minor', axis='both', lw=0.3, color='grey', alpha=0.1)
+
+    def add_grid(self, panel_id=0, visible=None, which='major', axis='both', **kwargs):
+        if panel_id == 0:
+            panels = self.panels.values()
+        elif type(panel_id) is int:
+            panels = [self.panels[int]]
+        elif type(panel_id) is list:
+            panels = [self.panels[i] for i in panel_id]
+        else:
+            raise NotImplementedError
+
+        for p in panels:
+            p.add_grid(ax=p(), visible=visible, which=which, axis=axis, **kwargs)
 
     def _validate_plot_layout(self, layout_in, level=0):
         from geospacelab.datahub import VariableModel
@@ -240,10 +263,10 @@ class TSDashboard(Dashboard):
         kwargs.setdefault('alpha', 0.8)
 
         if panel_index == 0:
-            if 'major' not in self.axes.keys():
+            if 'major' not in self.extra_axes.keys():
                 ax = self.add_major_axes()
             else:
-                ax = self.axes['major']
+                ax = self.extra_axes['major']
         else:
             ax = self.panels[panel_index].axes['major']
 
@@ -290,10 +313,10 @@ class TSDashboard(Dashboard):
         kwargs.setdefault('alpha', 0.4)
 
         if panel_index == 0:
-            if 'major' not in self.axes.keys():
+            if 'major' not in self.extra_axes.keys():
                 ax = self.add_major_axes()
             else:
-                ax = self.axes['major']
+                ax = self.extra_axes['major']
         else:
             ax = self.panels[panel_index].axes['major']
 
@@ -349,7 +372,7 @@ def test_tsdashboard():
     load_mode = 'AUTO'
     data_file_type = 'eiscat-hdf5'
 
-    viewer = TSDashboard(dt_fr=dt_fr, dt_to=dt_to)
+    viewer = TSDashboard(dt_fr=dt_fr, dt_to=dt_to, figure='new')
 
     ds_1 = viewer.dock(datasource_contents=['madrigal', 'eiscat'], site=site, antenna=antenna, modulation=modulation,
                         data_file_type=data_file_type, load_mode=load_mode, status_control=True, allow_load=True,
@@ -370,6 +393,7 @@ def test_tsdashboard():
     viewer.set_layout(panel_layouts=panel_layouts)
     viewer.draw()
     viewer.show()
+
 
 if __name__ == "__main__":
     test_tsdashboard()

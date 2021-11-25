@@ -5,7 +5,7 @@ from loaders.load_uta_gitm_201602_newrun import *
 import utilities.datetime_utilities as du
 
 import visualization.time_series as ts
-from geospacelab.visualization.map_proj.geopanel import PolarMap
+from geospacelab.visualization.mpl.geomap.geopanels import PolarMapPanel as PolarMap
 import geospacelab.visualization.mpl.colormaps as cm
 
 
@@ -59,7 +59,7 @@ def show_rho_n(dt_fr, dt_to):
     panel.add_subplot(major=True)
     panel.set_extent(boundary_style='circle')
 
-    data = panel.proj.transform_points(ccrs.PlateCarree(), sc_lon, sc_lat)
+    data = panel.projection.transform_points(ccrs.PlateCarree(), sc_lon, sc_lat)
 
     x = data[:, 0]
     y = data[:, 1]
@@ -98,7 +98,7 @@ def show_rho_n(dt_fr, dt_to):
     from matplotlib.collections import LineCollection
     coords = {'lat': sc_lat, 'lon': sc_lon, 'height': 250.}
     cs_new = panel.cs_transform(cs_fr='GEO', cs_to=cs, coords=coords)
-    data = panel.proj.transform_points(ccrs.PlateCarree(), cs_new['lon'], cs_new['lat'])
+    data = panel.projection.transform_points(ccrs.PlateCarree(), cs_new['lon'], cs_new['lat'])
     x = data[:, 0]
     y = data[:, 1]
     z = rho_n_sc.flatten()
@@ -176,7 +176,7 @@ def show_n_e(dt_fr, dt_to):
     #                 proj_type='Stereographic')
     panel.set_extent(boundary_style='circle')
 
-    data = panel.proj.transform_points(ccrs.PlateCarree(), sc_lon, sc_lat)
+    data = panel.projection.transform_points(ccrs.PlateCarree(), sc_lon, sc_lat)
 
     x = data[:, 0]
     y = data[:, 1]
@@ -215,7 +215,7 @@ def show_n_e(dt_fr, dt_to):
     from matplotlib.collections import LineCollection
     coords = {'lat': sc_lat, 'lon': sc_lon, 'height': 250.}
     cs_new = panel.cs_transform(cs_fr='GEO', cs_to=cs, coords=coords)
-    data = panel.proj.transform_points(ccrs.PlateCarree(), cs_new['lon'], cs_new['lat'])
+    data = panel.projection.transform_points(ccrs.PlateCarree(), cs_new['lon'], cs_new['lat'])
     x = data[:, 0]
     y = data[:, 1]
     z = rho_n_sc.flatten()
@@ -289,7 +289,7 @@ def show_T_e(dt_fr, dt_to):
     panel.add_subplot(major=True)
     panel.set_extent(boundary_style='circle')
 
-    data = panel.proj.transform_points(ccrs.PlateCarree(), sc_lon, sc_lat)
+    data = panel.projection.transform_points(ccrs.PlateCarree(), sc_lon, sc_lat)
 
     x = data[:, 0]
     y = data[:, 1]
@@ -327,7 +327,7 @@ def show_T_e(dt_fr, dt_to):
 
     from matplotlib.collections import LineCollection
 
-    data = panel.proj.transform_points(ccrs.PlateCarree(), sc_lon, sc_lat)
+    data = panel.projection.transform_points(ccrs.PlateCarree(), sc_lon, sc_lat)
     x = data[:, 0]
     y = data[:, 1]
     z = rho_n_sc.flatten()

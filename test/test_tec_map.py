@@ -2,14 +2,14 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 
-import geospacelab.visualization.map_proj.geomap_viewer as geomap
+import geospacelab.visualization.mpl.geomap.geodashboards as geomap
 
 
 def test_tec():
 
     dt_fr = datetime.datetime(2021, 8, 24, 1)
     dt_to = datetime.datetime(2021, 8, 24, 23)
-    viewer = geomap.GeoMapViewer(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (15, 10)})
+    viewer = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (15, 10)})
     viewer.dock(datasource_contents=['madrigal', 'gnss', 'tecmap'])
     viewer.set_layout(2, 3, wspace=0.5)
 

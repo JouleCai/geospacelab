@@ -1,23 +1,74 @@
-import cartopy.mpl.geoaxes as geoaxes
+# Licensed under the BSD 3-Clause License
+# Copyright (C) 2021 GeospaceLab (geospacelab)
+# Author: Lei Cai, Space Physics and Astronomy, University of Oulu
+
+__author__ = "Lei Cai"
+__copyright__ = "Copyright 2021, GeospaceLab"
+__license__ = "BSD-3-Clause License"
+__email__ = "lei.cai@oulu.fi"
+__docformat__ = "reStructureText"
+
+import numpy as np
 import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+
+import geospacelab.visualization.mpl.panels as panels
+import geospacelab.toolbox.utilities.pybasic as basic
 
 
-class GeoPanel(geoaxes.GeoAxes):
+class GeoPanelBase(panels.PanelBase):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, proj_class=None, proj_config: dict = None, **kwargs):
+
+        self.proj_class = proj_class
+        proj_config = proj_config if type(proj_config) is dict or proj_config is None else self._raise_error(TypeError)
+        self.projection = self.proj_class(**proj_config)
+        kwargs.update(projection=self.projection)
         super().__init__(*args, **kwargs)
 
+    def add_axes(self, *args, major=False, label=None, **kwargs):
+        if major:
+            kwargs.setdefault('projection', self.projection)
+        ax = super().add_axes(*args, major=major, label=label, **kwargs)
+        return ax
 
-class PolarStereo(ccrs.Stereographic):
+    def add_coastlines(self, *args, **kwargs):
+        cl = self().coastlines(**kwargs)
+        return cl
 
-    def __init__(self):
-        pass
+    def add_gridlines(self, *args, **kwargs):
+        gl = self().gridlines(
+            crs=ccrs.PlateCarree(), draw_labels=True,
+            **kwargs
+        )
+        return gl
 
-class PlateCarree(ccrs.PlateCarree):
+    def add_lands(self, *args, **kwargs):
 
-    def __init__(self, *args, **kwargs):
-        super(PlateCarree, self).__init__(*args, **kwargs)
+        ll = self().add_feature(cfeature.LAND, **kwargs)
+        return ll
 
-    def _as_mpl_axes(self):
-        return GeoPanel, {'map_projection': self}
+    def add_title(self, x=0.5, y=1.1, title=None, **kwargs):
+        kwargs.setdefault('ha', 'center')
+        kwargs.setdefault('va', 'baseline')
+        super().add_title(x=x, y=y, title=title, **kwargs)
 
+    @property
+    def proj_class(self):
+        return self._proj_class
+
+    @proj_class.setter
+    def proj_class(self, proj):
+        if proj is None:
+            proj = 'Stereographic'
+        if isinstance(proj, str):
+            proj = getattr(ccrs, proj)
+        elif issubclass(proj, ccrs.Projection):
+            proj = proj
+        else:
+            raise TypeError
+
+        self._proj_class = proj

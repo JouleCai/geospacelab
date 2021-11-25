@@ -11,7 +11,7 @@ __docformat__ = "reStructureText"
 
 import geospacelab.visualization.mpl as mpl
 import geospacelab.datahub as datahub
-import geospacelab.visualization.map_proj.geopanel as geopanel
+from geospacelab.visualization.mpl.geomap.geopanels import PolarMapPanel
 
 default_layout_config = {
     'left': 0.15,
@@ -28,12 +28,12 @@ default_figure_config = {
 }
 
 
-class GeoMapViewer(datahub.DataHub, mpl.Dashboard):
+class GeoDashboard(mpl.Dashboard):
     def __init__(self, **kwargs):
-        new_figure = kwargs.pop('new_figure', True)
+        figure = kwargs.pop('figure', 'new')
         figure_config = kwargs.pop('figure_config', default_figure_config)
 
-        super().__init__(visual='on', figure_config=figure_config, new_figure=new_figure, **kwargs)
+        super().__init__(visual='on', figure_config=figure_config, figure=figure, **kwargs)
 
     def set_layout(self, num_rows=None, num_cols=None, left=None, right=None, bottom=None, top=None,
                    hspace=None, wspace=None, **kwargs):
@@ -66,15 +66,12 @@ class GeoMapViewer(datahub.DataHub, mpl.Dashboard):
         :return:
         """
 
-        panel_id = super().add_panel(row_ind=row_ind, col_ind=col_ind, panel_class=geopanel.PolarMap,
+        panel_id = super().add_panel(row_ind=row_ind, col_ind=col_ind, panel_class=PolarMapPanel,
                                      label=label, cs=cs, style=style, pole=pole,
                                      ut=ut, lon_c=lon_c, lst_c=lst_c, mlt_c=mlt_c, mlon_c=mlon_c, boundary_lat=boundary_lat,
                                      boundary_style=boundary_style,
                                      mirror_south=mirror_south,
                                      proj_type=proj_type, **kwargs)
         return panel_id
-
-
-
 
 

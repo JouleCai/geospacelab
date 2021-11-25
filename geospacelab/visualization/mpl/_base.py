@@ -426,6 +426,11 @@ class PanelBase(object):
         return ax_new
 
     @check_panel_ax
+    def add_grid(self, ax=None, visible=True, which='major', axis='both', **kwargs):
+        self.sca(ax)
+        plt.grid(visible=visible, which=which, axis=axis, **kwargs)
+
+    @check_panel_ax
     def clear_axes(self, ax=None, collection_names=('lines', 'collections', 'images', 'patches')):
         for cn in collection_names:
             cs = getattr(ax, cn)
@@ -451,7 +456,7 @@ class PanelBase(object):
     def add_title(self, x=0.5, y=1.02, title=None, **kwargs):
         kwargs.setdefault('ha', 'center')
         kwargs.setdefault('va', 'baseline')
-        self.axes['major'].set_title(x, y, title, **kwargs)
+        self.add_text(x, y, title, **kwargs)
 
     @check_panel_ax
     def overlay_plot(self, *args, ax=None, **kwargs):
