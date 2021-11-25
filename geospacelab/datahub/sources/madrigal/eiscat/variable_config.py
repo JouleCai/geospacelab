@@ -57,8 +57,6 @@ default_plot_config = {
     }
 }
 
-
-
 configured_variables = {}
 visual = 'on'
 
@@ -190,7 +188,8 @@ plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [0, 360]
+axis[1].lim = [-5, 365]
+axis[1].ticks = [0, 90, 180, 270, 360]
 axis[1].label = '@v.group'
 axis[1].unit = ''
 axis[2].label = '@v.label'
@@ -213,9 +212,65 @@ plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [0, 180]
+axis[1].lim = [-5, 185]
+axis[1].ticks = [0, 45, 90, 135, 180]
 axis[1].label = '@v.group'
 axis[1].unit = ''
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'P_Tx'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Transmitter Power'
+var.label = 'Power'
+var.unit = 'MW'
+var.group = 'radar param'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+plot_config.line['linewidth'] = 0.5
+plot_config.line['linestyle'] = '-'
+plot_config.line['marker'] = ''
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [0, 1.6]
+axis[1].label = '@v.group'
+axis[1].unit = '@v.unit'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+
+var_name = 'T_SYS_1'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'System temperature 1'
+var.label = r'$T_{1}^{sys}$'
+var.unit = 'K'
+var.group = 'radar param'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.line['linewidth'] = 0.3
+plot_config.line['linestyle'] = '-'
+plot_config.line['marker'] = ''
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [0, 1000]
+axis[1].label = '@v.group'
+axis[1].unit = '@v.unit'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
 

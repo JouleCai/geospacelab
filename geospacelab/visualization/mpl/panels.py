@@ -105,7 +105,7 @@ class TSPanel(Panel):
             elif level == 0 and isinstance(elem, list):
                 ax_in = self.add_twin_axes(
                     ax=ax, which='x', location='right', offset_type='outward',
-                    offset=40*(len(self.axes_overview[ax]['twinx_axes']))
+                    offset=50*(len(self.axes_overview[ax]['twinx_axes']))
                 )
                 self.axes_overview[ax_in]['twinx'] = 'self'
                 ax_in._get_lines.prop_cycler = ax._get_lines.prop_cycler
@@ -117,7 +117,7 @@ class TSPanel(Panel):
         if level == 0:
             if self.axes_overview[ax]['legend'] == 'on' and self.axes_overview[ax]['twinx'] == 'off':
                 self._check_legend(ax)
-            if self.axes_overview[ax]['twinx']=='on':
+            if self.axes_overview[ax]['twinx'] == 'on':
                 self._check_twinx(ax)
             if self.axes_overview[ax]['colorbar'] == 'on':
                 self._check_colorbar(ax)
@@ -448,7 +448,7 @@ class TSPanel(Panel):
                 ylim[0] = ylim_current[0]
             if ylim[1] is None:
                 ylim[1] = ylim_current[1]
-        if zero_line == 'on':
+        if zero_line == 'on' and self.axes_overview[ax]['twinx']=='off':
             if (ylim[0] < 0) and (ylim[1] > 0):
                 ax.plot(ax.get_xlim(), [0, 0], 'k--', linewidth=0.5)
         ax.set_ylim(ylim)

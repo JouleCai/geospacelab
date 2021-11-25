@@ -39,7 +39,7 @@ default_dataset_attrs = {
 
 default_variable_names = [
     'DATETIME', 'DATETIME_1', 'DATETIME_2',
-    'AZ', 'EL', 'P_Tx', 'HEIGHT', 'RANGE',
+    'AZ', 'EL', 'P_Tx', 'HEIGHT', 'RANGE', 'P_Tx', 'T_SYS_1', 'T_SYS_2',
     'n_e', 'T_i', 'T_e', 'nu_i', 'v_i_los', 'comp_mix', 'comp_O_p',
     'n_e_err', 'T_i_err', 'T_e_err', 'nu_i_err', 'v_i_los_err', 'comp_mix_err', 'comp_O_p_err',
     'STATUS', 'RESIDUAL'

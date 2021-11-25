@@ -70,6 +70,8 @@ class Loader:
             'AZ': 'az',
             'EL': 'el',
             'P_Tx': 'Pt',
+            'T_SYS_1': 'Tsys1',
+            'T_SYS_2': 'Tsys2',
             'HEIGHT': 'h',
             'RANGE': 'range',
             'n_e': 'Ne',
@@ -156,6 +158,8 @@ class Loader:
             var_name = 'DATETIME_2'
             vars[var_name] = var
 
+            vars['P_Tx'] = vars['P_Tx'] / 1e6
+
             vars['DATETIME'] = vars['DATETIME_1'] + (vars['DATETIME_2'] - vars['DATETIME_2']) / 2
 
             metadata['r_XMITloc'] = [h5_data['par0d'][2][0], h5_data['par0d'][3][0], h5_data['par0d'][4][0]]
@@ -232,15 +236,49 @@ class Loader:
         self.metadata = metadata
 
     def load_eiscat_mat(self):
+
         raise NotImplemented
 
     def load_madrigal_hdf5(self):
+        var_name_dict = {
+            'MAGIC_CONSTANT': 'Magic_const',
+            'r_SCangle': 'SCangle',
+            'r_m0_2': 'm02',
+            'r_m0_1': 'm01',
+            'AZ': 'az',
+            'EL': 'el',
+            'P_Tx': 'Pt',
+            'T_SYS_1': 'Tsys1',
+            'T_SYS_2': 'Tsys2',
+            'HEIGHT': 'h',
+            'RANGE': 'range',
+            'n_e': 'Ne',
+            'T_i': 'Ti',
+            'T_r': 'Tr',
+            'nu_i': 'Collf',
+            'v_i_los': 'Vi',
+            'comp_mix': 'pm',
+            'comp_O_p': 'po+',
+            'n_e_var': 'var_Ne',
+            'T_i_var': 'var_Ti',
+            'T_r_var': 'var_Tr',
+            'nu_i_var': 'var_Collf',
+            'v_i_los_var': 'var_Vi',
+            'comp_mix_var': 'var_pm',
+            'comp_O_p_var': 'var_po+',
+            'STATUS': 'status',
+            'RESIDUAL': 'res1'
+        }
+        with h5py.File(self.file_path, 'r') as fh5:
+            data = fh5['Data']['Table Layout'][:]
+            data = list(zip(*tuple(data)))
+
         raise NotImplemented
 
 
 if __name__ == "__main__":
     dir_root = prf.datahub_data_root_dir
 
-    fp = pathlib.Path('examples') / "EISCAT_2005-09-01_steffe_64@32m.hdf5"
-
-    Loader(file_path=fp)
+    # fp = pathlib.Path('examples') / "EISCAT_2005-09-01_steffe_64@32m.hdf5"
+    fp = pathlib.Path('examples') / "MAD6300_2021-03-10_beata_ant@uhfa.hdf5"
+    Loader(file_path=fp, file_type = 'madrigal-hdf5')

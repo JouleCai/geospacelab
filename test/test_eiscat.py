@@ -29,6 +29,8 @@ def test_UHF_CP2():
     v_i = dashboard.assign_variable('v_i_los')
     az = dashboard.assign_variable('AZ')
     el = dashboard.assign_variable('EL')
+    ptx = dashboard.assign_variable('P_Tx')
+    tsys = dashboard.assign_variable('T_SYS_1')
     # T_r = dashboard.dataset.add_variable('T_r', ndim=2)
     # T_r.value = T_e.value / T_i.value
     # T_r.visual.plot_config.style = '2P'
@@ -36,7 +38,7 @@ def test_UHF_CP2():
     # T_r.visual.axis[2].label = 'Te/Ti'
     # T_r.visual.axis[2].unit = ''
 
-    layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
+    layout = [[n_e], [T_e], [T_i], [v_i], [az, [el], [ptx], [tsys]]]
     dashboard.set_layout(panel_layouts=layout, )
     dashboard.draw()
     dashboard.add_title()
@@ -176,8 +178,8 @@ def test_vhf_lowel():
 
 if __name__ == "__main__":
     # test_vhf_lowel()
-    test_uhf_cp3()
-    #test_UHF_CP2()
+    # test_uhf_cp3()
+    test_UHF_CP2()
     #test_esr_32m()
 
     plt.savefig('eiscat_example.png')
