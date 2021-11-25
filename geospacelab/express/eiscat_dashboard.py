@@ -11,12 +11,13 @@ __docformat__ = "reStructureText"
 
 import datetime
 
-from geospacelab.visualization.mpl.ts_viewer import TimeSeriesViewer
+from geospacelab.visualization.mpl.dashboards import TSDashboard
 
 
-class EISCATViewer(TimeSeriesViewer):
+class EISCATDashboard(TSDashboard):
     def __init__(self, dt_fr, dt_to, **kwargs):
-        super().__init__(dt_fr=dt_fr, dt_to=dt_to,)
+        figure = kwargs.pop('figure', 'new')
+        super().__init__(dt_fr=dt_fr, dt_to=dt_to, figure=figure)
         ds_1 = self.dock(datasource_contents=['madrigal', 'eiscat'], **kwargs)
         ds_1.load_data(load_mode=kwargs['load_mode'])
         # ds_1.list_all_variables()
@@ -59,8 +60,8 @@ class EISCATViewer(TimeSeriesViewer):
         self.list_assigned_variables()
         self.list_datasets()
 
-        layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
-        self.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3])
+        layout = [[n_e], [T_e], [T_i], [v_i], [az, [el]]]
+        self.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3], hspace=0.1)
         # plt.style.use('dark_background')
         # dt_fr_1 = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
         # dt_to_1 = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')

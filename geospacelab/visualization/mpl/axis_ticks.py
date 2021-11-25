@@ -47,8 +47,8 @@ class DatetimeMinorLocator(mdates.AutoDateLocator):
         if majorlocator is not None:
             tz = majorlocator.tz
         if ax is not None:
-            minticks = 2 * len(ax.get_xticks())
-            maxticks = 6 * len(ax.get_xticks())
+            minticks = 2 * len(ax.xaxis.get_major_ticks())
+            maxticks = 8 * len(ax.xaxis.get_major_ticks())
         super().__init__(tz=tz, minticks=minticks, maxticks=maxticks, interval_multiples=interval_multiples)
 
 

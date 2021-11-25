@@ -1,39 +1,39 @@
 import datetime
 import matplotlib.pyplot as plt
 
-import geospacelab.visualization.mpl.ts_viewer as ts
+import geospacelab.visualization.mpl.dashboards as dashboards
 
 
 def test():
     dt_fr = datetime.datetime(2015, 9, 1, 0)
-    dt_to = datetime.datetime(2015, 9, 30, 23)
-    tsviewer = ts.TimeSeriesViewer(dt_fr=dt_fr, dt_to=dt_to)
-    ds1 = tsviewer.dock(datasource_contents=['cdaweb', 'omni'])
+    dt_to = datetime.datetime(2015, 10, 30, 23)
+    dashboard = dashboards.TSDashboard(dt_fr=dt_fr, dt_to=dt_to)
+    ds1 = dashboard.dock(datasource_contents=['cdaweb', 'omni'])
     ds1.load_data()
 
-    Bx = tsviewer.assign_variable('B_x_GSM')
-    By = tsviewer.assign_variable('B_y_GSM')
-    Bz = tsviewer.assign_variable('B_z_GSM')
+    Bx = dashboard.assign_variable('B_x_GSM')
+    By = dashboard.assign_variable('B_y_GSM')
+    Bz = dashboard.assign_variable('B_z_GSM')
 
-    n_p = tsviewer.assign_variable('n_p')
-    v_sw = tsviewer.assign_variable('v_sw')
-    p_dyn = tsviewer.assign_variable('p_dyn')
+    n_p = dashboard.assign_variable('n_p')
+    v_sw = dashboard.assign_variable('v_sw')
+    p_dyn = dashboard.assign_variable('p_dyn')
 
-    ds2 = tsviewer.dock(datasource_contents=['wdc', 'asysym'])
+    ds2 = dashboard.dock(datasource_contents=['wdc', 'asysym'])
 
-    sym_h = tsviewer.assign_variable('SYM_H')
+    sym_h = dashboard.assign_variable('SYM_H')
 
-    ds3 = tsviewer.dock(datasource_contents=['wdc', 'ae'])
+    ds3 = dashboard.dock(datasource_contents=['wdc', 'ae'])
 
-    ae = tsviewer.assign_variable('AE')
-    au = tsviewer.assign_variable('AU')
-    al = tsviewer.assign_variable('AL')
+    ae = dashboard.assign_variable('AE')
+    au = dashboard.assign_variable('AU')
+    al = dashboard.assign_variable('AL')
 
     layout = [[Bx, By, Bz], [v_sw], [n_p], [p_dyn], [sym_h], [ae, au, al]]
-    layout = [[Bz, By], [v_sw], [n_p], [sym_h]]
-    tsviewer.set_layout(panel_layouts=layout, hspace=0.1)
-    tsviewer.draw()
-    # tsviewer.save_figure(file_name='example_omni_6', append_time=False)
+    # layout = [[Bz, By], [v_sw], [n_p], [sym_h]]
+    dashboard.set_layout(panel_layouts=layout, hspace=0.1)
+    dashboard.draw()
+    # dashboard.save_figure(file_name='example_omni_6', append_time=False)
     pass
 
 

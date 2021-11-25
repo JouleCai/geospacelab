@@ -460,6 +460,10 @@ class TSPanel(Panel):
         legend_config = var_for_config.visual.plot_config.legend
         # get color
         legend_config = basic.dict_set_default(legend_config, **self._default_legend_config)
+
+        if len(ax_ov['lines']) == 1 and ax_ov['lines'][0]._label == '_line0':
+            return
+
         ax.legend(handles=ax_ov['lines'], **legend_config)
 
     def _check_twinx(self, ax):

@@ -11,14 +11,14 @@ __docformat__ = "reStructureText"
 
 import datetime
 
-from geospacelab.visualization.mpl.ts_viewer import TimeSeriesViewer
+from geospacelab.visualization.mpl.dashboards import TSDashboard
 
 
-class OMNIViewer(TimeSeriesViewer):
+class OMNIDashboard(TSDashboard):
     def __init__(self, dt_fr, dt_to, **kwargs):
-        new_figure = kwargs.pop('new_figure', True)
+        figure = kwargs.pop('figure', 'new')
         figure_config = kwargs.pop('figure_config', {'figsize': (10, 8)})
-        super().__init__(dt_fr=dt_fr, dt_to=dt_to, new_figure=new_figure, figure_config=figure_config)
+        super().__init__(dt_fr=dt_fr, dt_to=dt_to, figure=figure, figure_config=figure_config)
         omni_config = {
             'omni_type': kwargs.pop('omni_type', 'OMNI2'),
             'omni_res': kwargs.pop('omni_res', '1min'),
@@ -62,7 +62,7 @@ class OMNIViewer(TimeSeriesViewer):
         self.list_assigned_variables()
         self.list_datasets()
 
-        layout = [[Bx, By, Bz], [v_sw], [n_p], [p_dyn], [au, al], [sym_h]]
+        layout = [[Bx, [By], [Bz]], [v_sw], [n_p], [p_dyn], [au, al], [sym_h]]
         self.set_layout(panel_layouts=layout)
         # plt.style.use('dark_background')
         # dt_fr_1 = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
@@ -81,7 +81,7 @@ def example():
     omni_type = 'OMNI2'
     omni_res = '1min'
     load_mode = 'AUTO'
-    viewer = OMNIViewer(
+    viewer = OMNIDashboard(
         dt_fr, dt_to, omni_type=omni_type, omni_res=omni_res, load_mode=load_mode
     )
     viewer.quicklook()

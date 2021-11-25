@@ -265,9 +265,10 @@ Output:
 ### Example 3: OMNI and WDC geomagnetic indices:
 
 In "example3.py"
+
 ```python
 import datetime
-import geospacelab.express.omni_viewer as omni
+import geospacelab.express.omni_dashboard as omni
 
 dt_fr = datetime.datetime.strptime('20160314' + '0600', '%Y%m%d%H%M')
 dt_to = datetime.datetime.strptime('20160320' + '0600', '%Y%m%d%H%M')

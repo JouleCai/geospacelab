@@ -1,7 +1,7 @@
 import datetime
 import matplotlib.pyplot as plt
 
-import geospacelab.express.eiscat_viewer as eiscat
+import geospacelab.express.eiscat_dashboard as eiscat
 
 
 def test_UHF_CP2():
@@ -14,22 +14,22 @@ def test_UHF_CP2():
     load_mode = 'AUTO'
     data_file_type = 'eiscat-hdf5'
 
-    viewer = eiscat.EISCATViewer(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
+    dashboard = eiscat.EISCATDashboard(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
                                  data_file_type=data_file_type, load_mode=load_mode, status_control=True,
                                  residual_control=True)
 
     # select beams before assign the variables
-    # viewer.dataset.select_beams(field_aligned=True)
-    # viewer.dataset.select_beams(az_el_pairs=[(188.6, 77.7)])
-    viewer.status_mask()
+    # dashboard.dataset.select_beams(field_aligned=True)
+    # dashboard.dataset.select_beams(az_el_pairs=[(188.6, 77.7)])
+    dashboard.status_mask()
 
-    n_e = viewer.assign_variable('n_e')
-    T_i = viewer.assign_variable('T_i')
-    T_e = viewer.assign_variable('T_e')
-    v_i = viewer.assign_variable('v_i_los')
-    az = viewer.assign_variable('AZ')
-    el = viewer.assign_variable('EL')
-    # T_r = viewer.dataset.add_variable('T_r', ndim=2)
+    n_e = dashboard.assign_variable('n_e')
+    T_i = dashboard.assign_variable('T_i')
+    T_e = dashboard.assign_variable('T_e')
+    v_i = dashboard.assign_variable('v_i_los')
+    az = dashboard.assign_variable('AZ')
+    el = dashboard.assign_variable('EL')
+    # T_r = dashboard.dataset.add_variable('T_r', ndim=2)
     # T_r.value = T_e.value / T_i.value
     # T_r.visual.plot_config.style = '2P'
     # T_r.depends = T_i.depends
@@ -37,11 +37,11 @@ def test_UHF_CP2():
     # T_r.visual.axis[2].unit = ''
 
     layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
-    viewer.set_layout(panel_layouts=layout, )
-    viewer.draw()
-    viewer.add_title()
-    viewer.add_panel_labels()
-    return viewer
+    dashboard.set_layout(panel_layouts=layout, )
+    dashboard.draw()
+    dashboard.add_title()
+    dashboard.add_panel_labels()
+    return dashboard
 
 
 def test_esr_32m():
@@ -54,25 +54,25 @@ def test_esr_32m():
     load_mode = 'AUTO'
     data_file_type = 'eiscat-hdf5'
 
-    viewer = eiscat.EISCATViewer(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
+    dashboard = eiscat.EISCATDashboard(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
                                  data_file_type=data_file_type, load_mode=load_mode)
 
     # select beams before assign the variables
-    # viewer.dataset.select_beams(field_aligned=False)
+    # dashboard.dataset.select_beams(field_aligned=False)
 
-    n_e = viewer.assign_variable('n_e')
-    T_i = viewer.assign_variable('T_i')
-    T_e = viewer.assign_variable('T_e')
-    v_i = viewer.assign_variable('v_i_los')
-    az = viewer.assign_variable('AZ')
-    el = viewer.assign_variable('EL')
+    n_e = dashboard.assign_variable('n_e')
+    T_i = dashboard.assign_variable('T_i')
+    T_e = dashboard.assign_variable('T_e')
+    v_i = dashboard.assign_variable('v_i_los')
+    az = dashboard.assign_variable('AZ')
+    el = dashboard.assign_variable('EL')
 
     layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
-    viewer.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3])
-    viewer.draw()
-    viewer.add_title()
-    viewer.add_panel_labels()
-    return viewer
+    dashboard.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3])
+    dashboard.draw()
+    dashboard.add_title()
+    dashboard.add_panel_labels()
+    return dashboard
 
 
 def test_uhf_cp3():
@@ -85,41 +85,41 @@ def test_uhf_cp3():
     load_mode = 'AUTO'
     data_file_type = 'eiscat-hdf5'
 
-    viewer = eiscat.EISCATViewer(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
+    dashboard = eiscat.EISCATDashboard(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
                                  data_file_type=data_file_type, load_mode=load_mode)
 
     # select beams before assign the variables
-    # viewer.dataset.select_beams(field_aligned=False)
+    # dashboard.dataset.select_beams(field_aligned=False)
 
-    n_e = viewer.assign_variable('n_e')
+    n_e = dashboard.assign_variable('n_e')
     n_e.visual.axis[0].data_res = 180 # time resolution in seconds
     n_e.visual.axis[1].data = '@d.GEO_LAT.value'
     n_e.visual.axis[1].label = 'GLAT'
     n_e.visual.axis[1].unit = 'deg'
     n_e.visual.axis[1].lim = [65, 75]
-    T_i = viewer.assign_variable('T_i')
+    T_i = dashboard.assign_variable('T_i')
     T_i.visual.axis[0].data_res = 180
-    T_e = viewer.assign_variable('T_e')
+    T_e = dashboard.assign_variable('T_e')
     T_e.visual.axis[0].data_res = 180
 
-    v_i = viewer.assign_variable('v_i_los')
+    v_i = dashboard.assign_variable('v_i_los')
     v_i.visual.axis[0].data_res = 180
     v_i.visual.axis[1].data = '@d.GEO_LAT.value'
     v_i.visual.axis[1].label = 'GLAT'
     v_i.visual.axis[1].unit = 'deg'
     v_i.visual.axis[1].lim = [65, 75]
 
-    az = viewer.assign_variable('AZ')
+    az = dashboard.assign_variable('AZ')
     az.visual.axis[0].data_res = 180
-    el = viewer.assign_variable('EL')
+    el = dashboard.assign_variable('EL')
     el.visual.axis[0].data_res = 180
 
     layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
-    viewer.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3])
-    viewer.draw()
-    viewer.add_title()
-    viewer.add_panel_labels()
-    return viewer
+    dashboard.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3])
+    dashboard.draw()
+    dashboard.add_title()
+    dashboard.add_panel_labels()
+    return dashboard
 
 
 def test_vhf_lowel():
@@ -132,53 +132,53 @@ def test_vhf_lowel():
     load_mode = 'AUTO'
     data_file_type = 'eiscat-hdf5'
 
-    viewer = eiscat.EISCATViewer(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
+    dashboard = eiscat.EISCATDashboard(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
                                  data_file_type=data_file_type, load_mode=load_mode)
 
     # select beams before assign the variables
-    # viewer.dataset.select_beams(field_aligned=False)
+    # dashboard.dataset.select_beams(field_aligned=False)
 
-    n_e = viewer.assign_variable('n_e')
+    n_e = dashboard.assign_variable('n_e')
     n_e_clone = n_e.clone()         # Clone a variable. It has no meaning here, but it may be useful to create panels with the same variable but different visual settings.
     n_e.visual.axis[0].data_res = 180 # time resolution in seconds
     n_e.visual.axis[1].data = '@d.AACGM_LAT.value'
     n_e.visual.axis[1].label = 'MALT'
     n_e.visual.axis[1].unit = 'deg'
     n_e.visual.axis[1].lim = [68, 74.5]
-    T_i = viewer.assign_variable('T_i')
+    T_i = dashboard.assign_variable('T_i')
     T_i.visual.axis[0].data_res = 180 # time resolution in seconds
     T_i.visual.axis[1].data = '@d.GEO_LAT.value'
     T_i.visual.axis[1].label = 'GLAT'
     T_i.visual.axis[1].unit = 'deg'
     T_i.visual.axis[1].lim = [71, 75]
-    T_e = viewer.assign_variable('T_e')
+    T_e = dashboard.assign_variable('T_e')
     T_e.visual.axis[0].data_res = 180 # time resolution in seconds
     T_e.visual.axis[1].data = '@d.GEO_LAT.value'
     T_e.visual.axis[1].label = 'GLAT'
     T_e.visual.axis[1].unit = 'deg'
     T_e.visual.axis[1].lim = [71, 75]
-    v_i = viewer.assign_variable('v_i_los')
+    v_i = dashboard.assign_variable('v_i_los')
     v_i.visual.axis[0].data_res = 180 # time resolution in seconds
     v_i.visual.axis[1].data = '@d.GEO_LAT.value'
     v_i.visual.axis[1].label = 'GLAT'
     v_i.visual.axis[1].unit = 'deg'
     v_i.visual.axis[1].lim = [None, None]
-    az = viewer.assign_variable('AZ')
-    el = viewer.assign_variable('EL')
+    az = dashboard.assign_variable('AZ')
+    el = dashboard.assign_variable('EL')
 
     layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
-    viewer.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3])
-    viewer.draw()
-    viewer.add_title()
-    viewer.add_panel_labels()
-    return viewer
+    dashboard.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3])
+    dashboard.draw()
+    dashboard.add_title()
+    dashboard.add_panel_labels()
+    return dashboard
 
 
 if __name__ == "__main__":
     # test_vhf_lowel()
-    # test_uhf_cp3()
-    # test_UHF_CP2()
-    test_esr_32m()
+    test_uhf_cp3()
+    #test_UHF_CP2()
+    #test_esr_32m()
 
     plt.savefig('eiscat_example.png')
     plt.show()
