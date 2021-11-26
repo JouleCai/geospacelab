@@ -142,7 +142,7 @@ class Dataset(datahub.DatasetModel):
 
     def download_data(self):
         if self.data_file_ext == 'nc':
-            download_obj = self.downloader(self.dt_fr, self.dt_to, data_file_root_dir=self.data_root_dir, force=self.force_download)
+            download_obj = self.downloader(data_file_root_dir=self.data_root_dir, force=self.force_download)
         else:
             raise NotImplementedError
         return download_obj.done
