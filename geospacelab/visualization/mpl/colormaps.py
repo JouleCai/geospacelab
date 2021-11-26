@@ -54,6 +54,16 @@ def cmap_jhuapl_ssj_like():
     return mycmap
 
 
+def cmap_for_kp():
+    c1 = [
+        '#193300', '#009900', '#00CC00', '#00FF00', '#B2FF66',
+        '#FFFF66', '#FFFF33', '#FFFF00', '#FF8000',
+        '#FF3333', '#FF0000', '#CC0000', '#990000'
+    ]
+    mycmap = colors.LinearSegmentedColormap.from_list("kp", c1, N=100)
+    return mycmap
+
+
 def cmap_aurora_green():
     stops = {'red': [(0.00, 0.1725, 0.1725),
                  (0.50, 0.1725, 0.1725),

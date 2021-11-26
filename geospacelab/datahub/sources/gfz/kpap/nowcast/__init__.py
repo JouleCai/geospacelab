@@ -14,29 +14,32 @@ import numpy as np
 
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, ProductModel
-from geospacelab.datahub.sources.wdc import wdc_database
+
 from geospacelab import preferences as prf
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
-from geospacelab.datahub.sources.wdc.asysym.loader import Loader as default_Loader
-from geospacelab.datahub.sources.wdc.asysym.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.wdc.asysym.variable_config as var_config
+
+from geospacelab.datahub.sources.gfz import gfz_database
+from geospacelab.datahub.sources.gfz.kpap.loader import Loader as default_Loader
+from geospacelab.datahub.sources.gfz.kpap.nowcast.downloader import Downloader as default_Downloader
+import geospacelab.datahub.sources.gfz.kpap.variable_config as var_config
 
 
 default_dataset_attrs = {
-    'database': wdc_database,
-    'product': 'ASYSYM',
+    'database': gfz_database,
+    'product': 'KpAp-NOWCAST',
     'data_file_ext': 'nc',
-    'data_root_dir': prf.datahub_data_root_dir / 'WDC' / 'ASYSYM',
+    'data_root_dir': prf.datahub_data_root_dir / 'GFZ' / 'Indices',
     'allow_load': True,
     'allow_download': True,
+    'force_download': False,
     'data_search_recursive': False,
     'label_fields': ['database', 'product', 'data_file_ext'],
     'time_clip': True,
 }
 
-default_variable_names = ['DATETIME', 'ASY_D', 'ASY_H', 'SYM_D', 'SYM_H']
+default_variable_names = ['DATETIME', 'Kp', 'ap', 'Ap']
 
 # default_data_search_recursive = True
 
@@ -49,9 +52,10 @@ class Dataset(datahub.DatasetModel):
 
         super().__init__(**kwargs)
 
-        self.database = kwargs.pop('database', '')
-        self.product = kwargs.pop('product', '')
+        self.database = kwargs.pop('database', gfz_database)
+        self.product = kwargs.pop('product', 'KpAp')
         self.allow_download = kwargs.pop('allow_download', True)
+        self.force_download = kwargs.pop('force_download', True)
 
         self.metadata = None
 
@@ -101,23 +105,28 @@ class Dataset(datahub.DatasetModel):
     def search_data_files(self, **kwargs):
         dt_fr = self.dt_fr
         dt_to = self.dt_to
-        diff_months = dttool.get_diff_months(dt_fr, dt_to)
-        dt0 = dttool.get_first_day_of_month(dt_fr)
-        for i in range(diff_months + 1):
-            thismonth = dttool.get_next_n_months(dt0, i)
+        diff_years = dt_fr.year - dt_to.year
+        dt0 = datetime.datetime(dt_fr.year, 1, 1)
+        for i in range(diff_years + 1):
+            thisyear = datetime.datetime(dt0.year + i, 1, 1)
+            if datetime.date.today().year == thisyear.year:
+                self.force_download = True
 
             initial_file_dir = kwargs.pop('initial_file_dir', None)
             if initial_file_dir is None:
-                initial_file_dir = self.data_root_dir / thismonth.strftime("%Y")
-            file_patterns = [thismonth.strftime("%Y%m")]
+                initial_file_dir = self.data_root_dir / 'Kp_Ap'
+            file_patterns = ['nowcast']
             # remove empty str
             file_patterns = [pattern for pattern in file_patterns if str(pattern)]
 
             search_pattern = '*' + '*'.join(file_patterns) + '*'
 
-            done = super().search_data_files(
-                initial_file_dir=initial_file_dir, search_pattern=search_pattern
-            )
+            if not self.force_download:
+                done = super().search_data_files(
+                    initial_file_dir=initial_file_dir, search_pattern=search_pattern
+                )
+            else:
+                done = False
 
             # Validate file paths
 
@@ -133,7 +142,7 @@ class Dataset(datahub.DatasetModel):
 
     def download_data(self):
         if self.data_file_ext == 'nc':
-            download_obj = self.downloader(self.dt_fr, self.dt_to, data_file_root_dir=self.data_root_dir)
+            download_obj = self.downloader(self.dt_fr, self.dt_to, data_file_root_dir=self.data_root_dir, force=self.force_download)
         else:
             raise NotImplementedError
         return download_obj.done
@@ -163,6 +172,7 @@ class Dataset(datahub.DatasetModel):
             self._product = value
         else:
             raise TypeError
+
 
 
 

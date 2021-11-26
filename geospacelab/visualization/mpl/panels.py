@@ -11,6 +11,7 @@ __docformat__ = "reStructureText"
 import numpy as np
 import re
 import datetime
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.colors as mpl_colors
 import matplotlib.ticker as mpl_ticker
@@ -187,6 +188,32 @@ class TSPanel(Panel):
         if self.axes_overview[ax]['legend'] is None:
             self.axes_overview[ax]['legend'] = 'on'
         return il
+
+    @check_panel_ax
+    def overlay_bar(self, *args, ax=None, **kwargs):
+
+        var = args[0]
+        il = None
+        data = self._retrieve_data_1d(var)
+        x = data['x'].flatten()
+        height = data['y'].flatten()
+
+        bar_config = basic.dict_set_default(kwargs, **var.visual.plot_config.bar)
+
+        color_by_value = bar_config.pop('color_by_value', False)
+        colormap = bar_config.pop('colormap', 'viridis')
+        vmin = bar_config.pop('vmin', np.nanmin(height))
+        vmax = bar_config.pop('vmax', np.nanmax(height))
+        if color_by_value:
+            if isinstance(colormap, str):
+                colormap = mpl.cm.get_cmap(colormap)
+            norm = mpl_colors.Normalize(vmin=vmin, vmax=vmax)
+            colors = colormap(norm(height))
+            bar_config.update(color=colors)
+
+        # plot_config = basic.dict_set_default(plot_config, **self._default_plot_config)
+        ib = ax.bar(x, height, **bar_config)
+        return [ib]
 
     @check_panel_ax
     def overlay_pcolormesh(self, *args, ax=None, **kwargs):

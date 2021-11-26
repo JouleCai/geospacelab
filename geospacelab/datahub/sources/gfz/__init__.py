@@ -1,10 +1,16 @@
-# Licensed under the BSD 3-Clause License
-# Copyright (C) 2021 GeospaceLab (geospacelab)
-# Author: Lei Cai, Space Physics and Astronomy, University of Oulu
+from geospacelab import preferences
+import geospacelab.datahub.sources.madrigal.utilities as utilities
 
-__author__ = "Lei Cai"
-__copyright__ = "Copyright 2021, GeospaceLab"
-__license__ = "BSD-3-Clause License"
-__email__ = "lei.cai@oulu.fi"
-__docformat__ = "reStructureText"
+from geospacelab.datahub import DatabaseModel
 
+
+class GFZDatabase(DatabaseModel):
+    def __new__(cls, str_in, **kwargs):
+        obj = super().__new__(cls, str_in, **kwargs)
+        return obj
+
+
+gfz_database = GFZDatabase('WDC')
+gfz_database.url = 'https://www.gfz-potsdam.de/en/section/geomagnetism/data-products-services/'
+gfz_database.category = 'online database'
+gfz_database.Notes = ''

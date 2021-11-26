@@ -29,20 +29,38 @@ from geospacelab import preferences as prf
 
 class Downloader(downloader.Downloader):
 
-    def __init__(self, dt_fr,  dt_to, data_file_root_dir=None, force=False):
+    def __init__(self, data_file_root_dir=None, force=False, download_method='html'):
 
         ftp_sub_dir = 'Kp_ap_Ap_SN_F107'
         ftp_filename_prefix = ftp_sub_dir + '_'
 
+        dt_fr = datetime.datetime.now()
+        dt_to = datetime.datetime.now()
         super().__init__(
             dt_fr,  dt_to,
             data_file_root_dir=data_file_root_dir, force=force,
             ftp_sub_dir=ftp_sub_dir, ftp_filename_prefix=ftp_filename_prefix
         )
         self.data_file_root_dir = self.data_file_root_dir / 'Kp_Ap'
+        self.download_method = download_method
         self.download()
 
-    def save_to_netcdf(self, ystr, file_path):
+    def download(self):
+        if self.download_method == 'html':
+            self.download_from_web()
+        elif self.download_method == 'ftp':
+            super().download()
+
+    def download_from_web(self):
+        mylog.StreamLogger.info("Downloading the nowcast data from the GFZ server ...")
+        r = requests.get('https://www-app3.gfz-potsdam.de/kp_index/Kp_ap_Ap_SN_F107_nowcast.txt')
+        r.raise_for_status()
+        file_path = self.data_file_root_dir / 'Kp_ap_Ap_SN_F107_nowcast.txt'
+        with open(file_path, "w") as file:
+            file.write(r.text)
+        self.save_to_netcdf(file_path)
+
+    def save_to_netcdf(self, file_path):
         with open(file_path, 'r') as f:
             text = f.read()
 
@@ -76,7 +94,7 @@ class Downloader(downloader.Downloader):
             num_rows = len(results[0])
 
             ################## for SN, f10.7
-            fp = file_path.parent.resolve().parent.resolve() / "SN_F107" / ("GFZ_SN_F107_" + ystr + '.nc')
+            fp = file_path.parent.resolve().parent.resolve() / "SN_F107" / ("GFZ_SN_F107_nowcast" + '.nc')
             fp.parent.resolve().mkdir(parents=True, exist_ok=True)
             fnc = nc.Dataset(fp, 'w')
             fnc.createDimension('UNIX_TIME', num_rows)
@@ -107,7 +125,7 @@ class Downloader(downloader.Downloader):
             fnc.close()
 
             ########## for Kp Ap
-            fp = file_path.parent.resolve() / ("GFZ_Kp_Ap_" + ystr + '.nc')
+            fp = file_path.parent.resolve() / ("GFZ_Kp_Ap_nowcast" + '.nc')
             fp.parent.resolve().mkdir(parents=True, exist_ok=True)
             fnc = nc.Dataset(fp, 'w')
             fnc.createDimension('UNIX_TIME', num_rows*8)
@@ -148,7 +166,7 @@ class Downloader(downloader.Downloader):
 if __name__ == "__main__":
     dt_fr1 = datetime.datetime(1990, 1, 1)
     dt_to1 = datetime.datetime(2020, 12, 16)
-    Downloader(dt_fr1, dt_to1)
+    Downloader()
 
 
 

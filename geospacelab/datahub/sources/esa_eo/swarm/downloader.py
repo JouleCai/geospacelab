@@ -137,7 +137,7 @@ class Downloader(DownloaderModel):
             file_name_patterns = []
 
         if list(file_name_patterns):
-            search_pattern = '*' + '*'.join(file_name_patterns) + '*'
+            search_pattern = '.*' + '.*'.join(file_name_patterns) + '.*'
             fn_regex = re.compile(search_pattern)
             file_list = list(filter(fn_regex.match, file_list))
 
