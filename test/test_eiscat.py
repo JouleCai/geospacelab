@@ -12,7 +12,7 @@ def test_UHF_CP2():
     antenna = 'UHF'
     modulation = 'ant'
     load_mode = 'AUTO'
-    data_file_type = 'eiscat-hdf5'
+    data_file_type = 'madrigal-hdf5'
 
     dashboard = eiscat.EISCATDashboard(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
                                  data_file_type=data_file_type, load_mode=load_mode, status_control=True,
@@ -54,7 +54,7 @@ def test_esr_32m():
     antenna = '42m'
     modulation = '120'
     load_mode = 'AUTO'
-    data_file_type = 'eiscat-hdf5'
+    data_file_type = 'madrigal-hdf5'
 
     dashboard = eiscat.EISCATDashboard(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
                                  data_file_type=data_file_type, load_mode=load_mode)
@@ -85,7 +85,7 @@ def test_uhf_cp3():
     antenna = 'UHF'
     modulation = 'ant'
     load_mode = 'AUTO'
-    data_file_type = 'eiscat-hdf5'
+    data_file_type = 'madrigal-hdf5'
 
     dashboard = eiscat.EISCATDashboard(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
                                  data_file_type=data_file_type, load_mode=load_mode)
@@ -132,7 +132,7 @@ def test_vhf_lowel():
     antenna = 'VHF'
     modulation = '60'
     load_mode = 'AUTO'
-    data_file_type = 'eiscat-hdf5'
+    data_file_type = 'madrigal-hdf5'
 
     dashboard = eiscat.EISCATDashboard(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
                                  data_file_type=data_file_type, load_mode=load_mode)
@@ -177,10 +177,10 @@ def test_vhf_lowel():
 
 
 if __name__ == "__main__":
-    # test_vhf_lowel()
+    test_vhf_lowel()
     # test_uhf_cp3()
-    test_UHF_CP2()
-    #test_esr_32m()
+    # test_UHF_CP2()
+    # test_esr_32m()
 
     plt.savefig('eiscat_example.png')
     plt.show()

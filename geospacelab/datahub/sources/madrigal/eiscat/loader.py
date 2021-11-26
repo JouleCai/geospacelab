@@ -158,9 +158,7 @@ class Loader:
             var_name = 'DATETIME_2'
             vars[var_name] = var
 
-            vars['P_Tx'] = vars['P_Tx'] / 1e6
-
-            vars['DATETIME'] = vars['DATETIME_1'] + (vars['DATETIME_2'] - vars['DATETIME_2']) / 2
+            vars['P_Tx'] = vars['P_Tx'] / 1e3   # in kW
 
             metadata['r_XMITloc'] = [h5_data['par0d'][2][0], h5_data['par0d'][3][0], h5_data['par0d'][4][0]]
             metadata['r_RECloc'] = [h5_data['par0d'][5][0], h5_data['par0d'][6][0], h5_data['par0d'][7][0]]
@@ -240,45 +238,177 @@ class Loader:
         raise NotImplemented
 
     def load_madrigal_hdf5(self):
+        from scipy.signal import argrelmin, argrelmax
+
         var_name_dict = {
-            'MAGIC_CONSTANT': 'Magic_const',
-            'r_SCangle': 'SCangle',
-            'r_m0_2': 'm02',
-            'r_m0_1': 'm01',
-            'AZ': 'az',
-            'EL': 'el',
-            'P_Tx': 'Pt',
-            'T_SYS_1': 'Tsys1',
-            'T_SYS_2': 'Tsys2',
-            'HEIGHT': 'h',
-            'RANGE': 'range',
-            'n_e': 'Ne',
-            'T_i': 'Ti',
-            'T_r': 'Tr',
-            'nu_i': 'Collf',
-            'v_i_los': 'Vi',
-            'comp_mix': 'pm',
-            'comp_O_p': 'po+',
-            'n_e_var': 'var_Ne',
-            'T_i_var': 'var_Ti',
-            'T_r_var': 'var_Tr',
-            'nu_i_var': 'var_Collf',
-            'v_i_los_var': 'var_Vi',
-            'comp_mix_var': 'var_pm',
-            'comp_O_p_var': 'var_po+',
-            'STATUS': 'status',
-            'RESIDUAL': 'res1'
+            # 'MAGIC_CONSTANT': 'Magic_const',
+            'r_SCangle': 'HSA',
+            # 'r_m0_2': 'm02',
+            # 'r_m0_1': 'm01',
+            'AZ': 'AZM',
+            'EL': 'ELM',
+            'P_Tx': 'POWER',
+            'T_SYS_1': 'SYSTMP',
+            'T_SYS_2': 'SYSTMP',
+            'HEIGHT': 'GDALT',
+            'RANGE': 'RANGE',
+            'n_e': 'NE',
+            'T_i': 'TI',
+            'T_r': 'TR',
+            'nu_i': 'CO',
+            'v_i_los': 'VO',
+            'comp_mix': 'PM',
+            'comp_O_p': 'PO+',
+            'n_e_err': 'DNE',
+            'T_i_err': 'DTI',
+            'T_r_err': 'DTR',
+            'nu_i_err': 'DCO',
+            'v_i_los_err': 'DVO',
+            'comp_mix_err': 'DPM',
+            'comp_O_p_err': 'DPO+',
+            'STATUS': 'GFIT',
+            'RESIDUAL': 'CHISQ'
+            ''
         }
         with h5py.File(self.file_path, 'r') as fh5:
+
+            # load metadata
+            metadata = {}
+
+            exp_params = fh5['Metadata']['Experiment Parameters'][:]
+            exp_params = list(zip(*tuple(exp_params)))
+            fn_id = exp_params[0].index(b'Cedar file name')
+            fn = exp_params[1][fn_id].decode('UTF-8')
+            rc = re.compile(r'^MAD[\w]+_[\d]{4}-[\d]{2}-[\d]{2}_(\w+)@(\w+)\.hdf5')
+            rm = rc.findall(fn)[0]
+            pattern_1 = rm[0]
+            pattern_2 = rm[1]
+            metadata['modulation'] = pattern_1.split('_')[-1]
+            metadata['pulse_code'] = pattern_1.replace('_' + metadata['modulation'], '')
+
+            antenna = pattern_2
+            if 'uhf' in antenna:
+                sitename = 'UHF'
+            elif 'vhf' in antenna:
+                sitename = 'VHF'
+            elif 'sod' in antenna:
+                sitename = 'SOD'
+            elif 'kir' in antenna:
+                sitename = 'KIR'
+            elif '32' in antenna or '42' in antenna:
+                sitename = 'ESR'
+            else:
+                print(antenna)
+                raise AttributeError
+            metadata['site_name'] = sitename
+
+            lat_id = exp_params[0].index(b'instrument latitude')
+            lat = float(exp_params[1][lat_id].decode('UTF-8'))
+            lon_id = exp_params[0].index(b'instrument longitude')
+            lon = float(exp_params[1][lon_id].decode('UTF-8'))
+            alt_id = exp_params[0].index(b'instrument altitude')
+            alt = float(exp_params[1][alt_id].decode('UTF-8')) * 1000
+
+            metadata['r_RECloc'] = [lat, lon, alt]
+            if sitename in ['ESR', 'UHF', 'VHF', 'TRO']:
+                metadata['r_XMITloc'] = [lat, lon, alt]
+            else:
+                metadata['r_XMITloc'] = [69.583, 19.21, 30]
+            metadata['antenna'] = antenna
+            metadata['GUISDAP_version'] = ''
+            metadata['rawdata_path'] = ''
+            metadata['scan_mode'] = ''
+            metadata['affiliation'] = ''
+            metadata['rawdata_path'] = ''
+            metadata['scan_mode'] = ''
+            metadata['affiliation'] = ''
+
+            # load data
             data = fh5['Data']['Table Layout'][:]
             data = list(zip(*tuple(data)))
+            data_parameters = list(zip(*tuple(fh5['Metadata']['Data Parameters'][:])))
+            var_names_h5 = [vn.decode('UTF-8') for vn in data_parameters[0]]
+            nvar_h5 = len(var_names_h5)
+            ran_id = var_names_h5.index('RANGE')
+            ran = data[ran_id]
+            inds_ran_min = argrelmin(np.array(ran))[0]
+            inds_ran_min = np.append(inds_ran_min, 0)
+            inds_ran_min.sort()
 
-        raise NotImplemented
+            inds_ran_max = argrelmax(np.array(ran))[0]
+            inds_ran_max = np.append(inds_ran_max, len(ran)-1)
+            inds_ran_max.sort()
+
+            ngates_max = np.max(np.diff(inds_ran_max))
+            data_array = np.empty((nvar_h5, inds_ran_min.shape[0], ngates_max))
+            data_array[::] = np.nan
+            for ip in range(nvar_h5):
+                var_tmp = np.array(data[ip])
+                for i in range(inds_ran_min.shape[0]):
+                    ind1 = inds_ran_min[i]
+                    ind2 = inds_ran_max[i]
+                    data_array[ip, i, 0: ind2-ind1+1] = var_tmp[ind1: ind2+1]
+            num_row = inds_ran_min.shape[0]
+            vars_h5 = {}
+            for ip in range(nvar_h5):
+
+                var = data_array[ip]
+                test_unique = np.unique(var[0][~np.isnan(var[0])])
+                if test_unique.shape[0] == 1 and not re.match(r'^D\w+', var_names_h5[ip]) and var_names_h5[ip] not in ['GFIT']:
+                    print(var_names_h5[ip])
+                    var = np.array([list(set(var[i][~np.isnan(var[i])])) for i in range(num_row)]).reshape((num_row, 1))
+                vars_h5[var_names_h5[ip]] = var
+
+            vars = {}
+            for var_name, var_name_h5 in var_name_dict.items():
+                try:
+                    vars[var_name] = vars_h5[var_name_h5]
+                except KeyError:
+                    vars[var_name] = None
+
+            num_row = inds_ran_min.shape[0]
+            # unix time to datetime
+            utime1 = vars_h5['UT1_UNIX'].flatten()
+            dt1 = dttool.convert_unix_time_to_datetime_cftime(utime1)
+            var = dt1.reshape(num_row, 1)
+            var_name = 'DATETIME_1'
+            vars[var_name] = var
+
+            utime2 = vars_h5['UT2_UNIX'].flatten()
+            dt2 = dttool.convert_unix_time_to_datetime_cftime(utime2)
+            var = dt2.reshape(num_row, 1)
+            var_name = 'DATETIME_2'
+            vars[var_name] = var
+
+            vars['DATETIME'] = vars['DATETIME_1'] + (vars['DATETIME_2'] - vars['DATETIME_1']) / 2
+            vars['T_e'] = vars['T_i'] * vars['T_r']
+            vars['T_e_err'] = vars['T_e'] * np.sqrt((vars['T_i_err'] / vars['T_i']) ** 2
+                                                    + (vars['T_r_err'] / vars['T_r']) ** 2)
+
+            inds = np.where(np.isnan(vars['HEIGHT']))
+            for i in range(len(inds[0])):
+                ind_0 = inds[0][i]
+                ind_1 = inds[1][i]
+                x0 = np.arange(vars['HEIGHT'].shape[0])
+                y0 = vars['HEIGHT'][:, ind_1]
+                xp = x0[np.where(np.isfinite(y0))[0]]
+                yp = y0[np.isfinite(y0)]
+                vars['HEIGHT'][ind_0, ind_1] = np.interp(x0[ind_0], xp, yp)
+
+                x0 = np.arange(vars['RANGE'].shape[0])
+                y0 = vars['RANGE'][:, ind_1]
+                xp = x0[np.isfinite(y0)]
+                yp = y0[np.isfinite(y0)]
+                vars['RANGE'][ind_0, ind_1] = np.interp(x0[ind_0], xp, yp)
+
+            self.variables = vars
+            self.metadata = metadata
+        # raise NotImplemented
 
 
 if __name__ == "__main__":
     dir_root = prf.datahub_data_root_dir
 
     # fp = pathlib.Path('examples') / "EISCAT_2005-09-01_steffe_64@32m.hdf5"
-    fp = pathlib.Path('examples') / "MAD6300_2021-03-10_beata_ant@uhfa.hdf5"
+    fp = pathlib.Path('examples') / "MAD6400_2021-03-10_beata_ant@uhfa.hdf5"
     Loader(file_path=fp, file_type = 'madrigal-hdf5')

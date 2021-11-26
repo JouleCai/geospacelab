@@ -227,20 +227,21 @@ var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'Transmitter Power'
 var.label = 'Power'
-var.unit = 'MW'
+var.unit = 'kW'
 var.group = 'radar param'
 var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
 plot_config.config(**default_plot_config)
 plot_config.style = '1noE'
-plot_config.line['linewidth'] = 0.5
+plot_config.line['linewidth'] = 2.5
 plot_config.line['linestyle'] = '-'
 plot_config.line['marker'] = ''
+plot_config.line['alpha'] = 0.5
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [0, 1.6]
+axis[1].lim = [0, 1600]
 axis[1].label = '@v.group'
 axis[1].unit = '@v.unit'
 axis[2].label = '@v.label'
@@ -261,14 +262,16 @@ var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
 plot_config.config(**default_plot_config)
-plot_config.line['linewidth'] = 0.3
+plot_config.line['linewidth'] = 2.5
 plot_config.line['linestyle'] = '-'
 plot_config.line['marker'] = ''
+plot_config.line['alpha'] = 0.5
+
 plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [0, 1000]
+axis[1].lim = [0, 500]
 axis[1].label = '@v.group'
 axis[1].unit = '@v.unit'
 axis[2].label = '@v.label'

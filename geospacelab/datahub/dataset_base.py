@@ -211,6 +211,8 @@ class DatasetModel(object):
 
         shape_0 = var_datetime.value.shape[0]
         for var in self._variables.values():
+            if var.value is None:
+                continue
             if var.value.shape[0] == shape_0 and len(var.value.shape) > 1:
                 var.value = var.value[inds, ::]
 
