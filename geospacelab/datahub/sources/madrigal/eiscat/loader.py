@@ -242,6 +242,7 @@ class Loader:
 
         var_name_dict = {
             # 'MAGIC_CONSTANT': 'Magic_const',
+<<<<<<< Updated upstream
             'r_SCangle': 'HSA',
             # 'r_m0_2': 'm02',
             # 'r_m0_1': 'm01',
@@ -269,6 +270,34 @@ class Loader:
             'STATUS': 'GFIT',
             'RESIDUAL': 'CHISQ'
             ''
+=======
+            'r_SCangle': 'SCangle',
+            'r_m0_2': 'm02',
+            'r_m0_1': 'm01',
+            'AZ': 'az',
+            'EL': 'el',
+            'P_Tx': 'Pt',
+            'T_SYS_1': 'Tsys1',
+            'T_SYS_2': 'Tsys2',
+            'HEIGHT': 'h',
+            'RANGE': 'range',
+            'n_e': 'Ne',
+            'T_i': 'Ti',
+            'T_r': 'Tr',
+            'nu_i': 'Collf',
+            'v_i_los': 'Vi',
+            'comp_mix': 'pm',
+            'comp_O_p': 'po+',
+            'n_e_var': 'var_Ne',
+            'T_i_var': 'var_Ti',
+            'T_r_var': 'var_Tr',
+            'nu_i_var': 'var_Collf',
+            'v_i_los_var': 'var_Vi',
+            'comp_mix_var': 'var_pm',
+            'comp_O_p_var': 'var_po+',
+            'STATUS': 'status',
+            'RESIDUAL': 'res1'
+>>>>>>> Stashed changes
         }
         with h5py.File(self.file_path, 'r') as fh5:
 
