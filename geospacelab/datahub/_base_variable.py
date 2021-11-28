@@ -298,7 +298,7 @@ class VariableModel(object):
             self._dataset_ref = None
             return
 
-        from geospacelab.datahub.dataset_base import DatasetModel
+        from geospacelab.datahub._base_dataset import DatasetModel
         if issubclass(dataset_obj.__class__, DatasetModel):
             self._dataset_ref = weakref.ref(dataset_obj)
         else:

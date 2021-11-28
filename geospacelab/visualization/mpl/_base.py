@@ -26,6 +26,7 @@ class FigureBase(Figure):
     """
 
     _default_canvas_fontsize = 12
+    _default_dashboard_class = 'DashboardBase'
 
     def __init__(self, *args, watermark=None, watermark_style=None, **kwargs):
         super(FigureBase, self).__init__(*args, **kwargs)
@@ -37,10 +38,25 @@ class FigureBase(Figure):
         if watermark is not None:
             self.add_watermark()
 
-    def add_dashboard(self, *args, label=None, **kwargs):
+    def add_dashboard(self, *args, label=None, dashboard_class=None, **kwargs):
+        import geospacelab.visualization.mpl.dashboards as dashboards
         if label is None:
             label = len(self.dashboards) + 1
-        self.dashboards[label] = Dashboard(*args, figure=self, label=label, **kwargs)
+        if dashboard_class is None:
+            dashboard_class = self._default_dashboard_class
+        if isinstance(dashboard_class, str):
+            try:
+                db = getattr(dashboards, dashboard_class)
+            except AttributeError:
+                mylog.StreamLogger.warning("Cannot find the assigned dashboard class! Use the default Dashboard instead")
+                db = dashboards.Dashboard
+        elif issubclass(dashboard_class, DashboardBase):
+            db = dashboard_class
+        else:
+            raise ValueError
+
+        self.dashboards[label] = db(*args, figure=self, **kwargs)
+        return self.dashboards[label]
 
     def add_text(self, *args, **kwargs):
         super().text(*args, **kwargs)
@@ -75,6 +91,10 @@ class FigureBase(Figure):
         else:
             raise TypeError
 
+    def __repr__(self):
+        r = super().__repr__()
+        return r
+
 
 class DashboardBase(object):
     """
@@ -101,7 +121,7 @@ class DashboardBase(object):
 
     _default_dashboard_fontsize = 12
 
-    def __init__(self, *args, figure=None, figure_config=None, figure_class=FigureBase, **kwargs):
+    def __init__(self, figure=None, figure_config=None, figure_class=FigureBase, **kwargs):
         """
         Initialization
 
@@ -112,7 +132,7 @@ class DashboardBase(object):
         :param args: The arguments used to create a :class:`DataHub <geospacelab.datahub.DataHub>` instance..
         :param kwargs: Other keyword arguments used to create a :class:`DataHub <geospacelab.datahub.DataHub>` instance.
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
         self._figure_class = figure_class
         if figure_config is None:
@@ -178,7 +198,7 @@ class DashboardBase(object):
         elif index in self.panels.keys():
             raise ValueError('The panel index has been occupied. Change to a new one!')
         self.panels[index] = panel
-        return index
+        return panel
 
     def remove_panel(self, index):
         """
@@ -292,6 +312,7 @@ class DashboardBase(object):
 
         if figure_obj == 'new':
             figure = plt.figure(FigureClass=self._figure_class, **self._figure_config)
+            figure._default_dashboard_class = self.__class__
             mylog.simpleinfo.info(f"Create a new figure: {figure}.")
         elif figure_obj is None:
             figure = plt.gcf()
@@ -304,6 +325,9 @@ class DashboardBase(object):
 
         self._figure_ref = weakref.ref(figure)
 
+    def __repr__(self):
+        r = "GeospaceLab DashboardBase"
+        return r
 
 class PanelBase(object):
     _ax_attr_model = {

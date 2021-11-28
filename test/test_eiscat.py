@@ -134,9 +134,8 @@ def test_vhf_lowel():
     load_mode = 'AUTO'
     data_file_type = 'madrigal-hdf5'
 
-    dashboard = eiscat.EISCATDashboard(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
+    dashboard = eiscat.EISCATDashboard(dt_fr, dt_to, figure_config={'figsize': (30, 8)}, site=site, antenna=antenna, modulation=modulation,
                                  data_file_type=data_file_type, load_mode=load_mode)
-
     # select beams before assign the variables
     # dashboard.dataset.select_beams(field_aligned=False)
 
@@ -169,15 +168,45 @@ def test_vhf_lowel():
     el = dashboard.assign_variable('EL')
 
     layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
-    dashboard.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3])
+    dashboard.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3], right=0.4)
     dashboard.draw()
     dashboard.add_title()
     dashboard.add_panel_labels()
+
+    dt_fr = datetime.datetime.strptime('20001201' + '0400', '%Y%m%d%H%M')
+    dt_to = datetime.datetime.strptime('20001201' + '1200', '%Y%m%d%H%M')
+
+    site = 'ESR'
+    antenna = '42m'
+    modulation = '120'
+    load_mode = 'AUTO'
+    data_file_type = 'madrigal-hdf5'
+
+    dashboard = dashboard.figure.add_dashboard(dt_fr=dt_fr, dt_to=dt_to, site=site, antenna=antenna, modulation=modulation,
+                                       data_file_type=data_file_type, load_mode=load_mode)
+
+    # select beams before assign the variables
+    # dashboard.dataset.select_beams(field_aligned=False)
+
+    n_e = dashboard.assign_variable('n_e')
+    T_i = dashboard.assign_variable('T_i')
+    T_e = dashboard.assign_variable('T_e')
+    v_i = dashboard.assign_variable('v_i_los')
+    az = dashboard.assign_variable('AZ')
+    el = dashboard.assign_variable('EL')
+
+    layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
+    dashboard.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3], left=0.6)
+    dashboard.draw()
+    dashboard.add_title()
+    dashboard.add_panel_labels()
+
     return dashboard
 
 
 if __name__ == "__main__":
-    test_vhf_lowel()
+    db = test_vhf_lowel()
+
     # test_uhf_cp3()
     # test_UHF_CP2()
     # test_esr_32m()

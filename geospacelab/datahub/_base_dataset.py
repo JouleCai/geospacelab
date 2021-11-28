@@ -10,7 +10,7 @@ __docformat__ = "reStructureText"
 
 import pathlib
 
-from geospacelab.datahub.variable_base import *
+from geospacelab.datahub._base_variable import *
 from geospacelab import preferences as pref
 
 import geospacelab.toolbox.utilities.pyclass as pyclass

@@ -19,7 +19,7 @@ import zipfile
 import ftplib
 from contextlib import closing
 
-from geospacelab.datahub.dataset_base import DownloaderModel
+from geospacelab.datahub._base_dataset import DownloaderModel
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.datahub.sources.wdc as wdc

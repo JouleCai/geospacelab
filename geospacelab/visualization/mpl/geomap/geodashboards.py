@@ -66,12 +66,12 @@ class GeoDashboard(mpl.Dashboard):
         :return:
         """
 
-        panel_id = super().add_panel(row_ind=row_ind, col_ind=col_ind, panel_class=PolarMapPanel,
+        panel = super().add_panel(row_ind=row_ind, col_ind=col_ind, panel_class=PolarMapPanel,
                                      label=label, cs=cs, style=style, pole=pole,
                                      ut=ut, lon_c=lon_c, lst_c=lst_c, mlt_c=mlt_c, mlon_c=mlon_c, boundary_lat=boundary_lat,
                                      boundary_style=boundary_style,
                                      mirror_south=mirror_south,
                                      proj_type=proj_type, **kwargs)
-        return panel_id
+        return panel
 
 

@@ -19,7 +19,7 @@ import matplotlib.dates as mpl_dates
 from scipy.interpolate import interp1d
 
 from geospacelab.visualization.mpl._base import PanelBase
-from geospacelab.datahub.variable_base import VariableModel
+from geospacelab.datahub._base_variable import VariableModel
 import geospacelab.toolbox.utilities.numpyarray as arraytool
 import geospacelab.visualization.mpl.axis_ticks as ticktool
 import geospacelab.toolbox.utilities.pybasic as basic
@@ -417,12 +417,12 @@ class TSPanel(Panel):
             ax.set_ylabel(ylabel, va='baseline', rotation=270, fontsize=plt.rcParams['axes.labelsize'])
         else:
             ylabel = self.generate_label(ylabel, unit=yunit, style=ylabel_style)
-            label_pos = var_for_config.visual.axis[1].label_pos
-            if label_pos is None:
-                label_pos = [-0.1, 0.5]
+            # label_pos = var_for_config.visual.axis[1].label_pos
+            # if label_pos is None:
+            #    label_pos = [-0.1, 0.5]
 
             ax.set_ylabel(ylabel, va='bottom', fontsize=plt.rcParams['axes.labelsize'])
-            ax.yaxis.set_label_coords(label_pos[0], label_pos[1])
+            # ax.yaxis.set_label_coords(label_pos[0], label_pos[1])
         ylim = ax.get_ylim()
 
         # set yaxis scale

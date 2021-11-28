@@ -21,7 +21,7 @@ def test_tec():
     time1 = datetime.datetime(2021, 8, 24, 9, 30)
     ind_t = np.where(dts == time1)[0]
 
-    pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
+    panel1 = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time1, mirror_south=True)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time1, boundary_lat=60)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)
@@ -29,7 +29,6 @@ def test_tec():
     #                          boundary_lat=0, mirror_south=False)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
     #                        boundary_lat=30, mirror_south=False)
-    panel1 = viewer.panels[pid]
     panel1.add_coastlines()
     panel1.add_gridlines()
     #
@@ -49,7 +48,7 @@ def test_tec():
     time1 = datetime.datetime(2021, 8, 24, 10, 0)
     ind_t = np.where(dts == time1)[0]
 
-    pid = viewer.add_polar_map(row_ind=0, col_ind=1, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
+    panel1 = viewer.add_polar_map(row_ind=0, col_ind=1, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time1, mirror_south=True)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time1, boundary_lat=60)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)
@@ -57,7 +56,6 @@ def test_tec():
     #                          boundary_lat=0, mirror_south=False)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
     #                        boundary_lat=30, mirror_south=False)
-    panel1 = viewer.panels[pid]
     panel1.add_coastlines()
     panel1.add_gridlines()
     #
@@ -77,7 +75,7 @@ def test_tec():
     time1 = datetime.datetime(2021, 8, 24, 10, 30)
     ind_t = np.where(dts == time1)[0]
 
-    pid = viewer.add_polar_map(row_ind=0, col_ind=2, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
+    panel1 = viewer.add_polar_map(row_ind=0, col_ind=2, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time1, mirror_south=True)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time1, boundary_lat=60)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)
@@ -85,7 +83,7 @@ def test_tec():
     #                          boundary_lat=0, mirror_south=False)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
     #                        boundary_lat=30, mirror_south=False)
-    panel1 = viewer.panels[pid]
+
     panel1.add_coastlines()
     panel1.add_gridlines()
     #
@@ -105,7 +103,7 @@ def test_tec():
     time1 = datetime.datetime(2021, 8, 24, 11, 0)
     ind_t = np.where(dts == time1)[0]
 
-    pid = viewer.add_polar_map(row_ind=1, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
+    panel1 = viewer.add_polar_map(row_ind=1, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time1, mirror_south=True)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time1, boundary_lat=60)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)
@@ -113,7 +111,6 @@ def test_tec():
     #                          boundary_lat=0, mirror_south=False)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
     #                        boundary_lat=30, mirror_south=False)
-    panel1 = viewer.panels[pid]
     panel1.add_coastlines()
     panel1.add_gridlines()
     #
@@ -133,7 +130,7 @@ def test_tec():
     time1 = datetime.datetime(2021, 8, 24, 11, 30)
     ind_t = np.where(dts == time1)[0]
 
-    pid = viewer.add_polar_map(row_ind=1, col_ind=1, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
+    panel1 = viewer.add_polar_map(row_ind=1, col_ind=1, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time1, mirror_south=True)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time1, boundary_lat=60)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)
@@ -141,7 +138,6 @@ def test_tec():
     #                          boundary_lat=0, mirror_south=False)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
     #                        boundary_lat=30, mirror_south=False)
-    panel1 = viewer.panels[pid]
     panel1.add_coastlines()
     panel1.add_gridlines()
     #
@@ -161,7 +157,7 @@ def test_tec():
     time1 = datetime.datetime(2021, 8, 24, 12, 0)
     ind_t = np.where(dts == time1)[0]
 
-    pid = viewer.add_polar_map(row_ind=1, col_ind=2, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
+    panel1 = viewer.add_polar_map(row_ind=1, col_ind=2, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time1, mirror_south=True)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time1, boundary_lat=60)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)
@@ -169,7 +165,6 @@ def test_tec():
     #                          boundary_lat=0, mirror_south=False)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
     #                        boundary_lat=30, mirror_south=False)
-    panel1 = viewer.panels[pid]
     panel1.add_coastlines()
     panel1.add_gridlines()
     #

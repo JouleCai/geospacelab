@@ -14,9 +14,9 @@ import pathlib
 
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pybasic as pybasic
-from geospacelab.datahub.metadata_base import *
-from geospacelab.datahub.dataset_base import DatasetModel
-from geospacelab.datahub.variable_base import VariableModel
+from geospacelab.datahub._base_metadata import *
+from geospacelab.datahub._base_dataset import DatasetModel
+from geospacelab.datahub._base_variable import VariableModel
 from geospacelab import preferences as pfr
 
 
