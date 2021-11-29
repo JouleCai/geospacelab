@@ -16,7 +16,7 @@ dashboard.list_assigned_variables()
 B_x_gsm = dashboard.get_variable('B_x_GSM', dataset_index=1)    # Omni dataset index is 1 in the OMNIDashboard. To check other dashboards, use the method "list_datasets()"
 print(B_x_gsm)
 
-# dashboard.quicklook()
+dashboard.quicklook()
 
 # save figure
-# dashboard.save_figure()
+dashboard.save_figure()
