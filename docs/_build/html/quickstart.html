@@ -1,33 +1,23 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Quick Start &mdash; GeospaceLab beta-v0.2.7 documentation</title>
   
 
   
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-
+  
   
   
 
   
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -39,6 +29,12 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" />
@@ -80,7 +76,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -101,6 +96,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#use-the-express-viewer-and-create-a-figure">Use the Express Viewer and Create a Figure</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#solar-wind-and-geomagnetic-indices-from-omni-and-wdc">Solar Wind and Geomagnetic Indices from OMNI and WDC</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#eiscat-from-madrigal-with-marking-tools">EISCAT from Madrigal with Marking Tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dmsp-ssusi-auroral-images">DMSP/SSUSI auroral images</a></li>
 </ul>
 </li>
 </ul>
@@ -113,7 +109,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -148,20 +143,18 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
       <li>Quick Start</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="_sources/quickstart.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -184,53 +177,6 @@
 <h2>Use the Datahub and Dock a Dataset<a class="headerlink" href="#use-the-datahub-and-dock-a-dataset" title="Permalink to this headline">¶</a></h2>
 <p>The example below shows how to dock a sourced dataset (Madrigal/EISCAT data) to a datahub. Please refer to
 <a class="reference internal" href="index.html#datasources"><span class="std std-ref">the list of the data sources</span></a> for loading other geospace data.</p>
-<div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-text">examples/dock_a_dataset.py</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This is an example showing how to dock a dataset to the datahub.</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
-<span class="kn">import</span> <span class="nn">datetime</span>
-
-<span class="kn">from</span> <span class="nn">geospacelab.datahub</span> <span class="kn">import</span> <span class="n">DataHub</span>
-
-<span class="c1"># pre-settings</span>
-<span class="n">dt_fr</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20210309&#39;</span> <span class="o">+</span> <span class="s1">&#39;0000&#39;</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M&#39;</span><span class="p">)</span>   <span class="c1"># starting time</span>
-<span class="n">dt_to</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20210309&#39;</span> <span class="o">+</span> <span class="s1">&#39;2359&#39;</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M&#39;</span><span class="p">)</span>   <span class="c1"># stopping time</span>
-<span class="n">database_name</span> <span class="o">=</span> <span class="s1">&#39;madrigal&#39;</span>      <span class="c1"># built-in sourced database name</span>
-<span class="n">facility_name</span> <span class="o">=</span> <span class="s1">&#39;eiscat&#39;</span>        <span class="c1"># facility name</span>
-
-<span class="n">site</span> <span class="o">=</span> <span class="s1">&#39;UHF&#39;</span>                <span class="c1"># facility attributes required, check from the eiscat schedule page</span>
-<span class="n">antenna</span> <span class="o">=</span> <span class="s1">&#39;UHF&#39;</span>
-<span class="n">modulation</span> <span class="o">=</span> <span class="s1">&#39;ant&#39;</span>
-
-<span class="c1"># create a datahub instance</span>
-<span class="n">dh</span> <span class="o">=</span> <span class="n">DataHub</span><span class="p">(</span><span class="n">dt_fr</span><span class="p">,</span> <span class="n">dt_to</span><span class="p">)</span>
-<span class="c1"># dock a dataset</span>
-<span class="n">ds_1</span> <span class="o">=</span> <span class="n">dh</span><span class="o">.</span><span class="n">dock</span><span class="p">(</span><span class="n">datasource_contents</span><span class="o">=</span><span class="p">[</span><span class="n">database_name</span><span class="p">,</span> <span class="n">facility_name</span><span class="p">],</span>
-                      <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">antenna</span><span class="o">=</span><span class="n">antenna</span><span class="p">,</span> <span class="n">modulation</span><span class="o">=</span><span class="n">modulation</span><span class="p">,</span> <span class="n">data_file_type</span><span class="o">=</span><span class="s1">&#39;eiscat-hdf5&#39;</span><span class="p">)</span>
-<span class="c1"># load data</span>
-<span class="n">ds_1</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
-<span class="c1"># assign a variable from its own dataset to the datahub</span>
-<span class="n">n_e</span> <span class="o">=</span> <span class="n">dh</span><span class="o">.</span><span class="n">assign_variable</span><span class="p">(</span><span class="s1">&#39;n_e&#39;</span><span class="p">)</span>
-<span class="n">T_i</span> <span class="o">=</span> <span class="n">dh</span><span class="o">.</span><span class="n">assign_variable</span><span class="p">(</span><span class="s1">&#39;T_i&#39;</span><span class="p">)</span>
-
-<span class="c1"># get the variables which have been assigned in the datahub</span>
-<span class="n">n_e</span> <span class="o">=</span> <span class="n">dh</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="s1">&#39;n_e&#39;</span><span class="p">)</span>
-<span class="n">T_i</span> <span class="o">=</span> <span class="n">dh</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="s1">&#39;T_i&#39;</span><span class="p">)</span>
-<span class="c1"># if the variable is not assigned in the datahub, but exists in the its own dataset:</span>
-<span class="n">comp_O_p</span> <span class="o">=</span> <span class="n">dh</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="s1">&#39;comp_O_p&#39;</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">ds_1</span><span class="p">)</span>     <span class="c1"># O+ ratio</span>
-<span class="c1"># above line is equivalent to</span>
-<span class="n">comp_O_p</span> <span class="o">=</span> <span class="n">dh</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;comp_O_p&#39;</span><span class="p">]</span>
-
-<span class="c1"># The variables, e.g., n_e and T_i, are the class Variable&#39;s instances,</span>
-<span class="c1"># which stores the variable values, errors, and many other attributes, e.g., name, label, unit, depends, ....</span>
-<span class="c1"># To get the value of the variable, use variable_isntance.value, e.g.,</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">n_e</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>        <span class="c1"># return the variable&#39;s value, type: numpy.ndarray, axis 0 is always along the time, check n_e.depends.items{}</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">n_e</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
 </div>
 <div class="section" id="use-the-time-series-viewer-and-create-a-figure">
 <h2>Use the Time-Series Viewer and Create a Figure<a class="headerlink" href="#use-the-time-series-viewer-and-create-a-figure" title="Permalink to this headline">¶</a></h2>
@@ -251,31 +197,169 @@ indices, as well as the EISCAT data, respectively.</p>
 <h3>Solar Wind and Geomagnetic Indices from OMNI and WDC<a class="headerlink" href="#solar-wind-and-geomagnetic-indices-from-omni-and-wdc" title="Permalink to this headline">¶</a></h3>
 <p>Solar wind and geomagnetic indices data</p>
 <blockquote>
-<div><div class="literal-block-wrapper docutils container" id="id2">
-<div class="code-block-caption"><span class="caption-text">examples/quicklook_omni_wdc.py</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<div><div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">examples/demo_omni_data.py</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">geospacelab.express.omni_dashboard</span> <span class="k">as</span> <span class="nn">omni</span>
+
+<span class="n">dt_fr</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20160314&#39;</span> <span class="o">+</span> <span class="s1">&#39;0600&#39;</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M&#39;</span><span class="p">)</span>
+<span class="n">dt_to</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20160320&#39;</span> <span class="o">+</span> <span class="s1">&#39;0600&#39;</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M&#39;</span><span class="p">)</span>
+
+<span class="n">omni_type</span> <span class="o">=</span> <span class="s1">&#39;OMNI2&#39;</span>
+<span class="n">omni_res</span> <span class="o">=</span> <span class="s1">&#39;1min&#39;</span>
+<span class="n">load_mode</span> <span class="o">=</span> <span class="s1">&#39;AUTO&#39;</span>
+<span class="n">dashboard</span> <span class="o">=</span> <span class="n">omni</span><span class="o">.</span><span class="n">OMNIDashboard</span><span class="p">(</span>
+    <span class="n">dt_fr</span><span class="p">,</span> <span class="n">dt_to</span><span class="p">,</span> <span class="n">omni_type</span><span class="o">=</span><span class="n">omni_type</span><span class="p">,</span> <span class="n">omni_res</span><span class="o">=</span><span class="n">omni_res</span><span class="p">,</span> <span class="n">load_mode</span><span class="o">=</span><span class="n">load_mode</span>
+<span class="p">)</span>
+
+<span class="c1"># data can be retrieved in the same way as in Example 1:</span>
+<span class="n">dashboard</span><span class="o">.</span><span class="n">list_assigned_variables</span><span class="p">()</span>
+<span class="n">B_x_gsm</span> <span class="o">=</span> <span class="n">dashboard</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="s1">&#39;B_x_GSM&#39;</span><span class="p">,</span> <span class="n">dataset_index</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>    <span class="c1"># Omni dataset index is 1 in the OMNIDashboard. To check other dashboards, use the method &quot;list_datasets()&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">B_x_gsm</span><span class="p">)</span>
+
+<span class="n">dashboard</span><span class="o">.</span><span class="n">quicklook</span><span class="p">()</span>
+
+<span class="c1"># save figure</span>
+<span class="n">dashboard</span><span class="o">.</span><span class="n">save_figure</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 </div></blockquote>
 <p>Output:</p>
 <blockquote>
-<div><img alt="OMNI solar wind and WDC geomagnetic indices" src="_images/OMNI_1min_20160314-060000-20160320-060000.png" />
+<div><img alt="IMF and solar wind from the OMNI database and the geomagnetic indices from WDC and GFZ" src="_images/OMNI_1min_20160314-060000-20160320-060000.png" />
 </div></blockquote>
 </div>
 <div class="section" id="eiscat-from-madrigal-with-marking-tools">
 <h3>EISCAT from Madrigal with Marking Tools<a class="headerlink" href="#eiscat-from-madrigal-with-marking-tools" title="Permalink to this headline">¶</a></h3>
 <blockquote>
-<div><div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">examples/quicklook_eiscat.py</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span>
+<div><div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">examples/demo_eiscat_quicklook.py</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">geospacelab.express.eiscat_dashboard</span> <span class="k">as</span> <span class="nn">eiscat</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="n">dt_fr</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20201209&#39;</span> <span class="o">+</span> <span class="s1">&#39;1800&#39;</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M&#39;</span><span class="p">)</span>
+<span class="linenos"> 5</span><span class="n">dt_to</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20201210&#39;</span> <span class="o">+</span> <span class="s1">&#39;0600&#39;</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M&#39;</span><span class="p">)</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="n">site</span> <span class="o">=</span> <span class="s1">&#39;UHF&#39;</span>
+<span class="linenos"> 8</span><span class="n">antenna</span> <span class="o">=</span> <span class="s1">&#39;UHF&#39;</span>
+<span class="linenos"> 9</span><span class="n">modulation</span> <span class="o">=</span> <span class="s1">&#39;60&#39;</span>
+<span class="linenos">10</span><span class="n">load_mode</span> <span class="o">=</span> <span class="s1">&#39;AUTO&#39;</span>
+<span class="linenos">11</span><span class="n">dashboard</span> <span class="o">=</span> <span class="n">eiscat</span><span class="o">.</span><span class="n">EISCATDashboard</span><span class="p">(</span>
+<span class="linenos">12</span>    <span class="n">dt_fr</span><span class="p">,</span> <span class="n">dt_to</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">antenna</span><span class="o">=</span><span class="n">antenna</span><span class="p">,</span> <span class="n">modulation</span><span class="o">=</span><span class="n">modulation</span><span class="p">,</span> <span class="n">load_mode</span><span class="o">=</span><span class="s1">&#39;AUTO&#39;</span>
+<span class="linenos">13</span><span class="p">)</span>
+<span class="linenos">14</span><span class="n">dashboard</span><span class="o">.</span><span class="n">quicklook</span><span class="p">()</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="c1"># dashboard.save_figure() # comment this if you need to run the following codes</span>
+<span class="linenos">17</span><span class="c1"># dashboard.show()   # comment this if you need to run the following codes.</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">20</span><span class="sd">As the viewer is an instance of the class EISCATViewer, which is a heritage of the class Datahub.</span>
+<span class="linenos">21</span><span class="sd">The variables can be retrieved in the same ways as shown in Example 1. </span>
+<span class="linenos">22</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">23</span><span class="n">n_e</span> <span class="o">=</span> <span class="n">dashboard</span><span class="o">.</span><span class="n">assign_variable</span><span class="p">(</span><span class="s1">&#39;n_e&#39;</span><span class="p">)</span>
+<span class="linenos">24</span><span class="nb">print</span><span class="p">(</span><span class="n">n_e</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">27</span><span class="sd">Several marking tools (vertical lines, shadings, and top bars) can be added as the overlays </span>
+<span class="linenos">28</span><span class="sd">on the top of the quicklook plot.</span>
+<span class="linenos">29</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">30</span><span class="c1"># add vertical line</span>
+<span class="linenos">31</span><span class="n">dt_fr_2</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20201209&#39;</span> <span class="o">+</span> <span class="s1">&#39;2030&#39;</span><span class="p">,</span> <span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">%H%M&quot;</span><span class="p">)</span>
+<span class="linenos">32</span><span class="n">dt_to_2</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20201210&#39;</span> <span class="o">+</span> <span class="s1">&#39;0130&#39;</span><span class="p">,</span> <span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">%H%M&quot;</span><span class="p">)</span>
+<span class="linenos">33</span><span class="n">dashboard</span><span class="o">.</span><span class="n">add_vertical_line</span><span class="p">(</span><span class="n">dt_fr_2</span><span class="p">,</span> <span class="n">bottom_extend</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">top_extend</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Line 1&#39;</span><span class="p">,</span> <span class="n">label_position</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
+<span class="linenos">34</span><span class="c1"># add shading</span>
+<span class="linenos">35</span><span class="n">dashboard</span><span class="o">.</span><span class="n">add_shading</span><span class="p">(</span><span class="n">dt_fr_2</span><span class="p">,</span> <span class="n">dt_to_2</span><span class="p">,</span> <span class="n">bottom_extend</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">top_extend</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Shading 1&#39;</span><span class="p">,</span> <span class="n">label_position</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
+<span class="linenos">36</span><span class="c1"># add top bar</span>
+<span class="linenos">37</span><span class="n">dt_fr_3</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20201210&#39;</span> <span class="o">+</span> <span class="s1">&#39;0130&#39;</span><span class="p">,</span> <span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">%H%M&quot;</span><span class="p">)</span>
+<span class="linenos">38</span><span class="n">dt_to_3</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20201210&#39;</span> <span class="o">+</span> <span class="s1">&#39;0430&#39;</span><span class="p">,</span> <span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">%H%M&quot;</span><span class="p">)</span>
+<span class="linenos">39</span><span class="n">dashboard</span><span class="o">.</span><span class="n">add_top_bar</span><span class="p">(</span><span class="n">dt_fr_3</span><span class="p">,</span> <span class="n">dt_to_3</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Top bar 1&#39;</span><span class="p">)</span>
+<span class="linenos">40</span>
+<span class="linenos">41</span><span class="c1"># save figure</span>
+<span class="linenos">42</span><span class="n">dashboard</span><span class="o">.</span><span class="n">save_figure</span><span class="p">()</span>
+<span class="linenos">43</span><span class="c1"># show on screen</span>
+<span class="linenos">44</span><span class="n">dashboard</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 </div></blockquote>
 <p>Output:</p>
 <blockquote>
-<div><img alt="EISCAT quicklook" src="_images/EISCAT_UHF_beata_cp1_2.1u_CP_20201209-180000-20201210-060000.png" />
+<div><img alt="EISCAT quicklook" src="_images/EISCAT_UHF_beata_cp1_60_20201209-180000-20201210-060000.png" />
+</div></blockquote>
+</div>
+<div class="section" id="dmsp-ssusi-auroral-images">
+<h3>DMSP/SSUSI auroral images<a class="headerlink" href="#dmsp-ssusi-auroral-images" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">examples/demo_dmsp_ssusi_single_panel.py</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">geospacelab.visualization.mpl.geomap.geodashboards</span> <span class="k">as</span> <span class="nn">geomap</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="k">def</span> <span class="nf">test_ssusi</span><span class="p">():</span>
+<span class="linenos"> 8</span>    <span class="n">dt_fr</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2015</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+<span class="linenos"> 9</span>    <span class="n">dt_to</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2015</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">59</span><span class="p">)</span>
+<span class="linenos">10</span>    <span class="n">time1</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2015</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">)</span>
+<span class="linenos">11</span>    <span class="n">pole</span> <span class="o">=</span> <span class="s1">&#39;N&#39;</span>
+<span class="linenos">12</span>    <span class="n">sat_id</span> <span class="o">=</span> <span class="s1">&#39;f18&#39;</span>
+<span class="linenos">13</span>    <span class="n">band</span> <span class="o">=</span> <span class="s1">&#39;LBHS&#39;</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span>    <span class="n">dashboard</span> <span class="o">=</span> <span class="n">geomap</span><span class="o">.</span><span class="n">GeoDashboard</span><span class="p">(</span><span class="n">dt_fr</span><span class="o">=</span><span class="n">dt_fr</span><span class="p">,</span> <span class="n">dt_to</span><span class="o">=</span><span class="n">dt_to</span><span class="p">,</span> <span class="n">figure_config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;figsize&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)})</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span>    <span class="c1"># dashboard.dock(datasource_contents=[&#39;jhuapl&#39;, &#39;dmsp&#39;, &#39;ssusi&#39;, &#39;edraur&#39;], pole=&#39;N&#39;, sat_id=&#39;f17&#39;, orbit_id=&#39;46863&#39;)</span>
+<span class="linenos">18</span>    <span class="n">dashboard</span><span class="o">.</span><span class="n">dock</span><span class="p">(</span><span class="n">datasource_contents</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;jhuapl&#39;</span><span class="p">,</span> <span class="s1">&#39;dmsp&#39;</span><span class="p">,</span> <span class="s1">&#39;ssusi&#39;</span><span class="p">,</span> <span class="s1">&#39;edraur&#39;</span><span class="p">],</span> <span class="n">pole</span><span class="o">=</span><span class="n">pole</span><span class="p">,</span> <span class="n">sat_id</span><span class="o">=</span><span class="n">sat_id</span><span class="p">,</span> <span class="n">orbit_id</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="linenos">19</span>    <span class="n">dashboard</span><span class="o">.</span><span class="n">set_layout</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span>    <span class="n">lbhs</span> <span class="o">=</span> <span class="n">dashboard</span><span class="o">.</span><span class="n">assign_variable</span><span class="p">(</span><span class="s1">&#39;GRID_AUR_&#39;</span> <span class="o">+</span> <span class="n">band</span><span class="p">,</span> <span class="n">dataset_index</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">22</span>    <span class="n">dts</span> <span class="o">=</span> <span class="n">dashboard</span><span class="o">.</span><span class="n">assign_variable</span><span class="p">(</span><span class="s1">&#39;DATETIME&#39;</span><span class="p">,</span> <span class="n">dataset_index</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+<span class="linenos">23</span>    <span class="n">mlat</span> <span class="o">=</span> <span class="n">dashboard</span><span class="o">.</span><span class="n">assign_variable</span><span class="p">(</span><span class="s1">&#39;GRID_MLAT&#39;</span><span class="p">,</span> <span class="n">dataset_index</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+<span class="linenos">24</span>    <span class="n">mlon</span> <span class="o">=</span> <span class="n">dashboard</span><span class="o">.</span><span class="n">assign_variable</span><span class="p">(</span><span class="s1">&#39;GRID_MLON&#39;</span><span class="p">,</span> <span class="n">dataset_index</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+<span class="linenos">25</span>    <span class="n">mlt</span> <span class="o">=</span> <span class="n">dashboard</span><span class="o">.</span><span class="n">assign_variable</span><span class="p">((</span><span class="s1">&#39;GRID_MLT&#39;</span><span class="p">),</span> <span class="n">dataset_index</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span>    <span class="n">ind_t</span> <span class="o">=</span> <span class="n">dashboard</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get_time_ind</span><span class="p">(</span><span class="n">ut</span><span class="o">=</span><span class="n">time1</span><span class="p">)</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span>    <span class="n">panel1</span> <span class="o">=</span> <span class="n">dashboard</span><span class="o">.</span><span class="n">add_polar_map</span><span class="p">(</span><span class="n">row_ind</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">col_ind</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;mlt-fixed&#39;</span><span class="p">,</span> <span class="n">cs</span><span class="o">=</span><span class="s1">&#39;AACGM&#39;</span><span class="p">,</span> <span class="n">mlt_c</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">pole</span><span class="o">=</span><span class="n">pole</span><span class="p">,</span> <span class="n">ut</span><span class="o">=</span><span class="n">time1</span><span class="p">,</span> <span class="n">boundary_lat</span><span class="o">=</span><span class="mf">65.</span><span class="p">,</span> <span class="n">mirror_south</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">30</span>    <span class="c1"># panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style=&#39;mlt-fixed&#39;, cs=&#39;AACGM&#39;, mlt_c=0., pole=pole, ut=time1, mirror_south=True)</span>
+<span class="linenos">31</span>    <span class="c1"># panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style=&#39;lst-fixed&#39;, cs=&#39;GEO&#39;, lst_c=3., pole=&#39;N&#39;, ut=time1)</span>
+<span class="linenos">32</span>    <span class="c1"># panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style=&#39;lst-fixed&#39;, cs=&#39;GEO&#39;, lst_c=0, pole=&#39;S&#39;, ut=time1, mirror_south=True)</span>
+<span class="linenos">33</span>    <span class="c1"># panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style=&#39;lon-fixed&#39;, cs=&#39;GEO&#39;, lon_c=0., pole=&#39;S&#39;, ut=time1,</span>
+<span class="linenos">34</span>    <span class="c1">#                           boundary_lat=0, mirror_south=False)</span>
+<span class="linenos">35</span>    <span class="c1"># panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style=&#39;lon-fixed&#39;, cs=&#39;GEO&#39;, lon_c=0., pole=&#39;N&#39;, ut=time1,</span>
+<span class="linenos">36</span>    <span class="c1">#                          boundary_lat=0, mirror_south=False)</span>
+<span class="linenos">37</span>    <span class="n">panel1</span><span class="o">.</span><span class="n">add_coastlines</span><span class="p">()</span>
+<span class="linenos">38</span>
+<span class="linenos">39</span>    <span class="n">lbhs_</span> <span class="o">=</span> <span class="n">lbhs</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="n">ind_t</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+<span class="linenos">40</span>    <span class="n">pcolormesh_config</span> <span class="o">=</span> <span class="n">lbhs</span><span class="o">.</span><span class="n">visual</span><span class="o">.</span><span class="n">plot_config</span><span class="o">.</span><span class="n">pcolormesh</span>
+<span class="linenos">41</span>    <span class="n">pcolormesh_config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">c_scale</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="linenos">42</span>    <span class="n">pcolormesh_config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">c_lim</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1500</span><span class="p">])</span>
+<span class="linenos">43</span>    <span class="kn">import</span> <span class="nn">geospacelab.visualization.mpl.colormaps</span> <span class="k">as</span> <span class="nn">cm</span>
+<span class="linenos">44</span>    <span class="n">cmap</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">cmap_gist_ncar_modified</span><span class="p">()</span>
+<span class="linenos">45</span>    <span class="n">cmap</span> <span class="o">=</span> <span class="s1">&#39;viridis&#39;</span>
+<span class="linenos">46</span>    <span class="n">pcolormesh_config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+<span class="linenos">47</span>    <span class="n">ipc</span> <span class="o">=</span> <span class="n">panel1</span><span class="o">.</span><span class="n">add_pcolor</span><span class="p">(</span><span class="n">lbhs_</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;lat&#39;</span><span class="p">:</span> <span class="n">mlat</span><span class="p">[</span><span class="n">ind_t</span><span class="p">,</span> <span class="p">::],</span> <span class="s1">&#39;lon&#39;</span><span class="p">:</span> <span class="n">mlon</span><span class="p">[</span><span class="n">ind_t</span><span class="p">,</span> <span class="p">::],</span> <span class="s1">&#39;mlt&#39;</span><span class="p">:</span> <span class="n">mlt</span><span class="p">[</span><span class="n">ind_t</span><span class="p">,</span> <span class="p">::],</span> <span class="s1">&#39;height&#39;</span><span class="p">:</span> <span class="mf">250.</span><span class="p">},</span> <span class="n">cs</span><span class="o">=</span><span class="s1">&#39;AACGM&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">pcolormesh_config</span><span class="p">)</span>
+<span class="linenos">48</span>    <span class="n">panel1</span><span class="o">.</span><span class="n">add_colorbar</span><span class="p">(</span><span class="n">ipc</span><span class="p">,</span> <span class="n">c_label</span><span class="o">=</span><span class="n">band</span> <span class="o">+</span> <span class="s2">&quot; (R)&quot;</span><span class="p">,</span> <span class="n">c_scale</span><span class="o">=</span><span class="n">pcolormesh_config</span><span class="p">[</span><span class="s1">&#39;c_scale&#39;</span><span class="p">],</span> <span class="n">left</span><span class="o">=</span><span class="mf">1.1</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+<span class="linenos">49</span>                        <span class="n">width</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="linenos">50</span>
+<span class="linenos">51</span>    <span class="n">panel1</span><span class="o">.</span><span class="n">add_gridlines</span><span class="p">(</span><span class="n">lat_res</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">lon_label_separator</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="linenos">52</span>
+<span class="linenos">53</span>    <span class="n">polestr</span> <span class="o">=</span> <span class="s1">&#39;North&#39;</span> <span class="k">if</span> <span class="n">pole</span> <span class="o">==</span> <span class="s1">&#39;N&#39;</span> <span class="k">else</span> <span class="s1">&#39;South&#39;</span>
+<span class="linenos">54</span>    <span class="n">panel1</span><span class="o">.</span><span class="n">add_title</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;DMSP/SSUSI, &#39;</span> <span class="o">+</span> <span class="n">band</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="n">sat_id</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="n">polestr</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="n">time1</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H%M UT&#39;</span><span class="p">))</span>
+<span class="linenos">55</span>    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;DMSP_SSUSI_&#39;</span> <span class="o">+</span> <span class="n">time1</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">-%H%M&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">band</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">sat_id</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">pole</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<span class="linenos">56</span>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="linenos">57</span>
+<span class="linenos">58</span>
+<span class="linenos">59</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">60</span>    <span class="n">test_ssusi</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div></blockquote>
+<p>Output:</p>
+<blockquote>
+<div><img alt="DMSP SSUSI image" src="_images/DMSP_SSUSI_20150908-2021_LBHS_F18_N.png" />
 </div></blockquote>
 </div>
 </div>
@@ -286,29 +370,29 @@ indices, as well as the EISCAT data, respectively.</p>
            
           </div>
           <footer>
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="user/manual.html" class="btn btn-neutral float-right" title="User Manual" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+        <a href="user/manual.html" class="btn btn-neutral float-right" title="User Manual" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; <a href="copyright.html">Copyright</a> 2021, Lei Cai.
+        &copy; <a href="copyright.html">Copyright</a> 2021, Lei Cai
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
 
@@ -316,6 +400,7 @@ indices, as well as the EISCAT data, respectively.</p>
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

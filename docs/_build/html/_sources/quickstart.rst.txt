@@ -45,24 +45,37 @@ Solar Wind and Geomagnetic Indices from OMNI and WDC
 
 Solar wind and geomagnetic indices data
 
-    .. literalinclude:: ../examples/quicklook_omni_wdc.py
+    .. literalinclude:: ../examples/demo_omni_data.py
         :language: python
-        :caption: examples/quicklook_omni_wdc.py
+        :caption: examples/demo_omni_data.py
 
 Output:
 
     .. image:: ../examples/OMNI_1min_20160314-060000-20160320-060000.png
-        :alt: OMNI solar wind and WDC geomagnetic indices
+        :alt: IMF and solar wind from the OMNI database and the geomagnetic indices from WDC and GFZ
 
 EISCAT from Madrigal with Marking Tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-   .. literalinclude:: ../examples/quicklook_eiscat.py
+   .. literalinclude:: ../examples/demo_eiscat_quicklook.py
         :language: python
         :linenos:
-        :caption: examples/quicklook_eiscat.py
+        :caption: examples/demo_eiscat_quicklook.py
 
 Output:
 
-    .. image:: ../examples/EISCAT_UHF_beata_cp1_2.1u_CP_20201209-180000-20201210-060000.png
+    .. image:: ../examples/EISCAT_UHF_beata_cp1_60_20201209-180000-20201210-060000.png
         :alt: EISCAT quicklook
+
+DMSP/SSUSI auroral images
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+   .. literalinclude:: ../examples/demo_dmsp_ssusi_single_panel.py
+        :language: python
+        :linenos:
+        :caption: examples/demo_dmsp_ssusi_single_panel.py
+
+Output:
+
+    .. image:: ../examples/DMSP_SSUSI_20150908-2021_LBHS_F18_N.png
+        :alt: DMSP SSUSI image
