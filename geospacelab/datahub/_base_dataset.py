@@ -281,7 +281,7 @@ class DatasetModel(object):
         mylog.simpleinfo.info('{:^20s}{:^30s}'.format('No.', 'Variable name'))
         for ind, var_name in enumerate(self._variables.keys()):
             mylog.simpleinfo.info('{:^20d}{:30s}'.format(ind+1, var_name))
-        print()
+        mylog.simpleinfo.inf('')
 
     def keys(self):
         return self._variables.keys()

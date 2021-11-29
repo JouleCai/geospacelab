@@ -12,6 +12,7 @@ __docformat__ = "reStructureText"
 import datetime
 
 from geospacelab.visualization.mpl.dashboards import TSDashboard
+import geospacelab.toolbox.utilities.pylogging as mylog
 
 
 class EISCATDashboard(TSDashboard):
@@ -42,7 +43,7 @@ class EISCATDashboard(TSDashboard):
     def list_eiscat_variables(self):
         self.datasets[1].list_all_variables()
 
-    def check_beams(self, show=True):
+    def check_beams(self, error=0.5, logging=True):
         import numpy as np
         azV = self.dataset['AZ']
         elV = self.dataset['EL']
@@ -50,21 +51,47 @@ class EISCATDashboard(TSDashboard):
         el_arr = np.round(elV.value, decimals=1)
         beams = np.array([[az_arr[0, 0], el_arr[0, 0]]])
         beams_counts = [1]
+        beams_sequence_inds = [[0]]
         beam_array = np.hstack((az_arr[1:, :], el_arr[1:, :]))
         for ind in range(beam_array.shape[0]):
             tile_beam = np.tile(beam_array[ind], (beams.shape[0], 1))
             diff = np.abs(beams - tile_beam)
-            ind_beam = np.where(np.all(diff < 0.25, axis=1))
-            if not list(ind_beam):
-                beams = np.vstack((beams, beam_array[ind]))
+            if abs(beam_array[ind, 1] - 90) < error:
+                el_is_90 = np.where(np.abs(beams[:, 1] - 90) < error)[0]
+                if list(el_is_90):
+                    diff[el_is_90, 0] = 0
+            ind_beam = np.where(np.all(diff < error, axis=1))
+            if not list(ind_beam[0]):
+                beams = np.vstack((beams, beam_array[ind, :]))
+                beams_counts.append(1)
+                beams_sequence_inds.append([ind+1])
+            elif len(ind_beam[0]) == 1:
+                beams_counts[ind_beam[0][0]] = beams_counts[ind_beam[0][0]] + 1
+                beams_sequence_inds[ind_beam[0][0]].append(ind+1)
             else:
-                beams_counts[ind_beam] = beams_counts + 1
-            pass
+                print(beams)
+                print(beam_array[ind])
+                raise ValueError(f"Several beams have the similar az and el angles, which cannot be identified." +
+                                 " Try to set the error of angles with a larger value! Currently error={error}")
+        beams_counts = np.array(beams_counts)
+        beams_sequence_inds = np.array(beams_sequence_inds, dtype=object)
+        count_ind = np.argsort(-beams_counts)
+        beams = beams[count_ind, :]
+        beams_counts = beams_counts[count_ind]
+        beams_sequence_inds = beams_sequence_inds[count_ind]
+        if logging:
+            label = self.dataset.label()
+            mylog.simpleinfo.info("Dataset: {}".format(label))
+            mylog.simpleinfo.info("Listing all the beams ...")
+            mylog.simpleinfo.info('{:^20s}{:^20s}{:^20s}{:80s}'.format('No.', '(az, el)', 'Counts', 'Sequence indices'))
+            for ind in range(beams.shape[0]):
+                mylog.simpleinfo.info(
+                    '{:^20d}{:^20s}{:^20d}{:80s}'.format(
+                        ind+1, f"({beams[ind, 0]}, {beams[ind, 1]})", beams_counts[ind], repr(beams_sequence_inds[ind])
+                    )
+                )
 
-
-
-        beams, counts = np.unique(np.hstack((az_arr, el_arr)), axis=0, return_counts=True)
-        count_sort_ind = np.argsort(-counts)
+        return beams, beams_counts
 
     def save_figure(self, **kwargs):
         file_name = kwargs.pop('file_name', self.title.replace(', ', '_'))
@@ -104,7 +131,7 @@ def example():
     antenna = 'UHF'
     modulation = '60'
     load_mode = 'AUTO'
-    viewer = EISCATViewer(
+    viewer = EISCATDashboard(
         dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO'
     )
     viewer.quicklook()

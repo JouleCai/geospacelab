@@ -199,7 +199,7 @@ class Loader:
         vars['T_e'] = vars['T_i'] * vars['T_r']
         vars['T_e_err'] = vars['T_e'] * np.sqrt((vars['T_i_err']/vars['T_i'])**2
                                                 + (vars['T_r_err']/vars['T_r'])**2)
-
+        vars['AZ'] = vars['AZ'] % 360.
         # check height and range
         vars['HEIGHT'] = vars['HEIGHT'] / 1000.
         vars['RANGE'] = vars['RANGE'] / 1000.
@@ -354,7 +354,7 @@ class Loader:
                 var = data_array[ip]
                 test_unique = np.unique(var[0][~np.isnan(var[0])])
                 if test_unique.shape[0] == 1 and not re.match(r'^D\w+', var_names_h5[ip]) and var_names_h5[ip] not in ['GFIT']:
-                    print(var_names_h5[ip])
+                    # print(var_names_h5[ip])
                     var = np.array([list(set(var[i][~np.isnan(var[i])])) for i in range(num_row)]).reshape((num_row, 1))
                 vars_h5[var_names_h5[ip]] = var
 
@@ -383,7 +383,7 @@ class Loader:
             vars['T_e'] = vars['T_i'] * vars['T_r']
             vars['T_e_err'] = vars['T_e'] * np.sqrt((vars['T_i_err'] / vars['T_i']) ** 2
                                                     + (vars['T_r_err'] / vars['T_r']) ** 2)
-
+            vars['AZ'] = vars['AZ'] % 360.
             inds = np.where(np.isnan(vars['HEIGHT']))
             for i in range(len(inds[0])):
                 ind_0 = inds[0][i]

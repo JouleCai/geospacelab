@@ -91,7 +91,7 @@ def test_uhf_cp3():
 
     dashboard = eiscat.EISCATDashboard(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
                                  data_file_type=data_file_type, load_mode=load_mode)
-
+    dashboard.check_beams()
     # select beams before assign the variables
     # dashboard.dataset.select_beams(field_aligned=False)
 
