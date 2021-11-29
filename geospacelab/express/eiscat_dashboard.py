@@ -39,8 +39,32 @@ class EISCATDashboard(TSDashboard):
     def select_beams(self, field_aligned=False, az_el_pairs=None):
         self.dataset.select_beams(field_aligned=field_aligned, az_el_pairs=az_el_pairs)
 
-    def list_all_variables(self):
+    def list_eiscat_variables(self):
         self.datasets[1].list_all_variables()
+
+    def check_beams(self, show=True):
+        import numpy as np
+        azV = self.dataset['AZ']
+        elV = self.dataset['EL']
+        az_arr = np.round(azV.value, decimals=1)
+        el_arr = np.round(elV.value, decimals=1)
+        beams = np.array([[az_arr[0, 0], el_arr[0, 0]]])
+        beams_counts = [1]
+        beam_array = np.hstack((az_arr[1:, :], el_arr[1:, :]))
+        for ind in range(beam_array.shape[0]):
+            tile_beam = np.tile(beam_array[ind], (beams.shape[0], 1))
+            diff = np.abs(beams - tile_beam)
+            ind_beam = np.where(np.all(diff < 0.25, axis=1))
+            if not list(ind_beam):
+                beams = np.vstack((beams, beam_array[ind]))
+            else:
+                beams_counts[ind_beam] = beams_counts + 1
+            pass
+
+
+
+        beams, counts = np.unique(np.hstack((az_arr, el_arr)), axis=0, return_counts=True)
+        count_sort_ind = np.argsort(-counts)
 
     def save_figure(self, **kwargs):
         file_name = kwargs.pop('file_name', self.title.replace(', ', '_'))

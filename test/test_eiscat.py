@@ -21,6 +21,8 @@ def test_UHF_CP2():
     # select beams before assign the variables
     # dashboard.dataset.select_beams(field_aligned=True)
     # dashboard.dataset.select_beams(az_el_pairs=[(188.6, 77.7)])
+    dashboard.check_beams()
+
     dashboard.status_mask()
 
     n_e = dashboard.assign_variable('n_e')
@@ -205,10 +207,10 @@ def test_vhf_lowel():
 
 
 if __name__ == "__main__":
-    db = test_vhf_lowel()
+    # db = test_vhf_lowel()
 
     # test_uhf_cp3()
-    # test_UHF_CP2()
+    test_UHF_CP2()
     # test_esr_32m()
 
     plt.savefig('eiscat_example.png')

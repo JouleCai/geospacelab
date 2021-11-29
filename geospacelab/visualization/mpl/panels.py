@@ -417,12 +417,11 @@ class TSPanel(Panel):
             ax.set_ylabel(ylabel, va='baseline', rotation=270, fontsize=plt.rcParams['axes.labelsize'])
         else:
             ylabel = self.generate_label(ylabel, unit=yunit, style=ylabel_style)
-            # label_pos = var_for_config.visual.axis[1].label_pos
-            # if label_pos is None:
-            #    label_pos = [-0.1, 0.5]
+            label_pos = var_for_config.visual.axis[1].label_pos
 
             ax.set_ylabel(ylabel, va='bottom', fontsize=plt.rcParams['axes.labelsize'])
-            # ax.yaxis.set_label_coords(label_pos[0], label_pos[1])
+            if label_pos is not None:
+                ax.yaxis.set_label_coords(label_pos[0], label_pos[1])
         ylim = ax.get_ylim()
 
         # set yaxis scale
