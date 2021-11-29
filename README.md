@@ -38,20 +38,22 @@ on [readthedocs.io](https://geospacelab.readthedocs.io/en/latest/).
 ## Built-in data sources:
 | Data Source                   | Variables             | File Format           | Downloadable  | Express         | Status      | 
 |-------------------------------|-----------------------|-----------------------|---------------|-----------------|-------------|
-| CDAWeb/OMNI                   | Solar wind and IMF    |*cdf*                 | *True*        | __OMNIViewer__  | stable      |
-| Madrigal/EISCAT               | Ionospheric Ne, Te, Ti, ... | *EISCAT-hdf5*, *Madrigal-hdf5* | *True* | __EISCATViewer__ | stable    |
+| CDAWeb/OMNI                   | Solar wind and IMF    |*cdf*                 | *True*        | __OMNIDashboard__  | stable      |
+| Madrigal/EISCAT               | Ionospheric Ne, Te, Ti, ... | *EISCAT-hdf5*, *Madrigal-hdf5* | *True* | __EISCATDashboard__ | stable    |
 | Madrigal/GNSS/TECMAP          | Ionospheric GPS TEC map | *hdf5*                | *True*        | -  | beta      |
-| Madrigal/DMSP/s1              | DMSP SSM, SSIES, etc  | *hdf5*                | *True*        | __DMSPTSViewer__  | beta      |
-| Madrigal/DMSP/s4              | DMSP SSIES            | *hdf5*                | *True*        | __DMSPTSViewer__  | beta      |
-| Madrigal/DMSP/e               | DMSP SSJ              | *hdf5*                | *True*        | __DMSPTSViewer__  | beta      |
-| JHUAPL/DMSP/SSUSI             | DMSP SSUSI            | *netcdf*              | *True*        | __DMSPSSUSIViewer__  | beta      |
-| JHUAPL/AMPERE/fitted          | AMPERE FAC            | *netcdf*              | *False*        | __AMPEREViewer__  | stable      |
+| Madrigal/DMSP/s1              | DMSP SSM, SSIES, etc  | *hdf5*                | *True*        | __DMSPTSDashboard__  | beta      |
+| Madrigal/DMSP/s4              | DMSP SSIES            | *hdf5*                | *True*        | __DMSPTSDashboard__  | beta      |
+| Madrigal/DMSP/e               | DMSP SSJ              | *hdf5*                | *True*        | __DMSPTSDashboard__  | beta      |
+| JHUAPL/DMSP/SSUSI             | DMSP SSUSI            | *netcdf*              | *True*        | __DMSPSSUSIDashboard__  | beta      |
+| JHUAPL/AMPERE/fitted          | AMPERE FAC            | *netcdf*              | *False*        | __AMPEREDashboard__  | stable      |
+| SuperDARN/POTMAP              | SuperDARN potential map | *ascii*             | *False*       | - | stable |                  
 | WDC/Dst                       | Dst index             | *IAGA2002-ASCII*      | *True*        | - | stable |
-| WDC/ASYSYM                    | ASY/SYM indices       | *IAGA2002-ASCII*      | *True*        | __OMNIViewer__ | stable |
-| WDC/AE                        | AE indices            | *IAGA2002-ASCII*      | *True*        | __OMNIViewer__ | stable |
-| GFZ/Kp                        | Kp/Ap indices         | *ASCII*               | *True*        | -              | beta   |
-| GFZ/SNF107                    | SN, F107              | *ASCII*               | *True*        | -              | beta   |
-| ESA/SWARM/EFI_LP_1B           | SWARM Ne, Te, etc.    | *netcdf*              | *True*        | -              | beta   |
+| WDC/ASYSYM                    | ASY/SYM indices       | *IAGA2002-ASCII*      | *True*        | __OMNIDashboard__ | stable |
+| WDC/AE                        | AE indices            | *IAGA2002-ASCII*      | *True*        | __OMNIDashboard__ | stable |
+| GFZ/Kp                        | Kp/Ap indices         | *ASCII*               | *True*        | -              | stable   |
+| GFZ/Hpo                        | Hp30 or Hp60 indices         | *ASCII*               | *True*        | -              | stable   |
+| GFZ/SNF107                    | SN, F107              | *ASCII*               | *True*        | -              | stable   |
+| ESA/SWARM/EFI_LP_1B           | SWARM Ne, Te, etc.    | *netcdf*              | *True*        | -              | stable   |
 | ESA/SWARM/AOB_FAC_2F          | SWARM FAC, auroral oval boundary | *netcdf*              | *True*        | -              | beta   |
 | UTA/GITM/2DALL                | GITM 2D output        | *binary*, *IDL-sav*   | *False*       | -              | beta   |
 | UTA/GITM/3DALL                | GITM 3D output        | *binary*, *IDL-sav*   | *False*       | -              | beta   |
@@ -215,29 +217,30 @@ added in the plot. See the example script and figure below:
 In "example2.py"
 ```python
 import datetime
-import geospacelab.express.eiscat_viewer as eiscat
+import geospacelab.express.eiscat_dashboard as eiscat
 
 dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
 dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
 
-# check the eiscat-hdf5 filename from the EISCAT schedule page, e.g., "EISCAT_2020-12-10_beata_60@uhfa.hdf5"
 site = 'UHF'
 antenna = 'UHF'
 modulation = '60'
 load_mode = 'AUTO'
-# The code will download and load the data automatically as long as the parameters above are set correctly.
-viewer = eiscat.EISCATViewer(
-      dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO'
+dashboard = eiscat.EISCATDashboard(
+    dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO'
 )
-viewer.quicklook()
-# viewer.save_figure() # comment this if you need to run the following codes
-# viewer.show()   # comment this if you need to run the following codes.
+dashboard.quicklook()
+
+# dashboard.save_figure() # comment this if you need to run the following codes
+# dashboard.show()   # comment this if you need to run the following codes.
 
 """
-The viewer is an instance of the class EISCATViewer, which is a heritage of the class Datahub.
-Thus, the variables can be retrieved in the same ways as shown in Example 1. 
+As the viewer is an instance of the class EISCATViewer, which is a heritage of the class Datahub.
+The variables can be retrieved in the same ways as shown in Example 1. 
 """
-n_e = viewer.get_variable('n_e')
+n_e = dashboard.assign_variable('n_e')
+print(n_e.value)
+print(n_e.error)
 
 """
 Several marking tools (vertical lines, shadings, and top bars) can be added as the overlays 
@@ -246,23 +249,23 @@ on the top of the quicklook plot.
 # add vertical line
 dt_fr_2 = datetime.datetime.strptime('20201209' + '2030', "%Y%m%d%H%M")
 dt_to_2 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
-viewer.add_vertical_line(dt_fr_2, bottom_extend=0, top_extend=0.02, label='Line 1', label_position='top')
+dashboard.add_vertical_line(dt_fr_2, bottom_extend=0, top_extend=0.02, label='Line 1', label_position='top')
 # add shading
-viewer.add_shading(dt_fr_2, dt_to_2, bottom_extend=0, top_extend=0.02, label='Shading 1', label_position='top')
+dashboard.add_shading(dt_fr_2, dt_to_2, bottom_extend=0, top_extend=0.02, label='Shading 1', label_position='top')
 # add top bar
 dt_fr_3 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
 dt_to_3 = datetime.datetime.strptime('20201210' + '0430', "%Y%m%d%H%M")
-viewer.add_top_bar(dt_fr_3, dt_to_3, bottom=0., top=0.02, label='Top bar 1')
+dashboard.add_top_bar(dt_fr_3, dt_to_3, bottom=0., top=0.02, label='Top bar 1')
 
 # save figure
-viewer.save_figure()
+dashboard.save_figure()
 # show on screen
-viewer.show()
+dashboard.show()
 ```
 Output:
-> ![alt text](https://github.com/JouleCai/geospacelab/blob/master/examples/EISCAT_UHF_beata_cp1_2.1u_CP_20201209-180000-20201210-060000.png?raw=true)
+> ![alt text](https://github.com/JouleCai/geospacelab/blob/master/examples/EISCAT_UHF_beata_cp1_60_20201209-180000-20201210-060000.png?raw=true)
 
-### Example 3: OMNI and WDC geomagnetic indices:
+### Example 3: OMNI data and geomagnetic indices (WDC + GFZ):
 
 In "example3.py"
 
@@ -276,21 +279,88 @@ dt_to = datetime.datetime.strptime('20160320' + '0600', '%Y%m%d%H%M')
 omni_type = 'OMNI2'
 omni_res = '1min'
 load_mode = 'AUTO'
-viewer = omni.OMNIViewer(
+dashboard = omni.OMNIDashboard(
     dt_fr, dt_to, omni_type=omni_type, omni_res=omni_res, load_mode=load_mode
 )
-viewer.quicklook()
+dashboard.quicklook()
 
 # data can be retrieved in the same way as in Example 1:
-viewer.list_assigned_variables()
-B_x_gsm = viewer.get_variable('B_x_GSM')
+dashboard.list_assigned_variables()
+B_x_gsm = dashboard.get_variable('B_x_GSM', dataset_index=1)
 # save figure
-viewer.save_figure()
+dashboard.save_figure()
 # show on screen
-viewer.show()
+dashboard.show()
 ```
 Output:
 > ![alt text](https://github.com/JouleCai/geospacelab/blob/master/examples/OMNI_1min_20160314-060000-20160320-060000.png?raw=true)
+
+### Example 4: Mapping geospatial data in the polar map.
+```python
+import datetime
+import matplotlib.pyplot as plt
+
+import geospacelab.visualization.mpl.geomap.geodashboards as geomap
+
+dt_fr = datetime.datetime(2015, 9, 8, 8)
+dt_to = datetime.datetime(2015, 9, 8, 23, 59)
+time1 = datetime.datetime(2015, 9, 8, 20, 21)
+pole = 'N'
+sat_id = 'f18'
+band = 'LBHS'
+
+dashboard = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (5, 5)})
+
+# If the orbit_id is specified, only one file will be downloaded. This option saves the downloading time.
+# dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole='N', sat_id='f17', orbit_id='46863')
+# If not specified, the data during the whole day will be downloaded.
+dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole=pole, sat_id=sat_id, orbit_id=None)
+dashboard.set_layout(1, 1)
+
+lbhs = dashboard.assign_variable('GRID_AUR_' + band, dataset_index=1)
+dts = dashboard.assign_variable('DATETIME', dataset_index=1).value.flatten()
+mlat = dashboard.assign_variable('GRID_MLAT', dataset_index=1).value
+mlon = dashboard.assign_variable('GRID_MLON', dataset_index=1).value
+mlt = dashboard.assign_variable(('GRID_MLT'), dataset_index=1).value
+
+ind_t = dashboard.datasets[1].get_time_ind(ut=time1)
+
+panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, boundary_lat=65., mirror_south=True)
+# panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, mirror_south=True)
+# panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=3., pole='N', ut=time1)
+# panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)
+# panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='S', ut=time1,
+#                           boundary_lat=0, mirror_south=False)
+# panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
+#                          boundary_lat=0, mirror_south=False)
+panel1.add_coastlines()
+
+lbhs_ = lbhs.value[ind_t, :, :]
+pcolormesh_config = lbhs.visual.plot_config.pcolormesh
+pcolormesh_config.update(c_scale='log')
+pcolormesh_config.update(c_lim=[100, 1500])
+import geospacelab.visualization.mpl.colormaps as cm
+cmap = cm.cmap_gist_ncar_modified()
+cmap = 'viridis'
+pcolormesh_config.update(cmap=cmap)
+ipc = panel1.add_pcolor(lbhs_, coords={'lat': mlat[ind_t, ::], 'lon': mlon[ind_t, ::], 'mlt': mlt[ind_t, ::], 'height': 250.}, cs='AACGM', **pcolormesh_config)
+panel1.add_colorbar(ipc, c_label=band + " (R)", c_scale=pcolormesh_config['c_scale'], left=1.1, bottom=0.1,
+                    width=0.05, height=0.7)
+
+panel1.add_gridlines(lat_res=5, lon_label_separator=5)
+
+polestr = 'North' if pole == 'N' else 'South'
+panel1.add_title(title='DMSP/SSUSI, ' + band + ', ' + sat_id.upper() + ', ' + polestr + ', ' + time1.strftime('%Y-%m-%d %H%M UT'))
+plt.savefig('DMSP_SSUSI_' + time1.strftime('%Y%m%d-%H%M') + '_' + band + '_' + sat_id.upper() + '_' + pole, dpi=300)
+plt.show()
+```
+Output:
+> ![alt text](https://github.com/JouleCai/geospacelab/blob/master/examples/DMSP_SSUSI_20150908-2021_LBHS_F18_N.png?raw=true)
+
+This is an example showing the HiLDA aurora in the dayside polar cap region 
+(see also [DMSP observations of the HiLDA aurora (Cai et al., JGR, 2021)](https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2020JA028808)).
+
+Other examples for the time-series plots and map projections can be found [here](https://github.com/JouleCai/geospacelab/tree/master/examples)
 
 ## Citation and Acknowledgements
 Please acknowledge or cite GeospaceLab, if the library contributes to a project that leads

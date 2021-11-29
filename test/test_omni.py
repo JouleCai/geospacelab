@@ -24,12 +24,14 @@ def test():
     sym_h = dashboard.assign_variable('SYM_H')
 
     ds3 = dashboard.dock(datasource_contents=['wdc', 'ae'])
-
     ae = dashboard.assign_variable('AE')
     au = dashboard.assign_variable('AU')
     al = dashboard.assign_variable('AL')
 
-    layout = [[Bx, By, Bz], [v_sw], [n_p], [p_dyn], [sym_h], [ae, au, al]]
+    ds4 = dashboard.dock(datasource_contents=['gfz', 'kpap'])
+    kp = dashboard.assign_variable('Kp')
+
+    layout = [[Bx, By, Bz], [v_sw], [n_p], [p_dyn], [sym_h], [ae, au, al], [kp]]
     # layout = [[Bz, By], [v_sw], [n_p], [sym_h]]
     dashboard.set_layout(panel_layouts=layout, hspace=0.1)
     dashboard.draw()

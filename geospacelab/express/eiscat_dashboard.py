@@ -114,10 +114,13 @@ class EISCATDashboard(TSDashboard):
         v_i = self.assign_variable('v_i_los')
         az = self.assign_variable('AZ')
         el = self.assign_variable('EL')
+        ptx = self.assign_variable('P_Tx')
+        tsys = self.assign_variable('T_SYS_1')
         self.list_assigned_variables()
         self.list_datasets()
+        self.check_beams()
 
-        layout = [[n_e], [T_e], [T_i], [v_i], [az, [el]]]
+        layout = [[n_e], [T_e], [T_i], [v_i], [az, [el], [ptx], [tsys]]]
         self.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3], hspace=0.1)
         # plt.style.use('dark_background')
         # dt_fr_1 = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
@@ -137,10 +140,10 @@ def example():
     antenna = 'UHF'
     modulation = '60'
     load_mode = 'AUTO'
-    viewer = EISCATDashboard(
+    dashboard = EISCATDashboard(
         dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO'
     )
-    viewer.quicklook()
+    dashboard.quicklook()
 
     # viewer.save_figure() # comment this if you need to run the following codes
     # viewer.show()   # comment this if you need to run the following codes.
@@ -149,7 +152,7 @@ def example():
     As the viewer is an instance of the class EISCATViewer, which is a heritage of the class Datahub.
     The variables can be retrieved in the same ways as shown in Example 1. 
     """
-    n_e = viewer.assign_variable('n_e')
+    n_e = dashboard.assign_variable('n_e')
     print(n_e.value)
 
     """
@@ -159,18 +162,18 @@ def example():
     # add vertical line
     dt_fr_2 = datetime.datetime.strptime('20201209' + '2030', "%Y%m%d%H%M")
     dt_to_2 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
-    viewer.add_vertical_line(dt_fr_2, bottom_extend=0, top_extend=0.02, label='Line 1', label_position='top')
+    dashboard.add_vertical_line(dt_fr_2, bottom_extend=0, top_extend=0.02, label='Line 1', label_position='top')
     # add shading
-    viewer.add_shading(dt_fr_2, dt_to_2, bottom_extend=0, top_extend=0.02, label='Shading 1', label_position='top')
+    dashboard.add_shading(dt_fr_2, dt_to_2, bottom_extend=0, top_extend=0.02, label='Shading 1', label_position='top')
     # add top bar
     dt_fr_3 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
     dt_to_3 = datetime.datetime.strptime('20201210' + '0430', "%Y%m%d%H%M")
-    viewer.add_top_bar(dt_fr_3, dt_to_3, bottom=0., top=0.02, label='Top bar 1')
+    dashboard.add_top_bar(dt_fr_3, dt_to_3, bottom=0., top=0.02, label='Top bar 1')
 
     # save figure
-    # viewer.save_figure()
+    dashboard.save_figure()
     # show on screen
-    viewer.show()
+    dashboard.show()
 
 
 if __name__ == '__main__':
