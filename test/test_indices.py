@@ -31,7 +31,7 @@ def test():
     kp = tsdb.assign_variable('Kp', dataset=ds4)
     hp = tsdb.assign_variable('Hp', dataset=ds5)
 
-    layout = [[dst], [asy_d, asy_h, sym_d, sym_h], [ae, au, ao, al], [hp]]
+    layout = [[dst], [asy_d, asy_h, sym_d, sym_h], [ae, au, ao, al], [kp], [hp]]
     tsdb.set_layout(panel_layouts=layout, hspace=0.1)
     tsdb.draw()
     pass

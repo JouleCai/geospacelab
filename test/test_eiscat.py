@@ -96,6 +96,7 @@ def test_uhf_cp3():
     # dashboard.dataset.select_beams(field_aligned=False)
 
     n_e = dashboard.assign_variable('n_e')
+
     n_e.visual.axis[0].data_res = 180 # time resolution in seconds
     n_e.visual.axis[1].data = '@d.GEO_LAT.value'
     n_e.visual.axis[1].label = 'GLAT'
@@ -207,11 +208,12 @@ def test_vhf_lowel():
 
 
 if __name__ == "__main__":
-    # db = test_vhf_lowel()
+    db = test_vhf_lowel()
 
-    # test_uhf_cp3()
+    test_uhf_cp3()
     test_UHF_CP2()
-    # test_esr_32m()
+    test_esr_32m()
 
     plt.savefig('eiscat_example.png')
     plt.show()
+    db.list_sourced_datasets()

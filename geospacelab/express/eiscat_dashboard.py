@@ -43,7 +43,7 @@ class EISCATDashboard(TSDashboard):
     def list_eiscat_variables(self):
         self.datasets[1].list_all_variables()
 
-    def check_beams(self, error=0.5, logging=True):
+    def check_beams(self, error=0.5, logging=True, full_sequence=False):
         import numpy as np
         azV = self.dataset['AZ']
         elV = self.dataset['EL']
@@ -85,9 +85,15 @@ class EISCATDashboard(TSDashboard):
             mylog.simpleinfo.info("Listing all the beams ...")
             mylog.simpleinfo.info('{:^20s}{:^20s}{:^20s}{:80s}'.format('No.', '(az, el)', 'Counts', 'Sequence indices'))
             for ind in range(beams.shape[0]):
+                if full_sequence:
+                    sequence_str = repr(beams_sequence_inds[ind])
+                elif len(beams_sequence_inds[ind]) < 10:
+                    sequence_str = repr(beams_sequence_inds[ind])
+                else:
+                    sequence_str = repr(beams_sequence_inds[ind][:10]).replace(']', ', ...]')
                 mylog.simpleinfo.info(
                     '{:^20d}{:^20s}{:^20d}{:80s}'.format(
-                        ind+1, f"({beams[ind, 0]}, {beams[ind, 1]})", beams_counts[ind], repr(beams_sequence_inds[ind])
+                        ind+1, f"({beams[ind, 0]}, {beams[ind, 1]})", beams_counts[ind], sequence_str
                     )
                 )
 

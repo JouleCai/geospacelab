@@ -55,7 +55,7 @@ setuptools.setup(
               'scipy>=1.6.0',
               'h5py>=3.2.1',
               'netcdf4>=1.5.7',
-              'matplotlib>=3.3',
+              'matplotlib>=3.5',
               'madrigalweb>=3.2',
               'aacgmv2>=2.6.2',
               'cdflib>=0.3.20',

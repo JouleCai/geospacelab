@@ -475,7 +475,7 @@ class PanelBase(object):
             label = self.label
         kwargs.setdefault('ha', 'left')
         kwargs.setdefault('va', 'center')
-        ax.text(x, y, label, **kwargs)
+        self.add_text(x, y, label, **kwargs)
 
     def add_title(self, x=0.5, y=1.02, title=None, **kwargs):
         kwargs.setdefault('ha', 'center')
