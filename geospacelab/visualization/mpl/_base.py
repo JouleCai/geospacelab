@@ -309,13 +309,17 @@ class DashboardBase(object):
 
     @figure.setter
     def figure(self, figure_obj):
+        if figure_obj is None:
+            fig_nums = plt.get_fignums()
+            if list(fig_nums):
+                figure_obj = plt.gcf()
+            else:
+                figure_obj = 'new'
 
         if figure_obj == 'new':
             figure = plt.figure(FigureClass=self._figure_class, **self._figure_config)
             figure._default_dashboard_class = self.__class__
             mylog.simpleinfo.info(f"Create a new figure: {figure}.")
-        elif figure_obj is None:
-            figure = plt.gcf()
         elif issubclass(figure_obj.__class__, self._figure_class):
             figure = figure_obj
         elif issubclass(figure_obj.__class__, plt.Figure):
