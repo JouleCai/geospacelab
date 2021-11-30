@@ -3,23 +3,24 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python==3.8
+  - python=3.8
   - sphinx==4.2.0
   - nbsphinx==0.8.7
   - cartopy
+  - pip>=20.1
   - pip:
     - sphinx_rtd_theme==0.5.2
     - myst-parser==0.15.2
     - matplotlib==3.5.0
-    - requests==2.26.0
-    - beautifulsoup4==4.9.3
-    - natsort==7.1.1
-    - numpy==1.20
-    - scipy==1.6.0
-    - h5py==3.2.1
-    - netcdf4==1.5.7
-    - madrigalweb==3.2
-    - aacgmv2==2.6.2
-    - cdflib==0.3.20
-    - geopack==1.0.8
+    - requests>=2.26.0
+    - beautifulsoup4>=4.9.3
+    - natsort>=7.1.1
+    - numpy>=1.20
+    - scipy>=1.6.0
+    - h5py>=3.2.1
+    - netcdf4>=1.5.7
+    - madrigalweb>=3.2
+    - aacgmv2>=2.6.2
+    - cdflib>=0.3.20
+    - geopack>=1.0.8
     - toml
