@@ -20,10 +20,10 @@ sphinx:
 #    - pdf
 
 # Optionally declare the Python requirements required to build your docs
-python:
-  version: 3.8  
-  install:
-  - requirements: docs/requirements.txt
+# python:
+#  version: 3.8
+#  install:
+#  - requirements: docs/requirements.txt
 
 conda:
   environment: docs/environment.yaml
