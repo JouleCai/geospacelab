@@ -79,7 +79,11 @@ After creating the virtual environement, you need to activate the virtual enviro
 ```shell
 conda activate [YOUR_ENV_NAME]
 ```
-and then to install the package as shown below or to start the IDE "spyder".
+and then to install the package as shown below or to start the IDE **Spyder**.
+
+> **_Note:_**   The recommended IDE is Spyder. Sometime, a *RuntimeError* can be raised 
+> when the __aacgmv2__ package is called in **PyCharm** or **VS Code**. 
+> If you meet this issue, try to compile the codes in **Spyder** several times. 
 
 More detailed information to set the anaconda environment can be found [here](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#), 
 
