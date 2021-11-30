@@ -42,15 +42,15 @@ class VariableModel(object):
     :param  quantity: The physical quantity associated with the variable, waiting for implementing. [None]
     :type   quantity: TBD.
     :param  value: the variable's value. Usually it's a np.ndarray. The axis=0 along the time, axis=1 along height, lat,
-    lon. For a scalar, value in a shape of (1, ).
+        lon. For a scalar, value in a shape of (1, ).
     :type   value: np.ndarray, default: None
     :param  error: the variable's error. Either a np.ndarray or a string. When it's a string, the string is a variable name
-    indicating the variable in the associated dataset (see :attr:`dataset` below).
+        indicating the variable in the associated dataset (see :attr:`dataset` below).
     :type error: str or np.ndarry
     :param ndim: The number of dimension.
     :type ndim: int
     :param depends: The full depends of the variables. Usually Axis 0 for time, next for spatial distributions,
-    and then for components.
+        and then for components.
     :type depends: dict
     :param dataset: The dataset that the variable is appended.
     :type dataset: DatasetModel object

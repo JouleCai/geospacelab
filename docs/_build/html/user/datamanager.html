@@ -283,37 +283,25 @@ for the dataset class and its inheritances.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em><em> or </em><em>None.</em>) – The name of the dataset.</p></li>
-<li><p><strong>kind</strong> – The type of the dataset. ‘sourced’: the data source has been added in the package,</p></li>
+<li><p><strong>kind</strong> (<em>{'sourced'</em><em>, </em><em>'temporary'</em><em>, </em><em>'user-defined'}</em>) – The type of the dataset. ‘sourced’: the data source has been added in the package,
+‘temporary’: a dataset added temporarily, ‘user-defined’: a data source defined by the user.</p></li>
+<li><p><strong>dt_fr</strong> (<em>datetime.datetime</em><em>, </em><em>default: None.</em>) – the starting time of the data records.</p></li>
+<li><p><strong>dt_to</strong> (<em>datetime.datetime</em><em>, </em><em>default: None.</em>) – the stopping time of the the data records.</p></li>
+<li><p><strong>load_mode</strong> (<em>{&quot;AUTO&quot;</em><em>, </em><em>&quot;dialog&quot;</em><em>, </em><em>&quot;data_file_paths&quot;}.</em>) – The mode for the dataset to load the data. “AUTO”: Automatically searching the data files and load
+the data; “dialog”: Open a dialog window and select data files;
+“assigned”: Assign files to the attribute <code class="docutils literal notranslate"><span class="pre">data_file_paths</span></code>.</p></li>
+<li><p><strong>loader</strong> (<em>LoaderModel.</em>) – the loader class used to load the data.</p></li>
+<li><p><strong>downloader</strong> (<em>DownloaderModel</em>) – the downloader class used to download the data.</p></li>
+<li><p><strong>data_root_dir</strong> (<em>str</em><em> or </em><em>pathlib.Path</em>) – The root directory where the data files are stored.</p></li>
+<li><p><strong>data_file_paths</strong> (<em>list.</em>) – A list of the full paths of the data files.</p></li>
+<li><p><strong>data_file_num</strong> (<em>int.</em>) – The number of the data files.</p></li>
+<li><p><strong>data_file_ext</strong> (<em>str.</em>) – The extension of the data files.</p></li>
+<li><p><strong>data_search_recursive</strong> (<em>bool.</em>) – If True, search the data files in a directory recursively.</p></li>
+<li><p><strong>visual</strong> (<em>{'on'</em><em>, </em><em>'off'}.</em>) – If “on”, append the attribute visual to the vairables.</p></li>
+<li><p><strong>time_clip</strong> – Clip the time interval in the range of [dt_fr, dt_to].</p></li>
 </ul>
 </dd>
 </dl>
-<p>‘temporary’: a dataset added temporarily, ‘user-defined’: a data source defined by the user.
-:type kind: {‘sourced’, ‘temporary’, ‘user-defined’}
-:param dt_fr: the starting time of the data records.
-:type dt_fr: datetime.datetime, default: None.
-:param dt_to: the stopping time of the the data records.
-:type dt_to: datetime.datetime, default: None.
-:param load_mode: The mode for the dataset to load the data. “AUTO”: Automatically searching the data files and
-load the data; “dialog”: Open a dialog window and select data files; “assigned”: Assign files to
-the attribute <code class="docutils literal notranslate"><span class="pre">data_file_paths</span></code>.
-:type: load_mode: {“AUTO”, “dialog”, “data_file_paths”}.
-:param loader: the loader class used to load the data.
-:type loader: LoaderModel.
-:param downloader: the downloader class used to download the data.
-:type downloader: DownloaderModel
-:param data_root_dir: The root directory where the data files are stored.
-:type data_root_dir: str or pathlib.Path
-:param data_file_paths: A list of the full paths of the data files.
-:type data_file_paths: list.
-:param data_file_num: The number of the data files.
-:type data_file_num: int.
-:param data_file_ext: The extension of the data files.
-:type data_file_ext: str.
-:param data_search_recursive: If True, search the data files in a directory recursively.
-:type data_search_recursive: bool.
-:param visual: If “on”, append the attribute visual to the vairables.
-:type visual: {‘on’, ‘off’}.
-:param time_clip: Clip the time interval in the range of [dt_fr, dt_to].</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="geospacelab.datahub.DatasetModel.search_data_files">
 <span class="sig-name descname"><span class="pre">search_data_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DatasetModel.search_data_files" title="Permalink to this definition">¶</a></dt>
@@ -414,24 +402,18 @@ as the label in plots with multiple lines. [‘’]</p></li>
 <li><p><strong>unit_label</strong> (<em>str</em>) – The unit’s  label,  used for plots. The string is a raw string (e.g., r’$n_e$’).
 If None, the plot will use unit as a label.</p></li>
 <li><p><strong>quantity</strong> (<em>TBD.</em>) – The physical quantity associated with the variable, waiting for implementing. [None]</p></li>
-<li><p><strong>value</strong> – the variable’s value. Usually it’s a np.ndarray. The axis=0 along the time, axis=1 along height, lat,</p></li>
+<li><p><strong>value</strong> (<em>np.ndarray</em><em>, </em><em>default: None</em>) – the variable’s value. Usually it’s a np.ndarray. The axis=0 along the time, axis=1 along height, lat,
+lon. For a scalar, value in a shape of (1, ).</p></li>
+<li><p><strong>error</strong> (<em>str</em><em> or </em><em>np.ndarry</em>) – the variable’s error. Either a np.ndarray or a string. When it’s a string, the string is a variable name
+indicating the variable in the associated dataset (see <code class="xref py py-attr docutils literal notranslate"><span class="pre">dataset</span></code> below).</p></li>
+<li><p><strong>ndim</strong> (<em>int</em>) – The number of dimension.</p></li>
+<li><p><strong>depends</strong> (<em>dict</em>) – The full depends of the variables. Usually Axis 0 for time, next for spatial distributions,
+and then for components.</p></li>
+<li><p><strong>dataset</strong> (<em>DatasetModel object</em>) – The dataset that the variable is appended.</p></li>
+<li><p><strong>visual</strong> (<em>dict</em><em> or </em><em>Visual object</em><em>, </em><em>default: None.</em>) – the attributes for visualization.</p></li>
 </ul>
 </dd>
 </dl>
-<p>lon. For a scalar, value in a shape of (1, ).
-:type   value: np.ndarray, default: None
-:param  error: the variable’s error. Either a np.ndarray or a string. When it’s a string, the string is a variable name
-indicating the variable in the associated dataset (see <code class="xref py py-attr docutils literal notranslate"><span class="pre">dataset</span></code> below).
-:type error: str or np.ndarry
-:param ndim: The number of dimension.
-:type ndim: int
-:param depends: The full depends of the variables. Usually Axis 0 for time, next for spatial distributions,
-and then for components.
-:type depends: dict
-:param dataset: The dataset that the variable is appended.
-:type dataset: DatasetModel object
-:param visual: the attributes for visualization.
-:type visual: dict or Visual object, default: None.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="geospacelab.datahub.VariableModel.config">
 <span class="sig-name descname"><span class="pre">config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logging</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.VariableModel.config" title="Permalink to this definition">¶</a></dt>

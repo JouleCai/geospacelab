@@ -27,16 +27,16 @@ class DatasetModel(object):
     :param name: The name of the dataset.
     :type name: str or None.
     :param kind: The type of the dataset. 'sourced': the data source has been added in the package,
-    'temporary': a dataset added temporarily, 'user-defined': a data source defined by the user.
+      'temporary': a dataset added temporarily, 'user-defined': a data source defined by the user.
     :type kind: {'sourced', 'temporary', 'user-defined'}
     :param dt_fr: the starting time of the data records.
     :type dt_fr: datetime.datetime, default: None.
     :param dt_to: the stopping time of the the data records.
     :type dt_to: datetime.datetime, default: None.
-    :param load_mode: The mode for the dataset to load the data. "AUTO": Automatically searching the data files and
-    load the data; "dialog": Open a dialog window and select data files; "assigned": Assign files to
-    the attribute ``data_file_paths``.
-    :type: load_mode: {"AUTO", "dialog", "data_file_paths"}.
+    :param load_mode: The mode for the dataset to load the data. "AUTO": Automatically searching the data files and load
+      the data; "dialog": Open a dialog window and select data files;
+      "assigned": Assign files to the attribute ``data_file_paths``.
+    :type load_mode: {"AUTO", "dialog", "data_file_paths"}.
     :param loader: the loader class used to load the data.
     :type loader: LoaderModel.
     :param downloader: the downloader class used to download the data.
