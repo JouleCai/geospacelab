@@ -88,10 +88,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">User Manual</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#data-manager-geospacelab-datahub">Data Manager: <code class="xref py py-mod docutils literal notranslate"><span class="pre">geospacelab.datahub</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#visualization-geospacelab-visualization">Visualization: <code class="xref py py-mod docutils literal notranslate"><span class="pre">geospacelab.visualization</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#express-geospace-express">Express: <code class="xref py py-mod docutils literal notranslate"><span class="pre">geospace.express</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#space-coordinate-system-transformation-geospace-cs">Space Coordinate System Transformation: <code class="xref py py-mod docutils literal notranslate"><span class="pre">geospace.cs</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-manager-geospacelab-datahub">Data Manager (<code class="xref py py-mod docutils literal notranslate"><span class="pre">geospacelab.datahub</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#visualization-geospacelab-visualization">Visualization (<code class="xref py py-mod docutils literal notranslate"><span class="pre">geospacelab.visualization</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#express-geospace-express">Express (<code class="xref py py-mod docutils literal notranslate"><span class="pre">geospace.express</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#space-coordinate-system-transformation-geospace-cs">Space Coordinate System Transformation (<code class="xref py py-mod docutils literal notranslate"><span class="pre">geospace.cs</span></code>)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#toolbox-geospace-toolbox">Toolbox: <code class="xref py py-mod docutils literal notranslate"><span class="pre">geospace.toolbox</span></code></a></li>
 </ul>
 </li>
@@ -164,7 +164,7 @@
   <div class="section" id="user-manual">
 <span id="usermanual"></span><h1>User Manual<a class="headerlink" href="#user-manual" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="data-manager-geospacelab-datahub">
-<h2>Data Manager: <code class="xref py py-mod docutils literal notranslate"><span class="pre">geospacelab.datahub</span></code><a class="headerlink" href="#data-manager-geospacelab-datahub" title="Permalink to this headline">¶</a></h2>
+<h2>Data Manager (<code class="xref py py-mod docutils literal notranslate"><span class="pre">geospacelab.datahub</span></code>)<a class="headerlink" href="#data-manager-geospacelab-datahub" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="geospacelab.datahub.DataHub">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geospacelab.datahub.</span></span><span class="sig-name descname"><span class="pre">DataHub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt_fr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'off'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub" title="Permalink to this definition">¶</a></dt>
@@ -528,13 +528,77 @@ and then for components.</p></li>
 
 </div>
 <div class="section" id="visualization-geospacelab-visualization">
-<h2>Visualization: <code class="xref py py-mod docutils literal notranslate"><span class="pre">geospacelab.visualization</span></code><a class="headerlink" href="#visualization-geospacelab-visualization" title="Permalink to this headline">¶</a></h2>
+<h2>Visualization (<code class="xref py py-mod docutils literal notranslate"><span class="pre">geospacelab.visualization</span></code>)<a class="headerlink" href="#visualization-geospacelab-visualization" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geospacelab.visualization.mpl._base.</span></span><span class="sig-name descname"><span class="pre">PanelBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_subplot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase.sca">
+<span class="sig-name descname"><span class="pre">sca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase.sca" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set current axes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ax</strong> – the ax instance belong to the attribute axes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase.gca">
+<span class="sig-name descname"><span class="pre">gca</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase.gca" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the current ax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Axes instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase.add_axes">
+<span class="sig-name descname"><span class="pre">add_axes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">major</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase.add_axes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new ax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – </p></li>
+<li><p><strong>major</strong> – </p></li>
+<li><p><strong>label</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase.get_line_collection">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">get_line_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linewidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase.get_line_collection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a set of line segments and a line collection, see also: <span class="xref std std-ref">https://matplotlib.org/2.0.2/examples/pylab_examples/multicolored_line.html</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>z</strong> (<em>x</em><em>, </em><em>y</em><em>,</em>) – The line points (x, y) with the colored z values.</p></li>
+<li><p><strong>cmap</strong> (<em>str</em><em> or </em><em>matplotlib.colors.Colormap</em><em>, </em><em>default: 'jet'.</em>) – The color map for the plot.</p></li>
+<li><p><strong>kwargs</strong> – Other optional keyword arguments forwarded to LineCollection.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The line collection instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="express-geospace-express">
-<h2>Express: <code class="xref py py-mod docutils literal notranslate"><span class="pre">geospace.express</span></code><a class="headerlink" href="#express-geospace-express" title="Permalink to this headline">¶</a></h2>
+<h2>Express (<code class="xref py py-mod docutils literal notranslate"><span class="pre">geospace.express</span></code>)<a class="headerlink" href="#express-geospace-express" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="space-coordinate-system-transformation-geospace-cs">
-<h2>Space Coordinate System Transformation: <code class="xref py py-mod docutils literal notranslate"><span class="pre">geospace.cs</span></code><a class="headerlink" href="#space-coordinate-system-transformation-geospace-cs" title="Permalink to this headline">¶</a></h2>
+<h2>Space Coordinate System Transformation (<code class="xref py py-mod docutils literal notranslate"><span class="pre">geospace.cs</span></code>)<a class="headerlink" href="#space-coordinate-system-transformation-geospace-cs" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="toolbox-geospace-toolbox">
 <h2>Toolbox: <code class="xref py py-mod docutils literal notranslate"><span class="pre">geospace.toolbox</span></code><a class="headerlink" href="#toolbox-geospace-toolbox" title="Permalink to this headline">¶</a></h2>

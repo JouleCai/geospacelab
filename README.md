@@ -239,7 +239,7 @@ dashboard.quicklook()
 # dashboard.show()   # comment this if you need to run the following codes.
 
 """
-As the viewer is an instance of the class EISCATViewer, which is a heritage of the class Datahub.
+As the dashboard class (EISCATDashboard) is a inheritance of the classes Datahub and TSDashboard.
 The variables can be retrieved in the same ways as shown in Example 1. 
 """
 n_e = dashboard.assign_variable('n_e')

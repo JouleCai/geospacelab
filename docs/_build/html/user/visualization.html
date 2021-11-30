@@ -152,7 +152,135 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  
+  <dl class="py class">
+<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.DashboardBase">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geospacelab.visualization.mpl._base.</span></span><span class="sig-name descname"><span class="pre">DashboardBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">figure=None</span></em>, <em class="sig-param"><span class="pre">figure_config=None</span></em>, <em class="sig-param"><span class="pre">figure_class=&lt;class</span> <span class="pre">'geospacelab.visualization.mpl._base.FigureBase'&gt;</span></em>, <em class="sig-param"><span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.DashboardBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dashboard is a collection of panels in a figure or GeospaceLab canvas. The class inherits
+from <a class="reference internal" href="manual.html#geospacelab.datahub.DataHub" title="geospacelab.datahub.DataHub"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataHub</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>canvas</strong> (Instance of <code class="xref py py-class docutils literal notranslate"><span class="pre">GeospaceLab</span> <span class="pre">Canvas</span></code>.) – The canvas that the dashboad will be placed.</p></li>
+<li><p><strong>panels</strong> (<em>dict</em><em>, </em><em>default: {}</em><em>, </em><em>the keys are integers starting from 1 if not specified.</em>) – A collection of the panels that are placed in the dashboard.</p></li>
+<li><p><strong>extra_axes</strong> (<em>dict</em><em>, </em><em>default: {}.</em>) – A collection of the axes additionally appended to the dashboard.</p></li>
+<li><p><strong>gs</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.DashboardBase.set_layout">
+<span class="sig-name descname"><span class="pre">set_layout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_rows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.DashboardBase.set_layout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the layout of the dashboard in a canvas using matplotlib GridSpec.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_rows</strong> (<em>int.</em>) – The number of rows of the grid.</p></li>
+<li><p><strong>num_cols</strong> (<em>int.</em>) – The number of columns of the grid.</p></li>
+<li><p><strong>kwargs</strong> – Optional keyword arguments used in <strong>matplotlib GridSpec</strong>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.DashboardBase.add_panel">
+<span class="sig-name descname"><span class="pre">add_panel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row_ind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_ind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">panel_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.DashboardBase.add_panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a panel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row_ind</strong> (<em>int</em><em> or </em><em>list.</em>) – The row indices (i or [i, j]) of the panel in the dashboard grid.</p></li>
+<li><p><strong>col_ind</strong> (<em>int</em><em> or </em><em>list.</em>) – The column indices of the panel in the dashboard grid.</p></li>
+<li><p><strong>index</strong> (<em>int</em><em> or </em><em>str.</em>) – The panel index as a key in self.panels.</p></li>
+<li><p><strong>label</strong> (<em>str</em>) – The panel label</p></li>
+<li><p><strong>panel_class</strong> (Subclass of <code class="xref py py-class docutils literal notranslate"><span class="pre">Panel</span></code>) – If None, use the default Panel class.</p></li>
+<li><p><strong>kwargs</strong> – Optional keyword arguments to create a Panel instance.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>index</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.DashboardBase.remove_panel">
+<span class="sig-name descname"><span class="pre">remove_panel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.DashboardBase.remove_panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a panel</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>index</strong> (<em>int</em><em> or </em><em>str.</em>) – The panel index.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geospacelab.visualization.mpl._base.</span></span><span class="sig-name descname"><span class="pre">PanelBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_subplot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase.sca">
+<span class="sig-name descname"><span class="pre">sca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase.sca" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set current axes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ax</strong> – the ax instance belong to the attribute axes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase.gca">
+<span class="sig-name descname"><span class="pre">gca</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase.gca" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the current ax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Axes instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase.add_axes">
+<span class="sig-name descname"><span class="pre">add_axes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">major</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase.add_axes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new ax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – </p></li>
+<li><p><strong>major</strong> – </p></li>
+<li><p><strong>label</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase.get_line_collection">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">get_line_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linewidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase.get_line_collection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a set of line segments and a line collection, see also: <span class="xref std std-ref">https://matplotlib.org/2.0.2/examples/pylab_examples/multicolored_line.html</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>z</strong> (<em>x</em><em>, </em><em>y</em><em>,</em>) – The line points (x, y) with the colored z values.</p></li>
+<li><p><strong>cmap</strong> (<em>str</em><em> or </em><em>matplotlib.colors.Colormap</em><em>, </em><em>default: 'jet'.</em>) – The color map for the plot.</p></li>
+<li><p><strong>kwargs</strong> – Other optional keyword arguments forwarded to LineCollection.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The line collection instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+
 
            </div>
            

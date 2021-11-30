@@ -1,7 +1,8 @@
-.. autoclass:: geospacelab.visualization.mplt._base.DashboardBase
+.. autoclass:: geospacelab.visualization.mpl._base.DashboardBase
     :members:
     :inherited-members:
 
-.. autoclass:: geospacelab.visualization.mplt._base.PanelBase
+.. autoclass:: geospacelab.visualization.mpl._base.PanelBase
     :members:
     :inherited-members:
+
