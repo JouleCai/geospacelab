@@ -12,13 +12,15 @@ __docformat__ = "reStructureText"
 import toml
 import pathlib
 import time
-
+import os
 import geospacelab.toolbox.utilities.pylogging as mylog
 
 # datahub_data_root_dir = pathlib.Path("/Users/lcai/01-Work/00-Data/")
 # datahub_data_root_dir = pathlib.Path("/home/lei/afys-data")
 
 package_name = "geospacelab"
+
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
 
 
 class Preferences(object):
@@ -28,10 +30,14 @@ class Preferences(object):
 
         self.user_config = {}
         self.set_user_config()
-        try:
-            self.datahub_data_root_dir = self.user_config['datahub']['data_root_dir']
-        except KeyError:
-            self.datahub_data_root_dir = None
+
+        if on_rtd:
+            self.datahub_data_root_dir = pathlib.Path.home() / 'Geospacelab' / 'Data'
+        else:
+            try:
+                self.datahub_data_root_dir = self.user_config['datahub']['data_root_dir']
+            except KeyError:
+                self.datahub_data_root_dir = None
 
     @property
     def datahub_data_root_dir(self):
