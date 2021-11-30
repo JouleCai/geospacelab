@@ -32,10 +32,16 @@ try:
     default_user_affiliation = preferences.user_config['datahub']['madrigal']['user_email']
 except KeyError:
     print("Inputs for accessing the Madrigal database.")
-    default_user_fullname = input("User's full name: ")
-    default_user_email = input("User's email: ")
-    default_user_affiliation = input("User's affiliation: ")
-    save = input("Save as default? [y]/n: ")
+    if preferences._on_rtd:
+        default_user_fullname = 'GeospaceLab'
+        default_user_email = 'geospacelab@gmail.com'
+        default_user_affiliation = 'GeospaceLab'
+        save = 'y'
+    else:
+        default_user_fullname = input("User's full name: ")
+        default_user_email = input("User's email: ")
+        default_user_affiliation = input("User's affiliation: ")
+        save = input("Save as default? [y]/n: ")
     if save.lower() in ['', 'y', 'yes']:
         uc = preferences.user_config
         uc.setdefault('datahub', {})

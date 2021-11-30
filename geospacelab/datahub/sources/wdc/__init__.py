@@ -24,9 +24,13 @@ The WDC Kyoto does not allow commercial applications of the geomagnetic indices.
 try:
     default_user_email = preferences.user_config['datahub']['wdc']['user_email']
 except KeyError:
-    print("Inputs for accessing the WDC (wdc.kugi.kyoto-u.ac.jp) database.")
-    default_user_email = input("User's email: ")
-    save = input("Save as default? [y]/n: ")
+    if preferences._on_rtd:
+        default_user_email = 'geospacelab@gmail.com'
+        save = 'y'
+    else:
+        print("Inputs for accessing the WDC (wdc.kugi.kyoto-u.ac.jp) database.")
+        default_user_email = input("User's email: ")
+        save = input("Save as default? [y]/n: ")
     if save.lower() in ['', 'y', 'yes']:
         uc = preferences.user_config
         uc.setdefault('datahub', {})

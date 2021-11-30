@@ -24,6 +24,7 @@ on_rtd = os.environ.get('READTHEDOCS') == 'True'
 
 
 class Preferences(object):
+    _on_rtd = on_rtd
 
     def __init__(self):
         self.package_name = package_name
@@ -31,7 +32,7 @@ class Preferences(object):
         self.user_config = {}
         self.set_user_config()
 
-        if on_rtd:
+        if self._on_rtd:
             self.datahub_data_root_dir = pathlib.Path.home() / 'Geospacelab' / 'Data'
         else:
             try:
@@ -69,9 +70,12 @@ class Preferences(object):
 
         if not self._datahub_data_root_dir.is_dir():
             mylog.simpleinfo.info(f"The direction ({self._datahub_data_root_dir}) does not exist!")
-            time.sleep(0.2)
-            result = input("Create it? [y]/n: ")
-            time.sleep(0.2)
+            if self._on_rtd:
+                result = 'y'
+            else:
+                time.sleep(0.2)
+                result = input("Create it? [y]/n: ")
+                time.sleep(0.2)
             if result.lower() in ['', 'y', 'yes']:
                 self._datahub_data_root_dir.mkdir(parents=True, exist_ok=False)
             elif result.lower() in ['n', 'no']:
