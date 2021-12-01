@@ -24,7 +24,7 @@ copyright = '2021, Lei Cai'
 author = 'Lei Cai'
 
 # The full version, including alpha/beta/rc tags
-release = 'beta-v0.2.7'
+release = 'beta-v0.3.1'
 
 
 # -- General configuration ---------------------------------------------------
@@ -37,6 +37,8 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.doctest',
+    'sphinx_copybutton',
     'myst_parser'
 ]
 
@@ -66,10 +68,14 @@ html_static_path = ['_static']
 # Mock importing packages
 autodoc_mock_imports = ['cartopy', 'apexpy']
 autodoc_member_order = 'bysource'
+add_module_names = False
 
 # Settings for napoleon
 napoleon_google_docstring = False
 napoleon_numpy_docstring = True
+
+# Settings for copybutton
+copybutton_prompt_text = ">>> "
 
 # Settings for intersphinx
 intersphinx_mapping = {

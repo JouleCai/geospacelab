@@ -286,6 +286,9 @@ class DatasetModel(object):
     def keys(self):
         return self._variables.keys()
 
+    def items(self):
+        return self._variables.items()
+
     def __setitem__(self, key, value):
         if value is not None:
             if not issubclass(value.__class__, VariableModel):

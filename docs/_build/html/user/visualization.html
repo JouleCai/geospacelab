@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>&lt;no title&gt; &mdash; GeospaceLab beta-v0.2.7 documentation</title>
+  <title>&lt;no title&gt; &mdash; GeospaceLab beta-v0.3.1 documentation</title>
   
 
   
@@ -25,6 +25,8 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -35,6 +37,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="copyright" title="Copyright" href="../copyright.html" /> 
@@ -154,7 +157,7 @@
             
   <dl class="py class">
 <dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.DashboardBase">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geospacelab.visualization.mpl._base.</span></span><span class="sig-name descname"><span class="pre">DashboardBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">figure=None</span></em>, <em class="sig-param"><span class="pre">figure_config=None</span></em>, <em class="sig-param"><span class="pre">figure_class=&lt;class</span> <span class="pre">'geospacelab.visualization.mpl._base.FigureBase'&gt;</span></em>, <em class="sig-param"><span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.DashboardBase" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">DashboardBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">figure=None</span></em>, <em class="sig-param"><span class="pre">figure_config=None</span></em>, <em class="sig-param"><span class="pre">figure_class=&lt;class</span> <span class="pre">'geospacelab.visualization.mpl._base.FigureBase'&gt;</span></em>, <em class="sig-param"><span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.DashboardBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>A dashboard is a collection of panels in a figure or GeospaceLab canvas. The class inherits
 from <a class="reference internal" href="manual.html#geospacelab.datahub.DataHub" title="geospacelab.datahub.DataHub"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataHub</span></code></a></p>
 <dl class="field-list simple">
@@ -218,7 +221,7 @@ from <a class="reference internal" href="manual.html#geospacelab.datahub.DataHub
 
 <dl class="py class">
 <dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geospacelab.visualization.mpl._base.</span></span><span class="sig-name descname"><span class="pre">PanelBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_subplot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">PanelBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_subplot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase.sca">
 <span class="sig-name descname"><span class="pre">sca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase.sca" title="Permalink to this definition">¶</a></dt>

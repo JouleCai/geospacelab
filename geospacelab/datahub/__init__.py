@@ -1,3 +1,14 @@
+"""
+
+The module datahub is the data manager in GeospaceLab. The datahub has three core class-based components:
+
+    - :class:`DataHub <geospacelab.datahub.DataHub>` manages a set of datasets docked or added to the datahub.
+    - :class:`Dataset <geospacelab.datahub.DatasetModel>` manages a set of variables loaded from a data source.
+    - :class:`Variable <geospacelab.datahub.VariableModel>` records the value, error, and various attributes \
+    (e.g., name, label, unit, depends, ndim, ...) of a variable.
+
+"""
+
 # Licensed under the BSD 3-Clause License
 # Copyright (C) 2021 GeospaceLab (geospacelab)
 # Author: Lei Cai, Space Physics and Astronomy, University of Oulu
@@ -7,6 +18,8 @@ __copyright__ = "Copyright 2021, GeospaceLab"
 __license__ = "BSD-3-Clause License"
 __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
+
+# __all__ = ['DataHub', 'DatasetModel', 'VariableModel',]
 
 import importlib
 import datetime
@@ -35,49 +48,101 @@ def example():
     var_2 = dh.assign_variable('T_i')
 
 
+def create_datahub(dt_fr, dt_to, visual='off', datahub_class=None, **kwargs):
+    """
+    Create a datahub object.
+
+    :param dt_fr: The starting time.
+    :type dt_fr: datetime.datetime
+    :param dt_to: The stopping time.
+    :type dt_to: datetime.datetime
+    :param visual: If "on", a Visual object is aggregated to the Variable object.
+    :type visual: {'off', 'on'}, default: 'off'
+    :param datahub_class: If ``None``, create a datahub object based on the
+        default :class:`DataHub <geospacelab.datahub.DataHub>` class.
+    :type datahub_class: DataHub or its subclass
+    :param kwargs: Other optional keyword arguments as inputs to DataHub.
+    :return: dh
+    :rtype: DataHub object
+
+    :Example:
+    >>> import geospacelab.datahub as datahub
+    >>> import datetime
+    >>> dt_fr = datetime.datetime.strptime('20210309' + '0000', '%Y%m%d%H%M')
+    >>> dt_to = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')
+    >>> dh = datahub.create_datahub(dt_fr, dt_to)
+
+    :seealso:: :class:`DataHub <geospacelab.datahub.DataHub>`
+    """
+
+    if datahub_class is None:
+        datahub_class = DataHub
+
+    dh = datahub_class(dt_fr=dt_fr, dt_to=dt_to, visual=visual, **kwargs)
+
+    return dh
+
+
 class DataHub(object):
     """
-    DataHub is the core module to manage the data from different data sources. A DataHub
-    object contains a set of a Dataset objects. A Dataset object contains a set of variables
-    loaded from the dataset.
+    The class DataHub manage a set of datasets from various data sources.
 
-    :param dt_fr: the starting time.
+    :param dt_fr: The starting time.
     :type dt_fr: datetime.datetime
-    :param dt_to: the stopping time.
+    :param dt_to: The stopping time.
     :type dt_to: datetime.datetime
-    :param visual: decide if a Visual object will be added to the variable objects. Options:['off'], 'on'.
-    :type visual: str
-    :param datasets: A dictionary that stores the datasets docked or added to the datahub. \
-The keys (indices) are the integer numbers starting from 1.
-    :type datasets: dict
-    :param variables: A dictionary that stores the variables assigned from their own datasets to the datahub. \
-Typically used for the viewers or outputs.
-    :type variables: dict
+    :param visual: If "on", a Visual object is aggregated to the Variable object.
+    :type visual: {'off', 'on'}, default: 'off'
+    :param datasets: A *dict* records multiple dataset added (:meth:`add_dataset`)
+        or docked (:meth:`dock`) to the datahub.
+        A item (*key:value*) in the *dict* is ``dataset_index``: ``dataset``.
+        **Note:** The ``dataset_index`` is an integer starting from **1**.
+    :type datasets: dict, default: {}.
+    :param variables: A *dict* records the variables assigned from their own datasets.
+        Typically used for the dashboards or the I/O configuration.
+    :type variables: dict, default: {}
 
-    ========
-    :example:
+    **Usage**:
 
+        - Create a DataHub object:
+
+        :Example:
+        >>> import geospacelab.datahub as datahub
+        >>> import datetime
+        >>> dt_fr = datetime.datetime.strptime('20210309' + '0000', '%Y%m%d%H%M')
+        >>> dt_to = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')
+        >>> dh = datahub.DataHub(dt_fr, dt_to)
+
+        :seealso:: :func:`create_datahub <geospacelab.datahub.create_datahub>`
+
+        - Dock a built-in dataset:
+
+        :Example: Dock a EISCAT dataset
+        >>> database_name = 'madrigal'      # built-in sourced database name
+        >>> facility_name = 'eiscat'
+        >>> site = 'UHF'      # facility attributes required, check from the eiscat schedule page
+        >>> antenna = 'UHF'
+        >>> modulation = 'ant'
+        >>> ds_1 = dh.dock(datasource_contents=[database_name, facility_name], site=site, antenna=antenna, modulation=modulation, data_file_type='eiscat-hdf5')
+
+        :seealso:: :meth:`dock`
     """
-    def __init__(self, dt_fr: datetime.datetime = None, dt_to=None, visual='off', **kwargs):
-        """
-        :param dt_fr: starting time, see above
-        :param dt_to: stopping time, see above
-        :param visual: visual attribute, see above
-        :param kwargs: other keywords, used for class inheritance.
-        """
+
+    def __init__(self, dt_fr=None, dt_to=None, visual='off', **kwargs):
         self.dt_fr = dt_fr
         self.dt_to = dt_to
         self.visual = visual
         self.datasets = {}
         self.variables = {}
+        self._current_dataset = None
 
         super().__init__(**kwargs)
 
     def dock(self, datasource_contents, **kwargs):
-        """To dock a sourced dataset.
+        """Dock a built-in or registered dataset.
 
-        :param datasource_contents: the contents that required for docking a sourced dataset. \
-To look up the sourced dataset and the associated contents, call :func:`~geospacelab.datahub.DataHub.list_sourced_datasets()`.
+        :param datasource_contents: the contents that required for docking a sourced dataset.
+            To look up the sourced dataset and the associated contents, call :func:`~geospacelab.datahub.DataHub.list_sourced_datasets()`.
         :type datasource_contents: list
         :param dt_fr: starting time, optional, use datahub.dt_fr if not specified.
         :type dt_fr: datetime.datetime
@@ -85,8 +150,13 @@ To look up the sourced dataset and the associated contents, call :func:`~geospac
         :type dt_to: datetime.datetime
         :param visual: variable attribute, use datahub.visual if not specified.
         :type visual: str
-        :return: a dataset
-        :rtype: object of :class:`~geospacelab.datahub.DatasetModel`
+        :return: ``dataset``
+        :rtype: :class:`Dataset <geospacelab.datahub.DatasetModel>` object
+
+        :Example:
+
+        -------------------
+
         """
         kwargs.setdefault('dt_fr', self.dt_fr)
         kwargs.setdefault('dt_to', self.dt_to)
@@ -116,21 +186,25 @@ To look up the sourced dataset and the associated contents, call :func:`~geospac
 
         return dataset
 
-    def add_dataset(self, *args, kind='temporary', dataset_class=DatasetModel, **kwargs):
-        """Add one or multiple datasets, which is not sourced in the package.
+    def add_dataset(self, *args, kind='temporary', dataset_class=None, **kwargs):
+        """Add one or more datasets, which can be a "temporary" or "user-defined" dataset.
 
-        :param args: a list of the datasets.
-        :param kind: the kind of a dataset, options: ['temporary'], or 'user-defined'. \
-if temporary, a new dataset will be created from the DatasetModel.
-        :param dataset_class: The dataset class as a model.
-        :type dataset_class: DatasetModel subclass.
-        :param kwargs: other keywords
+        :param args: A list of the datasets.
+        :type args: list(dataset)
+        :param kind: The type of a dataset. If temporary, a new dataset will be created from the DatasetModel.
+        :type kind: {'temporary', 'user-defined'}, default: 'temporary'
+        :param dataset_class: If None, the default class is DatasetModel. Used when ``kind='temporary'``.
+        :type dataset_class: DatasetModel or its subclass.
+        :param kwargs: Other keyword arguments forwarded to ``dataset_class``
         :return: None
         """
         kwargs.setdefault('dt_fr', self.dt_fr)
         kwargs.setdefault('dt_to', self.dt_to)
         kwargs.setdefault('visual', self.visual)
         kwargs.setdefault('datasets', [])
+
+        if dataset_class is None:
+            dataset_class = DatasetModel
 
         if kind == 'temporary':
             kwargs.pop('datasets', None)
@@ -143,11 +217,11 @@ if temporary, a new dataset will be created from the DatasetModel.
 
         for dataset in kwargs['datasets']:
             kind = 'user-defined'
-            self._append_dataset(dataset)
             if issubclass(dataset.__class__, DatasetModel):
                 dataset.kind = kind
             else:
                 TypeError('A dataset instance\'s class must be a heritage of the class DatasetModel!')
+            self._append_dataset(dataset)
 
         return None
 
@@ -162,31 +236,63 @@ if temporary, a new dataset will be created from the DatasetModel.
         if dataset.name is None:
             dataset.name = name
         self.datasets[ind] = dataset
-        self._latest_dataset_ind = ind
+        self.set_current_dataset(dataset=dataset)
+
+    def set_current_dataset(self, dataset=None, dataset_index=None):
+        """
+        Set the current dataset.
+
+        :param dataset: A Dataset object.
+        :param dataset_index: The index of the dataset in ``.datasets``.
+        :type dataset_index: int
+        :rtype: None
+        """
+        if dataset is not None:
+            if dataset in self.datasets.values():
+                cds = dataset
+            else:
+                raise ValueError("The input dataset is not aggregated to the datahub!")
+        elif dataset_index is not None:
+            cds = self.datasets[dataset_index]
+        else:
+            raise ValueError("Either dataset or dataset_index must be set!")
+        self._current_dataset = cds
+
+    def get_current_dataset(self, index=False):
+        """
+        Get the current dataset.
+
+        :param index: The index of the dataset.
+        :type index: bool
+        :return: If ``index=False``, dataset object, else dataset_index.
+        """
+
+        if index:
+            datasets_r = {value: key for key, value in self.datasets.items()}
+            res = datasets_r[self._current_dataset]
+        else:
+            res = self._current_dataset
+
+        return res
 
     def get_variable(self, var_name, dataset=None, dataset_index=None):
         """To get a variable from the docked or added dataset.
 
         :param var_name: the name of the queried variable
         :param dataset: the dataset storing the queried variable.
-        :param dataset_index: the index of the dataset in datahub.datasets. \
-if both dataset or dataset_index are not specified, the function will get the \
-variable from the assigned variables.
+        :param dataset_index: the index of the dataset in datahub.datasets.
+            if both dataset or dataset_index are not specified, the function will get the
+            variable from the current dataset.
         :return: object of :class:`~geospacelab.datahub.VariableModel` or None if not existing.
         """
+
         if dataset is None and dataset_index is None:
-            var = None
-            for ind, var in self.variables.items():
-                if var_name == var.name:
-                    var = self.variables[ind]
-            if var is None:
-                mylog.StreamLogger.warning("Cannot find the variable in the datahub assigned variables. Try specify the dataset.")
-            return var
+            dataset = self.get_current_dataset()
 
         if dataset is None:
             dataset = self.datasets[dataset_index]
         elif not issubclass(dataset.__class__, DatasetModel):
-            raise TypeError('A dataset instance\'s class must be a heritage of the class DatasetModel!')
+            raise TypeError('A dataset instance\'s class must be an inheritance of the class DatasetModel!')
 
         if dataset.exist(var_name):
             var = dataset[var_name]
@@ -209,7 +315,7 @@ variable from the assigned variables.
         """
         if dataset is None:
             if dataset_index is None:
-                dataset = self.datasets[self._latest_dataset_ind]  # the latest added dataset
+                dataset = self.get_current_dataset()  # the current dataset
             else:
                 dataset = self.datasets[dataset_index]
         elif not issubclass(dataset.__class__, DatasetModel):
@@ -240,7 +346,7 @@ variable from the assigned variables.
 
     @staticmethod
     def list_sourced_datasets():
-        """To list all the sourced datasets bult-in this package
+        """List all the bult-in data sources this package
 
         The list will be printed in the python console in a \"tree\" view.
         """
@@ -284,7 +390,7 @@ variable from the assigned variables.
         pybasic.dict_print_tree(data_sources, full_value=False, dict_repr=False, value_repr=True, max_level=None)
 
     def list_datasets(self):
-        """ To list all the datasets that have been docked or added to the datahub
+        """ List all the datasets that have been docked or added to the datahub
 
         The list will be printed in the console as a table
         """
@@ -297,7 +403,7 @@ variable from the assigned variables.
         print()
 
     def list_assigned_variables(self):
-        """ To list all the assigned variables that have been docked or added to the datahub
+        """ List all the assigned variables that have been docked or added to the datahub
 
         The list will be printed in the console as a table
         """
