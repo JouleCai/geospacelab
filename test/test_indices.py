@@ -34,6 +34,7 @@ def test():
     layout = [[dst], [asy_d, asy_h, sym_d, sym_h], [ae, au, ao, al], [kp], [hp]]
     tsdb.set_layout(panel_layouts=layout, hspace=0.1)
     tsdb.draw()
+    plt.savefig('example_geomagnetic_indices.png')
     pass
 
 
