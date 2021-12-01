@@ -154,13 +154,15 @@
             
   <dl class="py class">
 <dt class="sig sig-object py" id="geospacelab.datahub.DataHub">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geospacelab.datahub.</span></span><span class="sig-name descname"><span class="pre">DataHub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt_fr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'off'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub" title="Permalink to this definition">¶</a></dt>
-<dd><p>The core of the data manager in GeospaceLab to dock different datasets.</p>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geospacelab.datahub.</span></span><span class="sig-name descname"><span class="pre">DataHub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt_fr</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'off'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub" title="Permalink to this definition">¶</a></dt>
+<dd><p>DataHub is the core module to manage the data from different data sources. A DataHub
+object contains a set of a Dataset objects. A Dataset object contains a set of variables
+loaded from the dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dt_fr</strong> (<em>datetime.datetime</em>) – starting time.</p></li>
-<li><p><strong>dt_to</strong> (<em>datetime.datetime</em>) – stopping time.</p></li>
+<li><p><strong>dt_fr</strong> (<em>datetime.datetime</em>) – the starting time.</p></li>
+<li><p><strong>dt_to</strong> (<em>datetime.datetime</em>) – the stopping time.</p></li>
 <li><p><strong>visual</strong> (<em>str</em>) – decide if a Visual object will be added to the variable objects. Options:[‘off’], ‘on’.</p></li>
 <li><p><strong>datasets</strong> (<em>dict</em>) – A dictionary that stores the datasets docked or added to the datahub. The keys (indices) are the integer numbers starting from 1.</p></li>
 <li><p><strong>variables</strong> (<em>dict</em>) – A dictionary that stores the variables assigned from their own datasets to the datahub. Typically used for the viewers or outputs.</p></li>
