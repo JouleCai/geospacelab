@@ -36,11 +36,14 @@ def example():
 
 
 class DataHub(object):
-    """The core of the data manager in GeospaceLab to dock different datasets.
+    """
+    DataHub is the core module to manage the data from different data sources. A DataHub
+    object contains a set of a Dataset objects. A Dataset object contains a set of variables
+    loaded from the dataset.
 
-    :param dt_fr: starting time.
+    :param dt_fr: the starting time.
     :type dt_fr: datetime.datetime
-    :param dt_to: stopping time.
+    :param dt_to: the stopping time.
     :type dt_to: datetime.datetime
     :param visual: decide if a Visual object will be added to the variable objects. Options:['off'], 'on'.
     :type visual: str
@@ -55,7 +58,7 @@ Typically used for the viewers or outputs.
     :example:
 
     """
-    def __init__(self, dt_fr=None, dt_to=None, visual='off', **kwargs):
+    def __init__(self, dt_fr: datetime.datetime = None, dt_to=None, visual='off', **kwargs):
         """
         :param dt_fr: starting time, see above
         :param dt_to: stopping time, see above

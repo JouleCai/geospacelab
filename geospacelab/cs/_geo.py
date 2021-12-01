@@ -381,9 +381,10 @@ class GEOCSpherical(SpaceSphericalCS):
         lon_shape = self.coords.lon.shape
         if ut_type is datetime.datetime:
 
-            lat, lon, r = aacgm.convert_latlon_arr(in_lat=self.coords.lat.flatten(),
-                                                   in_lon=self.coords.lon.flatten(), height=self.coords.height.flatten(),
-                                                   dtime=self.ut, method_code=method_code)
+            lat, lon, r = aacgm.convert_latlon_arr(
+                in_lat=self.coords.lat.flatten(), in_lon=self.coords.lon.flatten(), height=self.coords.height.flatten(),
+                dtime=self.ut, method_code=method_code
+            )
         else:
             if uts.shape[0] != self.coords.lat.shape[0]:
                 mylog.StreamLogger.error("Datetimes must have the same length as cs!")
