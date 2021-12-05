@@ -25,35 +25,37 @@ class DatasetModel(object):
     for the dataset class and its inheritances.
 
     :param name: The name of the dataset.
-    :type name: str or None.
+    :type name: str or None
     :param kind: The type of the dataset. 'sourced': the data source has been added in the package,
       'temporary': a dataset added temporarily, 'user-defined': a data source defined by the user.
     :type kind: {'sourced', 'temporary', 'user-defined'}
     :param dt_fr: the starting time of the data records.
-    :type dt_fr: datetime.datetime, default: None.
+    :type dt_fr: datetime.datetime, default: None
     :param dt_to: the stopping time of the the data records.
-    :type dt_to: datetime.datetime, default: None.
+    :type dt_to: datetime.datetime, default: None
     :param load_mode: The mode for the dataset to load the data. "AUTO": Automatically searching the data files and load
       the data; "dialog": Open a dialog window and select data files;
       "assigned": Assign files to the attribute ``data_file_paths``.
-    :type load_mode: {"AUTO", "dialog", "data_file_paths"}.
+    :type load_mode: {"AUTO", "dialog", "data_file_paths"}
     :param loader: the loader class used to load the data.
-    :type loader: LoaderModel.
+    :type loader: Loader class
     :param downloader: the downloader class used to download the data.
     :type downloader: DownloaderModel
     :param data_root_dir: The root directory where the data files are stored.
     :type data_root_dir: str or pathlib.Path
     :param data_file_paths: A list of the full paths of the data files.
-    :type data_file_paths: list.
+    :type data_file_paths: list
     :param data_file_num: The number of the data files.
-    :type data_file_num: int.
+    :type data_file_num: int
     :param data_file_ext: The extension of the data files.
-    :type data_file_ext: str.
+    :type data_file_ext: str
     :param data_search_recursive: If True, search the data files in a directory recursively.
-    :type data_search_recursive: bool.
+    :type data_search_recursive: bool
     :param visual: If "on", append the attribute visual to the vairables.
-    :type visual: {'on', 'off'}.
+    :type visual: {'on', 'off'}
     :param time_clip: Clip the time interval in the range of [dt_fr, dt_to].
+    :type time_clip: bool
+
     """
     def __init__(self, **kwargs):
         self._variables = {}

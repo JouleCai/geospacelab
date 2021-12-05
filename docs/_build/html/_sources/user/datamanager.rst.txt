@@ -1,3 +1,5 @@
+.. py:currentmodule:: geospacelab.datahub
+
 .. topic:: Overview
 
     The module datahub is the data manager in GeospaceLab, including three class-based core components:
@@ -23,6 +25,9 @@ to create based a DataHub subclass.
 
 Dataset
 ^^^^^^^^
+
+All the datasets added to :class:`DataHub` are the objects of :class:`DatasetModel` or its subclasses.
+:class:`DatasetModel` is the base class, providing the essential attributes and methods to manage a data source.
 
 .. autoclass:: geospacelab.datahub.DatasetModel
     :members:

@@ -235,10 +235,9 @@ Typically used for the dashboards or the I/O configuration.</p></li>
 <div><ul class="simple">
 <li><p>Create a DataHub object:</p></li>
 </ul>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Example</dt>
-<dd class="field-odd"><p></p></dd>
-</dl>
+<dd class="field-odd"><p>Import the datahub module and create a DataHub object</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geospacelab.datahub</span> <span class="k">as</span> <span class="nn">datahub</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">datetime</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dt_fr</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;20210309&#39;</span> <span class="o">+</span> <span class="s1">&#39;0000&#39;</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M&#39;</span><span class="p">)</span>
@@ -246,19 +245,17 @@ Typically used for the dashboards or the I/O configuration.</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dh</span> <span class="o">=</span> <span class="n">datahub</span><span class="o">.</span><span class="n">DataHub</span><span class="p">(</span><span class="n">dt_fr</span><span class="p">,</span> <span class="n">dt_to</span><span class="p">)</span>
 </pre></div>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">seealso:</dt>
-<dd class="field-odd"><p><a class="reference internal" href="manual.html#geospacelab.datahub.create_datahub" title="geospacelab.datahub.create_datahub"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_datahub</span></code></a></p>
+</dd>
+<dt class="field-even">seealso:</dt>
+<dd class="field-even"><p><a class="reference internal" href="manual.html#geospacelab.datahub.create_datahub" title="geospacelab.datahub.create_datahub"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_datahub</span></code></a></p>
 </dd>
 </dl>
 <ul class="simple">
 <li><p>Dock a built-in dataset:</p></li>
 </ul>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Example</dt>
 <dd class="field-odd"><p>Dock a EISCAT dataset</p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">database_name</span> <span class="o">=</span> <span class="s1">&#39;madrigal&#39;</span>      <span class="c1"># built-in sourced database name</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">facility_name</span> <span class="o">=</span> <span class="s1">&#39;eiscat&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">site</span> <span class="o">=</span> <span class="s1">&#39;UHF&#39;</span>      <span class="c1"># facility attributes required, check from the eiscat schedule page</span>
@@ -267,9 +264,23 @@ Typically used for the dashboards or the I/O configuration.</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds_1</span> <span class="o">=</span> <span class="n">dh</span><span class="o">.</span><span class="n">dock</span><span class="p">(</span><span class="n">datasource_contents</span><span class="o">=</span><span class="p">[</span><span class="n">database_name</span><span class="p">,</span> <span class="n">facility_name</span><span class="p">],</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">antenna</span><span class="o">=</span><span class="n">antenna</span><span class="p">,</span> <span class="n">modulation</span><span class="o">=</span><span class="n">modulation</span><span class="p">,</span> <span class="n">data_file_type</span><span class="o">=</span><span class="s1">&#39;eiscat-hdf5&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">seealso:</dt>
-<dd class="field-odd"><p><a class="reference internal" href="manual.html#geospacelab.datahub.DataHub.dock" title="geospacelab.datahub.DataHub.dock"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dock()</span></code></a></p>
+</dd>
+<dt class="field-even">seealso:</dt>
+<dd class="field-even"><p><a class="reference internal" href="manual.html#geospacelab.datahub.DataHub.dock" title="geospacelab.datahub.DataHub.dock"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dock()</span></code></a></p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p>How to know <code class="docutils literal notranslate"><span class="pre">datasource_contents</span></code> and required inputs?</p></li>
+</ul>
+<dl class="field-list">
+<dt class="field-odd">Example</dt>
+<dd class="field-odd"><p>List the buit-in data sources</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dh</span><span class="o">.</span><span class="n">list_sourced_datasets</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd>
+<dt class="field-even">seealso:</dt>
+<dd class="field-even"><p><a class="reference internal" href="manual.html#geospacelab.datahub.DataHub.list_sourced_datasets" title="geospacelab.datahub.DataHub.list_sourced_datasets"><code class="xref py py-meth docutils literal notranslate"><span class="pre">list_sourced_datasets()</span></code></a></p>
 </dd>
 </dl>
 </div></blockquote>
@@ -293,8 +304,14 @@ To look up the sourced dataset and the associated contents, call <a class="refer
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="manual.html#geospacelab.datahub.DatasetModel" title="geospacelab.datahub.DatasetModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a> object</p>
 </dd>
-<dt class="field-even">Example</dt>
-<dd class="field-even"><p></p></dd>
+<dt class="field-even">Seealso:</dt>
+<dd class="field-even"><p><a class="reference internal" href="manual.html#geospacelab.datahub.DataHub.add_dataset" title="geospacelab.datahub.DataHub.add_dataset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_dataset()</span></code></a></p>
+</dd>
+<dt class="field-odd">Note:</dt>
+<dd class="field-odd"><p>The difference between the methods <a class="reference internal" href="manual.html#geospacelab.datahub.DataHub.dock" title="geospacelab.datahub.DataHub.dock"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dock()</span></code></a> and <a class="reference internal" href="manual.html#geospacelab.datahub.DataHub.add_dataset" title="geospacelab.datahub.DataHub.add_dataset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_dataset()</span></code></a> is that <a class="reference internal" href="manual.html#geospacelab.datahub.DataHub.dock" title="geospacelab.datahub.DataHub.dock"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dock()</span></code></a> adds a built-in data
+source, while <a class="reference internal" href="manual.html#geospacelab.datahub.DataHub.add_dataset" title="geospacelab.datahub.DataHub.add_dataset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_dataset()</span></code></a> add a temporary or user-defined dataset, which is not initially included in the
+package.</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -307,12 +324,15 @@ To look up the sourced dataset and the associated contents, call <a class="refer
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> (<em>list</em><em>(</em><em>dataset</em><em>)</em>) – A list of the datasets.</p></li>
 <li><p><strong>kind</strong> (<em>{'temporary'</em><em>, </em><em>'user-defined'}</em><em>, </em><em>default: 'temporary'</em>) – The type of a dataset. If temporary, a new dataset will be created from the DatasetModel.</p></li>
-<li><p><strong>dataset_class</strong> (<a class="reference internal" href="manual.html#geospacelab.datahub.DatasetModel" title="geospacelab.datahub.DatasetModel"><em>DatasetModel</em></a><em> or </em><em>its subclass.</em>) – If None, the default class is DatasetModel. Used when <code class="docutils literal notranslate"><span class="pre">kind='temporary'</span></code>.</p></li>
+<li><p><strong>dataset_class</strong> (<a class="reference internal" href="manual.html#geospacelab.datahub.DatasetModel" title="geospacelab.datahub.DatasetModel"><em>DatasetModel</em></a><em> or </em><em>its subclass</em>) – If None, the default class is DatasetModel. Used when <code class="docutils literal notranslate"><span class="pre">kind='temporary'</span></code>.</p></li>
 <li><p><strong>kwargs</strong> – Other keyword arguments forwarded to <code class="docutils literal notranslate"><span class="pre">dataset_class</span></code></p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Seealso:</dt>
+<dd class="field-odd"><p><a class="reference internal" href="manual.html#geospacelab.datahub.DataHub.dock" title="geospacelab.datahub.DataHub.dock"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dock()</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -363,7 +383,17 @@ variable from the current dataset.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>object of <a class="reference internal" href="manual.html#geospacelab.datahub.VariableModel" title="geospacelab.datahub.VariableModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">VariableModel</span></code></a> or None if not existing.</p>
+<dd class="field-even"><p>var</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="manual.html#geospacelab.datahub.VariableModel" title="geospacelab.datahub.VariableModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">VariableModel</span></code></a> object or None</p>
+</dd>
+<dt class="field-even">Seealso</dt>
+<dd class="field-even"><p><a class="reference internal" href="manual.html#geospacelab.datahub.DataHub.assign_variable" title="geospacelab.datahub.DataHub.assign_variable"><code class="xref py py-meth docutils literal notranslate"><span class="pre">assign_variable()</span></code></a></p>
+</dd>
+<dt class="field-odd">Note:</dt>
+<dd class="field-odd"><p>Both <a class="reference internal" href="manual.html#geospacelab.datahub.DataHub.get_variable" title="geospacelab.datahub.DataHub.get_variable"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_variable()</span></code></a> and <a class="reference internal" href="manual.html#geospacelab.datahub.DataHub.assign_variable" title="geospacelab.datahub.DataHub.assign_variable"><code class="xref py py-meth docutils literal notranslate"><span class="pre">assign_variable()</span></code></a> return a variable object assigned from a dataset.
+The former only returns the object, and the latter also assign the variable to the <code class="docutils literal notranslate"><span class="pre">DataHub.variables</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -371,7 +401,7 @@ variable from the current dataset.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="geospacelab.datahub.DataHub.assign_variable">
 <span class="sig-name descname"><span class="pre">assign_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_new</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub.assign_variable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Assign a variable from the docked or added dataset.</p>
+<dd><p>Assign a variable to <cite>DataHub.variables</cite> from the docked or added dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -384,6 +414,9 @@ variable from the current dataset.</p></li>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>object of <a class="reference internal" href="manual.html#geospacelab.datahub.VariableModel" title="geospacelab.datahub.VariableModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">VariableModel</span></code></a></p>
+</dd>
+<dt class="field-odd">Seealso:</dt>
+<dd class="field-odd"><p><a class="reference internal" href="manual.html#geospacelab.datahub.DataHub.get_variable" title="geospacelab.datahub.DataHub.get_variable"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_variable()</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -414,6 +447,8 @@ variable from the current dataset.</p></li>
 </div>
 <div class="section" id="dataset">
 <h1>Dataset<a class="headerlink" href="#dataset" title="Permalink to this headline">¶</a></h1>
+<p>All the datasets added to <a class="reference internal" href="manual.html#geospacelab.datahub.DataHub" title="geospacelab.datahub.DataHub"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataHub</span></code></a> are the objects of <a class="reference internal" href="manual.html#geospacelab.datahub.DatasetModel" title="geospacelab.datahub.DatasetModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetModel</span></code></a> or its subclasses.
+<a class="reference internal" href="manual.html#geospacelab.datahub.DatasetModel" title="geospacelab.datahub.DatasetModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetModel</span></code></a> is the base class, providing the essential attributes and methods to manage a data source.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geospacelab.datahub.DatasetModel">
 <em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">DatasetModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DatasetModel" title="Permalink to this definition">¶</a></dt>
@@ -423,23 +458,23 @@ for the dataset class and its inheritances.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em><em> or </em><em>None.</em>) – The name of the dataset.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> or </em><em>None</em>) – The name of the dataset.</p></li>
 <li><p><strong>kind</strong> (<em>{'sourced'</em><em>, </em><em>'temporary'</em><em>, </em><em>'user-defined'}</em>) – The type of the dataset. ‘sourced’: the data source has been added in the package,
 ‘temporary’: a dataset added temporarily, ‘user-defined’: a data source defined by the user.</p></li>
-<li><p><strong>dt_fr</strong> (<em>datetime.datetime</em><em>, </em><em>default: None.</em>) – the starting time of the data records.</p></li>
-<li><p><strong>dt_to</strong> (<em>datetime.datetime</em><em>, </em><em>default: None.</em>) – the stopping time of the the data records.</p></li>
-<li><p><strong>load_mode</strong> (<em>{&quot;AUTO&quot;</em><em>, </em><em>&quot;dialog&quot;</em><em>, </em><em>&quot;data_file_paths&quot;}.</em>) – The mode for the dataset to load the data. “AUTO”: Automatically searching the data files and load
+<li><p><strong>dt_fr</strong> (<em>datetime.datetime</em><em>, </em><em>default: None</em>) – the starting time of the data records.</p></li>
+<li><p><strong>dt_to</strong> (<em>datetime.datetime</em><em>, </em><em>default: None</em>) – the stopping time of the the data records.</p></li>
+<li><p><strong>load_mode</strong> (<em>{&quot;AUTO&quot;</em><em>, </em><em>&quot;dialog&quot;</em><em>, </em><em>&quot;data_file_paths&quot;}</em>) – The mode for the dataset to load the data. “AUTO”: Automatically searching the data files and load
 the data; “dialog”: Open a dialog window and select data files;
 “assigned”: Assign files to the attribute <code class="docutils literal notranslate"><span class="pre">data_file_paths</span></code>.</p></li>
-<li><p><strong>loader</strong> (<em>LoaderModel.</em>) – the loader class used to load the data.</p></li>
+<li><p><strong>loader</strong> (<em>Loader class</em>) – the loader class used to load the data.</p></li>
 <li><p><strong>downloader</strong> (<em>DownloaderModel</em>) – the downloader class used to download the data.</p></li>
 <li><p><strong>data_root_dir</strong> (<em>str</em><em> or </em><em>pathlib.Path</em>) – The root directory where the data files are stored.</p></li>
-<li><p><strong>data_file_paths</strong> (<em>list.</em>) – A list of the full paths of the data files.</p></li>
-<li><p><strong>data_file_num</strong> (<em>int.</em>) – The number of the data files.</p></li>
-<li><p><strong>data_file_ext</strong> (<em>str.</em>) – The extension of the data files.</p></li>
-<li><p><strong>data_search_recursive</strong> (<em>bool.</em>) – If True, search the data files in a directory recursively.</p></li>
-<li><p><strong>visual</strong> (<em>{'on'</em><em>, </em><em>'off'}.</em>) – If “on”, append the attribute visual to the vairables.</p></li>
-<li><p><strong>time_clip</strong> – Clip the time interval in the range of [dt_fr, dt_to].</p></li>
+<li><p><strong>data_file_paths</strong> (<em>list</em>) – A list of the full paths of the data files.</p></li>
+<li><p><strong>data_file_num</strong> (<em>int</em>) – The number of the data files.</p></li>
+<li><p><strong>data_file_ext</strong> (<em>str</em>) – The extension of the data files.</p></li>
+<li><p><strong>data_search_recursive</strong> (<em>bool</em>) – If True, search the data files in a directory recursively.</p></li>
+<li><p><strong>visual</strong> (<em>{'on'</em><em>, </em><em>'off'}</em>) – If “on”, append the attribute visual to the vairables.</p></li>
+<li><p><strong>time_clip</strong> (<em>bool</em>) – Clip the time interval in the range of [dt_fr, dt_to].</p></li>
 </ul>
 </dd>
 </dl>

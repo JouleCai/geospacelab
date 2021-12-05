@@ -106,26 +106,37 @@ class DataHub(object):
 
         - Create a DataHub object:
 
-        :Example:
-        >>> import geospacelab.datahub as datahub
-        >>> import datetime
-        >>> dt_fr = datetime.datetime.strptime('20210309' + '0000', '%Y%m%d%H%M')
-        >>> dt_to = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')
-        >>> dh = datahub.DataHub(dt_fr, dt_to)
+        :Example: Import the datahub module and create a DataHub object
+
+            >>> import geospacelab.datahub as datahub
+            >>> import datetime
+            >>> dt_fr = datetime.datetime.strptime('20210309' + '0000', '%Y%m%d%H%M')
+            >>> dt_to = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')
+            >>> dh = datahub.DataHub(dt_fr, dt_to)
 
         :seealso:: :func:`create_datahub <geospacelab.datahub.create_datahub>`
 
         - Dock a built-in dataset:
 
         :Example: Dock a EISCAT dataset
-        >>> database_name = 'madrigal'      # built-in sourced database name
-        >>> facility_name = 'eiscat'
-        >>> site = 'UHF'      # facility attributes required, check from the eiscat schedule page
-        >>> antenna = 'UHF'
-        >>> modulation = 'ant'
-        >>> ds_1 = dh.dock(datasource_contents=[database_name, facility_name], site=site, antenna=antenna, modulation=modulation, data_file_type='eiscat-hdf5')
+
+            >>> database_name = 'madrigal'      # built-in sourced database name
+            >>> facility_name = 'eiscat'
+            >>> site = 'UHF'      # facility attributes required, check from the eiscat schedule page
+            >>> antenna = 'UHF'
+            >>> modulation = 'ant'
+            >>> ds_1 = dh.dock(datasource_contents=[database_name, facility_name], site=site, antenna=antenna, modulation=modulation, data_file_type='eiscat-hdf5')
 
         :seealso:: :meth:`dock`
+
+        - How to know ``datasource_contents`` and required inputs?
+
+        :Example: List the buit-in data sources
+
+            >>> dh.list_sourced_datasets()
+
+        :seealso:: :meth:`list_sourced_datasets`
+
     """
 
     def __init__(self, dt_fr=None, dt_to=None, visual='off', **kwargs):
@@ -153,7 +164,11 @@ class DataHub(object):
         :return: ``dataset``
         :rtype: :class:`Dataset <geospacelab.datahub.DatasetModel>` object
 
-        :Example:
+        :seealso:: :meth:`add_dataset`
+
+        :note:: The difference between the methods :meth:`dock` and :meth:`add_dataset` is that :meth:`dock` adds a built-in data
+            source, while :meth:`add_dataset` add a temporary or user-defined dataset, which is not initially included in the
+            package.
 
         -------------------
 
@@ -194,9 +209,12 @@ class DataHub(object):
         :param kind: The type of a dataset. If temporary, a new dataset will be created from the DatasetModel.
         :type kind: {'temporary', 'user-defined'}, default: 'temporary'
         :param dataset_class: If None, the default class is DatasetModel. Used when ``kind='temporary'``.
-        :type dataset_class: DatasetModel or its subclass.
+        :type dataset_class: DatasetModel or its subclass
         :param kwargs: Other keyword arguments forwarded to ``dataset_class``
         :return: None
+
+        :seealso:: :meth:`dock`
+
         """
         kwargs.setdefault('dt_fr', self.dt_fr)
         kwargs.setdefault('dt_to', self.dt_to)
@@ -283,7 +301,13 @@ class DataHub(object):
         :param dataset_index: the index of the dataset in datahub.datasets.
             if both dataset or dataset_index are not specified, the function will get the
             variable from the current dataset.
-        :return: object of :class:`~geospacelab.datahub.VariableModel` or None if not existing.
+        :return: var
+        :rtype: :class:`VariableModel <geospacelab.datahub.VariableModel>` object or None
+
+        :seealso: :meth:`assign_variable`
+
+        :note:: Both :meth:`get_variable` and :meth:`assign_variable` return a variable object assigned from a dataset.
+            The former only returns the object, and the latter also assign the variable to the ``DataHub.variables``.
         """
 
         if dataset is None and dataset_index is None:
@@ -304,7 +328,7 @@ class DataHub(object):
         return var
 
     def assign_variable(self, var_name, dataset=None, dataset_index=None, add_new=False, **kwargs):
-        """Assign a variable from the docked or added dataset.
+        """Assign a variable to `DataHub.variables` from the docked or added dataset.
 
         :param var_name: The name of the variable
         :param dataset: The dataset that stores the variable
@@ -312,6 +336,9 @@ class DataHub(object):
         :param add_new: if True, add the variable to the specified dataset and assign to the datahub
         :param kwargs: other keywords to configure the attributes of the variable.
         :return: object of :class:`~geospacelab.datahub.VariableModel`
+
+        :seealso:: :meth:`get_variable`
+
         """
         if dataset is None:
             if dataset_index is None:
