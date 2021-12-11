@@ -644,6 +644,17 @@ class Visual(object):
             self._plot.config(**value)
         else:
             raise TypeError
+
+
+class NDim(int):
+    def __new__(cls, value, extra):
+        return float.__new__(cls, value)
+
+    def __init__(self, value, extra):
+        float.__init__(value)
+        self.extra = extra
+
+
 #
 #
 # class Visual_1(object):
