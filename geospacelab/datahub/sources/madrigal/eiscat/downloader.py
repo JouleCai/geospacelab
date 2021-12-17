@@ -31,10 +31,11 @@ import geospacelab.toolbox.utilities.pydatetime as dttool
 
 def test():
     sites = ['UHF', 'ESR']
-    dt_fr = datetime.datetime(2000, 1, 1)
-    dt_to = datetime.datetime(2021, 10, 30)
+    dt_fr = datetime.datetime(2021, 1, 1)
+    dt_to = datetime.datetime(2021, 12, 30)
     # download_obj = Downloader(dt_fr, dt_to, sites=sites, kind_data="madrigal")
     schedule = EISCATSchedule(dt_fr=dt_fr, dt_to=dt_to)
+    schedule.to_txt()
 
 
 class Downloader(object):
@@ -255,7 +256,7 @@ class EISCATSchedule(object):
         self.monthly = monthly  # True: download the whole month data. False: only for the specific date
         self.search_archives()
         self.analyze_archives()
-        self.to_txt()
+        # self.to_txt()
 
     def search_archives(self):
         """
@@ -310,13 +311,22 @@ class EISCATSchedule(object):
                 exp = info[1]
                 info = item_text[65:-1].split(')')[-1].strip()
 
-                try:
-                    code = info.split('_')[0]
-                    mode = info.split('_')[1]
-                    version = info.split('_')[2]
-                except IndexError:
-                    print('Not a standard experiment {}'.format(info))
-                    continue
+                info_splits = info.split('_')
+                code = info_splits[0]
+                mode = ''
+                version = ''
+                if len(info_splits) > 1:
+                    mode = info_splits[1]
+                if len(info_splits) > 2:
+                    version = info_splits[2]
+
+                # try:
+                #     code = info.split('_')[0]
+                #     mode = info.split('_')[1]
+                #     version = info.split('_')[2]
+                # except IndexError:
+                #     print('Not a standard experiment {}'.format(info))
+                #     continue
 
                 ind_diff = np.diff(inds)
                 ind_gaps = np.where(ind_diff > 3)[0]  # time difference greater than 1.5 h
@@ -359,8 +369,13 @@ class EISCATSchedule(object):
 
         return True
 
-    def to_txt(self):
-        with open(os.path.join(self.root_filepath, "EISCAT_archives.txt"), 'w') as out_file:
+    def to_txt(self, file_name=None, file_path=None):
+        if file_name is None:
+            file_name = "EISCAT_archives.txt"
+        if file_path is None:
+            file_path = self.root_filepath
+
+        with open(os.path.join(file_path, file_name), 'w') as out_file:
             for line in self.experiments:
                 line_str = "{0:<17s}{1:<7s}{2:<5s}{3:<6s}{4:<20s}{5:<25s}{6:<20s}{7:<30s}{8:<65s}".format(
                     line[0].strftime('%Y-%m-%d %H:%M'), line[1].strftime('%H:%M'),
