@@ -485,7 +485,7 @@ class PolarMapPanel(GeoPanel):
             factor = np.pi / 180.
             big_circle_d = 6371. * np.arccos(
                 np.sin(grid_data_lat * factor) * np.sin(grid_lat * factor) +
-                np.cos(grid_data_lat * factor) * np.cos(grid_lat * factor) * np.cos((grid_lon - grid_data_lon) * factor)
+                np.cos(grid_data_lat * factor) * np.cos(grid_lat * factor) * np.abs(np.cos((grid_lon - grid_data_lon)) * factor)
             )
             grid_data = np.where(big_circle_d < 75., grid_data, np.nan)
             ipc = self().pcolormesh(grid_lon, grid_lat, grid_data, transform=ccrs.PlateCarree(), **kwargs)
