@@ -30,12 +30,12 @@ import geospacelab.toolbox.utilities.pydatetime as dttool
 
 
 def test():
-    sites = ['UHF', 'ESR']
-    dt_fr = datetime.datetime(2021, 1, 1)
-    dt_to = datetime.datetime(2021, 12, 30)
-    # download_obj = Downloader(dt_fr, dt_to, sites=sites, kind_data="madrigal")
-    schedule = EISCATSchedule(dt_fr=dt_fr, dt_to=dt_to)
-    schedule.to_txt()
+    sites = ['VHF']
+    dt_fr = datetime.datetime(2010, 1, 1,)
+    dt_to = datetime.datetime(2021, 12, 31)
+    download_obj = Downloader(dt_fr, dt_to, sites=sites, kind_data="madrigal")
+    # schedule = EISCATSchedule(dt_fr=dt_fr, dt_to=dt_to)
+    # schedule.to_txt()
 
 
 class Downloader(object):
@@ -177,7 +177,7 @@ class Downloader(object):
             icodes.extend(instrument_codes[site])
         for icode in icodes:
             exp_list, _, database = madrigal.utilities.list_experiments(
-                icode, self.dt_fr, self.dt_to,madrigal_url=self.madrigal_url)
+                icode, self.dt_fr, self.dt_to, madrigal_url=self.madrigal_url)
             for exp in exp_list:
                 files = database.getExperimentFiles(exp.id)
                 for file in files:
