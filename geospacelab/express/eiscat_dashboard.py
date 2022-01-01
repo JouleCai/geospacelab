@@ -65,14 +65,17 @@ class EISCATDashboard(TSDashboard):
                 beams = np.vstack((beams, beam_array[ind, :]))
                 beams_counts.append(1)
                 beams_sequence_inds.append([ind+1])
-            elif len(ind_beam[0]) == 1:
+            else:
                 beams_counts[ind_beam[0][0]] = beams_counts[ind_beam[0][0]] + 1
                 beams_sequence_inds[ind_beam[0][0]].append(ind+1)
-            else:
-                print(beams)
-                print(beam_array[ind])
-                raise ValueError(f"Several beams have the similar az and el angles, which cannot be identified." +
-                                 " Try to set the error of angles with a larger value! Currently error={error}")
+            # elif len(ind_beam[0]) == 1:
+            #     beams_counts[ind_beam[0][0]] = beams_counts[ind_beam[0][0]] + 1
+            #     beams_sequence_inds[ind_beam[0][0]].append(ind+1)
+            # else:
+            #     print(beams)
+            #     print(beam_array[ind])
+            #     raise ValueError(f"Several beams have the similar az and el angles, which cannot be identified." +
+            #                      " Try to set the error of angles with a larger value! Currently error={error}")
         beams_counts = np.array(beams_counts)
         beams_sequence_inds = np.array(beams_sequence_inds, dtype=object)
         count_ind = np.argsort(-beams_counts)
@@ -97,7 +100,7 @@ class EISCATDashboard(TSDashboard):
                     )
                 )
 
-        return beams, beams_counts
+        return beams, beams_counts, beams_sequence_inds
 
     def save_figure(self, **kwargs):
         file_name = kwargs.pop('file_name', self.title.replace(', ', '_'))
