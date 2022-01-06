@@ -27,9 +27,8 @@ def test_ampere():
 
     ind_t = dataset_ampere.get_time_ind(ut=time1)
     # initialize the polar map
-    pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, boundary_lat=40, mirror_south=True)
+    panel1 = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, boundary_lat=40, mirror_south=True)
 
-    panel1 = viewer.panels[pid]
     panel1.add_coastlines()
 
     fac_ = fac.value[ind_t, :, :]

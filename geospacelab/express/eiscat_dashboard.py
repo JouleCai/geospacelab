@@ -17,6 +17,8 @@ import geospacelab.toolbox.utilities.pylogging as mylog
 
 class EISCATDashboard(TSDashboard):
     def __init__(self, dt_fr, dt_to, **kwargs):
+        kwargs.setdefault('load_mode', 'AUTO')
+
         figure = kwargs.pop('figure', 'new')
         super().__init__(dt_fr=dt_fr, dt_to=dt_to, figure=figure)
         ds_1 = self.dock(datasource_contents=['madrigal', 'eiscat'], **kwargs)

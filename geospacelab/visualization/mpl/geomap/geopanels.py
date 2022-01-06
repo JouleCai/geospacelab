@@ -448,7 +448,7 @@ class PolarMapPanel(GeoPanel):
 
     def add_pcolor(self, data, coords=None, cs=None,
                    c_lim=None, c_scale='linear', c_label=None, **kwargs):
-
+        kwargs.setdefault('shading', 'flat')
         if c_lim is None:
             c_lim = [np.nanmin(data.flatten()), np.nanmax(data.flatten())]
 
