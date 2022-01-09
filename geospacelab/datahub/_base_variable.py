@@ -18,6 +18,151 @@ import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pybasic as basic
 
 
+class VariableBase(np.ndarray):
+
+    _attrs_registered = [
+        'name', 'fullname', 'label',
+        'data_type', 'group',
+        'unit', 'unit_label',
+        'quantity',
+        'value', 'error',
+        'variable_type',
+        'kind',
+        'depends', 'dataset',
+        'visual'
+    ]
+
+    def __new__(cls, arr, copy=True, dtype=None, order='C', subok=False, ndmin=0, **kwargs):
+        if issubclass(arr.__class__, VariableBase):
+            obj_out = arr.clone()
+        else:
+            obj_out = np.array(arr, copy=copy, dtype=dtype, order=order, subok=subok, ndmin=ndmin)
+            obj_out = obj_out.view(cls)
+
+        obj_out.config(**kwargs)
+
+        return obj_out
+
+    def config(self, logging=True, **kwargs):
+        """
+        Configure the variable attributes. If the attribute is not the default attributes, return error.
+
+        :param logging: If True, show logging.
+        :param kwargs: A dictionary of the attributes.
+        :return: None
+        """
+
+        # check registered attributes
+        for key, value in kwargs.items():
+            if key not in self._attrs_registered:
+                raise KeyError(f'The attribute {key} is not registered! Use "add_attr()" to add a new attribute.')
+
+        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
+
+    def add_attr(self, logging=True, **kwargs):
+        """
+        Similar as config, but add a new attribute.
+        """
+
+        self._attrs_registered.extend(kwargs.keys())
+        pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
+
+    def copy_attr(self, obj, to_whom=None, omit_attrs=None):
+        """
+        Copy the attributes from obj to the current instance.
+
+        :param obj: the VariableBase or its subclass instance
+        :type obj: VariableBase instance
+        :param to_whom: The destination instance
+        :type to_whom: VariableBase instance. If ``None``, copy to self
+        :param omit_attrs: The attributes omitted. If None, copy all
+        :type omit_attrs: dict or None
+        """
+
+        if omit_attrs is None:
+            omit_attrs = {}
+
+        if to_whom is None:
+            to_whom = self
+
+        for key in self._attrs_registered:
+            if key in omit_attrs.keys():
+                continue
+            if key == 'visual':
+                to_whom.visual = obj.visual.clone()
+            elif key == 'dataset':
+                to_whom.dataset = obj.dataset
+            else:
+                setattr(to_whom, key, copy.deepcopy(getattr(obj, key)))
+
+        return to_whom
+
+    def clone(self, omit_attrs=None):
+        """
+        Clone a variable and return a new instance.
+
+        :param omit_attrs: The attributes omitted to be copied. If None, copy all.
+        :return: new variable instance
+        """
+
+        obj_new = self.__class__(self.view(np.ndarray))
+        obj_new.copy_attr(self, omit_attrs=omit_attrs)
+
+        return obj_new
+
+    def __array_ufunc__(self, ufunc, method, *inputs, out=None, **kwargs):
+        """
+        This implementation of __array_ufunc__ makes sure that all custom attributes are maintained when a ufunc operation is performed on our class.'''
+        See also :ref:`Propagate attributes <https://stackoverflow.com/questions/51520630/subclassing-numpy-array-propagate-attributes>`.
+        """
+
+        # convert inputs and outputs of class ArraySubclass to np.ndarray to prevent infinite recursion
+        args = ((i.view(np.ndarray) if issubclass(i, VariableBase) else i) for i in inputs)
+        outputs = kwargs.pop('out', None)
+        if outputs:
+            kwargs['out'] = tuple((o.view(np.ndarray) if issubclass(o, VariableBase) else o) for o in outputs)
+        else:
+            outputs = (None,) * ufunc.nout
+
+        # call numpys implementation of __array_ufunc__
+        results = super().__array_ufunc__(ufunc, method, *args, **kwargs)  # pylint: disable=no-member
+        if results is NotImplemented:
+            return NotImplemented
+        if method == 'at':
+            # method == 'at' means that the operation is performed in-place. Therefore, we are done.
+            return
+        # now we need to make sure that outputs that where specified with the 'out' argument are handled corectly:
+        if ufunc.nout == 1:
+            results = (results,)
+        results = tuple((self._copy_attrs_to(result) if output is None else output)
+                        for result, output in zip(results, outputs))
+        return results[0] if len(results) == 1 else results
+
+    def __array_finalize__(self, obj):
+        """
+        Used for handling new instances created by three ways:
+        * Explicit constructor:
+            * self type is ´´cls´´
+            * obj type is ``None``
+        * View casting:
+            * self type is ``cls``
+            * obj type is ``np.ndarray``
+        * Slicing (new from template)
+            * self type is ``cls``
+            * obj type is ``cls``
+        """
+
+        # Nothing needed for new variable or np.ndarray.view()
+        if obj is None or isinstance(obj.__class__, np.ndarray):
+            return None
+
+        if issubclass(obj.__class__, self.__class__):
+            self.copy_attr(obj)
+        # else:
+        #     for attr in getattr(self.__class__, '_attrs_registered'):
+        #         self.__setattr__(attr, cp.deepcopy(getattr(self.__class__, attr)))
+
+
 class VariableModel(object):
     """VariableModel is a base class for a geospace variable with useful attributes
 
