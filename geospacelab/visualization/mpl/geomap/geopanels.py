@@ -485,7 +485,7 @@ class PolarMapPanel(GeoPanel):
             factor = np.pi / 180.
             big_circle_d = 6371. * np.arccos(
                 np.sin(grid_data_lat * factor) * np.sin(grid_lat * factor) +
-                np.cos(grid_data_lat * factor) * np.cos(grid_lat * factor) * np.abs(np.cos((grid_lon - grid_data_lon)) * factor)
+                np.cos(grid_data_lat * factor) * np.cos(grid_lat * factor) * np.cos(np.abs((grid_lon - grid_data_lon) * factor))
             )
             grid_data = np.where(big_circle_d < 75., grid_data, np.nan)
             ipc = self().pcolormesh(grid_lon, grid_lat, grid_data, transform=ccrs.PlateCarree(), **kwargs)
@@ -633,6 +633,18 @@ class PolarMapPanel(GeoPanel):
         # self.add_colorbar(self.major_ax, line, cscale=scale, clabel=clabel)
         # cbar = plt.gcf().colorbar(line, ax=panel.major_ax, pad=0.1, fraction=0.03)
         # cbar.set_label(r'$n_e$' + '\n' + r'(cm$^{-3}$)', rotation=270, labelpad=25)
+
+    def add_sites(self, site_ids=None, coords=None, cs=None, **kwargs):
+        pybasic.dict_set_default(kwargs, s=10, c='k')
+        if cs is None:
+            cs = self.cs
+        if cs != self.cs:
+            cs_new = self.cs_transform(cs_fr=cs,coords=coords)
+        else:
+            cs_new = self.cs_transform(cs_fr=cs, coords=coords)
+        
+        isc = self().scatter(cs_new['lon'], cs_new['lat'], transform=ccrs.PlateCarree(), **kwargs)
+        return isc
 
     def add_colorbar(self, im, ax=None, figure=None,
                      c_scale='linear', c_label=None,

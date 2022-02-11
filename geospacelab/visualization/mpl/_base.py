@@ -324,6 +324,10 @@ class DashboardBase(object):
             figure = figure_obj
         elif issubclass(figure_obj.__class__, plt.Figure):
             figure = figure_obj
+        elif figure_obj=='off':
+            figure = 'off'
+            self._figure_ref = None
+            return
         else:
             raise TypeError
 

@@ -6,13 +6,13 @@ import geospacelab.visualization.mpl.geomap.geodashboards as geomap
 
 
 def test_ampere():
-    dt_fr = datetime.datetime(2016, 3, 14, 8)
-    dt_to = datetime.datetime(2016, 3, 14, 23, 59)
-    time1 = datetime.datetime(2016, 3, 14, 21, 10)
+    dt_fr = datetime.datetime(2016, 10, 23, 16)
+    dt_to = datetime.datetime(2016, 10, 23, 23, 59)
+    time1 = datetime.datetime(2016, 10, 23, 18, 10)
     pole = 'N'
     load_mode = 'assigned'
     # specify the file full path
-    data_file_paths = ['/home/lei/afys-data/JHUAPL/AMPERE/Fitted/201603/AMPERE_fitted_20160314.0000.86400.600.north.grd.ncdf']
+    data_file_paths = ['/home/lei/afys-data/JHUAPL/AMPERE/Fitted/201610/20161023.0000.86400.120.north.grd.ncdf']
 
     viewer = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)})
     # viewer.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole='N', sat_id='f17', orbit_id='46863')
@@ -27,7 +27,7 @@ def test_ampere():
 
     ind_t = dataset_ampere.get_time_ind(ut=time1)
     # initialize the polar map
-    panel1 = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, boundary_lat=40, mirror_south=True)
+    panel1 = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, boundary_lat=60, mirror_south=True)
 
     panel1.add_coastlines()
 

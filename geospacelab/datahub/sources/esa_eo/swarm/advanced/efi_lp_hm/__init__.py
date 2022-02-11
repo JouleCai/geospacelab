@@ -13,16 +13,16 @@ from geospacelab import preferences as prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
-from geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_tct.loader import Loader as default_Loader
-from geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_tct.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_tct.variable_config as var_config
+from geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_tct02.loader import Loader as default_Loader
+from geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_tct02.downloader import Downloader as default_Downloader
+import geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_tct02.variable_config as var_config
 
 
 default_dataset_attrs = {
     'database': esaeo_database,
     'facility': swarm_facility,
-    'instrument': 'EFI-TII',
-    'product': 'TCT02',
+    'instrument': 'EFI-LP',
+    'product': 'HM02',
     'data_file_ext': 'cdf',
     'product_version': 'latest',
     'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Advanced',
@@ -38,16 +38,28 @@ default_dataset_attrs = {
 }
 
 default_variable_names = [
-    'SC_DATETIME', 'SC_GEO_LAT', 'SC_GEO_LON', 'SC_GEO_r',
-    'SC_QD_LAT', 'SC_QD_MLT',
-    'v_i_H_x', 'v_i_H_x_err', 'v_i_V_x', 'v_i_V_x_err', 'v_i_H_y', 'v_i_H_y_err',
-    'v_i_V_z', 'v_i_V_z_err',
-    'v_SC_N', 'v_SC_E', 'v_SC_C',
-    'E_H_x', 'E_H_y', 'E_H_z',
-    'E_V_x', 'E_V_y', 'E_V_z',
-    'B_x', 'B_y', 'B_z',
-    'v_i_CR_x', 'v_i_CR_y', 'v_i_CR_z',
-    'QUALITY_FLAG', 'CALIB_FLAG',
+    'SC_DATETIME',
+    'SC_GEO_LAT',
+    'SC_GEO_LON',
+    'SC_GEO_ALT',
+    'SC_GEO_r',
+    'SC_QD_LAT',
+    'SC_SZA',
+    'SC_SAz',
+    'SC_ST',
+    'SC_DIP_LAT',
+    'SC_DIP_LON',
+    'SC_QD_MLT',
+    'SC_AACGM_LAT',
+    'SC_AACGM_LON',
+    'n_e',
+    'T_e_HGN',
+    'T_e_LGN',
+    'T_e',
+    'V_s_HGN',
+    'V_s_LGN',
+    'V_s',
+    'QUALITY_FLAG'
     ]
 
 # default_data_search_recursive = True
@@ -63,8 +75,8 @@ class Dataset(datahub.DatasetModel):
 
         self.database = kwargs.pop('database', 'ESA/EarthOnline')
         self.facility = kwargs.pop('facility', 'SWARM')
-        self.instrument = kwargs.pop('instrument', 'EFI-TII')
-        self.product = kwargs.pop('product', 'TCT02')
+        self.instrument = kwargs.pop('instrument', 'EFI-LP')
+        self.product = kwargs.pop('product', 'HM02')
         self.product_version = kwargs.pop('product', '')
         self.local_latest_version = ''
         self.allow_download = kwargs.pop('allow_download', False)

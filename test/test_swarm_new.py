@@ -13,7 +13,7 @@ def test_swarm():
 
     viewer = ts_viewer.TimeSeriesViewer(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)})
 
-    viewer.dock(datasource_contents=['esa_eo', 'swarm', 'advanced', 'efi_tct'], product='TCT02', sat_id='C', quality_control=True)
+    viewer.dock(datasource_contents=['esa_eo', 'swarm', 'advanced', 'efi_tct02'], product='TCT02', sat_id='C', quality_control=True)
 
     plt.savefig('swarm_example', dpi=300)
     plt.show()
