@@ -203,7 +203,8 @@ class Dataset(datahub.DatasetModel):
             if (not done and self.allow_download) or self.force_download:
                 done = self.download_data()
                 if done:
-                    initial_file_dir = initial_file_dir
+                    self._validate_attrs()
+                    initial_file_dir = self.data_root_dir
                     done = super().search_data_files(
                         initial_file_dir=initial_file_dir,
                         search_pattern=search_pattern,

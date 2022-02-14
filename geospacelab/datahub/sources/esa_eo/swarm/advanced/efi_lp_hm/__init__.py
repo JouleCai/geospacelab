@@ -13,16 +13,16 @@ from geospacelab import preferences as prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
-from geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_tct02.loader import Loader as default_Loader
-from geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_tct02.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_tct02.variable_config as var_config
+from geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_lp_hm.loader import Loader as default_Loader
+from geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_lp_hm.downloader import Downloader as default_Downloader
+import geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_lp_hm.variable_config as var_config
 
 
 default_dataset_attrs = {
     'database': esaeo_database,
     'facility': swarm_facility,
     'instrument': 'EFI-LP',
-    'product': 'HM02',
+    'product': 'LP_HM',
     'data_file_ext': 'cdf',
     'product_version': 'latest',
     'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Advanced',
@@ -43,13 +43,13 @@ default_variable_names = [
     'SC_GEO_LON',
     'SC_GEO_ALT',
     'SC_GEO_r',
-    'SC_QD_LAT',
     'SC_SZA',
     'SC_SAz',
     'SC_ST',
     'SC_DIP_LAT',
     'SC_DIP_LON',
     'SC_QD_MLT',
+    'SC_QD_LAT',
     'SC_AACGM_LAT',
     'SC_AACGM_LON',
     'n_e',
@@ -58,7 +58,7 @@ default_variable_names = [
     'T_e',
     'V_s_HGN',
     'V_s_LGN',
-    'V_s',
+    'SC_U',
     'QUALITY_FLAG'
     ]
 
@@ -113,11 +113,11 @@ class Dataset(datahub.DatasetModel):
         self.data_root_dir = self.data_root_dir / self.instrument / self.product
 
         if str(self.product_version) and self.product_version != 'latest':
-            self.data_root_dir = self.data_root_dir / self.product_version
+            self.data_root_dir = self._data_root_dir / self.product_version
         else:
             self.product_version = 'latest'
             try:
-                dirs_product_version = [f.name for f in self.data_root_dir.iterdir() if f.is_dir()]
+                dirs_product_version = [f.name for f in self._data_root_dir.iterdir() if f.is_dir()]
             except FileNotFoundError:
                 dirs_product_version = []
                 self.force_download = True
@@ -127,7 +127,7 @@ class Dataset(datahub.DatasetModel):
 
             if list(dirs_product_version):
                 self.local_latest_version = max(dirs_product_version)
-                self.data_root_dir = self.data_root_dir / self.local_latest_version
+                self.data_root_dir = self._data_root_dir / self.local_latest_version
                 if not self.force_download:
                     mylog.simpleinfo.info(
                         "Note: Loading the local files " +
@@ -215,7 +215,8 @@ class Dataset(datahub.DatasetModel):
             if (not done and self.allow_download) or self.force_download:
                 done = self.download_data()
                 if done:
-                    initial_file_dir = initial_file_dir
+                    self._validate_attrs()
+                    initial_file_dir = self.data_root_dir
                     done = super().search_data_files(
                         initial_file_dir=initial_file_dir,
                         search_pattern=search_pattern,

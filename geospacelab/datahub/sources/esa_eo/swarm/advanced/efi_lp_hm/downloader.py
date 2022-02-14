@@ -18,7 +18,7 @@ class Downloader(DownloaderModel):
     def __init__(
             self, dt_fr, dt_to,
             sat_id=None,
-            data_type='HM02',
+            data_type='LP_HM',
             file_version=None,
             data_file_root_dir=None,
             ftp_data_dir=None,

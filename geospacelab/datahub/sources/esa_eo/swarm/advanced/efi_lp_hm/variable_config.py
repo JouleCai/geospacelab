@@ -11,6 +11,8 @@ __docformat__ = "reStructureText"
 from geospacelab.datahub import VariableModel as Var
 import geospacelab.visualization.mpl.colormaps as cm
 
+import numpy as np
+
 database = 'ESA/EarthOnline'
 
 timestamps = {
@@ -35,112 +37,19 @@ default_plot_config = {
 configured_variables = {}
 visual = 'on'
 
-depend_0 = {'UT': 'DATETIME'}
-depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
+depend_0 = {'UT': 'SC_DATETIME'}
+# depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
 
 ####################################################################################################################
-var_name = 'v_i_H_x'
+var_name = 'n_e'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
-var.fullname = 'TII-H ion velocity (x component)'
-var.label = r'$v_{ix}^{(H)}$'
-var.unit = 'm/s'
-var.group = r'$v_i$'
-var.error = var_name + '_err'
-var.depends = {0: depend_0}
-# set plot attrs
-plot_config = var.visual.plot_config
-plot_config.config(**default_plot_config)
-plot_config.style = '1E'
-# set axis attrs
-axis = var.visual.axis
-axis[1].data = "@v.value"
-axis[1].lim = [-2000, 2000]
-axis[1].label = '@v.group'
-axis[1].unit = ''
-axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
-
-configured_variables[var_name] = var
-
-####################################################################################################################
-var_name = 'v_i_H_y'
-var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var.fullname = 'TII-H ion velocity (y component)'
-var.label = r'$v_{iy}^{(H)}$'
-var.unit = 'm/s'
-var.group = r'$v_i$'
-var.error = var_name + '_err'
-var.depends = {0: depend_0}
-# set plot attrs
-plot_config = var.visual.plot_config
-plot_config.config(**default_plot_config)
-plot_config.style = '1E'
-# set axis attrs
-axis = var.visual.axis
-axis[1].data = "@v.value"
-axis[1].lim = [-2000, 2000]
-axis[1].label = '@v.group'
-axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
-
-configured_variables[var_name] = var
-
-####################################################################################################################
-var_name = 'v_i_V_z'
-var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var.fullname = 'TII-V ion velocity (z component)'
-var.label = r'$v_{iz}^{(V)}$'
-var.unit = 'm/s'
-var.group = r'$v_i$'
-var.error = var_name + '_err'
-var.depends = {0: depend_0}
-# set plot attrs
-plot_config = var.visual.plot_config
-plot_config.config(**default_plot_config)
-plot_config.style = '1E'
-# set axis attrs
-axis = var.visual.axis
-axis[1].data = "@v.value"
-axis[1].lim = [-2000, 2000]
-axis[1].label = '@v.group'
-axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
-
-configured_variables[var_name] = var
-
-####################################################################################################################
-var_name = 'v_i_V_x'
-var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var.fullname = 'TII-V ion velocity (x component)'
-var.label = r'$v_{ix}^{(V)}$'
-var.group = r'$v_i$'
-var.error = var_name + '_err'
-var.depends = {0: depend_0}
-# set plot attrs
-plot_config = var.visual.plot_config
-plot_config.config(**default_plot_config)
-plot_config.style = '1E'
-# set axis attrs
-axis = var.visual.axis
-axis[1].data = "@v.value"
-axis[1].lim = [-2000, 2000]
-axis[1].label = '@v.group'
-axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
-
-configured_variables[var_name] = var
-
-####################################################################################################################
-var_name = 'B_x'
-var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var.fullname = 'Magnetic field (x component)'
-var.label = r'$B_x$'
-var.group = r'$B_x$'
+var.fullname = 'Plasma density from ion current'
+var.label = r'$n_e$'
+var.unit = 'cm-3'
+var.unit_label = r'cm$^{-3}$'
+var.group = r'$n_e$'
+# var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
@@ -149,10 +58,106 @@ plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-2000, 2000]
+# axis[1].lim = [np.nan, np.nan]
+axis[1].label = '@v.group'
+axis[1].unit = ''
+axis[2].label = '@v.label'
+axis[1].unit = '@v.unit_label'
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'T_e_HGN'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Electron temperature from the high gain probe'
+var.label = r'$T_e^{H}$'
+var.unit = 'K'
+var.group = r'$T$'
+# var.error = var_name + '_err'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+# axis[1].lim = [-2000, 2000]
+axis[1].label = '@v.group'
+axis[2].label = '@v.label'
+axis[1].unit = '@v.unit_label'
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'T_e_LGN'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Electron temperature from the low gain probe'
+var.label = r'$T_e^{L}$'
+var.unit = 'K'
+var.group = r'$T$'
+# var.error = var_name + '_err'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+# axis[1].lim = [-2000, 2000]
+axis[1].label = '@v.group'
+axis[2].label = '@v.label'
+axis[1].unit = '@v.unit_label'
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'T_e'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Electron temperature blended'
+var.label = r'$T_e$'
+var.unit = 'K'
+var.group = r'$T$'
+# var.error = var_name + '_err'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [0, 10000]
+axis[1].label = '@v.group'
+axis[2].label = '@v.label'
+axis[1].unit = '@v.unit_label'
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'QUALITY_FLAG'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Flag bits indicating data quality or properties'
+var.label = r'Flag'
+var.unit = ''
+var.group = r''
+# var.error = var_name + '_err'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+# axis[1].lim = [-2000, 2000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
-
 
 configured_variables[var_name] = var
