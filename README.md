@@ -6,7 +6,7 @@
 ![](https://tokei.rs/b1/github.com/JouleCai/geospacelab)
 
 
-To collect, manage, and visualize geospace data in an easy and fast way. The documentation can be found 
+To collect, manage, and visualize geospace data, aiming to speed up the research in space physics. The documentation can be found 
 on [readthedocs.io](https://geospacelab.readthedocs.io/en/latest/).
 
 ## Features
