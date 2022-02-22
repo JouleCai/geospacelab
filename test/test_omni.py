@@ -5,8 +5,8 @@ import geospacelab.visualization.mpl.dashboards as dashboards
 
 
 def test():
-    dt_fr = datetime.datetime(2021, 1, 15, 0)
-    dt_to = datetime.datetime(2021, 1, 15, 23)
+    dt_fr = datetime.datetime(2021, 3, 23, 0)
+    dt_to = datetime.datetime(2021, 3, 23, 23)
     dashboard = dashboards.TSDashboard(dt_fr=dt_fr, dt_to=dt_to)
     ds1 = dashboard.dock(datasource_contents=['cdaweb', 'omni'])
     ds1.load_data()
