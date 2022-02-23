@@ -21,6 +21,7 @@ to create based a DataHub subclass.
 
 .. autoclass:: geospacelab.datahub::DataHub
     :members:
+    :special-members: __init__
     :inherited-members:
 
 Dataset

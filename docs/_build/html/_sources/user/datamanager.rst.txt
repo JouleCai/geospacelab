@@ -21,13 +21,14 @@ to create based a DataHub subclass.
 
 .. autoclass:: geospacelab.datahub::DataHub
     :members:
+    :special-members: __init__
     :inherited-members:
 
 Dataset
 ^^^^^^^^
 
 All the datasets added to :class:`DataHub` are the objects of :class:`DatasetModel` or its subclasses.
-:class:`DatasetModel` is the base class, providing the essential attributes and methods to manage a data source.
+:class:`DatasetModel` is the base class, providing the essential attributes and methods to manage a data source. See details below:
 
 .. autoclass:: geospacelab.datahub.DatasetModel
     :members:
