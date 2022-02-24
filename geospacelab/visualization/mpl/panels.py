@@ -19,7 +19,7 @@ import matplotlib.dates as mpl_dates
 from scipy.interpolate import interp1d
 
 from geospacelab.visualization.mpl._base import PanelBase
-from geospacelab.datahub._base_variable import VariableModel
+from geospacelab.datahub.__variable_base__ import VariableBase as VariableModel
 import geospacelab.toolbox.utilities.numpyarray as arraytool
 import geospacelab.visualization.mpl.axis_ticks as ticktool
 import geospacelab.toolbox.utilities.pybasic as basic
@@ -730,7 +730,7 @@ class Panel1(object):
 
 
 def test_tspanel():
-    from geospacelab.express.eiscat_viewer import EISCATViewer
+    from geospacelab.express.eiscat_dashboard import EISCATDashboard
     dt_fr = datetime.datetime.strptime('20211010' + '1700', '%Y%m%d%H%M')
     dt_to = datetime.datetime.strptime('20211010' + '2100', '%Y%m%d%H%M')
 
@@ -740,7 +740,7 @@ def test_tspanel():
     load_mode = 'AUTO'
     data_file_type = 'eiscat-hdf5'
 
-    viewer = EISCATViewer(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
+    viewer = EISCATDashboard(dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation,
                                  data_file_type=data_file_type, load_mode=load_mode, status_control=True,
                                  residual_control=True)
 

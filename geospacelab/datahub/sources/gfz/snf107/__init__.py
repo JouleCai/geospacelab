@@ -46,7 +46,7 @@ default_variable_names = ['DATETIME', 'SN', 'BSRN', 'BSRN_Days', 'F107_ADJ', 'F1
 default_attrs_required = []
 
 
-class Dataset(datahub.DatasetModel):
+class Dataset(datahub.DatasetSourced):
     def __init__(self, **kwargs):
         kwargs = basic.dict_set_default(kwargs, **default_dataset_attrs)
 

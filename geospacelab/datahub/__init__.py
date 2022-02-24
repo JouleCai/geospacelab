@@ -27,9 +27,11 @@ import pathlib
 
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pybasic as pybasic
-from geospacelab.datahub._base_metadata import *
-from geospacelab.datahub._base_dataset import DatasetModel
-from geospacelab.datahub._base_variable import VariableModel
+from geospacelab.datahub.__metadata_base__ \
+    import DatabaseModel, MetadataModel, FacilityModel, SiteModel, ProductModel, InstrumentModel
+from geospacelab.datahub.__dataset_base__ import DatasetBase, DatasetUser, DatasetSourced
+from geospacelab.datahub.__variable_base__ import Visual
+from geospacelab.datahub.__variable_base__ import VariableBase as VariableModel
 from geospacelab import preferences as pfr
 
 
@@ -132,7 +134,7 @@ class DataHub(object):
 
     """
 
-    __dataset_model__ = DatasetModel
+    __dataset_model__ = DatasetBase
     __variable_model__ = VariableModel
 
     def __init__(self, dt_fr=None, dt_to=None, visual='off', **kwargs):
@@ -155,7 +157,7 @@ class DataHub(object):
 
         super().__init__(**kwargs)
 
-    def dock(self, datasource_contents, **kwargs) -> __dataset_model__:
+    def dock(self, datasource_contents, **kwargs) -> DatasetSourced:
         """Dock a built-in or registered dataset.
 
         :param datasource_contents: the contents that required for docking a sourced dataset.
@@ -242,10 +244,10 @@ class DataHub(object):
 
         for dataset in kwargs['datasets']:
             kind = 'user-defined'
-            if issubclass(dataset.__class__, DatasetModel):
+            if issubclass(dataset.__class__, DatasetUser):
                 dataset.kind = kind
             else:
-                TypeError('A dataset instance\'s class must be a heritage of the class DatasetModel!')
+                TypeError('A dataset instance\'s class must be a heritage of DatasetUser!')
             self._append_dataset(dataset)
 
         return None
@@ -323,8 +325,8 @@ class DataHub(object):
 
         if dataset is None:
             dataset = self.datasets[dataset_index]
-        elif not issubclass(dataset.__class__, DatasetModel):
-            raise TypeError('A dataset instance\'s class must be an inheritance of the class DatasetModel!')
+        elif not issubclass(dataset.__class__, DatasetBase):
+            raise TypeError('A dataset instance\'s class must be an inheritance of DatasetBase!')
 
         if dataset.exist(var_name):
             var = dataset[var_name]
@@ -353,8 +355,8 @@ class DataHub(object):
                 dataset = self.get_current_dataset()  # the current dataset
             else:
                 dataset = self.datasets[dataset_index]
-        elif not issubclass(dataset.__class__, DatasetModel):
-            raise TypeError('A dataset instance\'s class must be a heritage of the class DatasetModel!')
+        elif not issubclass(dataset.__class__, DatasetBase):
+            raise TypeError('A dataset instance\'s class must be a heritage of the class DatasetBase!')
 
         var = self.get_variable(var_name, dataset=dataset, dataset_index=dataset_index)
 

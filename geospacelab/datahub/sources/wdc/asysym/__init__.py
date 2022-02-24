@@ -43,7 +43,7 @@ default_variable_names = ['DATETIME', 'ASY_D', 'ASY_H', 'SYM_D', 'SYM_H']
 default_attrs_required = []
 
 
-class Dataset(datahub.DatasetModel):
+class Dataset(datahub.DatasetSourced):
     def __init__(self, **kwargs):
         kwargs = basic.dict_set_default(kwargs, **default_dataset_attrs)
 

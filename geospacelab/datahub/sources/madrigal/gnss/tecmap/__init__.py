@@ -32,7 +32,7 @@ default_variable_names = ['DATETIME', 'GEO_LON', 'GEO_LAT', 'TEC_MAP']
 default_attrs_required = []
 
 
-class Dataset(datahub.DatasetModel):
+class Dataset(datahub.DatasetSourced):
     def __init__(self, **kwargs):
         kwargs = basic.dict_set_default(kwargs, **default_dataset_attrs)
 

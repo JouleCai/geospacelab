@@ -51,7 +51,7 @@ default_variable_names = ['DATETIME', 'SC_ID_IMF', 'SC_ID_PLS', 'IMF_PTS', 'PLS_
 default_attrs_required = ['omni_type', 'omni_res']
 
 
-class Dataset(datahub.DatasetModel):
+class Dataset(datahub.DatasetSourced):
     def __init__(self, **kwargs):
         kwargs = basic.dict_set_default(kwargs, **default_dataset_attrs)
 

@@ -18,190 +18,152 @@ import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pybasic as basic
 
 
-class VariableBase(np.ndarray):
+class Visual(object):
+    """
+    The Visual class is used for setting the visualization attributes appending to a variable.
 
-    _attrs_registered = [
-        'name', 'fullname', 'label',
-        'data_type', 'group',
-        'unit', 'unit_label',
-        'quantity',
-        'value', 'error',
-        'variable_type',
-        'kind',
-        'depends', 'dataset',
-        'visual'
-    ]
 
-    def __new__(cls, arr, copy=True, dtype=None, order='C', subok=False, ndmin=0, **kwargs):
-        if issubclass(arr.__class__, VariableBase):
-            obj_out = arr.clone()
-        else:
-            obj_out = np.array(arr, copy=copy, dtype=dtype, order=order, subok=subok, ndmin=ndmin)
-            obj_out = obj_out.view(cls)
+    """
 
-        obj_out.config(**kwargs)
+    def __init__(self, **kwargs):
+        self._axis = {}
+        self.variable = None
+        self._ndim = None
 
-        return obj_out
+        self.variable = kwargs.pop('variable', None)
+        self.axis = kwargs.pop('axis', None)
+        self.plot_config = kwargs.pop('plot_config', VisualPlotConfig())
+        self.ndim = kwargs.pop('ndim', self._ndim)
 
     def config(self, logging=True, **kwargs):
-        """
-        Configure the variable attributes. If the attribute is not the default attributes, return error.
-
-        :param logging: If True, show logging.
-        :param kwargs: A dictionary of the attributes.
-        :return: None
-        """
-
-        # check registered attributes
-        for key, value in kwargs.items():
-            if key not in self._attrs_registered:
-                raise KeyError(f'The attribute {key} is not registered! Use "add_attr()" to add a new attribute.')
-
         pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
 
     def add_attr(self, logging=True, **kwargs):
-        """
-        Similar as config, but add a new attribute.
-        """
-
-        self._attrs_registered.extend(kwargs.keys())
         pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
 
-    def copy_attr(self, obj, to_whom=None, omit_attrs=None):
-        """
-        Copy the attributes from obj to the current instance.
+    def clone(self):
+        kwargs = {
+            'variable': self.variable,
+            'axis': copy.deepcopy(self.axis),
+            'plot_config': copy.deepcopy(self.plot_config),
+            'ndim': copy.deepcopy(self.ndim)
+        }
 
-        :param obj: the VariableBase or its subclass instance
-        :type obj: VariableBase instance
-        :param to_whom: The destination instance
-        :type to_whom: VariableBase instance. If ``None``, copy to self
-        :param omit_attrs: The attributes omitted. If None, copy all
-        :type omit_attrs: dict or None
-        """
+        return self.__class__(**kwargs)
 
-        if omit_attrs is None:
-            omit_attrs = {}
-
-        if to_whom is None:
-            to_whom = self
-
-        for key in self._attrs_registered:
-            if key in omit_attrs.keys():
-                continue
-            if key == 'visual':
-                to_whom.visual = obj.visual.clone()
-            elif key == 'dataset':
-                to_whom.dataset = obj.dataset
-            else:
-                setattr(to_whom, key, copy.deepcopy(getattr(obj, key)))
-
-        return to_whom
-
-    def clone(self, omit_attrs=None):
-        """
-        Clone a variable and return a new instance.
-
-        :param omit_attrs: The attributes omitted to be copied. If None, copy all.
-        :return: new variable instance
-        """
-
-        obj_new = self.__class__(self.view(np.ndarray))
-        obj_new.copy_attr(self, omit_attrs=omit_attrs)
-
-        return obj_new
-
-    def __array_ufunc__(self, ufunc, method, *inputs, out=None, **kwargs):
-        """
-        This implementation of __array_ufunc__ makes sure that all custom attributes are maintained when a ufunc operation is performed on our class.'''
-        See also :ref:`Propagate attributes <https://stackoverflow.com/questions/51520630/subclassing-numpy-array-propagate-attributes>`.
-        """
-
-        # convert inputs and outputs of class ArraySubclass to np.ndarray to prevent infinite recursion
-        args = ((i.view(np.ndarray) if issubclass(i, VariableBase) else i) for i in inputs)
-        outputs = kwargs.pop('out', None)
-        if outputs:
-            kwargs['out'] = tuple((o.view(np.ndarray) if issubclass(o, VariableBase) else o) for o in outputs)
-        else:
-            outputs = (None,) * ufunc.nout
-
-        # call numpys implementation of __array_ufunc__
-        results = super().__array_ufunc__(ufunc, method, *args, **kwargs)  # pylint: disable=no-member
-        if results is NotImplemented:
-            return NotImplemented
-        if method == 'at':
-            # method == 'at' means that the operation is performed in-place. Therefore, we are done.
-            return
-        # now we need to make sure that outputs that where specified with the 'out' argument are handled corectly:
-        if ufunc.nout == 1:
-            results = (results,)
-        results = tuple((self._copy_attrs_to(result) if output is None else output)
-                        for result, output in zip(results, outputs))
-        return results[0] if len(results) == 1 else results
-
-    def __array_finalize__(self, obj):
-        """
-        Used for handling new instances created by three ways:
-        * Explicit constructor:
-            * self type is ´´cls´´
-            * obj type is ``None``
-        * View casting:
-            * self type is ``cls``
-            * obj type is ``np.ndarray``
-        * Slicing (new from template)
-            * self type is ``cls``
-            * obj type is ``cls``
-        """
-
-        # Nothing needed for new variable or np.ndarray.view()
-        if obj is None or isinstance(obj.__class__, np.ndarray):
+    @property
+    def variable(self):
+        if self._variable_ref is None:
             return None
+        else:
+            return self._variable_ref()
 
-        if issubclass(obj.__class__, self.__class__):
-            self.copy_attr(obj)
-        # else:
-        #     for attr in getattr(self.__class__, '_attrs_registered'):
-        #         self.__setattr__(attr, cp.deepcopy(getattr(self.__class__, attr)))
+    @variable.setter
+    def variable(self, var_obj):
+        if var_obj is None:
+            self._variable_ref = None
+            return
+        if issubclass(var_obj.__class__, VariableBase):
+            self._variable_ref = weakref.ref(var_obj)
+        else:
+            raise TypeError
+
+    @property
+    def ndim(self):
+        _ndim = self._ndim
+        if _ndim is None:
+            if self.variable is not None:
+                _ndim = self.variable.ndim
+        return _ndim
+
+    @ndim.setter
+    def ndim(self, value):
+        self._ndim = value
+
+    @property
+    def axis(self):
+        if not dict(self._axis):
+            ndim = self.ndim
+            if ndim is None:
+                try:
+                    ndim = self.variable.ndim
+                    if ndim is None:
+                        return None
+                    self.ndim = ndim
+                except AttributeError:
+                    return None
+            if ndim < 2:
+                ndim = 2
+            for ind in range(ndim + 1):
+                self._axis[ind] = VisualAxis()
+        return self._axis
+
+    @axis.setter
+    def axis(self, a_dict):
+        if a_dict is None:
+            return
+        if type(a_dict) is dict:
+            for key, value in a_dict.items():
+                if not type(key) is int:
+                    raise TypeError
+                if value is None:
+                    self._axis[key] = VisualAxis()
+                elif type(value) is dict:
+                    self._axis[key].config(**value)
+                elif isinstance(value, VisualAxis):
+                    self._axis[key] = value
+                else:
+                    raise TypeError
+        else:
+            raise TypeError
+
+    @property
+    def plot_config(self):
+        return self._plot
+
+    @plot_config.setter
+    def plot_config(self, value):
+        if value is None:
+            self._plot = VisualPlotConfig()
+            return
+        if isinstance(value, VisualPlotConfig):
+            self._plot = value
+        elif type(value) is dict:
+            self._plot.config(**value)
+        else:
+            raise TypeError
 
 
-class VariableModel(object):
+class VariableBase(object):
     """VariableModel is a base class for a geospace variable with useful attributes
 
-    :param  name: The variable's name, ['']
-    :type   name: str
-    :param  fullname: The variable's full name, ['']
-    :type   fullname: str
-    :param  label: The variable's label for display. If a raw string (e.g., r'$\alpha$'),
+    :ivar str name: The variable's name.
+    :ivar str fullname: The variable's full name.
+    :ivar str  label: The variable's label for display. If a raw string (e.g., r'$\alpha$'),
         it will show a latex format.
-    :type   label: str
-    :param  data_type: The variable's data type in one of them: 'support_data', 'data', and 'metadata'
-        in the same format as in a NASA's cdf file. ['']
-    :type   data_type: str
-    :param  group: The group that the variable is belonged to, e.g., var.name = 'v_i_z', var.group = 'ion velocity',
+    :ivar str data_type: The variable's data type in one of them: 'support_data', 'data', and 'metadata'
+        in the same format as in a NASA's cdf file.
+    :ivar str group: The group that the variable is belonged to, e.g., var.name = 'v_i_z', var.group = 'ion velocity',
         as the label in plots with multiple lines. ['']
-    :type   group: str
-    :param  unit: The variable's unit. ['']
-    :type   unit: str
-    :param  unit_label: The unit's  label,  used for plots. The string is a raw string (e.g., r'$n_e$').
+    :ivar str  unit: The variable's unit. ['']
+    :ivar str  unit_label: The unit's  label,  used for plots. The string is a raw string (e.g., r'$n_e$').
                 If None, the plot will use unit as a label.
-    :type   unit_label: str
-    :param  quantity: The physical quantity associated with the variable, waiting for implementing. [None]
-    :type   quantity: TBD.
-    :param  value: the variable's value. Usually it's a np.ndarray. The axis=0 along the time, axis=1 along height, lat,
+    :ivar Quantity object  quantity: The physical quantity associated with the variable, waiting for implementing. [None]
+    :ivar np.ndarray  value: the variable's value.  The default type is a np.ndarray.
+        The axis=0 along the time, axis=1 along height, lat,
         lon. For a scalar, value in a shape of (1, ).
-    :type   value: np.ndarray, default: None
-    :param  error: the variable's error. Either a np.ndarray or a string. When it's a string, the string is a variable name
+    :ivar str or np.ndarray  error: the variable's error. Either a np.ndarray or a string. When it's a string, the string is a variable name
         indicating the variable in the associated dataset (see :attr:`dataset` below).
-    :type error: str or np.ndarry
-    :param ndim: The number of dimension.
-    :type ndim: int
-    :param depends: The full depends of the variables. Usually Axis 0 for time, next for spatial distributions,
+    :ivar int ndim: The number of dimension.
+    :ivar dict depends: The full depends of the variables. Usually Axis 0 for time, next for spatial distributions,
         and then for components.
-    :type depends: dict
-    :param dataset: The dataset that the variable is appended.
-    :type dataset: DatasetModel object
-    :param visual: the attributes for visualization.
-    :type visual: dict or Visual object, default: None.
+    :ivar Dataset object dataset: The dataset that the variable is appended.
+    :ivar Visual object visual: the attributes for visualization.
+
     """
+
+    __visual_model__ = Visual
+    __dataset_model__ = None
 
     def __init__(
             self, value=None, error=None, data_type=None,
@@ -211,17 +173,55 @@ class VariableModel(object):
             ndim=None, depends=None, dataset=None, visual=None,
             **kwargs):
         """Initial settings
-        
-        :params:
+
+            :param  name: The variable's name, ['']
+            :type   name: str
+            :param  fullname: The variable's full name, ['']
+            :type   fullname: str
+            :param  label: The variable's label for display. If a raw string (e.g., r'$\alpha$'),
+                it will show a latex format.
+            :type   label: str
+            :param  data_type: The variable's data type in one of them: 'support_data', 'data', and 'metadata'
+                in the same format as in a NASA's cdf file. ['']
+            :type   data_type: str
+            :param  group: The group that the variable is belonged to, e.g., var.name = 'v_i_z', var.group = 'ion velocity',
+                as the label in plots with multiple lines. ['']
+            :type   group: str
+            :param  unit: The variable's unit. ['']
+            :type   unit: str
+            :param  unit_label: The unit's  label,  used for plots. The string is a raw string (e.g., r'$n_e$').
+                        If None, the plot will use unit as a label.
+            :type   unit_label: str
+            :param  quantity: The physical quantity associated with the variable, waiting for implementing. [None]
+            :type   quantity: TBD.
+            :param  value: the variable's value. Usually it's a np.ndarray. The axis=0 along the time, axis=1 along height, lat,
+                lon. For a scalar, value in a shape of (1, ).
+            :type   value: np.ndarray, default: None
+            :param  error: the variable's error. Either a np.ndarray or a string. When it's a string, the string is a variable name
+                indicating the variable in the associated dataset (see :attr:`dataset` below).
+            :type error: str or np.ndarry
+            :param ndim: The number of dimension.
+            :type ndim: int
+            :param depends: The full depends of the variables. Usually Axis 0 for time, next for spatial distributions,
+                and then for components.
+            :type depends: dict
+            :param dataset: The dataset that the variable is appended.
+            :type dataset: DatasetModel object
+            :param visual: the attributes for visualization.
+            :type visual: dict or Visual object, default: None.
         """
         # set default values
+
+        from geospacelab.datahub.__dataset_base__ import DatasetBase
+
+        self.__dataset_model__ = DatasetBase
 
         self.name = name
         self.fullname = fullname
 
         self.label = label
 
-        self.data_type = data_type # 'support_data', 'data', 'metadata'
+        self.data_type = data_type  # 'support_data', 'data', 'metadata'
         self.group = group
 
         self.unit = unit
@@ -232,7 +232,7 @@ class VariableModel(object):
         self.value = value
         self.error = error
 
-        self.variable_type = variable_type   # scalar, vector, tensor, ...
+        self.variable_type = variable_type  # scalar, vector, tensor, ...
         self.ndim = ndim
         self._depends = {}
         self.depends = depends
@@ -382,7 +382,7 @@ class VariableModel(object):
         :type var_new: list, np.ndarray, or variable instance
         :return:
         """
-        if issubclass(var_new.__class__, VariableModel):
+        if issubclass(var_new.__class__, VariableBase):
             v = var_new.value
         else:
             v = var_new
@@ -408,7 +408,7 @@ class VariableModel(object):
         return rep
 
     @property
-    def visual(self) -> str:
+    def visual(self) -> __visual_model__:
         return self._visual
 
     @visual.setter
@@ -443,8 +443,7 @@ class VariableModel(object):
             self._dataset_ref = None
             return
 
-        from geospacelab.datahub._base_dataset import DatasetModel
-        if issubclass(dataset_obj.__class__, DatasetModel):
+        if issubclass(dataset_obj.__class__, self.__dataset_model__):
             self._dataset_ref = weakref.ref(dataset_obj)
         else:
             raise TypeError
@@ -627,6 +626,7 @@ class VisualAxis(object):
 
 
     """
+
     def __init__(self):
         self.data = None
         self.data_err = None
@@ -634,8 +634,8 @@ class VisualAxis(object):
         self.data_res = None
         self.mask_gap = None
         self.label = ''
-        self.label_style = 'double'   # or 'single
-        self.label_pos = None       # label position
+        self.label_style = 'double'  # or 'single
+        self.label_pos = None  # label position
         self.unit = ''
         self.lim = None
         self.scale = 'linear'
@@ -657,6 +657,7 @@ class VisualPlotConfig(object):
 
 
     """
+
     def __init__(self):
         self.visible = True
         self.line = {}
@@ -676,121 +677,6 @@ class VisualPlotConfig(object):
         pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
 
 
-class Visual(object):
-    """
-    The Visual class is used for setting the visualization attributes appending to a variable.
-
-
-    """
-    def __init__(self, **kwargs):
-        self._axis = {}
-        self.variable = None
-        self._ndim = None
-
-        self.variable = kwargs.pop('variable', None)
-        self.axis = kwargs.pop('axis', None)
-        self.plot_config = kwargs.pop('plot_config', VisualPlotConfig())
-        self.ndim = kwargs.pop('ndim', self._ndim)
-
-    def config(self, logging=True, **kwargs):
-        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
-
-    def add_attr(self, logging=True, **kwargs):
-        pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
-
-    def clone(self):
-        kwargs = {
-            'variable': self.variable,
-            'axis': copy.deepcopy(self.axis),
-            'plot_config': copy.deepcopy(self.plot_config),
-            'ndim': copy.deepcopy(self.ndim)
-        }
-
-        return self.__class__(**kwargs)
-
-    @property
-    def variable(self):
-        if self._variable_ref is None:
-            return None
-        else:
-            return self._variable_ref()
-
-    @variable.setter
-    def variable(self, var_obj):
-        if var_obj is None:
-            self._variable_ref = None
-            return
-        if issubclass(var_obj.__class__, VariableModel):
-            self._variable_ref = weakref.ref(var_obj)
-        else:
-            raise TypeError
-
-    @property
-    def ndim(self):
-        _ndim = self._ndim
-        if _ndim is None:
-            if self.variable is not None:
-                _ndim = self.variable.ndim
-        return _ndim
-
-    @ndim.setter
-    def ndim(self, value):
-        self._ndim = value
-
-    @property
-    def axis(self):
-        if not dict(self._axis):
-            ndim = self.ndim
-            if ndim is None:
-                try:
-                    ndim = self.variable.ndim
-                    if ndim is None:
-                        return None
-                    self.ndim = ndim
-                except AttributeError:
-                    return None
-            if ndim < 2:
-                ndim = 2
-            for ind in range(ndim + 1):
-                self._axis[ind] = VisualAxis()
-        return self._axis
-
-    @axis.setter
-    def axis(self, a_dict):
-        if a_dict is None:
-            return
-        if type(a_dict) is dict:
-            for key, value in a_dict.items():
-                if not type(key) is int:
-                    raise TypeError
-                if value is None:
-                    self._axis[key] = VisualAxis()
-                elif type(value) is dict:
-                    self._axis[key].config(**value)
-                elif isinstance(value, VisualAxis):
-                    self._axis[key] = value
-                else:
-                    raise TypeError
-        else:
-            raise TypeError
-
-    @property
-    def plot_config(self):
-        return self._plot
-
-    @plot_config.setter
-    def plot_config(self, value):
-        if value is None:
-            self._plot = VisualPlotConfig()
-            return
-        if isinstance(value, VisualPlotConfig):
-            self._plot = value
-        elif type(value) is dict:
-            self._plot.config(**value)
-        else:
-            raise TypeError
-
-
 class NDim(int):
     def __new__(cls, value, extra):
         return float.__new__(cls, value)
@@ -799,7 +685,152 @@ class NDim(int):
         float.__init__(value)
         self.extra = extra
 
-
+#
+#
+# class VariableBase(np.ndarray):
+#     _attrs_registered = [
+#         'name', 'fullname', 'label',
+#         'data_type', 'group',
+#         'unit', 'unit_label',
+#         'quantity',
+#         'value', 'error',
+#         'variable_type',
+#         'kind',
+#         'depends', 'dataset',
+#         'visual'
+#     ]
+#
+#     def __new__(cls, arr, copy=True, dtype=None, order='C', subok=False, ndmin=0, **kwargs):
+#         if issubclass(arr.__class__, VariableBase):
+#             obj_out = arr.clone()
+#         else:
+#             obj_out = np.array(arr, copy=copy, dtype=dtype, order=order, subok=subok, ndmin=ndmin)
+#             obj_out = obj_out.view(cls)
+#
+#         obj_out.config(**kwargs)
+#
+#         return obj_out
+#
+#     def config(self, logging=True, **kwargs):
+#         """
+#         Configure the variable attributes. If the attribute is not the default attributes, return error.
+#
+#         :param logging: If True, show logging.
+#         :param kwargs: A dictionary of the attributes.
+#         :return: None
+#         """
+#
+#         # check registered attributes
+#         for key, value in kwargs.items():
+#             if key not in self._attrs_registered:
+#                 raise KeyError(f'The attribute {key} is not registered! Use "add_attr()" to add a new attribute.')
+#
+#         pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
+#
+#     def add_attr(self, logging=True, **kwargs):
+#         """
+#         Similar as config, but add a new attribute.
+#         """
+#
+#         self._attrs_registered.extend(kwargs.keys())
+#         pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
+#
+#     def copy_attr(self, obj, to_whom=None, omit_attrs=None):
+#         """
+#         Copy the attributes from obj to the current instance.
+#
+#         :param obj: the VariableBase or its subclass instance
+#         :type obj: VariableBase instance
+#         :param to_whom: The destination instance
+#         :type to_whom: VariableBase instance. If ``None``, copy to self
+#         :param omit_attrs: The attributes omitted. If None, copy all
+#         :type omit_attrs: dict or None
+#         """
+#
+#         if omit_attrs is None:
+#             omit_attrs = {}
+#
+#         if to_whom is None:
+#             to_whom = self
+#
+#         for key in self._attrs_registered:
+#             if key in omit_attrs.keys():
+#                 continue
+#             if key == 'visual':
+#                 to_whom.visual = obj.visual.clone()
+#             elif key == 'dataset':
+#                 to_whom.dataset = obj.dataset
+#             else:
+#                 setattr(to_whom, key, copy.deepcopy(getattr(obj, key)))
+#
+#         return to_whom
+#
+#     def clone(self, omit_attrs=None):
+#         """
+#         Clone a variable and return a new instance.
+#
+#         :param omit_attrs: The attributes omitted to be copied. If None, copy all.
+#         :return: new variable instance
+#         """
+#
+#         obj_new = self.__class__(self.view(np.ndarray))
+#         obj_new.copy_attr(self, omit_attrs=omit_attrs)
+#
+#         return obj_new
+#
+#     def __array_ufunc__(self, ufunc, method, *inputs, out=None, **kwargs):
+#         """
+#         This implementation of __array_ufunc__ makes sure that all custom attributes are maintained when a ufunc operation is performed on our class.'''
+#         See also :ref:`Propagate attributes <https://stackoverflow.com/questions/51520630/subclassing-numpy-array-propagate-attributes>`.
+#         """
+#
+#         # convert inputs and outputs of class ArraySubclass to np.ndarray to prevent infinite recursion
+#         args = ((i.view(np.ndarray) if issubclass(i, VariableBase) else i) for i in inputs)
+#         outputs = kwargs.pop('out', None)
+#         if outputs:
+#             kwargs['out'] = tuple((o.view(np.ndarray) if issubclass(o, VariableBase) else o) for o in outputs)
+#         else:
+#             outputs = (None,) * ufunc.nout
+#
+#         # call numpys implementation of __array_ufunc__
+#         results = super().__array_ufunc__(ufunc, method, *args, **kwargs)  # pylint: disable=no-member
+#         if results is NotImplemented:
+#             return NotImplemented
+#         if method == 'at':
+#             # method == 'at' means that the operation is performed in-place. Therefore, we are done.
+#             return
+#         # now we need to make sure that outputs that where specified with the 'out' argument are handled corectly:
+#         if ufunc.nout == 1:
+#             results = (results,)
+#         results = tuple((self._copy_attrs_to(result) if output is None else output)
+#                         for result, output in zip(results, outputs))
+#         return results[0] if len(results) == 1 else results
+#
+#     def __array_finalize__(self, obj):
+#         """
+#         Used for handling new instances created by three ways:
+#         * Explicit constructor:
+#             * self type is ´´cls´´
+#             * obj type is ``None``
+#         * View casting:
+#             * self type is ``cls``
+#             * obj type is ``np.ndarray``
+#         * Slicing (new from template)
+#             * self type is ``cls``
+#             * obj type is ``cls``
+#         """
+#
+#         # Nothing needed for new variable or np.ndarray.view()
+#         if obj is None or isinstance(obj.__class__, np.ndarray):
+#             return None
+#
+#         if issubclass(obj.__class__, self.__class__):
+#             self.copy_attr(obj)
+#         # else:
+#         #     for attr in getattr(self.__class__, '_attrs_registered'):
+#         #         self.__setattr__(attr, cp.deepcopy(getattr(self.__class__, attr))
+#
+#
 #
 #
 # class Visual_1(object):
@@ -851,19 +882,17 @@ class NDim(int):
 #     def add_attr(self, logging=True, **kwargs):
 #         pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
 
-    #
-    # def to_dict(self):
-    #     class_vars = vars(Visual)  # get any "default" attrs defined at the class level
-    #     inst_vars = vars(self)  # get any attrs defined on the instance (self)
-    #     all_vars = dict(class_vars)
-    #     all_vars.update(inst_vars)
-    #     # filter out private attributes
-    #     public_vars = {k: v for k, v in all_vars.items() if not k.startswith('_')}
-    #     del public_vars['set_attr']
-    #     del public_vars['to_dict']
-    #     return public_vars
-
-
+#
+# def to_dict(self):
+#     class_vars = vars(Visual)  # get any "default" attrs defined at the class level
+#     inst_vars = vars(self)  # get any attrs defined on the instance (self)
+#     all_vars = dict(class_vars)
+#     all_vars.update(inst_vars)
+#     # filter out private attributes
+#     public_vars = {k: v for k, v in all_vars.items() if not k.startswith('_')}
+#     del public_vars['set_attr']
+#     del public_vars['to_dict']
+#     return public_vars
 
 
 #
