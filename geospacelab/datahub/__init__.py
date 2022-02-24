@@ -87,20 +87,13 @@ class DataHub(object):
     """
     The class DataHub manage a set of datasets from various data sources.
 
-    :param dt_fr: The starting time.
-    :type dt_fr: datetime.datetime
-    :param dt_to: The stopping time.
-    :type dt_to: datetime.datetime
-    :param visual: If "on", a Visual object is aggregated to the Variable object.
-    :type visual: {'off', 'on'}, default: 'off'
-    :param datasets: A *dict* records multiple dataset added (:meth:`add_dataset`)
+    :ivar datetime.datetime dt_fr: The starting time.
+    :ivar datetime.datetime dt_to: The ending time.
+    :ivar str, {'off', 'on'} visual: If "on", a Visual object will be aggregated to the Variable object.
+    :ivar dict datasets:  A *dict* stores the datasets added (:meth:`add_dataset`)
         or docked (:meth:`dock`) to the datahub.
-        A item (*key:value*) in the *dict* is ``dataset_index``: ``dataset``.
-        **Note:** The ``dataset_index`` is an integer starting from **1**.
-    :type datasets: dict, default: {}.
-    :param variables: A *dict* records the variables assigned from their own datasets.
+    :ivar dict variables: A *dict* stores the variables assigned from their aggregated datasets.
         Typically used for the dashboards or the I/O configuration.
-    :type variables: dict, default: {}
 
     **Usage**:
 
@@ -139,7 +132,20 @@ class DataHub(object):
 
     """
 
+    __dataset_model__ = DatasetModel
+    __variable_model__ = VariableModel
+
     def __init__(self, dt_fr=None, dt_to=None, visual='off', **kwargs):
+        """
+            :param dt_fr: The starting time.
+            :type dt_fr: datetime.datetime
+            :param dt_to: The stopping time.
+            :type dt_to: datetime.datetime
+            :param visual: If "on", a Visual object is aggregated to the Variable object.
+            :type visual: {'off', 'on'}, default: 'off'
+            :param kwargs: other keyword arguments forwarded to the inherited class.
+        """
+
         self.dt_fr = dt_fr
         self.dt_to = dt_to
         self.visual = visual
@@ -149,7 +155,7 @@ class DataHub(object):
 
         super().__init__(**kwargs)
 
-    def dock(self, datasource_contents, **kwargs):
+    def dock(self, datasource_contents, **kwargs) -> __dataset_model__:
         """Dock a built-in or registered dataset.
 
         :param datasource_contents: the contents that required for docking a sourced dataset.
@@ -184,7 +190,8 @@ class DataHub(object):
             module = importlib.import_module('.'.join(module_keys))
             dataset = getattr(module, 'Dataset')(**kwargs)
             dataset.kind = 'sourced'
-        except ImportError or ModuleNotFoundError:
+        except ImportError or ModuleNotFoundError as error:
+            print(error)
             mylog.StreamLogger.error(
                 'The data source cannot be docked. \n'
                 + 'Check the built-in sourced data using the method: "list_sourced_dataset". \n'
@@ -201,7 +208,7 @@ class DataHub(object):
 
         return dataset
 
-    def add_dataset(self, *args, kind='temporary', dataset_class=None, **kwargs):
+    def add_dataset(self, *args, kind='temporary', dataset_class=None, **kwargs) -> __dataset_model__:
         """Add one or more datasets, which can be a "temporary" or "user-defined" dataset.
 
         :param args: A list of the datasets.
@@ -222,7 +229,7 @@ class DataHub(object):
         kwargs.setdefault('datasets', [])
 
         if dataset_class is None:
-            dataset_class = DatasetModel
+            dataset_class = self.__dataset_model__
 
         if kind == 'temporary':
             kwargs.pop('datasets', None)
@@ -249,6 +256,7 @@ class DataHub(object):
         :param dataset: a dataset (Dataset object)
         :return: None
         """
+
         ind = len(self.datasets.keys()) + 1
         name = 'dataset_{:02d}'.format(ind)
         if dataset.name is None:
@@ -293,12 +301,12 @@ class DataHub(object):
 
         return res
 
-    def get_variable(self, var_name, dataset=None, dataset_index=None):
+    def get_variable(self, var_name, dataset=None, dataset_index=None) -> __variable_model__:
         """To get a variable from the docked or added dataset.
 
-        :param var_name: the name of the queried variable
-        :param dataset: the dataset storing the queried variable.
-        :param dataset_index: the index of the dataset in datahub.datasets.
+        :param str var_name: the name of the queried variable
+        :param DatasetBase object dataset: the dataset storing the queried variable.
+        :param int dataset_index: the index of the dataset in datahub.datasets.
             if both dataset or dataset_index are not specified, the function will get the
             variable from the current dataset.
         :return: var
@@ -327,7 +335,7 @@ class DataHub(object):
 
         return var
 
-    def assign_variable(self, var_name, dataset=None, dataset_index=None, add_new=False, **kwargs):
+    def assign_variable(self, var_name, dataset=None, dataset_index=None, add_new=False, **kwargs) -> __variable_model__:
         """Assign a variable to `DataHub.variables` from the docked or added dataset.
 
         :param var_name: The name of the variable

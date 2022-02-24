@@ -33,6 +33,7 @@ from geospacelab.datahub._base_variable import VariableModel
 from geospacelab import preferences as pfr
 
 
+
 class DataHub(object):
     """
     The class DataHub manage a set of datasets from various data sources.
@@ -82,6 +83,10 @@ class DataHub(object):
 
     """
 
+    from geospacelab.datahub import DatasetBase, VariableBase
+    __dataset_model__ = DatasetBase
+    __variable_model__ = VarialeBase
+
     def __init__(self, dt_fr=None, dt_to=None, visual='off', **kwargs):
         """
             :param dt_fr: The starting time.
@@ -102,7 +107,7 @@ class DataHub(object):
 
         super().__init__(**kwargs)
 
-    def dock(self, datasource_contents, **kwargs)->DatasetBase:
+    def dock(self, datasource_contents, **kwargs) -> __dataset_model__:
         """Dock a built-in or registered dataset.
 
         :param datasource_contents: the contents that required for docking a sourced dataset.
@@ -137,7 +142,8 @@ class DataHub(object):
             module = importlib.import_module('.'.join(module_keys))
             dataset = getattr(module, 'Dataset')(**kwargs)
             dataset.kind = 'sourced'
-        except ImportError or ModuleNotFoundError:
+        except ImportError or ModuleNotFoundError as error:
+            print(error)
             mylog.StreamLogger.error(
                 'The data source cannot be docked. \n'
                 + 'Check the built-in sourced data using the method: "list_sourced_dataset". \n'
@@ -154,7 +160,7 @@ class DataHub(object):
 
         return dataset
 
-    def add_dataset(self, *args, kind='temporary', dataset_class=None, **kwargs):
+    def add_dataset(self, *args, kind='temporary', dataset_class=None, **kwargs) -> __dataset_model__:
         """Add one or more datasets, which can be a "temporary" or "user-defined" dataset.
 
         :param args: A list of the datasets.
@@ -175,7 +181,7 @@ class DataHub(object):
         kwargs.setdefault('datasets', [])
 
         if dataset_class is None:
-            dataset_class = DatasetModel
+            dataset_class = self.__dataset_model__
 
         if kind == 'temporary':
             kwargs.pop('datasets', None)
@@ -202,6 +208,7 @@ class DataHub(object):
         :param dataset: a dataset (Dataset object)
         :return: None
         """
+
         ind = len(self.datasets.keys()) + 1
         name = 'dataset_{:02d}'.format(ind)
         if dataset.name is None:
@@ -246,12 +253,12 @@ class DataHub(object):
 
         return res
 
-    def get_variable(self, var_name, dataset=None, dataset_index=None):
+    def get_variable(self, var_name, dataset=None, dataset_index=None) -> __variable_model__:
         """To get a variable from the docked or added dataset.
 
-        :param var_name: the name of the queried variable
-        :param dataset: the dataset storing the queried variable.
-        :param dataset_index: the index of the dataset in datahub.datasets.
+        :param str var_name: the name of the queried variable
+        :param DatasetBase object dataset: the dataset storing the queried variable.
+        :param int dataset_index: the index of the dataset in datahub.datasets.
             if both dataset or dataset_index are not specified, the function will get the
             variable from the current dataset.
         :return: var
@@ -280,7 +287,7 @@ class DataHub(object):
 
         return var
 
-    def assign_variable(self, var_name, dataset=None, dataset_index=None, add_new=False, **kwargs):
+    def assign_variable(self, var_name, dataset=None, dataset_index=None, add_new=False, **kwargs) -> __variable_model__:
         """Assign a variable to `DataHub.variables` from the docked or added dataset.
 
         :param var_name: The name of the variable
@@ -423,7 +430,16 @@ class DatasetBase(object):
     :ivar list label_fields: A list of strings, indicating the fields used for generating the dataset label.
     """
 
-    def __init__(self, dt_fr=None, dt_to=None, name='', kind='', visual='off', label_fields=('name', 'kind'), **kwargs):
+    from geospacelab.datahub import VariableBase
+    __variable_model__ = VariableBase
+
+    def __init__(self,
+                 dt_fr: datetime.datetime = None,
+                 dt_to: datetime.datetime = None,
+                 name: str = '',
+                 kind: str = '',
+                 visual: str = 'off',
+                 label_fields: list = ('name', 'kind'), **kwargs):
         """
         Initial inputs to create the object.
 
@@ -443,18 +459,333 @@ class DatasetBase(object):
         """
 
         self._variables = {}
+        self.name = name
+        self.kind = kind
+        self.dt_fr = dt_fr
+        self.dt_to = dt_to
+
+        self.visual = visual
+
+        self.label_fields = label_fields
+
+    def add_variable(self, var_name: str, configured_variables=None, variable_class=None, **kwargs) -> __variable_model__:
+        """
+        Add a variable to the dataset.
+
+        :param var_name:
+        :param configured_variables:
+        :param variable_class:
+        :param kwargs:
+        :return:
+        """
+        if variable_class is None:
+            variable_class = self.__variable_model__
+        if configured_variables is None:
+            configured_variables = {}
+        if var_name in configured_variables.keys():
+            configured_variable = configured_variables[var_name]
+            if type(configured_variable) is dict:
+                self[var_name] = variable_class(**configured_variable)
+            elif issubclass(configured_variable.__class__, VariableModel):
+                self[var_name] = configured_variable.clone()
+            self[var_name].dataset = self
+            self[var_name].visual = self.visual
+        else:
+            self[var_name] = variable_class(dataset=self, visual=self.visual, **kwargs)
+        return self[var_name]
+
+    def label(self, fields=None, separator=' | ', lowercase=True) -> str:
+        """
+        Return a label of the data set.
+        :param fields: The attribute names for the label.
+        :param separator: A separator between two attributes.
+        :param lowercase: Show lowercase letters only.
+        :return: label
+        """
+        if fields is None:
+            fields = self.label_fields
+        sublabels = []
+        for attr_name in fields:
+            if not str(attr_name):
+                sublabels.append('*')
+            else:
+                sublabels.append(getattr(self, attr_name))
+        label = pybasic.str_join(*sublabels, separator=separator, lowercase=lowercase)
+        return label
+
+    def config(self, logging: bool = True, **kwargs) -> None:
+        """
+        Configure the attributes of the dataset.
+
+        :param logging: Show logging if True.
+        :param kwargs:
+        :return:
+        """
+        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
+
+    def add_attr(self, logging=True, **kwargs) -> None:
+        pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
+
+    def attrs_to_dict(self, attr_names=None) -> dict:
+        if attr_names is None:
+            attr_names = []
+        items = {}
+        for attr_name in attr_names:
+            items[attr_name] = getattr(self, attr_name)
+        return items
+
+    def list_all_variables(self) -> None:
+        # print header
+        label = self.label()
+        mylog.simpleinfo.info("Dataset: {}".format(label))
+        mylog.simpleinfo.info("Printing all of the variables ...")
+        mylog.simpleinfo.info('{:^20s}{:^30s}'.format('No.', 'Variable name'))
+        for ind, var_name in enumerate(self._variables.keys()):
+            mylog.simpleinfo.info('{:^20d}{:30s}'.format(ind+1, var_name))
+        mylog.simpleinfo.inf('')
+
+    def keys(self) -> list:
+        return list(self._variables.keys())
+
+    def items(self) -> dict:
+        return dict(self._variables.items())
+
+    def __setitem__(self, key, value):
+        if value is not None:
+            if not issubclass(value.__class__, VariableModel):
+                raise TypeError
+        self._variables[key] = value
+
+    def __getitem__(self, key) -> __variable_model__:
+        # if key not in self._variables.keys():
+        #    raise KeyError
+        return self._variables[key]
+
+    def __delitem__(self, key):
+        del self._variables[key]
+        pass
+
+    def __repr__(self):
+        rep = f"GeospaceLab Dataset object <{self.label()}, " + \
+              f"starting time: {str(self.dt_fr)}, stopping time: {str(self.dt_to)}>"
+        return rep.replace('geospacelab.datahub.sources.', '')
+
+    # def add_variable(self, variable, name=None):
+    #     if issubclass(variable, VariableModel):
+    #         pass
+    #     else:
+    #         variable = VariableModel(value=variable, name=name, visual=self.visual)
+    #     self[variable.name] = variable
+    def exist(self, var_name) -> bool:
+        if var_name in self._variables.keys():
+            return True
+        else:
+            return False
+
+    def remove_variable(self, name):
+        del self[name]
+
+    def get_variable_names(self) -> list:
+        return list(self._variables.keys())
+
+    def _set_default_variables(self, default_variable_names, configured_variables=None):
+        if configured_variables is None:
+            configured_variables = {}
+        for var_name in default_variable_names:
+            self.add_variable(var_name, configured_variables=configured_variables)
+
+
+class DatasetUser(DatasetBase):
+
+    def __init__(self,
+                 dt_fr: datetime.datetime = None,
+                 dt_to: datetime.datetime = None,
+                 name: str = '',
+                 visual: str = 'off',
+                 label_fields: list = ('name', 'kind'), **kwargs):
+
+        super().__init__(
+            dt_fr=dt_fr, dt_to=dt_to, name=name, kind='user-defined', visual=visual, label_fields=label_fields, **kwargs
+        )
+
+
+class DatasetSourced(DatasetBase):
+
+    def __init__(self,
+                 dt_fr: datetime.datetime = None,
+                 dt_to: datetime.datetime = None,
+                 name: str = '',
+                 visual: str = 'off',
+                 label_fields: list = ('name', 'kind'), **kwargs):
+
+        super().__init__(
+            dt_fr=dt_fr, dt_to=dt_to, name=name, kind='sourced', visual=visual, label_fields=label_fields, **kwargs
+        )
+
+        self._variables = {}
         self.name = kwargs.pop('name', None)
         self.kind = kwargs.pop('kind', None)
         self.dt_fr = kwargs.pop('dt_fr', None)
         self.dt_to = kwargs.pop('dt_to', None)
 
+        self.loader = kwargs.pop('loader', None)
+        self.downloader = kwargs.pop('downloader', None)
+        self.load_mode = kwargs.pop('load_mode', 'AUTO')  # ['AUTO'], 'dialog', 'assigned'
+        self.data_root_dir = kwargs.pop('data_root_dir', pref.datahub_data_root_dir)
+        self.data_file_paths = kwargs.pop('data_file_paths', [])
+        self.data_file_num = kwargs.pop('data_file_num', 0)
+        self.data_file_ext = kwargs.pop('data_file_ext', '*')
+        self.data_search_recursive = kwargs.pop('data_search_recursive', False)
         self.visual = kwargs.pop('visual', 'off')
+        self.time_clip = kwargs.pop('time_clip', True)
 
         self.label_fields = kwargs.pop('label_fields', [])
 
+    def search_data_files(self, **kwargs):
+        """
+        Search the data files by the input pattern in the file name. The search method is based on pathlib.glob.
+        For a dataset inheritance, a wrapper can be added for a custom setting.
+
+        :param initial_file_dir: The initial file directory for searching.
+        :type initial_file_dir: str or pathlib.Path, default: DatasetModel.data_root_dir.
+        :param search_pattern: Unix style pathname pattern, see also pathlib.glob.
+        :type search_pattern: str.
+        :param recursive: Search recursively if True.
+        :type recursive: bool, default: DatasetModel.data_search_recursive.
+        :param allow_multiple_files: Allow multiple files as a result.
+        :type allow_mulitple_files: bool, default: False.
+
+        :return: done, bool, if False, no matches.
+        """
+
+        done = False
+        initial_file_dir = kwargs.pop('initial_file_dir', self.data_root_dir)
+        search_pattern = kwargs.pop('search_pattern', '*')
+        recursive = kwargs.pop('recursive', self.data_search_recursive)
+        allow_multiple_files = kwargs.pop('allow_multiple_files', False)
+        if str(self.data_file_ext):
+            search_pattern = search_pattern + '.' + self.data_file_ext
+        if recursive:
+            search_pattern = '**/' + search_pattern
+        paths = list(initial_file_dir.glob(search_pattern))
+
+        import natsort
+        paths = natsort.natsorted(paths, reverse=False)
+        if len(paths) == 1:
+            done = True
+            self.data_file_paths.append(paths[0])
+        elif len(paths) > 1:
+            if allow_multiple_files:
+                done = True
+                self.data_file_paths.extend(paths)
+            else:
+                mylog.StreamLogger.error("Multiple files found! Restrict the search condition.")
+                print(paths)
+                raise FileExistsError
+        else:
+            print('Cannot find the requested data file in {}'.format(initial_file_dir))
+
+        return done
+
+    def open_dialog(self, **kwargs):
+        """
+        Open a dialog to select the data files.
+        """
+
+        def tk_open_file():
+
+            import tkinter as tk
+            from tkinter import filedialog
+
+            root = tk.Tk()
+            root.withdraw()
+
+            dialog_title = "Select a data file ..."
+
+            if str(self.data_file_ext):
+                p1 = '*.' + self.data_file_ext
+            file_types = (('data files', p1), ('all files', '*.*'))
+            file_name = filedialog.askopenfilename(
+                title=dialog_title,
+                initialdir=initial_file_dir,
+                filetypes=file_types,
+            )
+
+            return file_name
+
+        initial_file_dir = kwargs.pop('initial_file_dir', self.data_root_dir)
+
+        if initial_file_dir is None:
+            initial_file_dir = self.data_root_dir
+
+        self.data_file_num = kwargs.pop('data_file_num', self.data_file_num)
+        if self.data_file_num == 0:
+            value = input("How many files will be loaded? Input the number: ")
+            self.data_file_num = int(value)
+        for nf in range(self.data_file_num):
+            # value = input("Input the No. {} file's full path: ".format(str(nf)))
+            value = tk_open_file()
+            fp = pathlib.Path(value)
+            if not fp.is_file():
+                mylog.StreamLogger.warning("The input file does not exist!")
+                return
+            self.data_file_paths.append(fp)
+
+    def check_data_files(self, **kwargs):
+        """
+        Check the existing of the data files before loading the data, depending on the loading mode (``load_mode``).
+        This methods still needs to be improved as different datasets may have different variables as epochs. Two kinds
+        of things can be done: 1. write a wrapper in the new dataset inheritance. 2. Add a script to recognize the
+        epoch variables.
+
+        """
+        self.load_mode = kwargs.pop('load_mode', self.load_mode)
+        if self.load_mode == 'AUTO':
+            self.search_data_files(**kwargs)
+        elif self.load_mode == 'dialog':
+            self.open_dialog(**kwargs)
+        elif self.load_mode == 'assigned':
+            self.data_file_paths = kwargs.pop('data_file_paths', self.data_file_paths)
+            self.data_file_paths = [pathlib.Path(f) for f in self.data_file_paths]
+        else:
+            raise NotImplementedError
+        self.data_file_num = len(self.data_file_paths)
+
+    def time_filter_by_range(self, var_datetime=None, var_datetime_name=None):
+        """
+        Clip the times.
+
+        :param var_datetime:
+        :param var_datetime_name:
+        :return:
+        """
+        if var_datetime is None and var_datetime_name is None:
+            var_datetime = self['DATETIME']
+        if var_datetime_name is not None:
+            var_datetime = self[var_datetime_name]
+        if var_datetime.value is None:
+            return
+        inds = np.where((var_datetime.value.flatten() >= self.dt_fr) & (var_datetime.value.flatten() <= self.dt_to))[0]
+        self.time_filter_by_inds(inds, var_datetime=var_datetime)
+
+    def time_filter_by_inds(self, inds, var_datetime=None):
+        if inds is None:
+            return
+        if not list(inds):
+            return
+        if var_datetime is None:
+            var_datetime = self['DATETIME']
+
+        shape_0 = var_datetime.value.shape[0]
+        for var in self._variables.values():
+            if var.value is None:
+                continue
+            if var.value.shape[0] == shape_0 and len(var.value.shape) > 1:
+                var.value = var.value[inds, ::]
+
     def add_variable(self, var_name, configured_variables=None, variable_class=None, **kwargs):
         if variable_class is None:
-            variable_class = VariableModel
+            variable_class = self.__variable_model__
         if configured_variables is None:
             configured_variables = {}
         if var_name in configured_variables.keys():
@@ -516,7 +847,7 @@ class DatasetBase(object):
         mylog.simpleinfo.info("Printing all of the variables ...")
         mylog.simpleinfo.info('{:^20s}{:^30s}'.format('No.', 'Variable name'))
         for ind, var_name in enumerate(self._variables.keys()):
-            mylog.simpleinfo.info('{:^20d}{:30s}'.format(ind+1, var_name))
+            mylog.simpleinfo.info('{:^20d}{:30s}'.format(ind + 1, var_name))
         mylog.simpleinfo.inf('')
 
     def keys(self):
@@ -570,7 +901,7 @@ class DatasetBase(object):
             self.add_variable(var_name, configured_variables=configured_variables)
 
     @property
-    def data_root_dir(self):
+    def data_root_dir(self) -> pathlib.Path:
         return self._data_root_dir
 
     @data_root_dir.setter

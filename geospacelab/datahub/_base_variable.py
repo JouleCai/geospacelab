@@ -408,7 +408,7 @@ class VariableModel(object):
         return rep
 
     @property
-    def visual(self):
+    def visual(self) -> str:
         return self._visual
 
     @visual.setter
