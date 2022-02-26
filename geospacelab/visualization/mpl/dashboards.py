@@ -21,7 +21,7 @@ from geospacelab.datahub import DataHub
 import geospacelab.visualization.mpl.panels as mpl_panel
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pydatetime as dttool
-from geospacelab.visualization.mpl._base import DashboardBase
+from geospacelab.visualization.mpl.__base__ import DashboardBase
 import geospacelab.visualization.mpl.panels as panels
 
 plt.rcParams['font.serif'] = 'Ubuntu'

@@ -290,7 +290,7 @@ class DatasetSourced(DatasetBase):
                 print(paths)
                 raise FileExistsError
         else:
-            print('Cannot find the requested data file in {}'.format(initial_file_dir))
+            mylog.simpleinfo.info('Cannot find the requested data file in {}'.format(initial_file_dir))
         if direct_append:
             self.data_file_paths.extend(file_paths)
         return file_paths

@@ -9,7 +9,7 @@ __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
 from geospacelab.visualization.mpl.ts_viewer import TimeSeriesViewer
-from geospacelab.visualization.mpl._base import plt, FigureBase
+from geospacelab.visualization.mpl.__base__ import plt, FigureBase
 
 
 def mpl_viewer(figure_class=FigureBase, **kwargs):

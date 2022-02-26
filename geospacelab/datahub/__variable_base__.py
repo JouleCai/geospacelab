@@ -13,9 +13,77 @@ import weakref
 import re
 
 import numpy as np
+from typing import Dict
+
 import geospacelab.toolbox.utilities.pyclass as pyclass
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pybasic as basic
+
+
+class VisualAxis(object):
+    """
+    The attribute class appended to the Visual class for setting the attributes along an axis.
+
+
+    """
+
+    def __init__(self):
+        self.data = None
+        self.data_err = None
+        self.data_scale = 1.
+        self.data_res = None
+        self.mask_gap = None
+        self.label = ''
+        self.label_style = 'double'  # or 'single
+        self.label_pos = None  # label position
+        self.unit = ''
+        self.lim = None
+        self.scale = 'linear'
+        self.invert = False
+        self.ticks = None
+        self.tick_labels = None
+        self.minor_ticks = None
+        self.major_tick_max = 6
+        self.minor_tick_max = None
+        self.visible = True
+
+    def config(self, logging=True, **kwargs):
+        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
+
+
+class VisualPlotConfig(object):
+    """
+    The attribute class appended to the Visual class for setting the plots.
+
+
+    """
+
+    def __init__(self):
+        self.visible = True
+        self.line = {}
+        self.pattern = {}
+        self.errorbar = {}
+        self.pcolormesh = {}
+        self.imshow = {}
+        self.scatter = {}
+        self.legend = {}
+        self.colorbar = {}
+        self.bar = {}
+        self.scatter = {}
+        self.fill_between = {}
+        self.style = None
+
+    def config(self, logging=True, **kwargs):
+        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
+
+
+class NDim(int):
+    def __new__(cls, value, extra):
+        return float.__new__(cls, value)
+
+    def __init__(self, value, extra):
+        float.__init__(value)
+        self.extra = extra
 
 
 class Visual(object):
@@ -69,7 +137,7 @@ class Visual(object):
             raise TypeError
 
     @property
-    def ndim(self):
+    def ndim(self) -> int:
         _ndim = self._ndim
         if _ndim is None:
             if self.variable is not None:
@@ -81,7 +149,7 @@ class Visual(object):
         self._ndim = value
 
     @property
-    def axis(self):
+    def axis(self) -> Dict[int, VisualAxis]:
         if not dict(self._axis):
             ndim = self.ndim
             if ndim is None:
@@ -449,7 +517,7 @@ class VariableBase(object):
             raise TypeError
 
     @property
-    def value(self):
+    def value(self) -> np.ndarray:
         if self._value is None:
             return None
         elif isinstance(self._value, str):
@@ -484,7 +552,7 @@ class VariableBase(object):
         self._value = v
 
     @property
-    def error(self):
+    def error(self) -> np.ndarray:
         if self._error is None:
             return None
         elif isinstance(self._error, str):
@@ -619,71 +687,6 @@ class VariableBase(object):
             else:
                 self._depends[key] = value
 
-
-class VisualAxis(object):
-    """
-    The attribute class appended to the Visual class for setting the attributes along an axis.
-
-
-    """
-
-    def __init__(self):
-        self.data = None
-        self.data_err = None
-        self.data_scale = 1.
-        self.data_res = None
-        self.mask_gap = None
-        self.label = ''
-        self.label_style = 'double'  # or 'single
-        self.label_pos = None  # label position
-        self.unit = ''
-        self.lim = None
-        self.scale = 'linear'
-        self.invert = False
-        self.ticks = None
-        self.tick_labels = None
-        self.minor_ticks = None
-        self.major_tick_max = 6
-        self.minor_tick_max = None
-        self.visible = True
-
-    def config(self, logging=True, **kwargs):
-        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
-
-
-class VisualPlotConfig(object):
-    """
-    The attribute class appended to the Visual class for setting the plots.
-
-
-    """
-
-    def __init__(self):
-        self.visible = True
-        self.line = {}
-        self.pattern = {}
-        self.errorbar = {}
-        self.pcolormesh = {}
-        self.imshow = {}
-        self.scatter = {}
-        self.legend = {}
-        self.colorbar = {}
-        self.bar = {}
-        self.scatter = {}
-        self.fill_between = {}
-        self.style = None
-
-    def config(self, logging=True, **kwargs):
-        pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)
-
-
-class NDim(int):
-    def __new__(cls, value, extra):
-        return float.__new__(cls, value)
-
-    def __init__(self, value, extra):
-        float.__init__(value)
-        self.extra = extra
 
 #
 #

@@ -44,7 +44,7 @@ class Downloader(object):
     """Download the GNSS TEC data
     """
 
-    def __init__(self, dt_fr, dt_to, sat_id=None, file_type=None, data_file_root_dir=None,
+    def __init__(self, dt_fr, dt_to, sat_id=None, file_type=None, data_file_root_dir=None, force=False,
                  user_fullname=madrigal.default_user_fullname,
                  user_email=madrigal.default_user_email,
                  user_affiliation=madrigal.default_user_affiliation):
@@ -68,6 +68,7 @@ class Downloader(object):
             dt_to = dt_to + datetime.timedelta(hours=23, minutes=59)
         self.dt_fr = dt_fr  # datetime from
         self.dt_to = dt_to  # datetime to
+        self.force = force
 
         if data_file_root_dir is None:
             self.data_file_root_dir = pfr.datahub_data_root_dir / 'Madrigal' / 'DMSP'
@@ -88,7 +89,7 @@ class Downloader(object):
             files = database.getExperimentFiles(exp.id)
             for file in files:
                 if self.file_type == 'hp':
-                    rpattern = data_type_dict([self.file_type])
+                    rpattern = data_type_dict[self.file_type]
                 else:
                     rpattern = self.sat_id.upper() + '.*' + data_type_dict[self.file_type]
 
@@ -101,6 +102,10 @@ class Downloader(object):
                 m = re.search(r'([\d]{8})', file_name)
                 dtstr = m.group()
                 thisday = datetime.datetime.strptime(dtstr, "%Y%m%d")
+                if thisday < datetime.datetime(self.dt_fr.year, self.dt_fr.month, self.dt_fr.day):
+                    continue
+                if thisday > datetime.datetime(self.dt_to.year, self.dt_to.month, self.dt_to.day):
+                    continue
 
                 data_file_dir = self.data_file_root_dir / thisday.strftime("%Y%m") / thisday.strftime('%Y%m%d')
                 data_file_dir.mkdir(parents=True, exist_ok=True)
@@ -108,7 +113,10 @@ class Downloader(object):
                 data_file_path = data_file_dir / file_name
                 if data_file_path.is_file():
                     mylog.simpleinfo.info("The file {} has been downloaded.".format(data_file_path.name))
-                    continue
+                    if not self.force:
+                        continue
+                    else:
+                        print('Force downloading ...')
 
                 mylog.simpleinfo.info("Downloading  {} from the Madrigal database ...".format(file_name))
                 database.downloadFile(

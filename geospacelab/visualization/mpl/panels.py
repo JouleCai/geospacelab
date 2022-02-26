@@ -18,7 +18,7 @@ import matplotlib.ticker as mpl_ticker
 import matplotlib.dates as mpl_dates
 from scipy.interpolate import interp1d
 
-from geospacelab.visualization.mpl._base import PanelBase
+from geospacelab.visualization.mpl.__base__ import PanelBase
 from geospacelab.datahub.__variable_base__ import VariableBase as VariableModel
 import geospacelab.toolbox.utilities.numpyarray as arraytool
 import geospacelab.visualization.mpl.axis_ticks as ticktool

@@ -35,11 +35,11 @@ default_dataset_attrs = {
     'allow_download': True,
     'force_download': False,
     'data_search_recursive': False,
-    'quality_control': False,
-    'calib_control': False,
     'label_fields': ['database', 'facility', 'instrument', 'product'],
     'load_mode': 'AUTO',
     'time_clip': True,
+    'add_AACGM': True,
+    'calib_orbit': True,
 }
 
 default_variable_names = [
@@ -47,32 +47,26 @@ default_variable_names = [
     'SC_GEO_LAT',
     'SC_GEO_LON',
     'SC_GEO_ALT',
-    'SC_GEO_r',
-    'SC_SZA',
-    'SC_SAz',
-    'SC_ST',
-    'SC_DIP_LAT',
-    'SC_DIP_LON',
-    'SC_QD_MLT',
-    'SC_QD_LAT',
-    'SC_AACGM_LAT',
-    'SC_AACGM_LON',
+    'SC_MAG_LAT',
+    'SC_MAG_LON',
+    'SC_MAG_MLT',
     'n_e',
-    'T_e_HGN',
-    'T_e_LGN',
-    'T_e',
-    'V_s_HGN',
-    'V_s_LGN',
-    'SC_U',
-    'QUALITY_FLAG'
+    'v_i_H',
+    'V_i_V',
+    'B_D',
+    'B_F',
+    'B_P',
+    'delta_B_D',
+    'delta_B_F',
+    'delta_B_P',
     ]
 
 # default_data_search_recursive = True
 
-default_attrs_required = ['product', 'sat_id', ]
+default_attrs_required = ['sat_id', ]
 
 
-class Dataset(datahub.DatasetModel):
+class Dataset(datahub.DatasetSourced):
     def __init__(self, **kwargs):
         kwargs = basic.dict_set_default(kwargs, **default_dataset_attrs)
 
@@ -80,13 +74,12 @@ class Dataset(datahub.DatasetModel):
 
         self.database = kwargs.pop('database', 'Madrigal')
         self.facility = kwargs.pop('facility', 'DMSP')
-        self.instrument = kwargs.pop('instrument', 'EFI-LP')
+        self.instrument = kwargs.pop('instrument', 'SSIES&SSM')
         self.product = kwargs.pop('product', 's1')
         self.allow_download = kwargs.pop('allow_download', False)
         self.force_download = kwargs.pop('force_download', False)
-        # self.quality_control = kwargs.pop('quality_control', False)
-        # self.calib_control = kwargs.pop('calib_control', False)
-        self._data_root_dir = self.data_root_dir    # Record the initial root dir
+        self.add_AACGM = kwargs.pop('add_AACGM', False)
+        self.calib_orbit = kwargs.pop('calib_orbit', False)
 
         self.sat_id = kwargs.pop('sat_id', None)
 
@@ -125,7 +118,7 @@ class Dataset(datahub.DatasetModel):
             configured_variables=var_config.configured_variables
         )
         for file_path in self.data_file_paths:
-            load_obj = self.loader(file_path, file_type='cdf')
+            load_obj = self.loader(file_path, file_ext='hdf5')
 
             for var_name in self._variables.keys():
                 value = load_obj.variables[var_name]
@@ -134,29 +127,69 @@ class Dataset(datahub.DatasetModel):
             # self.select_beams(field_aligned=True)
         if self.time_clip:
             self.time_filter_by_range(var_datetime_name='SC_DATETIME')
-        if self.quality_control:
-            self.time_filter_by_quality()
-        if self.calib_control:
-            self.time_filter_by_calib()
 
-    def time_filter_by_quality(self, quality_flags=None):
-        if quality_flags is None:
-            quality_flags = np.array([1])
+        if self.calib_orbit:
+            self.fix_geo_lon()
 
-        for qf in quality_flags:
-            inds = np.where(self['QUALITY_FLAG'].value.flatten() == qf)[0]
-            for key in self.keys():
-                self._variables[key].value = self._variables[key].value[inds, ::]
+        if self.add_AACGM:
+            self.convert_to_AACGM()
 
-    def time_filter_by_calib(self, calib_flags=None):
+    def convert_to_AACGM(self):
+        import geospacelab.cs as gsl_cs
 
-        if calib_flags is None:
-            calib_flags = np.array([0])
+        coords_in = {
+            'lat': self['SC_GEO_LAT'].value.flatten(),
+            'lon': self['SC_GEO_LON'].value.flatten(),
+            'height': self['SC_GEO_ALT'].value.flatten()
+        }
+        dts = self['SC_DATETIME'].value.flatten()
+        cs_sph = gsl_cs.GEOCSpherical(coords=coords_in, ut=dts)
+        cs_aacgm = cs_sph.to_AACGM(append_mlt=True)
+        self.add_variable('SC_AACGM_LAT')
+        self.add_variable('SC_AACGM_LON')
+        self.add_variable('SC_AACGM_MLT')
+        self['SC_AACGM_LAT'].value = cs_aacgm['lat'].reshape(self['SC_DATETIME'].value.shape)
+        self['SC_AACGM_LON'].value = cs_aacgm['lon'].reshape(self['SC_DATETIME'].value.shape)
+        self['SC_AACGM_MLT'].value = cs_aacgm['mlt'].reshape(self['SC_DATETIME'].value.shape)
 
-        for cf in calib_flags:
-            inds = np.where(self['CALIB_FLAG'].value.flatten() == cf)[0]
-            for key in self.keys():
-                self._variables[key].value = self._variables[key].value[inds, ::]
+    def fix_geo_lon(self):
+        from geospacelab.observatory.sc_orbit import OrbitPosition_SSCWS
+        from scipy.interpolate import interp1d
+        # check outliers
+        orbit_obj = OrbitPosition_SSCWS(
+            dt_fr=self.dt_fr - datetime.timedelta(minutes=30),
+            dt_to=self.dt_to + datetime.timedelta(minutes=30),
+            sat_id='dmsp' + self.sat_id.lower()
+        )
+
+        glat_1 = self['SC_GEO_LAT'].value.flatten()
+        glon_1 = self['SC_GEO_LON'].value.flatten()
+
+        dts_1 = self['SC_DATETIME'].value.flatten()
+        dt0 = dttool.get_start_of_the_day(self.dt_fr)
+        sectime_1 = [(dt - dt0).total_seconds() for dt in dts_1]
+
+        glat_2 = orbit_obj['SC_GEO_LAT'].value.flatten()
+        glon_2 = orbit_obj['SC_GEO_LON'].value.flatten()
+        dts_2 = orbit_obj['SC_DATETIME'].value.flatten()
+        sectime_2 = [(dt - dt0).total_seconds() for dt in dts_2]
+
+        factor = np.pi / 180.
+        sin_glon_1 = np.sin(glon_1 * factor)
+        sin_glon_2 = np.sin(glon_2 * factor)
+        cos_glon_2 = np.cos(glon_2 * factor)
+        itpf_sin = interp1d(sectime_2, sin_glon_2, kind='cubic', bounds_error=False, fill_value='extrapolate')
+        itpf_cos = interp1d(sectime_2, cos_glon_2, kind='cubic', bounds_error=False, fill_value='extrapolate')
+        sin_glon_2_i = itpf_sin(sectime_1)
+        cos_glon_2_i = itpf_cos(sectime_1)
+        rad = np.sign(sin_glon_2_i) * (np.pi / 2 - np.arcsin(cos_glon_2_i))
+        glon_new = rad / factor
+        # rad = np.where((rad >= 0), rad, rad + 2 * numpy.pi)
+
+        ind_outliers = np.where(np.abs(sin_glon_1 - sin_glon_2_i) > 0.03)[0]
+
+        glon_1[ind_outliers] = glon_new[ind_outliers]
+        self['SC_GEO_LON'].value = glon_1.reshape((glon_1.size, 1))
 
     def search_data_files(self, **kwargs):
 
@@ -171,13 +204,13 @@ class Dataset(datahub.DatasetModel):
             this_day = dt0 + datetime.timedelta(days=i)
 
             initial_file_dir = kwargs.pop(
-                'initial_file_dir', self.data_root_dir
+                'initial_file_dir', self.data_root_dir / this_day.strftime('%Y%m') / this_day.strftime('%Y%m%d')
             )
 
             file_patterns = [
-                'EFI' + self.sat_id.upper(),
-                self.product.upper(),
-                this_day.strftime('%Y%m%d') + 'T',
+                'dms',
+                this_day.strftime('%Y%m%d'),
+                self.sat_id[1:] + self.product,
             ]
             # remove empty str
             file_patterns = [pattern for pattern in file_patterns if str(pattern)]
@@ -186,15 +219,13 @@ class Dataset(datahub.DatasetModel):
             done = super().search_data_files(
                 initial_file_dir=initial_file_dir,
                 search_pattern=search_pattern,
-                allow_multiple_files=True,
+                allow_multiple_files=False,
             )
             # Validate file paths
 
             if (not done and self.allow_download) or self.force_download:
                 done = self.download_data()
                 if done:
-                    self._validate_attrs()
-                    initial_file_dir = self.data_root_dir
                     done = super().search_data_files(
                         initial_file_dir=initial_file_dir,
                         search_pattern=search_pattern,
@@ -211,20 +242,9 @@ class Dataset(datahub.DatasetModel):
         download_obj = self.downloader(
             dt_fr, dt_to,
             sat_id=self.sat_id,
-            data_type=self.product,
-            file_version=self.product_version,
+            file_type=self.product,
             force=self.force_download
         )
-        if download_obj.done:
-            self.force_download = False
-
-            if download_obj.file_version != self.local_latest_version and self.product_version == 'latest':
-                mylog.StreamLogger.warning(
-                    f"A newer version of data files have been downloaded ({download_obj.file_version})"
-                )
-            self.product_version = download_obj.file_version
-            self.data_root_dir = self._data_root_dir
-            self._validate_attrs()
 
         return download_obj.done
 
