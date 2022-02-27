@@ -110,11 +110,6 @@ class Dataset(datahub.DatasetSourced):
         if self.time_clip:
             self.time_filter_by_range()
 
-    def get_time_ind(self, ut):
-        delta_sectime = [delta_t.total_seconds() for delta_t in (self['DATETIME'].value.flatten() - ut)]
-        ind = np.where(np.abs(delta_sectime) == np.min(np.abs(delta_sectime)))[0][0]
-        return ind
-
     def search_data_files(self, **kwargs):
         dt_fr = self.dt_fr
         if self.dt_to.hour > 22:

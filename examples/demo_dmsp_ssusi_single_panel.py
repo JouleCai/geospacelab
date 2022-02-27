@@ -19,6 +19,12 @@ def test_ssusi():
     # dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole='N', sat_id='f17', orbit_id='46863')
     # If not specified, the data during the whole day will be downloaded.
     dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole=pole, sat_id=sat_id, orbit_id=None)
+    ds_s1 = dashboard.dock(
+        datasource_contents=['madrigal', 'dmsp', 's1'],
+        dt_fr=time1 - datetime.timedelta(minutes=45),
+        dt_to=time1 + datetime.timedelta(minutes=45),
+        sat_id=sat_id)
+
     dashboard.set_layout(1, 1)
 
     # Get the variables: LBHS emission intensiy, corresponding times and locations
@@ -33,34 +39,39 @@ def test_ssusi():
 
     # Add a polar map panel to the dashboard. Currently the style is the fixed MLT at mlt_c=0. See the keywords below:
     panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, boundary_lat=65., mirror_south=True)
-    # panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, mirror_south=True)
-    # panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=3., pole='N', ut=time1)
-    # panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)
-    # panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='S', ut=time1,
-    #                           boundary_lat=0, mirror_south=False)
-    # panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
-    #                          boundary_lat=0, mirror_south=False)
-
     # Add the coastlines in the AACGM coordinate
     panel1.add_coastlines()
 
     # Some settings for plotting.
     lbhs_ = lbhs.value[ind_t, :, :]
     pcolormesh_config = lbhs.visual.plot_config.pcolormesh
+    colorbar_config = lbhs.visual.plot_config.colorbar
     pcolormesh_config.update(c_scale='log')
-    pcolormesh_config.update(c_lim=[100, 1500])
+    pcolormesh_config.update(c_lim=[100, 5000])
     import geospacelab.visualization.mpl.colormaps as cm
-    cmap = cm.cmap_gist_ncar_modified()
-    cmap = 'viridis'
-    pcolormesh_config.update(cmap=cmap)
+    cmap = cm.cmap_aurora()
+    # cmap = 'viridis'
+    pcolormesh_config.update(cmap=cmap, shading='auto')
     # Overlay the SSUSI image in the map.
-    ipc = panel1.add_pcolor(lbhs_, coords={'lat': mlat[ind_t, ::], 'lon': mlon[ind_t, ::], 'mlt': mlt[ind_t, ::], 'height': 250.}, cs='AACGM', **pcolormesh_config)
+    ipc = panel1.add_pcolor(lbhs_, coords={'lat': mlat[ind_t, ::], 'lon': mlon[ind_t, ::], 'mlt': mlt[ind_t, ::]}, cs='AACGM', **pcolormesh_config)
     # Add a color bar
     panel1.add_colorbar(ipc, c_label=band + " (R)", c_scale=pcolormesh_config['c_scale'], left=1.1, bottom=0.1,
                         width=0.05, height=0.7)
 
     # Add the gridlines
     panel1.add_gridlines(lat_res=5, lon_label_separator=5)
+
+    # Add satellite trajectory
+    sc_dt = ds_s1['SC_DATETIME'].value.flatten()
+    sc_lat = ds_s1['SC_GEO_LAT'].value.flatten()
+    sc_lon = ds_s1['SC_GEO_LON'].value.flatten()
+    sc_alt = ds_s1['SC_GEO_ALT'].value.flatten()
+    sc_coords = {'lat': sc_lat, 'lon': sc_lon, 'height': sc_alt}
+
+    v_H = ds_s1['v_i_H'].value.flatten()
+    panel1.add_cross_track_vector(vector=v_H, unit_vector=1000, alpha=0.5, color='r', sc_coords=sc_coords, sc_ut=sc_dt)
+
+    panel1.add_sc_trajectory(sc_ut=sc_dt, sc_coords=sc_coords, cs='GEO')
 
     # Add the title and save the figure
     polestr = 'North' if pole == 'N' else 'South'

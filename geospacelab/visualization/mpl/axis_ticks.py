@@ -18,6 +18,10 @@ from matplotlib.ticker import LogFormatterSciNotation
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import os
 
+from dateutil.rrule import (rrule, MO, TU, WE, TH, FR, SA, SU, YEARLY,
+                            MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY,
+                            SECONDLY)
+
 HOURS_PER_DAY = 24.
 MIN_PER_HOUR = 60.
 SEC_PER_MIN = 60.
@@ -38,6 +42,8 @@ class DatetimeMajorLocator(mdates.AutoDateLocator):
     def __init__(self, tz=None, minticks=4, maxticks=7, interval_multiples=True):
 
         super().__init__(tz=tz, minticks=minticks, maxticks=maxticks, interval_multiples=interval_multiples)
+        self.intervald[MINUTELY] = [1, 3, 5, 10, 15, 30]
+        self.intervald[SECONDLY] = [1, 3, 5, 10, 15, 30]
 
 
 class DatetimeMinorLocator(mdates.AutoDateLocator):

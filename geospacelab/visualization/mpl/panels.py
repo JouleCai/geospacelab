@@ -58,7 +58,7 @@ class TSPanel(Panel):
     def __init__(
             self, *args, 
             dt_fr=None, dt_to=None, figure=None, from_subplot=True,
-            bottom_panel=True, timeline_reverse=False, timeline_multiple_labels=None,
+            bottom_panel=True, timeline_reverse=False, timeline_extra_labels=None,
             time_gap=True,
             **kwargs
     ):
@@ -71,9 +71,9 @@ class TSPanel(Panel):
         self._xlim = [dt_fr, dt_to]
         self.timeline_reverse = timeline_reverse
         self.time_gap = time_gap
-        if timeline_multiple_labels is None:
-            timeline_multiple_labels = []
-        self.timeline_multiple_labels = timeline_multiple_labels
+        if timeline_extra_labels is None:
+            timeline_extra_labels = []
+        self.timeline_extra_labels = timeline_extra_labels
         self._var_for_config = None
         self.bottom_panel = bottom_panel
 
@@ -268,6 +268,7 @@ class TSPanel(Panel):
     @check_panel_ax
     def _get_var_for_config(self, ax=None, ind=0):
         var_for_config = self.axes_overview[ax]['variables'][ind]
+        self._var_for_config = var_for_config
         return var_for_config
 
     def _set_xaxis(self, ax):
@@ -311,7 +312,7 @@ class TSPanel(Panel):
         var_for_config = self._get_var_for_config(ax=ax)
         # ax.tick_params(axis='x', labelsize=plt.rcParams['xtick.labelsize'])
         # set UT timeline
-        if not list(self.timeline_multiple_labels):
+        if not list(self.timeline_extra_labels):
 
             ax.set_xlabel('UT', fontsize=12, fontweight='normal')
             return
@@ -335,14 +336,14 @@ class TSPanel(Panel):
         x0 = np.array(mpl_dates.date2num(x_depend['UT'])).flatten()
         x1 = np.array(ticks)
         ys = [x1]       # list of tick labels
-        for ind, label in enumerate(self.timeline_multiple_labels[1:]):
+        for ind, label in enumerate(self.timeline_extra_labels):
             if label in x_depend.keys():
                 y0 = x_depend[label].flatten()
             elif label in var_for_config.dataset.keys():
-                    y0 = var_for_config.dataset[label].value
+                y0 = var_for_config.dataset[label].value
             else:
                 raise KeyError
-            if label == 'MLT':
+            if 'MLT' in label.upper():
                 y0_sin = np.sin(y0 / 24. * 2 * np.pi)
                 y0_cos = np.cos(y0 / 24. * 2 * np.pi)
                 itpf_sin = interp1d(x0, y0_sin, bounds_error=False, fill_value='extrapolate')
@@ -352,12 +353,45 @@ class TSPanel(Panel):
                 rad = np.sign(y0_sin_i) * (np.pi / 2 - np.arcsin(y0_cos_i))
                 rad = np.where((rad >= 0), rad, rad + 2 * np.pi)
                 y1 = rad / 2. / np.pi * 24.
+            elif 'LON' in label.upper():
+                y0_sin = np.sin(y0 * np.pi / 180.)
+                y0_cos = np.cos(y0 * np.pi / 180.)
+                itpf_sin = interp1d(x0, y0_sin, bounds_error=False, fill_value='extrapolate')
+                itpf_cos = interp1d(x0, y0_cos, bounds_error=False, fill_value="extrapolate")
+                y0_sin_i = itpf_sin(x1)
+                y0_cos_i = itpf_cos(x1)
+                rad = np.sign(y0_sin_i) * (np.pi / 2 - np.arcsin(y0_cos_i))
+                y1 = rad * 180. / np.pi
             else:
                 itpf = interp1d(x0, y0, bounds_error=False, fill_value='extrapolate')
                 y1 = itpf(x1)
             ys.append(y1)
             xlabels.append(label)
 
+        for ind, xticks in enumerate(ys):
+            ax.text(
+                0.1, xy_fig[0][1] - yoffset * ind - 0.013,
+                xlabels[ind].replace('_', '/'),
+                fontsize=plt.rcParams['xtick.labelsize'], fontweight='normal',
+                horizontalalignment='right', verticalalignment='top',
+                transform=self.figure.transFigure
+            )
+            for ind_pos, xtick in enumerate(xticks):
+                if np.isnan(xtick):
+                    continue
+                if ind == 0:
+                    text = majorformatter.format_data(xtick)
+                elif 'MLT' in xlabels[ind]:
+                    text = (datetime.datetime(1970, 1, 1) + datetime.timedelta(hours=xtick)).strftime('%H:%M')
+                else:
+                    text = '%.1f' % xtick
+                ax.text(
+                    xy_fig[ind_pos][0], xy_fig[ind_pos][1] - yoffset * ind - 0.013,
+                    text,
+                    fontsize=plt.rcParams['xtick.labelsize'],
+                    horizontalalignment='center', verticalalignment='top',
+                    transform=self.figure.transFigure
+                )
         ax.xaxis.set_major_formatter(mpl_ticker.NullFormatter())
 
         # if self.major_timeline == 'MLT':
@@ -375,30 +409,7 @@ class TSPanel(Panel):
         #     ax.set_xlabel('MLT')
         #     return
 
-        for ind, xticks in enumerate(ys):
-            ax.text(
-                0.1, xy_fig[0][1] - yoffset * ind - 0.013,
-                xlabels[ind],
-                fontsize=plt.rcParams['xtick.labelsize'], fontweight='normal',
-                horizontalalignment='right', verticalalignment='top',
-                transform=self.figure.transFigure
-            )
-            for ind_pos, xtick in enumerate(xticks):
-                if np.isnan(xtick):
-                    continue
-                if ind == 0:
-                    text = majorformatter.format_data(xtick)
-                elif xlabels[ind] == 'MLT':
-                    text = (datetime.datetime(1970, 1, 1) + datetime.timedelta(hours=xtick)).strftime('%H:%M')
-                else:
-                    text = '%.1f' % xtick
-                ax.text(
-                    xy_fig[ind_pos][0], xy_fig[ind_pos][1] - yoffset * ind - 0.013,
-                    text,
-                    fontsize=plt.rcParams['xtick.labelsize'],
-                    horizontalalignment='center', verticalalignment='top',
-                    transform=self.figure.transFigure
-                )
+
 
     @check_panel_ax
     def _set_yaxis(self, ax=None):

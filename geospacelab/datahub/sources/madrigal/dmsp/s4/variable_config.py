@@ -20,15 +20,15 @@ timestamps = {
 }
 
 coords = {
-    'GEO': ['GEO_LAT', 'GEO_LON', 'GEO_ALT', 'GEO_ST'],
-    'AACGM': ['AACGM_LAT', 'AACGM_LON', 'AACGM_R', 'AACGM_MLT'],
-    'APEX': ['APEX_LAT', 'APEX_LON', 'APEX_ALT', 'APEX_MLT']
+    'GEO': ['SC_GEO_LAT', 'SC_GEO_LON', 'SC_GEO_ALT', 'SC_GEO_ST'],
+    'AACGM': ['SC_AACGM_LAT', 'SC_AACGM_LON', 'SC_AACGM_R', 'SC_AACGM_MLT'],
+    'APEX': ['SC_APEX_LAT', 'SC_APEX_LON', 'SC_APEX_ALT', 'SC_APEX_MLT']
 }
 
 depend_0 = {
     'UT': 'SC_DATETIME',
-    'GEO_LAT': 'GEO_LAT', 'GEO_LON': 'GEO_LON',
-    'AACGM_LAT': 'AACGM_LAT', 'AACGM_LON': 'AACGM_LON', 'AACGM_MLT': 'AACGM_MLT'
+    'GEO_LAT': 'SC_GEO_LAT', 'GEO_LON': 'SC_GEO_LON',
+    'AACGM_LAT': 'SC_AACGM_LAT', 'AACGM_LON': 'SC_AACGM_LON', 'AACGM_MLT': 'SC_AACGM_MLT'
 }
 
 default_colormap = cm.cmap_jet_modified()
@@ -38,6 +38,7 @@ default_axis_dict_1d = {
         'data': '@v.value',
         'label': '@v.group',
         'unit': '@v.unit',
+        'label_pos': [-0.1, 0.5],
     },
     2: {
         'label': '@v.label'
@@ -60,10 +61,10 @@ default_axis_dict_2d = {
 
 default_plot_config = {
     'line':         {
-        'linestyle':        '',
+        'linestyle':        '-',
         'linewidth':        1.5,
         'marker':           '.',
-        'markersize':       3,
+        'markersize':       2,
     },
     'pcolormesh':   {
         'cmap':            default_colormap,
@@ -74,15 +75,15 @@ configured_variables = {}
 visual = 'on'
 
 ####################################################################################################################
-var_name = 'v_i_HOR'
+var_name = 'T_e'
 var = Var(ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var_config = {
     'name': var_name,
-    'fullname': 'Cross-track ion velocity (horizontal)',
-    'label': r'$v_i^H$',
-    'group': 'ion velocity',
-    'unit': 'm/s',
+    'fullname': 'Electron temperature',
+    'label': r'$T_e$',
+    'group': 'T',
+    'unit': 'K',
     'unit_label': None,
     'error': None,
     'depends': {0: depend_0},
@@ -93,22 +94,22 @@ var.visual.plot_config.config(**default_plot_config)
 var.visual.plot_config.style = '1noE'
 # set axis attrs
 var.visual.axis[1].config(**default_axis_dict_1d[1])
-var.visual.axis[1].lim = [-np.inf, np.inf]
+var.visual.axis[1].lim = [500, 5e3]
 
 var.visual.axis[2].config(**default_axis_dict_1d[2])
 
 configured_variables[var_name] = var
 
 ####################################################################################################################
-var_name = 'v_i_VER'
+var_name = 'T_i'
 var = Var(ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var_config = {
     'name': var_name,
-    'fullname': 'Cross-track ion velocity (vertical)',
-    'label': r'$v_i^V$',
-    'group': 'ion velocity',
-    'unit': 'm/s',
+    'fullname': 'Ion temperature',
+    'label': r'$T_i$',
+    'group': 'T',
+    'unit': 'K',
     'unit_label': None,
     'error': None,
     'depends': {0: depend_0},
@@ -119,22 +120,21 @@ var.visual.plot_config.config(**default_plot_config)
 var.visual.plot_config.style = '1noE'
 # set axis attrs
 var.visual.axis[1].config(**default_axis_dict_1d[1])
-var.visual.axis[1].lim = [-np.inf, np.inf]
+var.visual.axis[1].lim = [500, 5e3]
 
 var.visual.axis[2].config(**default_axis_dict_1d[2])
 
 configured_variables[var_name] = var
 
 ####################################################################################################################
-var_name = 'delta_B_D'
+var_name = 'COMP_O_p'
 var = Var(ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var_config = {
     'name': var_name,
-    'fullname': 'Downward magnetic field subtracted from the background',
-    'label': r'$\delta B_D$',
-    'group': r'$\delta B$',
-    'unit': 'nT',
+    'fullname': 'O+ fraction',
+    'label': r'$r_{O+}$',
+    'unit': '%',
     'unit_label': None,
     'error': None,
     'depends': {0: depend_0},
@@ -145,89 +145,8 @@ var.visual.plot_config.config(**default_plot_config)
 var.visual.plot_config.style = '1noE'
 # set axis attrs
 var.visual.axis[1].config(**default_axis_dict_1d[1])
-var.visual.axis[1].lim = [-np.inf, np.inf]
-var.visual.axis[1].data_scale = 1e9
-
-var.visual.axis[2].config(**default_axis_dict_1d[2])
-
-configured_variables[var_name] = var
-
-####################################################################################################################
-var_name = 'delta_B_P'
-var = Var(ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var_config = {
-    'name': var_name,
-    'fullname': 'Cross-track magnetic field subtracted from the background',
-    'label': r'$\delta B_P$',
-    'group': r'$\delta B$',
-    'unit': 'nT',
-    'unit_label': None,
-    'error': None,
-    'depends': {0: depend_0},
-}
-var.config(**var_config)
-# set plot attrs
-var.visual.plot_config.config(**default_plot_config)
-var.visual.plot_config.style = '1noE'
-# set axis attrs
-var.visual.axis[1].config(**default_axis_dict_1d[1])
-var.visual.axis[1].lim = [-np.inf, np.inf]
-var.visual.axis[1].data_scale = 1e9
-
-var.visual.axis[2].config(**default_axis_dict_1d[2])
-
-configured_variables[var_name] = var
-
-####################################################################################################################
-var_name = 'delta_B_F'
-var = Var(ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var_config = {
-    'name': var_name,
-    'fullname': 'Forward-track magnetic field subtracted from the background',
-    'label': r'$\delta B_F$',
-    'group': r'$\delta B$',
-    'unit': 'nT',
-    'unit_label': None,
-    'error': None,
-    'depends': {0: depend_0},
-}
-var.config(**var_config)
-# set plot attrs
-var.visual.plot_config.config(**default_plot_config)
-var.visual.plot_config.style = '1noE'
-# set axis attrs
-var.visual.axis[1].config(**default_axis_dict_1d[1])
-var.visual.axis[1].lim = [-np.inf, np.inf]
-var.visual.axis[1].data_scale = 1e9
-
-var.visual.axis[2].config(**default_axis_dict_1d[2])
-
-configured_variables[var_name] = var
-
-####################################################################################################################
-var_name = 'n_e'
-var = Var(ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var_config = {
-    'name': var_name,
-    'fullname': 'Electron density',
-    'label': r'$n_e$',
-    'group': 'Density',
-    'unit': 'm/-3',
-    'unit_label': r'm$^{-3}$',
-    'error': None,
-    'depends': {0: depend_0},
-}
-var.config(**var_config)
-# set plot attrs
-var.visual.plot_config.config(**default_plot_config)
-var.visual.plot_config.style = '1noE'
-# set axis attrs
-var.visual.axis[1].config(**default_axis_dict_1d[1])
-var.visual.axis[1].lim = [5e8, 3e11]
-var.visual.axis[1].scale = 'log'
+var.visual.axis[1].lim = [0, 100]
+var.visual.axis[1].data_scale = 100
 
 var.visual.axis[2].config(**default_axis_dict_1d[2])
 

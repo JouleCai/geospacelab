@@ -74,7 +74,6 @@ class Loader(object):
             # load metadata
             metadata = {}
 
-
             # load data
             data_parameters = list(zip(*tuple(fh5['Data']['Array Layout']['1D Parameters']['Data Parameters'][:])))
             data = fh5['Data']['Array Layout']['1D Parameters']

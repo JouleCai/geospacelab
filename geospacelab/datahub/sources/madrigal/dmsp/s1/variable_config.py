@@ -19,17 +19,19 @@ timestamps = {
     'DATETIME': 'SC_DATETIME',
 }
 
+
 coords = {
-    'GEO': ['GEO_LAT', 'GEO_LON', 'GEO_ALT', 'GEO_ST'],
-    'AACGM': ['AACGM_LAT', 'AACGM_LON', 'AACGM_R', 'AACGM_MLT'],
-    'APEX': ['APEX_LAT', 'APEX_LON', 'APEX_ALT', 'APEX_MLT']
+    'GEO': ['SC_GEO_LAT', 'SC_GEO_LON', 'SC_GEO_ALT', 'SC_GEO_ST'],
+    'AACGM': ['SC_AACGM_LAT', 'SC_AACGM_LON', 'SC_AACGM_R', 'SC_AACGM_MLT'],
+    'APEX': ['SC_APEX_LAT', 'SC_APEX_LON', 'SC_APEX_ALT', 'SC_APEX_MLT']
 }
 
 depend_0 = {
     'UT': 'SC_DATETIME',
-    'GEO_LAT': 'GEO_LAT', 'GEO_LON': 'GEO_LON',
-    'AACGM_LAT': 'AACGM_LAT', 'AACGM_LON': 'AACGM_LON', 'AACGM_MLT': 'AACGM_MLT'
+    'GEO_LAT': 'SC_GEO_LAT', 'GEO_LON': 'SC_GEO_LON',
+    'AACGM_LAT': 'SC_AACGM_LAT', 'AACGM_LON': 'SC_AACGM_LON', 'AACGM_MLT': 'SC_AACGM_MLT'
 }
+
 
 default_colormap = cm.cmap_jet_modified()
 
@@ -38,6 +40,7 @@ default_axis_dict_1d = {
         'data': '@v.value',
         'label': '@v.group',
         'unit': '@v.unit',
+        'label_pos': [-0.1, 0.5],
     },
     2: {
         'label': '@v.label'
@@ -60,10 +63,10 @@ default_axis_dict_2d = {
 
 default_plot_config = {
     'line':         {
-        'linestyle':        '',
+        'linestyle':        '-',
         'linewidth':        1.5,
         'marker':           '.',
-        'markersize':       3,
+        'markersize':       2,
     },
     'pcolormesh':   {
         'cmap':            default_colormap,
@@ -74,7 +77,7 @@ configured_variables = {}
 visual = 'on'
 
 ####################################################################################################################
-var_name = 'v_i_HOR'
+var_name = 'v_i_H'
 var = Var(ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var_config = {
@@ -100,7 +103,7 @@ var.visual.axis[2].config(**default_axis_dict_1d[2])
 configured_variables[var_name] = var
 
 ####################################################################################################################
-var_name = 'v_i_VER'
+var_name = 'v_i_V'
 var = Var(ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var_config = {
@@ -126,7 +129,7 @@ var.visual.axis[2].config(**default_axis_dict_1d[2])
 configured_variables[var_name] = var
 
 ####################################################################################################################
-var_name = 'delta_B_D'
+var_name = 'd_B_D'
 var = Var(ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var_config = {
@@ -153,7 +156,7 @@ var.visual.axis[2].config(**default_axis_dict_1d[2])
 configured_variables[var_name] = var
 
 ####################################################################################################################
-var_name = 'delta_B_P'
+var_name = 'd_B_P'
 var = Var(ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var_config = {
@@ -180,7 +183,7 @@ var.visual.axis[2].config(**default_axis_dict_1d[2])
 configured_variables[var_name] = var
 
 ####################################################################################################################
-var_name = 'delta_B_F'
+var_name = 'd_B_F'
 var = Var(ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var_config = {

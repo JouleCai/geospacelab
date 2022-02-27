@@ -20,6 +20,7 @@ import matplotlib.ticker as mticker
 import matplotlib.path as mpath
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+from scipy.interpolate import interp1d
 import matplotlib.cm as cm
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
@@ -29,7 +30,7 @@ import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.numpymath as mathtool
 import geospacelab.toolbox.utilities.pybasic as pybasic
 from geospacelab.visualization.mpl.geomap._base import GeoPanelBase
-
+from geospacelab.datahub.__variable_base__ import VariableBase
 
 class GeoPanel(GeoPanelBase):
 
@@ -446,6 +447,112 @@ class PolarMapPanel(GeoPanel):
         else:
             raise NotImplementedError
 
+    def add_pcolormesh(
+            self, data, coords=None, cs=None,
+            regridding: bool = True,
+            data_lat_res: float = 0.7,
+            c_scale='linear', c_lim=None,
+            **kwargs):
+
+        kwargs.setdefault('shading', 'auto')
+
+        if c_lim is None:
+            c_lim = [0, 0]
+            c_lim[0] = np.nanmin(data.flatten())
+            c_lim[1] = np.nanmax(data.flatten())
+
+        if c_scale == 'log':
+            norm = mcolors.LogNorm(vmin=c_lim[0], vmax=c_lim[1])
+            kwargs.update(norm=norm)
+        else:
+            kwargs.update(vmin=c_lim[0])
+            kwargs.update(vmax=c_lim[1])
+
+        cs_new = self.cs_transform(cs_fr=cs, coords=coords)
+        lat_in = cs_new['lat']
+        lon_in = cs_new['lon']
+        data_in = data
+        if regridding:
+            from scipy.interpolate import griddata
+
+            grid_lat_res = kwargs.pop('grid_lat_res', 0.1)
+            grid_lon_res = kwargs.pop('grid_lon_res', 0.1)
+
+            ind_data = np.where(np.isfinite(data))
+            data_pts = data_in[ind_data]
+            lat_pts = lat_in[ind_data]
+            lon_pts = lon_in[ind_data]
+
+            pos_data = self.projection.transform_points(ccrs.PlateCarree(), lon_pts, lat_pts)
+            pos_x = np.float32(pos_data[:, 0])
+            pos_y = np.float32(pos_data[:, 1])
+
+            xlim = list(self.major_ax.get_xlim())
+            ylim = list(self.major_ax.get_ylim())
+            xlim.extend(ylim)
+            xlim = [np.float32(x) for x in xlim]
+            width = np.max(xlim) - np.min(xlim)
+            lat_width = (90. - np.abs(self.boundary_lat)) * 2
+            grid_x_res = grid_lat_res / lat_width * width
+            grid_y_res = grid_x_res
+            grid_x, grid_y = np.meshgrid(
+                np.arange(xlim[0], xlim[1], grid_x_res),
+                np.arange(xlim[0], xlim[1], grid_x_res)
+            )
+
+            grid_data = griddata((pos_x, pos_y), data_pts, (grid_x, grid_y), method='nearest')
+            grid_data_x = griddata(
+                (pos_x, pos_y), pos_x, (grid_x, grid_y), method='nearest'
+            )
+            grid_data_y = griddata(
+                (pos_x, pos_y), pos_y, (grid_x, grid_y), method='nearest'
+            )
+
+            ind_out = np.where(
+                np.sqrt((grid_data_x - grid_x) ** 2 + (grid_data_y - grid_y) ** 2) > data_lat_res/lat_width*width
+            )
+            grid_data[ind_out] = np.nan
+
+            ipc = self().pcolormesh(grid_x, grid_y, grid_data, **kwargs)
+
+            # self.boundary_lat
+            #
+            # grid_lat_res = kwargs.pop('grid_lat_res', 0.1)
+            # grid_lon_res = kwargs.pop('grid_lon_res', 0.1)
+            #
+            # ind_data = np.where(np.isfinite(data))
+            # data_pts = data[ind_data]
+            # lat_pts = cs_new['lat'][ind_data]
+            # lon_pts = cs_new['lon'][ind_data]
+            #
+            # grid_lon, grid_lat = np.meshgrid(
+            #     np.arange(0., 360., grid_lon_res),
+            #     np.append(np.arange(self.boundary_lat, self.lat_c, np.sign(self.lat_c) * grid_lat_res), self.lat_c)
+            # )
+            #
+            # grid_data = griddata((lon_pts, lat_pts), data_pts, (grid_lon, grid_lat), method='nearest')
+            # grid_data_lat = griddata(
+            #     (lon_pts, lat_pts), lat_pts, (grid_lon, grid_lat), method='nearest'
+            # )
+            # grid_data_lon = griddata(
+            #     (lon_pts, lat_pts), lon_pts, (grid_lon, grid_lat), method='nearest'
+            # )
+            # factor = np.pi / 180.
+            # big_circle_d = 6371. * np.arccos(
+            #     np.sin(grid_data_lat * factor) * np.sin(grid_lat * factor) +
+            #     np.cos(grid_data_lat * factor) * np.cos(grid_lat * factor) * np.cos(
+            #         np.abs((grid_lon - grid_data_lon) * factor))
+            # )
+            # grid_data = np.where(big_circle_d < data_lat_res*111.2, grid_data, np.nan)
+            # lat_in = grid_lat
+            # lon_in = grid_lon
+            # data_in = grid_data
+        else:
+            transform = ccrs.PlateCarree()
+            ipc = self().pcolormesh(lon_in, lat_in, data_in, transform=transform, **kwargs)
+
+        return ipc
+
     def add_pcolor(self, data, coords=None, cs=None,
                    c_lim=None, c_scale='linear', c_label=None, **kwargs):
         kwargs.setdefault('shading', 'auto')
@@ -510,50 +617,40 @@ class PolarMapPanel(GeoPanel):
             ict = self.major_ax.contour(cs_new['lon'], cs_new['lat'], data, levels, transform=ccrs.PlateCarree(), **kwargs)
         return ict
 
-    def add_sc_trajectory(self, sc_lat, sc_lon, sc_alt, sc_dt=None, show_trajectory=True,
-                          time_tick=False, time_tick_res=600., time_tick_scale=0.02,
-                          time_tick_label=True, time_tick_label_format="%M:%H", time_tick_label_fontsize=8,
-                          time_minor_tick=False, time_minor_tick_res=60, **kwargs):
+    def add_sc_trajectory(self, sc_ut=None, sc_coords=None, cs=None, *, show_trajectory=True, color='#EEEEEE',
+                          time_tick=True, time_tick_res=300., time_tick_scale=0.05,
+                          time_tick_label=True, time_tick_label_format="%H:%M", time_tick_label_fontsize=8,
+                          time_minor_tick=True, time_minor_tick_res=60, **kwargs):
         kwargs.setdefault('trajectory_config', {
             'linewidth': 1,
             'linestyle': '-',
-            'color': 'k',
+            'color': color,
         })
-        kwargs.setdefault('linewidth', 1)
-        kwargs.setdefault('color', 'k')
+
+        cs_new = self.cs_transform(cs_fr=cs, coords=sc_coords, ut=sc_ut)
 
         if self.pole == 'N':
-            ind_lat = np.where(sc_lat > self.boundary_lat)[0]
+            ind_lat = np.where(cs_new['lat'] > self.boundary_lat)[0]
         else:
-            ind_lat = np.where(sc_lat < self.boundary_lat)[0]
+            ind_lat = np.where(cs_new['lat'] < self.boundary_lat)[0]
 
-        sc_lat = sc_lat.flatten()[ind_lat]
-        sc_lon = sc_lon.flatten()[ind_lat]
-        sc_alt = sc_alt.flatten()[ind_lat]
-        sc_dt = sc_dt.flatten()[ind_lat]
-
-        coords = {
-            'lat': sc_lat,
-            'lon': sc_lon,
-            'height': sc_alt,
-        }
-        cs_new = self.cs_transform(cs_fr='GEO', coords=coords, ut=sc_dt)
+        lat_in = cs_new['lat'][ind_lat]
+        lon_in = cs_new['lon'][ind_lat]
+        dts_in = sc_ut[ind_lat]
         if show_trajectory:
-            self.major_ax.plot(cs_new['lon'], cs_new['lat'], proj=ccrs.Geodetic(), **kwargs['trajectory_config'])
+            self.major_ax.plot(lon_in, lat_in, transform=ccrs.Geodetic(), **kwargs['trajectory_config'])
 
         if time_tick:
-            data = self.projection.transform_points(ccrs.PlateCarree(), cs_new['lon'], cs_new['lat'])
+            data = self.projection.transform_points(ccrs.PlateCarree(), lon_in, lat_in)
             xdata = data[:, 0]
             ydata = data[:, 1]
 
             sectime, dt0 = dttool.convert_datetime_to_sectime(
-                sc_dt, datetime.datetime(self.ut.year, self.ut.month, self.ut.day)
+                dts_in, datetime.datetime(self.ut.year, self.ut.month, self.ut.day)
             )
 
-            time_ticks = np.arange(np.floor(sectime[0] / time_tick_res) * time_tick_res,
+            time_ticks = np.arange(np.ceil(sectime[0] / time_tick_res) * time_tick_res,
                                    np.ceil(sectime[-1] / time_tick_res) * time_tick_res, time_tick_res)
-
-            from scipy.interpolate import interp1d
 
             f = interp1d(sectime, xdata, fill_value='extrapolate')
             x_i = f(time_ticks)
@@ -561,20 +658,22 @@ class PolarMapPanel(GeoPanel):
             y_i = f(time_ticks)
 
             slope = mathtool.calc_curve_tangent_slope(xdata, ydata)
+            f = interp1d(sectime, slope, fill_value='extrapolate')
+            slope_i = f(time_ticks)
             l = np.empty_like(x_i)
             l[:] = (self._extent[1] - self._extent[0]) * time_tick_scale
 
             xq = x_i
             yq = y_i
-            uq1 = - l * np.sin(slope)
-            vq1 = l * np.cos(slope)
+            uq1 = - l * np.sin(slope_i)
+            vq1 = l * np.cos(slope_i)
 
-            self.major_ax.quiver(xq, yq, uq1, vq1, units='xy')
-
-            uq2 = l * np.sin(slope)
-            vq2 = - l * np.cos(slope)
-
-            self.major_ax.quiver(xq, yq, uq2, vq2, units='xy')
+            self.major_ax.quiver(
+                xq, yq, uq1, vq1,
+                units='xy', angles='xy', scale=1., scale_units='xy',
+                width=0.003 * (self._extent[1] - self._extent[0]),
+                headlength=0, headaxislength=0, pivot='middle', color=color
+            )
 
             if time_tick_label:
                 for ind, time_tick in enumerate(time_ticks):
@@ -583,16 +682,79 @@ class PolarMapPanel(GeoPanel):
                     y_time_tick = y_i[ind]
 
                     self.major_ax.text(
-                        x_time_tick + uq1[ind], y_time_tick + vq1[ind], time.strftime(time_tick_label_format),
+                        x_time_tick, y_time_tick, time.strftime(time_tick_label_format),
                         fontsize=time_tick_label_fontsize,
-                        rotation=slope[ind] * 180. / np.pi + 90.,
-                        ha='left', va='middle'
+                        rotation=slope[ind] * 180. / np.pi + 45,
+                        ha='left', va='baseline', color=color
                     )
 
             # self.major_ax.plot(x_time_ticks, y_time_ticks, **kwargs['time_tick_config'])
 
-        if time_minor_tick:
-            pass
+            if time_minor_tick:
+
+                time_ticks = np.arange(np.ceil(sectime[0] / time_minor_tick_res) * time_minor_tick_res,
+                                       np.ceil(sectime[-1] / time_minor_tick_res) * time_minor_tick_res, time_minor_tick_res)
+
+                f = interp1d(sectime, xdata, fill_value='extrapolate')
+                x_i = f(time_ticks)
+                f = interp1d(sectime, ydata, fill_value='extrapolate')
+                y_i = f(time_ticks)
+
+                f = interp1d(sectime, slope, fill_value='extrapolate')
+                slope_i = f(time_ticks)
+                l = np.empty_like(x_i)
+                l[:] = (self._extent[1] - self._extent[0]) * time_tick_scale / 2.5
+
+                xq = x_i
+                yq = y_i
+                uq1 = - l * np.sin(slope_i)
+                vq1 = l * np.cos(slope_i)
+
+                self.major_ax.quiver(
+                    xq, yq, uq1, vq1,
+                    units='xy', angles='xy', scale=1., scale_units='xy',
+                    width=0.003*(self._extent[1] - self._extent[0]),
+                    headlength=0, headaxislength=0, pivot='middle', color=color
+                )
+
+    def add_cross_track_vector(
+            self, vector, unit_vector, sc_ut=None, sc_coords=None, cs='GEO', *,
+            unit_vector_scale=0.1, vector_unit='',
+            color='r', alpha=0.5,
+            **kwargs):
+
+        cs_new = self.cs_transform(cs_fr=cs, coords=sc_coords, ut=sc_ut)
+
+        if self.pole == 'N':
+            ind_lat = np.where(cs_new['lat'] > self.boundary_lat)[0]
+        else:
+            ind_lat = np.where(cs_new['lat'] < self.boundary_lat)[0]
+
+        lat_in = cs_new['lat'][ind_lat]
+        lon_in = cs_new['lon'][ind_lat]
+        dts_in = sc_ut[ind_lat]
+        vector = vector[ind_lat]
+
+        data = self.projection.transform_points(ccrs.PlateCarree(), lon_in, lat_in)
+        xdata = np.float32(data[:, 0])
+        ydata = np.float32(data[:, 1])
+        slope = mathtool.calc_curve_tangent_slope(xdata, ydata, degree=3)
+
+        width = np.float32(self._extent[1] - self._extent[0])
+        vector = vector / unit_vector * width * unit_vector_scale
+        sign = np.sign(xdata[1] - xdata[0])
+        xq = xdata
+        yq = ydata
+        uq1 = - sign * vector * np.sin(slope)
+        vq1 = sign * vector * np.cos(slope)
+
+        self.major_ax.quiver(
+            xq, yq, uq1, vq1,
+            units='xy', angles='xy', scale=1., scale_units='xy',
+            width=0.001 * (self._extent[1] - self._extent[0]),
+            headlength=0, headaxislength=0, pivot='tail', color=color, alpha=alpha, **kwargs
+        )
+        pass
 
     def add_sc_coloured_line(self, sc_lat, sc_lon, sc_alt, sc_data, sc_dt=None, label='', unit='', scale='linear',
                              vmin=None, vmax=None, colormap=None):

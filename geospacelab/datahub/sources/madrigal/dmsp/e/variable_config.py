@@ -19,51 +19,58 @@ timestamps = {
     'DATETIME': 'SC_DATETIME',
 }
 
+
 coords = {
-    'GEO': ['GEO_LAT', 'GEO_LON', 'GEO_ALT', 'GEO_ST'],
-    'AACGM': ['AACGM_LAT', 'AACGM_LON', 'AACGM_R', 'AACGM_MLT'],
-    'APEX': ['APEX_LAT', 'APEX_LON', 'APEX_ALT', 'APEX_MLT']
+    'GEO': ['SC_GEO_LAT', 'SC_GEO_LON', 'SC_GEO_ALT', 'SC_GEO_ST'],
+    'AACGM': ['SC_AACGM_LAT', 'SC_AACGM_LON', 'SC_AACGM_R', 'SC_AACGM_MLT'],
+    'APEX': ['SC_APEX_LAT', 'SC_APEX_LON', 'SC_APEX_ALT', 'SC_APEX_MLT']
 }
 
 depend_0 = {
     'UT': 'SC_DATETIME',
-    'GEO_LAT': 'GEO_LAT', 'GEO_LON': 'GEO_LON',
-    'AACGM_LAT': 'AACGM_LAT', 'AACGM_LON': 'AACGM_LON', 'AACGM_MLT': 'AACGM_MLT'
+    'GEO_LAT': 'SC_GEO_LAT', 'GEO_LON': 'SC_GEO_LON',
+    'AACGM_LAT': 'SC_AACGM_LAT', 'AACGM_LON': 'SC_AACGM_LON', 'AACGM_MLT': 'SC_AACGM_MLT'
 }
+
+depend_1 = {'ENERGY_CHANNEL': 'ENERGY_CHANNEL_GRID'}
 
 default_colormap = cm.cmap_jet_modified()
 
 default_axis_dict_1d = {
     1: {
-        'data': '@v.value',
-        'label': '@v.group',
-        'unit': '@v.unit',
+        'data':     '@v.value',
+        'label':    '@v.group',
+        'unit':     '@v.unit',
+        'label_pos': [-0.1, 0.5],
     },
     2: {
-        'label': '@v.label'
+        'label':    '@v.label'
     },
 }
 
 default_axis_dict_2d = {
     1:     {
-        'data':     '@d.HEIGHT.value',
-        'lim':      [90, 350],
-        'label':    'h',
-        'unit':     'km',
+        'data':     '@d.ENERGY_CHANNEL_GRID.value',
+        'lim':      [2.5e1, 4e4],
+        'scale':    'log',
+        'label':    'Energy',
+        'unit':     'eV',
+        'label_pos': [-0.1, 0.5],
     },
     2:  {
         'data':     '@v.value',
         'label':    '@v.label',
-        'unit':     '@v.unit',
+        'unit':     '@v.unit_label',
+        'scale':    'log'
     }
 }
 
 default_plot_config = {
     'line':         {
-        'linestyle':        '',
+        'linestyle':        '-',
         'linewidth':        1.5,
         'marker':           '.',
-        'markersize':       3,
+        'markersize':       2,
     },
     'pcolormesh':   {
         'cmap':            default_colormap,
@@ -74,16 +81,16 @@ configured_variables = {}
 visual = 'on'
 
 ####################################################################################################################
-var_name = 'v_i_HOR'
+var_name = 'JE_e'
 var = Var(ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var_config = {
     'name': var_name,
-    'fullname': 'Cross-track ion velocity (horizontal)',
-    'label': r'$v_i^H$',
-    'group': 'ion velocity',
-    'unit': 'm/s',
-    'unit_label': None,
+    'fullname': 'Integrated energy flux of electrons',
+    'label': r'JE$_e$',
+    'group': 'JE',
+    'unit': r'eV/cm2/s/ster',
+    'unit_label': r'eV$/$cm$^{2}/$s$/$ster',
     'error': None,
     'depends': {0: depend_0},
 }
@@ -93,142 +100,248 @@ var.visual.plot_config.config(**default_plot_config)
 var.visual.plot_config.style = '1noE'
 # set axis attrs
 var.visual.axis[1].config(**default_axis_dict_1d[1])
-var.visual.axis[1].lim = [-np.inf, np.inf]
-
-var.visual.axis[2].config(**default_axis_dict_1d[2])
-
-configured_variables[var_name] = var
-
-####################################################################################################################
-var_name = 'v_i_VER'
-var = Var(ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var_config = {
-    'name': var_name,
-    'fullname': 'Cross-track ion velocity (vertical)',
-    'label': r'$v_i^V$',
-    'group': 'ion velocity',
-    'unit': 'm/s',
-    'unit_label': None,
-    'error': None,
-    'depends': {0: depend_0},
-}
-var.config(**var_config)
-# set plot attrs
-var.visual.plot_config.config(**default_plot_config)
-var.visual.plot_config.style = '1noE'
-# set axis attrs
-var.visual.axis[1].config(**default_axis_dict_1d[1])
-var.visual.axis[1].lim = [-np.inf, np.inf]
-
-var.visual.axis[2].config(**default_axis_dict_1d[2])
-
-configured_variables[var_name] = var
-
-####################################################################################################################
-var_name = 'delta_B_D'
-var = Var(ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var_config = {
-    'name': var_name,
-    'fullname': 'Downward magnetic field subtracted from the background',
-    'label': r'$\delta B_D$',
-    'group': r'$\delta B$',
-    'unit': 'nT',
-    'unit_label': None,
-    'error': None,
-    'depends': {0: depend_0},
-}
-var.config(**var_config)
-# set plot attrs
-var.visual.plot_config.config(**default_plot_config)
-var.visual.plot_config.style = '1noE'
-# set axis attrs
-var.visual.axis[1].config(**default_axis_dict_1d[1])
-var.visual.axis[1].lim = [-np.inf, np.inf]
-var.visual.axis[1].data_scale = 1e9
-
-var.visual.axis[2].config(**default_axis_dict_1d[2])
-
-configured_variables[var_name] = var
-
-####################################################################################################################
-var_name = 'delta_B_P'
-var = Var(ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var_config = {
-    'name': var_name,
-    'fullname': 'Cross-track magnetic field subtracted from the background',
-    'label': r'$\delta B_P$',
-    'group': r'$\delta B$',
-    'unit': 'nT',
-    'unit_label': None,
-    'error': None,
-    'depends': {0: depend_0},
-}
-var.config(**var_config)
-# set plot attrs
-var.visual.plot_config.config(**default_plot_config)
-var.visual.plot_config.style = '1noE'
-# set axis attrs
-var.visual.axis[1].config(**default_axis_dict_1d[1])
-var.visual.axis[1].lim = [-np.inf, np.inf]
-var.visual.axis[1].data_scale = 1e9
-
-var.visual.axis[2].config(**default_axis_dict_1d[2])
-
-configured_variables[var_name] = var
-
-####################################################################################################################
-var_name = 'delta_B_F'
-var = Var(ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var_config = {
-    'name': var_name,
-    'fullname': 'Forward-track magnetic field subtracted from the background',
-    'label': r'$\delta B_F$',
-    'group': r'$\delta B$',
-    'unit': 'nT',
-    'unit_label': None,
-    'error': None,
-    'depends': {0: depend_0},
-}
-var.config(**var_config)
-# set plot attrs
-var.visual.plot_config.config(**default_plot_config)
-var.visual.plot_config.style = '1noE'
-# set axis attrs
-var.visual.axis[1].config(**default_axis_dict_1d[1])
-var.visual.axis[1].lim = [-np.inf, np.inf]
-var.visual.axis[1].data_scale = 1e9
-
-var.visual.axis[2].config(**default_axis_dict_1d[2])
-
-configured_variables[var_name] = var
-
-####################################################################################################################
-var_name = 'n_e'
-var = Var(ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var_config = {
-    'name': var_name,
-    'fullname': 'Electron density',
-    'label': r'$n_e$',
-    'group': 'Density',
-    'unit': 'm/-3',
-    'unit_label': r'm$^{-3}$',
-    'error': None,
-    'depends': {0: depend_0},
-}
-var.config(**var_config)
-# set plot attrs
-var.visual.plot_config.config(**default_plot_config)
-var.visual.plot_config.style = '1noE'
-# set axis attrs
-var.visual.axis[1].config(**default_axis_dict_1d[1])
-var.visual.axis[1].lim = [5e8, 3e11]
+var.visual.axis[1].lim = [2e7, 3e13]
 var.visual.axis[1].scale = 'log'
 
 var.visual.axis[2].config(**default_axis_dict_1d[2])
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'JE_i'
+var = Var(ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var_config = {
+    'name': var_name,
+    'fullname': 'Integrated energy flux of ions',
+    'label': r'JE$_i$',
+    'group': 'JE',
+    'unit': r'eV/cm2/s/ster',
+    'unit_label': r'eV$/$cm$^{2}/$s$/$ster',
+    'error': None,
+    'depends': {0: depend_0},
+}
+var.config(**var_config)
+# set plot attrs
+var.visual.plot_config.config(**default_plot_config)
+var.visual.plot_config.style = '1noE'
+# set axis attrs
+var.visual.axis[1].config(**default_axis_dict_1d[1])
+var.visual.axis[1].lim = [2e7, 3e13]
+var.visual.axis[1].scale = 'log'
+
+var.visual.axis[2].config(**default_axis_dict_1d[2])
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'JN_e'
+var = Var(ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var_config = {
+    'name': var_name,
+    'fullname': 'Integrated number flux of electrons',
+    'label': r'JN$_e$',
+    'group': 'JN',
+    'unit': r'#/cm2/s/ster',
+    'unit_label': r'$\#/$cm$^{2}/$s$/$ster',
+    'error': None,
+    'depends': {0: depend_0},
+}
+var.config(**var_config)
+# set plot attrs
+var.visual.plot_config.config(**default_plot_config)
+var.visual.plot_config.style = '1noE'
+# set axis attrs
+var.visual.axis[1].config(**default_axis_dict_1d[1])
+var.visual.axis[1].lim = [1e4, 3e9]
+var.visual.axis[1].scale = 'log'
+
+var.visual.axis[2].config(**default_axis_dict_1d[2])
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'JN_i'
+var = Var(ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var_config = {
+    'name': var_name,
+    'fullname': 'Integrated number flux of ions',
+    'label': r'JN$_e$',
+    'group': 'JN',
+    'unit': r'#/cm2/s/ster',
+    'unit_label': r'$\#/$cm$^{2}/$s$/$ster',
+    'error': None,
+    'depends': {0: depend_0},
+}
+var.config(**var_config)
+# set plot attrs
+var.visual.plot_config.config(**default_plot_config)
+var.visual.plot_config.style = '1noE'
+# set axis attrs
+var.visual.axis[1].config(**default_axis_dict_1d[1])
+var.visual.axis[1].lim = [1e4, 3e9]
+var.visual.axis[1].scale = 'log'
+
+var.visual.axis[2].config(**default_axis_dict_1d[2])
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'E_e_MEAN'
+var = Var(ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var_config = {
+    'name': var_name,
+    'fullname': 'Mean energy of electrons',
+    'label': r'$\bar{E}_e$',
+    'group': r'$\bar{E}$',
+    'unit': r'eV',
+    'unit_label': None,
+    'error': None,
+    'depends': {0: depend_0},
+}
+var.config(**var_config)
+# set plot attrs
+var.visual.plot_config.config(**default_plot_config)
+var.visual.plot_config.style = '1noE'
+# set axis attrs
+var.visual.axis[1].config(**default_axis_dict_1d[1])
+var.visual.axis[1].lim = [2.5e1, 4e4]
+var.visual.axis[1].scale = 'log'
+
+var.visual.axis[2].config(**default_axis_dict_1d[2])
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'E_i_MEAN'
+var = Var(ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var_config = {
+    'name': var_name,
+    'fullname': 'Mean energy of ions',
+    'label': r'$\bar{E}_i$',
+    'group': r'$\bar{E}$',
+    'unit': r'eV',
+    'unit_label': None,
+    'error': None,
+    'depends': {0: depend_0},
+}
+var.config(**var_config)
+# set plot attrs
+var.visual.plot_config.config(**default_plot_config)
+var.visual.plot_config.style = '1noE'
+# set axis attrs
+var.visual.axis[1].config(**default_axis_dict_1d[1])
+var.visual.axis[1].lim = [2.5e1, 4e4]
+var.visual.axis[1].scale = 'log'
+
+var.visual.axis[2].config(**default_axis_dict_1d[2])
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'jE_e'
+var = Var(ndim=2, variable_type='scalar', visual=visual)
+# set variable attrs
+var_config = {
+    'name': var_name,
+    'fullname': 'Integrated number flux of electrons',
+    'label': r'jE$_e$',
+    'group': 'jE',
+    'unit': r'eV/cm2/s/ster/Delta eV',
+    'unit_label': r'eV$/$cm$^{2}/$s$/$ster$/\Delta$eV',
+    'error': None,
+    'depends': {0: depend_0, 1: depend_1},
+}
+var.config(**var_config)
+# set plot attrs
+var.visual.plot_config.config(**default_plot_config)
+var.visual.plot_config.style = '2P'
+# set axis attrs
+var.visual.axis[1].config(**default_axis_dict_2d[1])
+
+var.visual.axis[2].config(**default_axis_dict_2d[2])
+var.visual.axis[2].lim = [1e5, 1e10]
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'jE_i'
+var = Var(ndim=2, variable_type='scalar', visual=visual)
+# set variable attrs
+var_config = {
+    'name': var_name,
+    'fullname': 'Integrated number flux of ions',
+    'label': r'jE$_i$',
+    'group': 'jE',
+    'unit': r'eV/cm2/s/ster/Delta eV',
+    'unit_label': r'eV$/$cm$^{2}/$s$/$ster$/\Delta$eV',
+    'error': None,
+    'depends': {0: depend_0, 1: depend_1},
+}
+var.config(**var_config)
+# set plot attrs
+var.visual.plot_config.config(**default_plot_config)
+var.visual.plot_config.style = '2P'
+# set axis attrs
+var.visual.axis[1].config(**default_axis_dict_2d[1])
+
+var.visual.axis[2].config(**default_axis_dict_2d[2])
+var.visual.axis[2].lim = [1e3, 1e8]
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'jN_e'
+var = Var(ndim=2, variable_type='scalar', visual=visual)
+# set variable attrs
+var_config = {
+    'name': var_name,
+    'fullname': 'Integrated number flux of electrons',
+    'label': r'jN$_e$',
+    'group': 'jN',
+    'unit': r'#/cm2/s/ster/Delta eV',
+    'unit_label': r'$\#/$cm$^{2}/$s$/$ster$/\Delta$eV',
+    'error': None,
+    'depends': {0: depend_0, 1: depend_1},
+}
+var.config(**var_config)
+# set plot attrs
+var.visual.plot_config.config(**default_plot_config)
+var.visual.plot_config.style = '2P'
+# set axis attrs
+var.visual.axis[1].config(**default_axis_dict_2d[1])
+
+var.visual.axis[2].config(**default_axis_dict_2d[2])
+var.visual.axis[2].lim = [1e4, 1e9]
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'jN_i'
+var = Var(ndim=2, variable_type='scalar', visual=visual)
+# set variable attrs
+var_config = {
+    'name': var_name,
+    'fullname': 'Integrated number flux of ions',
+    'label': r'jN$_i$',
+    'group': 'jN',
+    'unit': r'#/cm2/s/ster/Delta eV',
+    'unit_label': r'$\#/$cm$^{2}/$s$/$ster$/\Delta$eV',
+    'error': None,
+    'depends': {0: depend_0, 1: depend_1},
+}
+var.config(**var_config)
+# set plot attrs
+var.visual.plot_config.config(**default_plot_config)
+var.visual.plot_config.style = '2P'
+# set axis attrs
+var.visual.axis[1].config(**default_axis_dict_2d[1])
+
+var.visual.axis[2].config(**default_axis_dict_2d[2])
+var.visual.axis[2].lim = [1e3, 1e8]
 
 configured_variables[var_name] = var

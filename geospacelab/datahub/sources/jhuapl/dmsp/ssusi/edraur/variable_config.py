@@ -36,6 +36,8 @@ configured_variables = {}
 visual = 'on'
 
 depend_0 = {'UT': 'DATETIME'}
+depend_1 = {'AACGM_LAT': 'GRID_MLAT'}
+depend_2 = {'AACGM_LON': 'GRID_MLON'}
 depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
 
 ####################################################################################################################
@@ -46,7 +48,7 @@ var.fullname = 'Auroral emission intensity at 121.6 nm'
 var.label = r'1216'
 var.group = 'Emission intensity'
 var.unit = 'R'
-var.depends = {0: depend_0, 1: {'AACGM_LAT': 'GRID_MLAT'}, 3: {'AACGM_LON': 'GRID_MLON'}}
+var.depends = {0: depend_0, 1: {'AACGM_LAT': 'GRID_MLAT'}, 2: {'AACGM_LON': 'GRID_MLON'}}
 # set plot attrs
 plot_config = var.visual.plot_config
 plot_config.config(**default_plot_config)

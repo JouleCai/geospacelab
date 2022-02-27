@@ -29,7 +29,7 @@ def trig_arctan_to_sph_lon(x, y):
     return angle
 
 
-def calc_curve_tangent_slope(x, y, degree=2, unit='radians'):
+def calc_curve_tangent_slope(x, y, degree=3, unit='radians'):
     poly = Polynomial.fit(x, y, degree)
     c = poly.convert().coef
     c_deriv = [i * cd for i, cd in enumerate(c)]

@@ -52,13 +52,13 @@ default_variable_names = [
     'SC_MAG_MLT',
     'n_e',
     'v_i_H',
-    'V_i_V',
+    'v_i_V',
     'B_D',
     'B_F',
     'B_P',
-    'delta_B_D',
-    'delta_B_F',
-    'delta_B_P',
+    'd_B_D',
+    'd_B_F',
+    'd_B_P',
     ]
 
 # default_data_search_recursive = True

@@ -402,6 +402,8 @@ class VariableBase(object):
         if results[0].lower() in ['v', 'var', 'variable']:
             attr = getattr(self, results[1])
         elif results[0].lower() in ['d', 'dataset']:
+            if len(results) == 2:
+                results.append('value')
             attr = getattr(self.dataset[results[1]], results[2])
         elif results[0].lower() in ['vd', 'depends']:
             depend = self.get_depend(axis=int(results[1]))

@@ -60,7 +60,7 @@ class TSDashboard(Dashboard):
             figure=None, figure_config=None,
             time_gap=True,
             timeline_major='UT',
-            timeline_multiple_labels=None,
+            timeline_extra_labels=None,
             **kwargs
     ):
         self.panel_layouts = []
@@ -68,14 +68,14 @@ class TSDashboard(Dashboard):
         self._panels_configs = {}
 
         figure_config = self._default_figure_config if figure_config is None else figure_config
-
         self.time_gap = time_gap
         self.timeline_major = timeline_major
-        self.timeline_extra_labels = [] if timeline_multiple_labels is None else timeline_major # e.g., ['MLT',
+        self.timeline_extra_labels = timeline_extra_labels
         kwargs.update(visual='on')
 
         super(Dashboard, self).__init__(figure=figure, figure_config=figure_config, **kwargs)
 
+        self.panels: dict[int: panels.TSPanel] = {}
         self._xlim = [self.dt_fr, self.dt_to]
 
     def set_layout(self, panel_layouts=None, panels_classes=None, plot_styles=None, row_height_scales=1,
@@ -140,6 +140,7 @@ class TSDashboard(Dashboard):
                 panel_config.update(sharex=self.panels[1]())
             if ind == len(self._panels_configs.keys())-1:
                 bottom_panel = True
+                panel_config.update(timeline_extra_labels=self.timeline_extra_labels)
             else:
                 bottom_panel = False
             panel_config.update(bottom_panel=bottom_panel)
@@ -299,6 +300,69 @@ class TSDashboard(Dashboard):
             text_config.setdefault('fontweight', 'medium')
             text_config.setdefault('clip_on', False)
             ax.text(x, y, label, transform=ax.transAxes, **text_config)
+
+    def search_UTs(self, search_step=1/86400, **kwargs) -> list:
+        from scipy.interpolate import interp1d
+        from scipy.signal import argrelmin
+        import matplotlib.dates as mpl_dates
+        panel = list(self.panels.values())[-1]
+        var_for_config = panel._var_for_config
+        x_depend = var_for_config.get_depend(axis=0, retrieve_data=True)
+        x0 = np.array(mpl_dates.date2num(x_depend['UT'])).flatten()
+        x_fr = x0[0]
+        x_to = x0[-1]
+        x1 = np.arange(x_fr, x_to, search_step)
+        x1_0 = x1
+        ind_0 = np.array(range(x1.size))
+        for ind, (label, value) in enumerate(kwargs.items()):
+            if label in x_depend.keys():
+                y0 = x_depend[label].flatten()
+            elif label in var_for_config.dataset.keys():
+                y0 = var_for_config.dataset[label].value
+            else:
+                raise KeyError
+            if ind == 0:
+                if 'MLT' in label.upper():
+                    y0_sin = np.sin(y0 / 24. * 2 * np.pi)
+                    y0_cos = np.cos(y0 / 24. * 2 * np.pi)
+                    itpf_sin = interp1d(x0, y0_sin, bounds_error=False, fill_value='extrapolate')
+                    itpf_cos = interp1d(x0, y0_cos, bounds_error=False, fill_value="extrapolate")
+                    y0_sin_i = itpf_sin(x1)
+                    y0_cos_i = itpf_cos(x1)
+                    rad = np.sign(y0_sin_i) * (np.pi / 2 - np.arcsin(y0_cos_i))
+                    rad = np.where((rad >= 0), rad, rad + 2 * np.pi)
+                    y1 = rad / 2. / np.pi * 24.
+                elif 'LON' in label.upper():
+                    y0_sin = np.sin(y0 * np.pi / 180.)
+                    y0_cos = np.cos(y0 * np.pi / 180.)
+                    itpf_sin = interp1d(x0, y0_sin, bounds_error=False, fill_value='extrapolate')
+                    itpf_cos = interp1d(x0, y0_cos, bounds_error=False, fill_value="extrapolate")
+                    y0_sin_i = itpf_sin(x1)
+                    y0_cos_i = itpf_cos(x1)
+                    rad = np.sign(y0_sin_i) * (np.pi / 2 - np.arcsin(y0_cos_i))
+                    y1 = rad * 180. / np.pi
+                    if value is list:
+                        value = [(v + 180.) % 360 - 180 for v in value]
+                    else:
+                        value = (value + 180.) % 360 - 180
+                else:
+                    itpf = interp1d(x0, y0, bounds_error=False, fill_value='extrapolate')
+                    y1 = itpf(x1)
+
+            if type(value) in (int, float):
+                ind_1 = argrelmin(np.abs(y1 - value))
+            elif type(value) is list:
+                ind_1 = np.where((y1 > value[0]) & (y1 < value[1]))[0]
+
+            x1 = x1[ind_1]
+            y1 = y1[ind_1]
+
+        results = []
+        for xx in x1:
+            ind_1 = argrelmin(np.abs(x0 - xx))
+            results.extend(mpl_dates.num2date(x0[ind_1]))
+
+        return results
 
     def add_shading(self, dt_fr, dt_to, panel_index=0,
                     label=None, label_position=None, top_extend=0., bottom_extend=0., **kwargs):

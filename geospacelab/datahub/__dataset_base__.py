@@ -107,7 +107,7 @@ class DatasetBase(object):
             self[var_name].dataset = self
             self[var_name].visual = self.visual
         else:
-            self[var_name] = variable_class(dataset=self, visual=self.visual, **kwargs)
+            self[var_name] = variable_class(dataset=self, name=var_name, visual=self.visual, **kwargs)
         return self[var_name]
 
     def label(self, fields=None, separator=' | ', lowercase=True) -> str:
@@ -158,7 +158,7 @@ class DatasetBase(object):
         mylog.simpleinfo.info('{:^20s}{:^30s}'.format('No.', 'Variable name'))
         for ind, var_name in enumerate(self._variables.keys()):
             mylog.simpleinfo.info('{:^20d}{:30s}'.format(ind+1, var_name))
-        mylog.simpleinfo.inf('')
+        mylog.simpleinfo.info('')
 
     def keys(self) -> list:
         return list(self._variables.keys())
@@ -373,22 +373,17 @@ class DatasetSourced(DatasetBase):
             if var.value.shape[0] == shape_0 and len(var.value.shape) > 1:
                 var.value = var.value[inds, ::]
 
-    def add_variable(self, var_name, configured_variables=None, variable_class=None, **kwargs):
-        if variable_class is None:
-            variable_class = self.__variable_model__
-        if configured_variables is None:
-            configured_variables = {}
-        if var_name in configured_variables.keys():
-            configured_variable = configured_variables[var_name]
-            if type(configured_variable) is dict:
-                self[var_name] = variable_class(**configured_variable)
-            elif issubclass(configured_variable.__class__, self.__variable_model__):
-                self[var_name] = configured_variable.clone()
-            self[var_name].dataset = self
-            self[var_name].visual = self.visual
-        else:
-            self[var_name] = variable_class(dataset=self, visual=self.visual, **kwargs)
-        return self[var_name]
+    def get_time_ind(self, ut, var_datetime=None, var_datetime_name=None):
+        if var_datetime is None and var_datetime_name is None:
+            var_datetime = self['DATETIME']
+        if var_datetime_name is not None:
+            var_datetime = self[var_datetime_name]
+        if var_datetime.value is None:
+            return
+
+        delta_sectime = [delta_t.total_seconds() for delta_t in (self['DATETIME'].value.flatten() - ut)]
+        ind = np.where(np.abs(delta_sectime) == np.min(np.abs(delta_sectime)))[0][0]
+        return ind
 
     def _set_default_variables(self, default_variable_names, configured_variables=None):
         if configured_variables is None:
