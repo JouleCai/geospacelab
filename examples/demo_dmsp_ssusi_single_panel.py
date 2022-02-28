@@ -47,7 +47,7 @@ def test_ssusi():
     pcolormesh_config = lbhs.visual.plot_config.pcolormesh
     colorbar_config = lbhs.visual.plot_config.colorbar
     pcolormesh_config.update(c_scale='log')
-    pcolormesh_config.update(c_lim=[100, 5000])
+    pcolormesh_config.update(c_lim=[100, 6000])
     import geospacelab.visualization.mpl.colormaps as cm
     cmap = cm.cmap_aurora()
     # cmap = 'viridis'
