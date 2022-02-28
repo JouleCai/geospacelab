@@ -20,7 +20,7 @@ import matplotlib.ticker as mticker
 import matplotlib.path as mpath
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, griddata
 import matplotlib.cm as cm
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
@@ -29,8 +29,9 @@ import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.numpymath as mathtool
 import geospacelab.toolbox.utilities.pybasic as pybasic
-from geospacelab.visualization.mpl.geomap._base import GeoPanelBase
+from geospacelab.visualization.mpl.geomap.__base__ import GeoPanelBase
 from geospacelab.datahub.__variable_base__ import VariableBase
+
 
 class GeoPanel(GeoPanelBase):
 
@@ -141,7 +142,7 @@ class PolarMapPanel(GeoPanel):
             cs2.coords.lon = self._transform_mlt_to_lon(cs2.coords.mlt)
         return cs2
 
-    def add_coastlines(self):
+    def overlay_coastlines(self):
         import cartopy.io.shapereader as shpreader
 
         resolution = '110m'
@@ -180,7 +181,7 @@ class PolarMapPanel(GeoPanel):
 
         return
 
-    def add_gridlines(self,
+    def overlay_gridlines(self,
                       lat_res=None, lon_res=None,
                       lat_label_separator=None, lon_label_separator=None,
                       lat_label_format=None, lon_label_format=None,
@@ -447,10 +448,12 @@ class PolarMapPanel(GeoPanel):
         else:
             raise NotImplementedError
 
-    def add_pcolormesh(
-            self, data, coords=None, cs=None,
+    def overlay_pcolormesh(
+            self, data=None, coords=None, cs=None, *,
             regridding: bool = True,
-            data_lat_res: float = 0.7,
+            data_res: float = 0.7,
+            grid_res: float = 0.1,
+            interp_method: str = 'linear',
             c_scale='linear', c_lim=None,
             **kwargs):
 
@@ -473,48 +476,8 @@ class PolarMapPanel(GeoPanel):
         lon_in = cs_new['lon']
         data_in = data
         if regridding:
-            from scipy.interpolate import griddata
-
-            grid_lat_res = kwargs.pop('grid_lat_res', 0.1)
-            grid_lon_res = kwargs.pop('grid_lon_res', 0.1)
-
-            ind_data = np.where(np.isfinite(data))
-            data_pts = data_in[ind_data]
-            lat_pts = lat_in[ind_data]
-            lon_pts = lon_in[ind_data]
-
-            pos_data = self.projection.transform_points(ccrs.PlateCarree(), lon_pts, lat_pts)
-            pos_x = np.float32(pos_data[:, 0])
-            pos_y = np.float32(pos_data[:, 1])
-
-            xlim = list(self.major_ax.get_xlim())
-            ylim = list(self.major_ax.get_ylim())
-            xlim.extend(ylim)
-            xlim = [np.float32(x) for x in xlim]
-            width = np.max(xlim) - np.min(xlim)
-            lat_width = (90. - np.abs(self.boundary_lat)) * 2
-            grid_x_res = grid_lat_res / lat_width * width
-            grid_y_res = grid_x_res
-            grid_x, grid_y = np.meshgrid(
-                np.arange(xlim[0], xlim[1], grid_x_res),
-                np.arange(xlim[0], xlim[1], grid_x_res)
-            )
-
-            grid_data = griddata((pos_x, pos_y), data_pts, (grid_x, grid_y), method='nearest')
-            grid_data_x = griddata(
-                (pos_x, pos_y), pos_x, (grid_x, grid_y), method='nearest'
-            )
-            grid_data_y = griddata(
-                (pos_x, pos_y), pos_y, (grid_x, grid_y), method='nearest'
-            )
-
-            ind_out = np.where(
-                np.sqrt((grid_data_x - grid_x) ** 2 + (grid_data_y - grid_y) ** 2) > data_lat_res/lat_width*width
-            )
-            grid_data[ind_out] = np.nan
-
-            ipc = self().pcolormesh(grid_x, grid_y, grid_data, **kwargs)
-
+            lon_in, lat_in, data_in = self.grid_data(lon_in, lat_in, data_in, data_res=data_res, grid_res=grid_res)
+            transform = None
             # self.boundary_lat
             #
             # grid_lat_res = kwargs.pop('grid_lat_res', 0.1)
@@ -549,75 +512,76 @@ class PolarMapPanel(GeoPanel):
             # data_in = grid_data
         else:
             transform = ccrs.PlateCarree()
-            ipc = self().pcolormesh(lon_in, lat_in, data_in, transform=transform, **kwargs)
 
-        return ipc
+        ipm = self().pcolormesh(lon_in, lat_in, data_in, transform=transform, **kwargs)
 
-    def add_pcolor(self, data, coords=None, cs=None,
-                   c_lim=None, c_scale='linear', c_label=None, **kwargs):
-        kwargs.setdefault('shading', 'auto')
-        if c_lim is None:
-            c_lim = [np.nanmin(data.flatten()), np.nanmax(data.flatten())]
+        return ipm
 
-        if c_scale == 'log':
-            norm = mcolors.LogNorm(vmin=c_lim[0], vmax=c_lim[1])
-            kwargs.update(norm=norm)
-        else:
-            kwargs.update(vmin=c_lim[0])
-            kwargs.update(vmax=c_lim[1])
-
-        if cs != self.cs:
-            from scipy.interpolate import griddata
-            ind_data = np.where(np.isfinite(data))
-            data_pts = data[ind_data]
-            lat_pts = coords['lat'][ind_data]
-            lon_pts = coords['lon'][ind_data]
-            height = coords['height']
-            cs_new = self.cs_transform(cs_fr=cs, coords={'lat': lat_pts, 'lon': lon_pts, 'height': height})
-
-            grid_lat_res = kwargs.pop('grid_lat_res', 0.25)
-            grid_lon_res = kwargs.pop('grid_lon_res', .5)
-            grid_lon, grid_lat = np.meshgrid(
-                np.arange(0., 360., grid_lon_res),
-                np.append(np.arange(self.boundary_lat, self.lat_c, np.sign(self.lat_c) * grid_lat_res), self.lat_c)
-            )
-
-            grid_data = griddata((cs_new['lon'], cs_new['lat']), data_pts, (grid_lon, grid_lat), method='nearest')
-            grid_data_lat = griddata(
-                (cs_new['lon'], cs_new['lat']), cs_new['lat'], (grid_lon, grid_lat), method='nearest'
-            )
-            grid_data_lon = griddata(
-                (cs_new['lon'], cs_new['lat']), cs_new['lon'], (grid_lon, grid_lat), method='nearest'
-            )
-            factor = np.pi / 180.
-            big_circle_d = 6371. * np.arccos(
-                np.sin(grid_data_lat * factor) * np.sin(grid_lat * factor) +
-                np.cos(grid_data_lat * factor) * np.cos(grid_lat * factor) * np.cos(np.abs((grid_lon - grid_data_lon) * factor))
-            )
-            grid_data = np.where(big_circle_d < 75., grid_data, np.nan)
-            ipc = self().pcolormesh(grid_lon, grid_lat, grid_data, transform=ccrs.PlateCarree(), **kwargs)
-        else:
-            cs_new = self.cs_transform(cs_fr=cs, coords=coords)
-            ipc = self().pcolormesh(cs_new['lon'], cs_new['lat'], data, transform=ccrs.PlateCarree(), **kwargs)
-            # ipc = self.major_ax.imshow(data.T, origin='upper', extent=[0, 360, 40, 90], transform=ccrs.PlateCarree(), cmap='jet', interpolation='bessel')
-        # self.add_colorbar(im, ax=self.major_ax, figure=None, c_scale=c_scale, c_label=c_label,
-        #              left=1.1, bottom=0.1, width=0.05, height=0.7
-        #             )
-        # self._check_mirror_south()
-        return ipc
-
-    def add_contour(self, data, coords=None, cs=None, **kwargs):
+    def overlay_contour(
+            self,
+            data, coords=None, cs=None,
+            regridding=True, data_res=1, grid_res=0.1, interp_method='linear',
+            **kwargs,
+    ):
         levels = kwargs.pop('levels', 10)
         if cs is None:
             cs = self.cs
-        if cs !=self.cs:
-            raise NotImplemented
+
+        cs_new = self.cs_transform(cs_fr=cs, coords=coords)
+        lat_in = cs_new['lat']
+        lon_in = cs_new['lon']
+        data_in = data
+        if regridding:
+            lon_in, lat_in, data_in = self.grid_data(lon_in, lat_in, data_in, data_res=data_res, grid_res=grid_res, interp_method=interp_method)
+            transform = None
         else:
-            cs_new = self.cs_transform(cs_fr=cs, coords=coords)
-            ict = self.major_ax.contour(cs_new['lon'], cs_new['lat'], data, levels, transform=ccrs.PlateCarree(), **kwargs)
+            transform = ccrs.PlateCarree()
+
+        ict = self.major_ax.contour(lon_in, lat_in, data_in, levels, transform=transform, **kwargs)
         return ict
 
-    def add_sc_trajectory(self, sc_ut=None, sc_coords=None, cs=None, *, show_trajectory=True, color='#EEEEEE',
+    def grid_data(self, lon_in, lat_in, data_in, grid_res=0.1, data_res=0.5, interp_method='linear'):
+        ind_data = np.where(np.isfinite(data_in))
+        data_pts = data_in[ind_data]
+        lat_pts = lat_in[ind_data]
+        lon_pts = lon_in[ind_data]
+
+        pos_data = self.projection.transform_points(ccrs.PlateCarree(), lon_pts, lat_pts)
+        pos_x = np.float32(pos_data[:, 0])
+        pos_y = np.float32(pos_data[:, 1])
+
+        lim=[]
+        xlim = list(self.major_ax.get_xlim())
+        ylim = list(self.major_ax.get_ylim())
+        lim.extend(xlim)
+        lim.extend(ylim)
+        lim = [np.float32(x) for x in lim]
+        width = np.max(lim) - np.min(lim)
+        lat_width = (90. - np.abs(self.boundary_lat)) * 2
+        grid_x_res = grid_res / lat_width * width
+        if xlim[0] > xlim[1]:
+            grid_x_res = -grid_x_res
+        grid_x, grid_y = np.meshgrid(
+            np.arange(lim[0], lim[1], grid_x_res),
+            np.arange(lim[0], lim[1], grid_x_res)
+        )
+
+        grid_data = griddata((pos_x, pos_y), data_pts, (grid_x, grid_y), method=interp_method)
+        grid_data_x = griddata(
+            (pos_x, pos_y), pos_x, (grid_x, grid_y), method='nearest'
+        )
+        grid_data_y = griddata(
+            (pos_x, pos_y), pos_y, (grid_x, grid_y), method='nearest'
+        )
+
+        ind_out = np.where(
+            np.sqrt((grid_data_x - grid_x) ** 2 + (grid_data_y - grid_y) ** 2) > data_res / lat_width * width
+        )
+        grid_data[ind_out] = np.nan
+
+        return grid_x, grid_y, grid_data
+
+    def overlay_sc_trajectory(self, sc_ut=None, sc_coords=None, cs=None, *, show_trajectory=True, color='#EEEEEE',
                           time_tick=True, time_tick_res=300., time_tick_scale=0.05,
                           time_tick_label=True, time_tick_label_format="%H:%M", time_tick_label_fontsize=8,
                           time_minor_tick=True, time_minor_tick_res=60, **kwargs):
@@ -717,7 +681,7 @@ class PolarMapPanel(GeoPanel):
                     headlength=0, headaxislength=0, pivot='middle', color=color
                 )
 
-    def add_cross_track_vector(
+    def overlay_cross_track_vector(
             self, vector, unit_vector, sc_ut=None, sc_coords=None, cs='GEO', *,
             unit_vector_scale=0.1, vector_unit='',
             color='r', alpha=0.5,
@@ -756,39 +720,44 @@ class PolarMapPanel(GeoPanel):
         )
         pass
 
-    def add_sc_coloured_line(self, sc_lat, sc_lon, sc_alt, sc_data, sc_dt=None, label='', unit='', scale='linear',
-                             vmin=None, vmax=None, colormap=None):
+    def overlay_sc_coloured_line(
+            self, data, sc_coords=None, sc_ut=None, cs=None, *,
+            c_scale='linear', c_lim=None, line_width=6., **kwargs):
         from matplotlib.collections import LineCollection
         import matplotlib.colors as mpl_color
 
-        if self.pole == 'N':
-            ind_lat = np.where(sc_lat > self.boundary_lat)[0]
+        if c_lim is None:
+            c_lim = [0, 0]
+            c_lim[0] = np.nanmin(data.flatten())
+            c_lim[1] = np.nanmax(data.flatten())
+
+        if c_scale == 'log':
+            norm = mcolors.LogNorm(vmin=c_lim[0], vmax=c_lim[1])
         else:
-            ind_lat = np.where(sc_lat < self.boundary_lat)[0]
+            norm = mcolors.Normalize(vmin=c_lim[0], vmax=c_lim[1])
 
-        sc_lat = sc_lat.flatten()[ind_lat]
-        sc_lon = sc_lon.flatten()[ind_lat]
-        sc_alt = sc_alt.flatten()[ind_lat]
-        sc_data = sc_data.flatten()[ind_lat]
-        sc_dt = sc_dt.flatten()[ind_lat]
+        cs_new = self.cs_transform(cs_fr=cs, coords=sc_coords, ut=sc_ut)
 
-        coords = {'lat': sc_lat, 'lon': sc_lon, 'height': sc_alt}
-        cs_new = self.cs_transform(cs_fr='GEO', coords=coords)
-        data = self.projection.transform_points(ccrs.PlateCarree(), cs_new['lon'], cs_new['lat'])
-        x = data[:, 0]
-        y = data[:, 1]
-        z = sc_data.flatten()
+        if self.pole == 'N':
+            ind_lat = np.where(cs_new['lat'] > self.boundary_lat)[0]
+        else:
+            ind_lat = np.where(cs_new['lat'] < self.boundary_lat)[0]
+
+        lat_in = cs_new['lat'][ind_lat]
+        lon_in = cs_new['lon'][ind_lat]
+        dts_in = sc_ut[ind_lat]
+
+        pos_data = self.projection.transform_points(ccrs.PlateCarree(), lon_in, lat_in)
+        x = pos_data[:, 0]
+        y = pos_data[:, 1]
+        z = data.flatten()
+
         points = np.array([x, y]).T.reshape(-1, 1, 2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
-        if scale == 'linear':
-            norm = mpl_color.LogNorm(vmin=vmin, vmax=vmax)
-        elif scale == 'log':
-            norm = mpl_color.Normalize(vmin, vmax)
-        else:
-            raise ValueError
-        lc = LineCollection(segments, cmap=colormap, norm=norm)
+
+        lc = LineCollection(segments, norm=norm, **kwargs)
         lc.set_array(z)
-        lc.set_linewidth(6)
+        lc.set_linewidth(line_width)
         im = self().add_collection(lc)
         return im
         # clabel = label + ' (' + unit + ')'
@@ -796,7 +765,7 @@ class PolarMapPanel(GeoPanel):
         # cbar = plt.gcf().colorbar(line, ax=panel.major_ax, pad=0.1, fraction=0.03)
         # cbar.set_label(r'$n_e$' + '\n' + r'(cm$^{-3}$)', rotation=270, labelpad=25)
 
-    def add_sites(self, site_ids=None, coords=None, cs=None, **kwargs):
+    def overlay_sites(self, site_ids=None, coords=None, cs=None, **kwargs):
         pybasic.dict_set_default(kwargs, s=10, c='k')
         if cs is None:
             cs = self.cs

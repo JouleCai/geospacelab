@@ -62,7 +62,13 @@ class Loader(object):
         else:
             ind_mid_t = np.where(lat == np.nanmin(lat.flatten()))
         sectime0 = variables['GRID_UT'][ind_mid_t][0] * 3600
-        variables['DATETIME'] = dt0 + datetime.timedelta(seconds=int(sectime0))
+
+        diff_days = dttool.get_diff_days(starting_time, stopping_time)
+        if diff_days > 0 and sectime0 < 0.5 * 86400.:
+            dt = dt0 + datetime.timedelta(seconds=int(sectime0 + 86400))
+        else:
+            dt = dt0 + datetime.timedelta(seconds=int(sectime0))
+        variables['DATETIME'] = dt
 
         invalid_ut_inds = np.where(ut == 0)
         # Auroral map, #colors: 0: '1216', 1: '1304', 2: '1356', 3: 'LBHS', 4: 'LBHL'.
@@ -101,14 +107,3 @@ class Loader(object):
         dataset.close()
 
         self.variables = variables
-
-
-if __name__ == "__main__":
-    import pathlib
-    fp = pathlib.Path('/Users/lcai/Geospacelab/Data/JHUAPL/DMSP/SSUSI/f17/20151205/' +
-                      'PS.APL_V0105S027CE0008_SC.U_DI.A_GP.F17-SSUSI_PA.APL-EDR-AURORA_DD.20151205_SN.46863-00_DF.NC')
-    loader = Loader(file_path=fp)
-
-
-    # if hasattr(readObj, 'pole'):
-    #    readObj.filter_data_pole(boundinglat = 25)

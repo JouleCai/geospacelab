@@ -337,6 +337,7 @@ class DashboardBase(object):
         r = "GeospaceLab DashboardBase"
         return r
 
+
 class PanelBase(object):
     _ax_attr_model = {
         'twinx': 'off',

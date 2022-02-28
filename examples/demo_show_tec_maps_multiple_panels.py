@@ -29,8 +29,8 @@ def test_tec():
     #                          boundary_lat=0, mirror_south=False)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
     #                        boundary_lat=30, mirror_south=False)
-    panel1.add_coastlines()
-    panel1.add_gridlines()
+    panel1.overlay_coastlines()
+    panel1.overlay_gridlines()
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
@@ -38,7 +38,7 @@ def test_tec():
 
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
-    ipc = panel1.add_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
+    ipc = panel1.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
     panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
@@ -56,8 +56,8 @@ def test_tec():
     #                          boundary_lat=0, mirror_south=False)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
     #                        boundary_lat=30, mirror_south=False)
-    panel1.add_coastlines()
-    panel1.add_gridlines()
+    panel1.overlay_coastlines()
+    panel1.overlay_gridlines()
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
@@ -65,7 +65,7 @@ def test_tec():
 
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
-    ipc = panel1.add_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
+    ipc = panel1.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
     panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
@@ -84,8 +84,8 @@ def test_tec():
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
     #                        boundary_lat=30, mirror_south=False)
 
-    panel1.add_coastlines()
-    panel1.add_gridlines()
+    panel1.overlay_coastlines()
+    panel1.overlay_gridlines()
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
@@ -93,7 +93,7 @@ def test_tec():
 
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
-    ipc = panel1.add_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
+    ipc = panel1.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
     panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
@@ -111,8 +111,8 @@ def test_tec():
     #                          boundary_lat=0, mirror_south=False)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
     #                        boundary_lat=30, mirror_south=False)
-    panel1.add_coastlines()
-    panel1.add_gridlines()
+    panel1.overlay_coastlines()
+    panel1.overlay_gridlines()
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
@@ -120,7 +120,7 @@ def test_tec():
 
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
-    ipc = panel1.add_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
+    ipc = panel1.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
     panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
@@ -138,8 +138,8 @@ def test_tec():
     #                          boundary_lat=0, mirror_south=False)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
     #                        boundary_lat=30, mirror_south=False)
-    panel1.add_coastlines()
-    panel1.add_gridlines()
+    panel1.overlay_coastlines()
+    panel1.overlay_gridlines()
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
@@ -147,7 +147,7 @@ def test_tec():
 
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
-    ipc = panel1.add_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
+    ipc = panel1.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
     panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")
@@ -165,8 +165,8 @@ def test_tec():
     #                          boundary_lat=0, mirror_south=False)
     # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
     #                        boundary_lat=30, mirror_south=False)
-    panel1.add_coastlines()
-    panel1.add_gridlines()
+    panel1.overlay_coastlines()
+    panel1.overlay_gridlines()
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
@@ -174,7 +174,7 @@ def test_tec():
 
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
-    ipc = panel1.add_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
+    ipc = panel1.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
     panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     #
     # # viewer.add_text(0.5, 1.1, "dashboard title")

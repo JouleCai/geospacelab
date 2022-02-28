@@ -29,7 +29,7 @@ def test_ampere():
     # initialize the polar map
     panel1 = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, boundary_lat=60, mirror_south=True)
 
-    panel1.add_coastlines()
+    panel1.overlay_coastlines()
 
     fac_ = fac.value[ind_t, :, :]
     # re-grid the original data with higher spatial resolution, default mlt_res = 0.05, mlat_res = 0.5. used for plotting.
@@ -47,14 +47,13 @@ def test_ampere():
     cmap = 'jet'
     pcolormesh_config.update(cmap=cmap)
     # ipc = panel1.add_pcolor(fac_, coords={'lat': mlat[ind_t, ::], 'lon': None, 'mlt': mlt[ind_t, ::], 'height': 250.}, cs='AACGM', **pcolormesh_config)
-    ipc = panel1.add_pcolor(grid_fac, coords={'lat': grid_mlat, 'lon': None, 'mlt': grid_mlt, 'height': 250.}, cs='AACGM', **pcolormesh_config)
-    panel1.add_colorbar(ipc, c_label=r'FAC ($\mu$A/m$^2$)', c_scale=pcolormesh_config['c_scale'], left=1.1, bottom=0.1,
+    ipm = panel1.overlay_pcolormesh(grid_fac, coords={'lat': grid_mlat, 'lon': None, 'mlt': grid_mlt, 'height': 250.}, cs='AACGM', **pcolormesh_config)
+    panel1.add_colorbar(ipm, c_label=r'FAC ($\mu$A/m$^2$)', c_scale=pcolormesh_config['c_scale'], left=1.1, bottom=0.1,
                         width=0.05, height=0.7)
 
-    panel1.add_gridlines(lat_res=5, lon_label_separator=5)
+    panel1.overlay_gridlines(lat_res=5, lon_label_separator=5)
 
     polestr = 'North' if pole == 'N' else 'South'
-    # panel1.add_title('DMSP/SSUSI, ' + band + ', ' + sat_id.upper() + ', ' + polestr + ', ' + time1.strftime('%Y-%m-%d %H%M UT'), pad=20)
     plt.savefig('ampere_example', dpi=300)
     plt.show()
 

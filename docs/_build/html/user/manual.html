@@ -95,9 +95,9 @@
 <p>The module datahub is the data manager in GeospaceLab, including three class-based core components:</p>
 <ul>
 <li><p><a class="reference internal" href="#geospacelab.datahub.DataHub" title="geospacelab.datahub.DataHub"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataHub</span></code></a> manages a set of datasets docked or added to the datahub.</p></li>
-<li><p><a class="reference internal" href="#geospacelab.datahub.DatasetModel" title="geospacelab.datahub.DatasetModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a> manages a set of variables loaded from a data source.</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code> manages a set of variables loaded from a data source.</p></li>
 <li><div class="line-block">
-<div class="line"><a class="reference internal" href="#geospacelab.datahub.VariableModel" title="geospacelab.datahub.VariableModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a> records the value, error, and various attributes</div>
+<div class="line"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code> records the value, error, and various attributes</div>
 <div class="line">(e.g., name, label, unit, depends, ndim, …) of a variable.</div>
 </div>
 </li>
@@ -149,24 +149,16 @@ default <a class="reference internal" href="#geospacelab.datahub.DataHub" title=
 <dl class="py class">
 <dt class="sig sig-object py" id="geospacelab.datahub.DataHub">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataHub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt_fr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'off'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub" title="Permalink to this definition"></a></dt>
-<dd><p>The class DataHub manage a set of datasets from various data sources.dfDSDDASfdsaf</p>
+<dd><p>The class DataHub manage a set of datasets from various data sources.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dt_fr</strong> – stewaqa</p></li>
-<li><p><strong>dt_to</strong> (<em>datetime</em><em> or </em><em>None</em>) – stewaqa</p></li>
-</ul>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
 <li><p><strong>dt_fr</strong> (<em>datetime.datetime</em>) – The starting time.</p></li>
-<li><p><strong>dt_to</strong> (<em>datetime.datetime</em>) – The stopping time.</p></li>
-<li><p><strong>visual</strong> (<em>{'off'</em><em>, </em><em>'on'}</em><em>, </em><em>default: 'off'</em>) – If “on”, a Visual object is aggregated to the Variable object.</p></li>
-<li><p><strong>datasets</strong> (<em>dict</em><em>, </em><em>default: {}.</em>) – A <em>dict</em> records multiple dataset added (<a class="reference internal" href="#geospacelab.datahub.DataHub.add_dataset" title="geospacelab.datahub.DataHub.add_dataset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_dataset()</span></code></a>)
-or docked (<a class="reference internal" href="#geospacelab.datahub.DataHub.dock" title="geospacelab.datahub.DataHub.dock"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dock()</span></code></a>) to the datahub.
-A item (<em>key:value</em>) in the <em>dict</em> is <code class="docutils literal notranslate"><span class="pre">dataset_index</span></code>: <code class="docutils literal notranslate"><span class="pre">dataset</span></code>.
-<strong>Note:</strong> The <code class="docutils literal notranslate"><span class="pre">dataset_index</span></code> is an integer starting from <strong>1</strong>.</p></li>
-<li><p><strong>variables</strong> (<em>dict</em><em>, </em><em>default: {}</em>) – A <em>dict</em> records the variables assigned from their own datasets.
+<li><p><strong>dt_to</strong> (<em>datetime.datetime</em>) – The ending time.</p></li>
+<li><p><strong>visual</strong> (<em>str</em><em>, </em><em>{'off'</em><em>, </em><em>'on'}</em>) – If “on”, a Visual object will be aggregated to the Variable object.</p></li>
+<li><p><strong>datasets</strong> (<em>dict</em>) – A <em>dict</em> stores the datasets added (<a class="reference internal" href="#geospacelab.datahub.DataHub.add_dataset" title="geospacelab.datahub.DataHub.add_dataset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_dataset()</span></code></a>)
+or docked (<a class="reference internal" href="#geospacelab.datahub.DataHub.dock" title="geospacelab.datahub.DataHub.dock"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dock()</span></code></a>) to the datahub.</p></li>
+<li><p><strong>variables</strong> (<em>dict</em>) – A <em>dict</em> stores the variables assigned from their aggregated datasets.
 Typically used for the dashboards or the I/O configuration.</p></li>
 </ul>
 </dd>
@@ -228,14 +220,13 @@ Typically used for the dashboards or the I/O configuration.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="geospacelab.datahub.DataHub.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt_fr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'off'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>fafa</p>
-<dl class="field-list simple">
+<dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dt_fr</strong> – </p></li>
-<li><p><strong>dt_to</strong> – </p></li>
-<li><p><strong>visual</strong> – </p></li>
-<li><p><strong>kwargs</strong> – </p></li>
+<li><p><strong>dt_fr</strong> (<em>datetime.datetime</em>) – The starting time.</p></li>
+<li><p><strong>dt_to</strong> (<em>datetime.datetime</em>) – The stopping time.</p></li>
+<li><p><strong>visual</strong> (<em>{'off'</em><em>, </em><em>'on'}</em><em>, </em><em>default: 'off'</em>) – If “on”, a Visual object is aggregated to the Variable object.</p></li>
+<li><p><strong>kwargs</strong> – other keyword arguments forwarded to the inherited class.</p></li>
 </ul>
 </dd>
 </dl>
@@ -243,7 +234,7 @@ Typically used for the dashboards or the I/O configuration.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geospacelab.datahub.DataHub.dock">
-<span class="sig-name descname"><span class="pre">dock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasource_contents</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub.dock" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">dock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasource_contents</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#geospacelab.datahub.DatasetSourced" title="geospacelab.datahub.__dataset_base__.DatasetSourced"><span class="pre">geospacelab.datahub.__dataset_base__.DatasetSourced</span></a></span></span><a class="headerlink" href="#geospacelab.datahub.DataHub.dock" title="Permalink to this definition"></a></dt>
 <dd><p>Dock a built-in or registered dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -259,7 +250,7 @@ To look up the sourced dataset and the associated contents, call <a class="refer
 <dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">dataset</span></code></p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#geospacelab.datahub.DatasetModel" title="geospacelab.datahub.DatasetModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a> object</p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code> object</p>
 </dd>
 <dt class="field-even">Seealso:</dt>
 <dd class="field-even"><p><a class="reference internal" href="#geospacelab.datahub.DataHub.add_dataset" title="geospacelab.datahub.DataHub.add_dataset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_dataset()</span></code></a></p>
@@ -274,14 +265,14 @@ package.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geospacelab.datahub.DataHub.add_dataset">
-<span class="sig-name descname"><span class="pre">add_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'temporary'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub.add_dataset" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'temporary'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#geospacelab.datahub.DatasetBase" title="geospacelab.datahub.__dataset_base__.DatasetBase"><span class="pre">geospacelab.datahub.__dataset_base__.DatasetBase</span></a></span></span><a class="headerlink" href="#geospacelab.datahub.DataHub.add_dataset" title="Permalink to this definition"></a></dt>
 <dd><p>Add one or more datasets, which can be a “temporary” or “user-defined” dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> (<em>list</em><em>(</em><em>dataset</em><em>)</em>) – A list of the datasets.</p></li>
 <li><p><strong>kind</strong> (<em>{'temporary'</em><em>, </em><em>'user-defined'}</em><em>, </em><em>default: 'temporary'</em>) – The type of a dataset. If temporary, a new dataset will be created from the DatasetModel.</p></li>
-<li><p><strong>dataset_class</strong> (<a class="reference internal" href="#geospacelab.datahub.DatasetModel" title="geospacelab.datahub.DatasetModel"><em>DatasetModel</em></a><em> or </em><em>its subclass</em>) – If None, the default class is DatasetModel. Used when <code class="docutils literal notranslate"><span class="pre">kind='temporary'</span></code>.</p></li>
+<li><p><strong>dataset_class</strong> (<em>DatasetModel</em><em> or </em><em>its subclass</em>) – If None, the default class is DatasetModel. Used when <code class="docutils literal notranslate"><span class="pre">kind='temporary'</span></code>.</p></li>
 <li><p><strong>kwargs</strong> – Other keyword arguments forwarded to <code class="docutils literal notranslate"><span class="pre">dataset_class</span></code></p></li>
 </ul>
 </dd>
@@ -327,14 +318,14 @@ package.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geospacelab.datahub.DataHub.get_variable">
-<span class="sig-name descname"><span class="pre">get_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub.get_variable" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">geospacelab.datahub.__variable_base__.VariableBase</span></span></span><a class="headerlink" href="#geospacelab.datahub.DataHub.get_variable" title="Permalink to this definition"></a></dt>
 <dd><p>To get a variable from the docked or added dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>var_name</strong> – the name of the queried variable</p></li>
-<li><p><strong>dataset</strong> – the dataset storing the queried variable.</p></li>
-<li><p><strong>dataset_index</strong> – the index of the dataset in datahub.datasets.
+<li><p><strong>var_name</strong> (<em>str</em>) – the name of the queried variable</p></li>
+<li><p><strong>dataset</strong> (<em>DatasetBase object</em>) – the dataset storing the queried variable.</p></li>
+<li><p><strong>dataset_index</strong> (<em>int</em>) – the index of the dataset in datahub.datasets.
 if both dataset or dataset_index are not specified, the function will get the
 variable from the current dataset.</p></li>
 </ul>
@@ -343,7 +334,7 @@ variable from the current dataset.</p></li>
 <dd class="field-even"><p>var</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#geospacelab.datahub.VariableModel" title="geospacelab.datahub.VariableModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">VariableModel</span></code></a> object or None</p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">VariableModel</span></code> object or None</p>
 </dd>
 <dt class="field-even">Seealso</dt>
 <dd class="field-even"><p><a class="reference internal" href="#geospacelab.datahub.DataHub.assign_variable" title="geospacelab.datahub.DataHub.assign_variable"><code class="xref py py-meth docutils literal notranslate"><span class="pre">assign_variable()</span></code></a></p>
@@ -357,7 +348,7 @@ The former only returns the object, and the latter also assign the variable to t
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geospacelab.datahub.DataHub.assign_variable">
-<span class="sig-name descname"><span class="pre">assign_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_new</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DataHub.assign_variable" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">assign_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_new</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">geospacelab.datahub.__variable_base__.VariableBase</span></span></span><a class="headerlink" href="#geospacelab.datahub.DataHub.assign_variable" title="Permalink to this definition"></a></dt>
 <dd><p>Assign a variable to <cite>DataHub.variables</cite> from the docked or added dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -370,7 +361,7 @@ The former only returns the object, and the latter also assign the variable to t
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>object of <a class="reference internal" href="#geospacelab.datahub.VariableModel" title="geospacelab.datahub.VariableModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">VariableModel</span></code></a></p>
+<dd class="field-even"><p>object of <code class="xref py py-class docutils literal notranslate"><span class="pre">VariableModel</span></code></p>
 </dd>
 <dt class="field-odd">Seealso:</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#geospacelab.datahub.DataHub.get_variable" title="geospacelab.datahub.DataHub.get_variable"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_variable()</span></code></a></p>
@@ -404,81 +395,44 @@ The former only returns the object, and the latter also assign the variable to t
 </section>
 <section id="dataset">
 <h3>Dataset<a class="headerlink" href="#dataset" title="Permalink to this headline"></a></h3>
-<p>All the datasets added to <a class="reference internal" href="#geospacelab.datahub.DataHub" title="geospacelab.datahub.DataHub"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataHub</span></code></a> are the objects of <a class="reference internal" href="#geospacelab.datahub.DatasetModel" title="geospacelab.datahub.DatasetModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetModel</span></code></a> or its subclasses.
-<a class="reference internal" href="#geospacelab.datahub.DatasetModel" title="geospacelab.datahub.DatasetModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetModel</span></code></a> is the base class, providing the essential attributes and methods to manage a data source. See details below:</p>
+<p>All the datasets added to <a class="reference internal" href="#geospacelab.datahub.DataHub" title="geospacelab.datahub.DataHub"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataHub</span></code></a> are the objects of <a class="reference internal" href="#geospacelab.datahub.DatasetBase" title="geospacelab.datahub.DatasetBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetBase</span></code></a> or its subclasses.
+<a class="reference internal" href="#geospacelab.datahub.DatasetBase" title="geospacelab.datahub.DatasetBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetBase</span></code></a> is the base class, providing the essential attributes and methods to manage a data source. See details below:</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="geospacelab.datahub.DatasetModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DatasetModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DatasetModel" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="geospacelab.datahub.DatasetBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DatasetBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt_fr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt_to</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'off'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fields</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">('name',</span> <span class="pre">'kind')</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DatasetBase" title="Permalink to this definition"></a></dt>
 <dd><p>A dataset is a dictionary-like object used for downloading and loading data from a data source. The items in
 the dataset are the variables loaded from the data files. The parameters listed below are the general attributes used
 for the dataset class and its inheritances.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em><em> or </em><em>None</em>) – The name of the dataset.</p></li>
-<li><p><strong>kind</strong> (<em>{'sourced'</em><em>, </em><em>'temporary'</em><em>, </em><em>'user-defined'}</em>) – The type of the dataset. ‘sourced’: the data source has been added in the package,
+<li><p><strong>name</strong> (<em>str</em>) – The name of the dataset.</p></li>
+<li><p><strong>kind</strong> (<em>str</em>) – The type of the dataset. ‘sourced’: the data source has been added in the package,
 ‘temporary’: a dataset added temporarily, ‘user-defined’: a data source defined by the user.</p></li>
-<li><p><strong>dt_fr</strong> (<em>datetime.datetime</em><em>, </em><em>default: None</em>) – the starting time of the data records.</p></li>
-<li><p><strong>dt_to</strong> (<em>datetime.datetime</em><em>, </em><em>default: None</em>) – the stopping time of the the data records.</p></li>
-<li><p><strong>load_mode</strong> (<em>{&quot;AUTO&quot;</em><em>, </em><em>&quot;dialog&quot;</em><em>, </em><em>&quot;data_file_paths&quot;}</em>) – The mode for the dataset to load the data. “AUTO”: Automatically searching the data files and load
-the data; “dialog”: Open a dialog window and select data files;
-“assigned”: Assign files to the attribute <code class="docutils literal notranslate"><span class="pre">data_file_paths</span></code>.</p></li>
-<li><p><strong>loader</strong> (<em>Loader class</em>) – the loader class used to load the data.</p></li>
-<li><p><strong>downloader</strong> (<em>DownloaderModel</em>) – the downloader class used to download the data.</p></li>
-<li><p><strong>data_root_dir</strong> (<em>str</em><em> or </em><em>pathlib.Path</em>) – The root directory where the data files are stored.</p></li>
-<li><p><strong>data_file_paths</strong> (<em>list</em>) – A list of the full paths of the data files.</p></li>
-<li><p><strong>data_file_num</strong> (<em>int</em>) – The number of the data files.</p></li>
-<li><p><strong>data_file_ext</strong> (<em>str</em>) – The extension of the data files.</p></li>
-<li><p><strong>data_search_recursive</strong> (<em>bool</em>) – If True, search the data files in a directory recursively.</p></li>
-<li><p><strong>visual</strong> (<em>{'on'</em><em>, </em><em>'off'}</em>) – If “on”, append the attribute visual to the vairables.</p></li>
-<li><p><strong>time_clip</strong> (<em>bool</em>) – Clip the time interval in the range of [dt_fr, dt_to].</p></li>
+<li><p><strong>dt_fr</strong> (<em>datetime.datetime</em><em> or </em><em>None</em>) – the starting time of the data records.</p></li>
+<li><p><strong>dt_fr</strong> – the starting time of the data records.</p></li>
+<li><p><strong>visual</strong> (<em>str</em><em>, </em><em>{&quot;on&quot;</em><em>, </em><em>&quot;off&quot;}</em>) – If “on”, append the Visual object to the Variable object.</p></li>
+<li><p><strong>label_fields</strong> (<em>list</em>) – A list of strings, indicating the fields used for generating the dataset label.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geospacelab.datahub.DatasetBase.VariableModel">
+<span class="sig-name descname"><span class="pre">VariableModel</span></span><a class="headerlink" href="#geospacelab.datahub.DatasetBase.VariableModel" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">geospacelab.datahub.__variable_base__.VariableBase</span></code></p>
+</dd></dl>
+
 <dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.datahub.DatasetModel.search_data_files">
-<span class="sig-name descname"><span class="pre">search_data_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DatasetModel.search_data_files" title="Permalink to this definition"></a></dt>
-<dd><p>Search the data files by the input pattern in the file name. The search method is based on pathlib.glob.
-For a dataset inheritance, a wrapper can be added for a custom setting.</p>
+<dt class="sig sig-object py" id="geospacelab.datahub.DatasetBase.add_variable">
+<span class="sig-name descname"><span class="pre">add_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configured_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">geospacelab.datahub.__variable_base__.VariableBase</span></span></span><a class="headerlink" href="#geospacelab.datahub.DatasetBase.add_variable" title="Permalink to this definition"></a></dt>
+<dd><p>Add a variable to the dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>initial_file_dir</strong> (<em>str</em><em> or </em><em>pathlib.Path</em><em>, </em><em>default: DatasetModel.data_root_dir.</em>) – The initial file directory for searching.</p></li>
-<li><p><strong>search_pattern</strong> (<em>str.</em>) – Unix style pathname pattern, see also pathlib.glob.</p></li>
-<li><p><strong>recursive</strong> (<em>bool</em><em>, </em><em>default: DatasetModel.data_search_recursive.</em>) – Search recursively if True.</p></li>
-<li><p><strong>allow_multiple_files</strong> – Allow multiple files as a result.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>done, bool, if False, no matches.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.datahub.DatasetModel.open_dialog">
-<span class="sig-name descname"><span class="pre">open_dialog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DatasetModel.open_dialog" title="Permalink to this definition"></a></dt>
-<dd><p>Open a dialog to select the data files.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.datahub.DatasetModel.check_data_files">
-<span class="sig-name descname"><span class="pre">check_data_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DatasetModel.check_data_files" title="Permalink to this definition"></a></dt>
-<dd><p>Check the existing of the data files before loading the data, depending on the loading mode (<code class="docutils literal notranslate"><span class="pre">load_mode</span></code>).
-This methods still needs to be improved as different datasets may have different variables as epochs. Two kinds
-of things can be done: 1. write a wrapper in the new dataset inheritance. 2. Add a script to recognize the
-epoch variables.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.datahub.DatasetModel.time_filter_by_range">
-<span class="sig-name descname"><span class="pre">time_filter_by_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_datetime_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DatasetModel.time_filter_by_range" title="Permalink to this definition"></a></dt>
-<dd><p>Clip the times.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>var_datetime</strong> – </p></li>
-<li><p><strong>var_datetime_name</strong> – </p></li>
+<li><p><strong>var_name</strong> – </p></li>
+<li><p><strong>configured_variables</strong> – </p></li>
+<li><p><strong>variable_class</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -488,8 +442,8 @@ epoch variables.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.datahub.DatasetModel.label">
-<span class="sig-name descname"><span class="pre">label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">separator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">|</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowercase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DatasetModel.label" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="geospacelab.datahub.DatasetBase.label">
+<span class="sig-name descname"><span class="pre">label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">separator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">|</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowercase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#geospacelab.datahub.DatasetBase.label" title="Permalink to this definition"></a></dt>
 <dd><p>Return a label of the data set.
 :param fields: The attribute names for the label.
 :param separator: A separator between two attributes.
@@ -498,8 +452,8 @@ epoch variables.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.datahub.DatasetModel.config">
-<span class="sig-name descname"><span class="pre">config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logging</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DatasetModel.config" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="geospacelab.datahub.DatasetBase.config">
+<span class="sig-name descname"><span class="pre">config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logging</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#geospacelab.datahub.DatasetBase.config" title="Permalink to this definition"></a></dt>
 <dd><p>Configure the attributes of the dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -516,242 +470,71 @@ epoch variables.</p>
 
 </dd></dl>
 
-</section>
-<section id="variable">
-<h3>Variable<a class="headerlink" href="#variable" title="Permalink to this headline"></a></h3>
 <dl class="py class">
-<dt class="sig sig-object py" id="geospacelab.datahub.VariableModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VariableModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fullname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'scalar'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depends</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.VariableModel" title="Permalink to this definition"></a></dt>
-<dd><p>VariableModel is a base class for a geospace variable with useful attributes</p>
+<dt class="sig sig-object py" id="geospacelab.datahub.DatasetSourced">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DatasetSourced</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt_fr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt_to</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'off'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_fields</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">('name',</span> <span class="pre">'kind')</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DatasetSourced" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.datahub.DatasetSourced.search_data_files">
+<span class="sig-name descname"><span class="pre">search_data_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_file_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recursive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direct_append</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_multiple_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#geospacelab.datahub.DatasetSourced.search_data_files" title="Permalink to this definition"></a></dt>
+<dd><p>Search the data files by the input pattern in the file name. The search method is based on pathlib.glob.
+For a dataset inheritance, a wrapper can be added for a custom setting.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – The variable’s name, [‘’]</p></li>
-<li><p><strong>fullname</strong> (<em>str</em>) – The variable’s full name, [‘’]</p></li>
-<li><p><strong>label</strong> (<em>str</em>) – The variable’s label for display. If a raw string (e.g., r’$lpha$’),
-it will show a latex format.</p></li>
-<li><p><strong>data_type</strong> (<em>str</em>) – The variable’s data type in one of them: ‘support_data’, ‘data’, and ‘metadata’
-in the same format as in a NASA’s cdf file. [‘’]</p></li>
-<li><p><strong>group</strong> (<em>str</em>) – The group that the variable is belonged to, e.g., var.name = ‘v_i_z’, var.group = ‘ion velocity’,
-as the label in plots with multiple lines. [‘’]</p></li>
-<li><p><strong>unit</strong> (<em>str</em>) – The variable’s unit. [‘’]</p></li>
-<li><p><strong>unit_label</strong> (<em>str</em>) – The unit’s  label,  used for plots. The string is a raw string (e.g., r’$n_e$’).
-If None, the plot will use unit as a label.</p></li>
-<li><p><strong>quantity</strong> (<em>TBD.</em>) – The physical quantity associated with the variable, waiting for implementing. [None]</p></li>
-<li><p><strong>value</strong> (<em>np.ndarray</em><em>, </em><em>default: None</em>) – the variable’s value. Usually it’s a np.ndarray. The axis=0 along the time, axis=1 along height, lat,
-lon. For a scalar, value in a shape of (1, ).</p></li>
-<li><p><strong>error</strong> (<em>str</em><em> or </em><em>np.ndarry</em>) – the variable’s error. Either a np.ndarray or a string. When it’s a string, the string is a variable name
-indicating the variable in the associated dataset (see <code class="xref py py-attr docutils literal notranslate"><span class="pre">dataset</span></code> below).</p></li>
-<li><p><strong>ndim</strong> (<em>int</em>) – The number of dimension.</p></li>
-<li><p><strong>depends</strong> (<em>dict</em>) – The full depends of the variables. Usually Axis 0 for time, next for spatial distributions,
-and then for components.</p></li>
-<li><p><strong>dataset</strong> (<em>DatasetModel object</em>) – The dataset that the variable is appended.</p></li>
-<li><p><strong>visual</strong> (<em>dict</em><em> or </em><em>Visual object</em><em>, </em><em>default: None.</em>) – the attributes for visualization.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.datahub.VariableModel.config">
-<span class="sig-name descname"><span class="pre">config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logging</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.VariableModel.config" title="Permalink to this definition"></a></dt>
-<dd><p>Configure the variable attributes. If the attribute is not the default attributes, return error.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>logging</strong> – If True, show logging.</p></li>
-<li><p><strong>kwargs</strong> – A dictionary of the attributes.</p></li>
+<li><p><strong>initial_file_dir</strong> (<em>str</em><em> or </em><em>pathlib.Path</em><em>, </em><em>default: DatasetModel.data_root_dir.</em>) – The initial file directory for searching.</p></li>
+<li><p><strong>search_pattern</strong> (<em>str.</em>) – Unix style pathname pattern, see also pathlib.glob.</p></li>
+<li><p><strong>recursive</strong> (<em>bool</em><em>, </em><em>default: DatasetModel.data_search_recursive.</em>) – Search recursively if True.</p></li>
+<li><p><strong>allow_multiple_files</strong> – Allow multiple files as a result.</p></li>
+<li><p><strong>direct_append</strong> (bool, default: <cite>True</cite>) – Append directly the searched results to Dataset.data_file_paths.
+If <cite>False</cite>, the file path list is returned only.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>None</p>
+<dd class="field-even"><p>a list of the file paths.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.datahub.VariableModel.add_attr">
-<span class="sig-name descname"><span class="pre">add_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logging</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.VariableModel.add_attr" title="Permalink to this definition"></a></dt>
-<dd><p>Similar as config, but add a new attribute.</p>
+<dt class="sig sig-object py" id="geospacelab.datahub.DatasetSourced.open_dialog">
+<span class="sig-name descname"><span class="pre">open_dialog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_file_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_file_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DatasetSourced.open_dialog" title="Permalink to this definition"></a></dt>
+<dd><p>Open a dialog to select the data files.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.datahub.VariableModel.clone">
-<span class="sig-name descname"><span class="pre">clone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omit_attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.VariableModel.clone" title="Permalink to this definition"></a></dt>
-<dd><p>Clone a variable and return a new instance.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>omit_attrs</strong> – The attributes omitted to be copied. If None, copy all.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>new variable instance</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="geospacelab.datahub.DatasetSourced.check_data_files">
+<span class="sig-name descname"><span class="pre">check_data_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">load_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DatasetSourced.check_data_files" title="Permalink to this definition"></a></dt>
+<dd><p>Check the existing of the data files before loading the data, depending on the loading mode (<code class="docutils literal notranslate"><span class="pre">load_mode</span></code>).
+This methods still needs to be improved as different datasets may have different variables as epochs. Two kinds
+of things can be done: 1. write a wrapper in the new dataset inheritance. 2. Add a script to recognize the
+epoch variables.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.datahub.VariableModel.get_depend">
-<span class="sig-name descname"><span class="pre">get_depend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retrieve_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.VariableModel.get_depend" title="Permalink to this definition"></a></dt>
-<dd><p>Get the dependence of the variable along an axis.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>axis</strong> – The axis.</p></li>
-<li><p><strong>retrieve_data</strong> – If True, Convert identifier to data.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A dictionary of dependence.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.datahub.VariableModel.set_depend">
-<span class="sig-name descname"><span class="pre">set_depend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depend_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.VariableModel.set_depend" title="Permalink to this definition"></a></dt>
-<dd><p>Set the dependence along an axis.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>axis</strong> – The axis.</p></li>
-<li><p><strong>depend_dict</strong> – the dictionary of the dependence, e.g., {‘DATETIME’: ‘DATETIME’}.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.datahub.VariableModel.get_visual_axis_attr">
-<span class="sig-name descname"><span class="pre">get_visual_axis_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.VariableModel.get_visual_axis_attr" title="Permalink to this definition"></a></dt>
-<dd><p>Get the visual attributes along an axis.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>attr_name</strong> – </p></li>
-<li><p><strong>axis</strong> – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.datahub.VariableModel.join">
-<span class="sig-name descname"><span class="pre">join</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var_new</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.VariableModel.join" title="Permalink to this definition"></a></dt>
-<dd><p>Join a numpy array or a variable instance to the current variable.
-:param var_new: The input variable.
-:type var_new: list, np.ndarray, or variable instance
+<dt class="sig sig-object py" id="geospacelab.datahub.DatasetSourced.time_filter_by_range">
+<span class="sig-name descname"><span class="pre">time_filter_by_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var_datetime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_datetime_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.datahub.DatasetSourced.time_filter_by_range" title="Permalink to this definition"></a></dt>
+<dd><p>Clip the times.
+:param var_datetime:
+:param var_datetime_name:
 :return:</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geospacelab.datahub.DatasetSourced.VariableModel">
+<span class="sig-name descname"><span class="pre">VariableModel</span></span><a class="headerlink" href="#geospacelab.datahub.DatasetSourced.VariableModel" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">geospacelab.datahub.__variable_base__.VariableBase</span></code></p>
 </dd></dl>
 
-</section>
-</section>
-<section id="visualization-geospacelab-visualization">
-<h2>Visualization (<code class="xref py py-mod docutils literal notranslate"><span class="pre">geospacelab.visualization</span></code>)<a class="headerlink" href="#visualization-geospacelab-visualization" title="Permalink to this headline"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.DashboardBase">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DashboardBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_config=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_class=&lt;class</span> <span class="pre">'geospacelab.visualization.mpl._base.FigureBase'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.DashboardBase" title="Permalink to this definition"></a></dt>
-<dd><p>A dashboard is a collection of panels in a figure or GeospaceLab canvas. The class inherits
-from <a class="reference internal" href="#geospacelab.datahub.DataHub" title="geospacelab.datahub.DataHub"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataHub</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.datahub.DatasetSourced.add_variable">
+<span class="sig-name descname"><span class="pre">add_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configured_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">geospacelab.datahub.__variable_base__.VariableBase</span></span></span><a class="headerlink" href="#geospacelab.datahub.DatasetSourced.add_variable" title="Permalink to this definition"></a></dt>
+<dd><p>Add a variable to the dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>canvas</strong> (Instance of <code class="xref py py-class docutils literal notranslate"><span class="pre">GeospaceLab</span> <span class="pre">Canvas</span></code>.) – The canvas that the dashboad will be placed.</p></li>
-<li><p><strong>panels</strong> (<em>dict</em><em>, </em><em>default: {}</em><em>, </em><em>the keys are integers starting from 1 if not specified.</em>) – A collection of the panels that are placed in the dashboard.</p></li>
-<li><p><strong>extra_axes</strong> (<em>dict</em><em>, </em><em>default: {}.</em>) – A collection of the axes additionally appended to the dashboard.</p></li>
-<li><p><strong>gs</strong> – </p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.DashboardBase.set_layout">
-<span class="sig-name descname"><span class="pre">set_layout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_rows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.DashboardBase.set_layout" title="Permalink to this definition"></a></dt>
-<dd><p>Set the layout of the dashboard in a canvas using matplotlib GridSpec.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>num_rows</strong> (<em>int.</em>) – The number of rows of the grid.</p></li>
-<li><p><strong>num_cols</strong> (<em>int.</em>) – The number of columns of the grid.</p></li>
-<li><p><strong>kwargs</strong> – Optional keyword arguments used in <strong>matplotlib GridSpec</strong>.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.DashboardBase.add_panel">
-<span class="sig-name descname"><span class="pre">add_panel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row_ind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_ind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">panel_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.DashboardBase.add_panel" title="Permalink to this definition"></a></dt>
-<dd><p>Add a panel.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>row_ind</strong> (<em>int</em><em> or </em><em>list.</em>) – The row indices (i or [i, j]) of the panel in the dashboard grid.</p></li>
-<li><p><strong>col_ind</strong> (<em>int</em><em> or </em><em>list.</em>) – The column indices of the panel in the dashboard grid.</p></li>
-<li><p><strong>index</strong> (<em>int</em><em> or </em><em>str.</em>) – The panel index as a key in self.panels.</p></li>
-<li><p><strong>label</strong> (<em>str</em>) – The panel label</p></li>
-<li><p><strong>panel_class</strong> (Subclass of <code class="xref py py-class docutils literal notranslate"><span class="pre">Panel</span></code>) – If None, use the default Panel class.</p></li>
-<li><p><strong>kwargs</strong> – Optional keyword arguments to create a Panel instance.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>index</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.DashboardBase.remove_panel">
-<span class="sig-name descname"><span class="pre">remove_panel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.DashboardBase.remove_panel" title="Permalink to this definition"></a></dt>
-<dd><p>Remove a panel</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>index</strong> (<em>int</em><em> or </em><em>str.</em>) – The panel index.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PanelBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_subplot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase" title="Permalink to this definition"></a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase.sca">
-<span class="sig-name descname"><span class="pre">sca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase.sca" title="Permalink to this definition"></a></dt>
-<dd><p>Set current axes.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>ax</strong> – the ax instance belong to the attribute axes.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase.gca">
-<span class="sig-name descname"><span class="pre">gca</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase.gca" title="Permalink to this definition"></a></dt>
-<dd><p>Get the current ax.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Axes instance.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase.add_axes">
-<span class="sig-name descname"><span class="pre">add_axes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">major</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase.add_axes" title="Permalink to this definition"></a></dt>
-<dd><p>Add a new ax.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>args</strong> – </p></li>
-<li><p><strong>major</strong> – </p></li>
-<li><p><strong>label</strong> – </p></li>
+<li><p><strong>var_name</strong> – </p></li>
+<li><p><strong>configured_variables</strong> – </p></li>
+<li><p><strong>variable_class</strong> – </p></li>
 <li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
@@ -762,25 +545,41 @@ from <a class="reference internal" href="#geospacelab.datahub.DataHub" title="ge
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geospacelab.visualization.mpl._base.PanelBase.get_line_collection">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_line_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linewidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geospacelab.visualization.mpl._base.PanelBase.get_line_collection" title="Permalink to this definition"></a></dt>
-<dd><p>Create a set of line segments and a line collection, see also: <span class="xref std std-ref">https://matplotlib.org/2.0.2/examples/pylab_examples/multicolored_line.html</span></p>
+<dt class="sig sig-object py" id="geospacelab.datahub.DatasetSourced.config">
+<span class="sig-name descname"><span class="pre">config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logging</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#geospacelab.datahub.DatasetSourced.config" title="Permalink to this definition"></a></dt>
+<dd><p>Configure the attributes of the dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>z</strong> (<em>x</em><em>, </em><em>y</em><em>,</em>) – The line points (x, y) with the colored z values.</p></li>
-<li><p><strong>cmap</strong> (<em>str</em><em> or </em><em>matplotlib.colors.Colormap</em><em>, </em><em>default: 'jet'.</em>) – The color map for the plot.</p></li>
-<li><p><strong>kwargs</strong> – Other optional keyword arguments forwarded to LineCollection.</p></li>
+<li><p><strong>logging</strong> – Show logging if True.</p></li>
+<li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The line collection instance.</p>
+<dd class="field-even"><p></p>
 </dd>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="geospacelab.datahub.DatasetSourced.label">
+<span class="sig-name descname"><span class="pre">label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">separator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'</span> <span class="pre">|</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowercase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#geospacelab.datahub.DatasetSourced.label" title="Permalink to this definition"></a></dt>
+<dd><p>Return a label of the data set.
+:param fields: The attribute names for the label.
+:param separator: A separator between two attributes.
+:param lowercase: Show lowercase letters only.
+:return: label</p>
 </dd></dl>
 
+</dd></dl>
+
+</section>
+<section id="variable">
+<h3>Variable<a class="headerlink" href="#variable" title="Permalink to this headline"></a></h3>
+</section>
+</section>
+<section id="visualization-geospacelab-visualization">
+<h2>Visualization (<code class="xref py py-mod docutils literal notranslate"><span class="pre">geospacelab.visualization</span></code>)<a class="headerlink" href="#visualization-geospacelab-visualization" title="Permalink to this headline"></a></h2>
 </section>
 <section id="express-geospace-express">
 <h2>Express (<code class="xref py py-mod docutils literal notranslate"><span class="pre">geospace.express</span></code>)<a class="headerlink" href="#express-geospace-express" title="Permalink to this headline"></a></h2>

@@ -28,10 +28,9 @@ def test_ampere():
 
     ind_t = dataset_superdarn.get_time_ind(ut=time1)
     # initialize the polar map
-    pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, boundary_lat=50, mirror_south=True)
+    panel1 = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, boundary_lat=50, mirror_south=True)
 
-    panel1 = viewer.panels[pid]
-    panel1.add_coastlines()
+    panel1.overlay_coastlines()
 
     phi_ = phi.value[ind_t]
     mlat_ = mlat.value[ind_t]
@@ -46,9 +45,9 @@ def test_ampere():
 
     levels = np.array([-21e3, -18e3, -15e3, -12e3, -9e3, -6e3, 3e3, 6e3,  9e3, 12e3, 15e3, 18e3, 21e3])
     # ipc = panel1.add_pcolor(fac_, coords={'lat': mlat[ind_t, ::], 'lon': None, 'mlt': mlt[ind_t, ::], 'height': 250.}, cs='AACGM', **pcolormesh_config)
-    ict = panel1.add_contour(grid_phi, coords={'lat': grid_mlat, 'lon': None, 'mlt': grid_mlt}, cs='AACGM', colors='b', levels=levels)
+    ict = panel1.overlay_contour(grid_phi, coords={'lat': grid_mlat, 'lon': None, 'mlt': grid_mlt}, cs='AACGM', colors='b', levels=levels)
     # panel1.major_ax.clabel(ict, inline=True, fontsize=10)
-    panel1.add_gridlines(lat_res=5, lon_label_separator=5)
+    panel1.overlay_gridlines(lat_res=5, lon_label_separator=5)
 
     polestr = 'North' if pole == 'N' else 'South'
     # panel1.add_title('DMSP/SSUSI, ' + band + ', ' + sat_id.upper() + ', ' + polestr + ', ' + time1.strftime('%Y-%m-%d %H%M UT'), pad=20)

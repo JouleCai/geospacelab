@@ -36,32 +36,29 @@ def test_ssusi():
 
     # Search the index for the time to plot, used as an input to the following polar map
     ind_t = dashboard.datasets[1].get_time_ind(ut=time1)
-
+    lbhs_ = lbhs.value[ind_t, :, :]
+    mlat_ = mlat[ind_t, ::]
+    mlon_ = mlon[ind_t, ::]
+    mlt_ = mlt[ind_t, ::]
     # Add a polar map panel to the dashboard. Currently the style is the fixed MLT at mlt_c=0. See the keywords below:
     panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, boundary_lat=65., mirror_south=True)
-    # Add the coastlines in the AACGM coordinate
-    panel1.add_coastlines()
+
 
     # Some settings for plotting.
-    lbhs_ = lbhs.value[ind_t, :, :]
     pcolormesh_config = lbhs.visual.plot_config.pcolormesh
-    colorbar_config = lbhs.visual.plot_config.colorbar
-    pcolormesh_config.update(c_scale='log')
-    pcolormesh_config.update(c_lim=[100, 6000])
-    import geospacelab.visualization.mpl.colormaps as cm
-    cmap = cm.cmap_aurora()
-    # cmap = 'viridis'
-    pcolormesh_config.update(cmap=cmap, shading='auto')
     # Overlay the SSUSI image in the map.
-    ipc = panel1.add_pcolor(lbhs_, coords={'lat': mlat[ind_t, ::], 'lon': mlon[ind_t, ::], 'mlt': mlt[ind_t, ::]}, cs='AACGM', **pcolormesh_config)
+    ipc = panel1.overlay_pcolormesh(data=lbhs_, coords={'lat': mlat_, 'lon': mlon_, 'mlt': mlt_}, cs='AACGM', **pcolormesh_config)
     # Add a color bar
     panel1.add_colorbar(ipc, c_label=band + " (R)", c_scale=pcolormesh_config['c_scale'], left=1.1, bottom=0.1,
                         width=0.05, height=0.7)
 
-    # Add the gridlines
-    panel1.add_gridlines(lat_res=5, lon_label_separator=5)
+    # Overlay the gridlines
+    panel1.overlay_gridlines(lat_res=5, lon_label_separator=5)
 
-    # Add satellite trajectory
+    # Overlay the coastlines in the AACGM coordinate
+    panel1.overlay_coastlines()
+
+    # Overlay cross-track velocity along satellite trajectory
     sc_dt = ds_s1['SC_DATETIME'].value.flatten()
     sc_lat = ds_s1['SC_GEO_LAT'].value.flatten()
     sc_lon = ds_s1['SC_GEO_LON'].value.flatten()
@@ -69,9 +66,9 @@ def test_ssusi():
     sc_coords = {'lat': sc_lat, 'lon': sc_lon, 'height': sc_alt}
 
     v_H = ds_s1['v_i_H'].value.flatten()
-    panel1.add_cross_track_vector(vector=v_H, unit_vector=1000, alpha=0.5, color='r', sc_coords=sc_coords, sc_ut=sc_dt)
-
-    panel1.add_sc_trajectory(sc_ut=sc_dt, sc_coords=sc_coords, cs='GEO')
+    panel1.overlay_cross_track_vector(vector=v_H, unit_vector=1000, alpha=0.5, color='r', sc_coords=sc_coords, sc_ut=sc_dt)
+    # Overlay the satellite trajectory with ticks
+    panel1.overlay_sc_trajectory(sc_ut=sc_dt, sc_coords=sc_coords, cs='GEO')
 
     # Add the title and save the figure
     polestr = 'North' if pole == 'N' else 'South'

@@ -35,18 +35,18 @@ class GeoPanelBase(panels.PanelBase):
         ax = super().add_axes(*args, major=major, label=label, **kwargs)
         return ax
 
-    def add_coastlines(self, *args, **kwargs):
+    def overlay_coastlines(self, *args, **kwargs):
         cl = self().coastlines(**kwargs)
         return cl
 
-    def add_gridlines(self, *args, **kwargs):
+    def overlay_gridlines(self, *args, **kwargs):
         gl = self().gridlines(
             crs=ccrs.PlateCarree(), draw_labels=True,
             **kwargs
         )
         return gl
 
-    def add_lands(self, *args, **kwargs):
+    def overlay_lands(self, *args, **kwargs):
 
         ll = self().add_feature(cfeature.LAND, **kwargs)
         return ll
