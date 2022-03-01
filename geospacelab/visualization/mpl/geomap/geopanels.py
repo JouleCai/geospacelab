@@ -780,11 +780,11 @@ class PolarMapPanel(GeoPanel):
         # cbar.set_label(r'$n_e$' + '\n' + r'(cm$^{-3}$)', rotation=270, labelpad=25)
 
     def overlay_sites(self, site_ids=None, coords=None, cs=None, **kwargs):
-        kwargs = pybasic.dict_set_default(kwargs, s=10, c='k')
+        kwargs = pybasic.dict_set_default(kwargs, color='k', linestyle='', markersize=5, marker='.')
 
         cs_new = self.cs_transform(cs_fr=cs, coords=coords)
         
-        isc = self().scatter(cs_new['lon'], cs_new['lat'], transform=ccrs.PlateCarree(), **kwargs)
+        isc = self().plot(cs_new['lon'], cs_new['lat'], transform=ccrs.PlateCarree(), **kwargs)
         return isc
 
     def add_colorbar(self, im, ax=None, figure=None,
