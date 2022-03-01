@@ -620,14 +620,14 @@ class PanelBase(object):
                 (pos_ax.y1 - pos_ax.y0) * cax_position[3],
             ]
             cax = self.add_axes(pos_cax)
-            cax_label_config = dict(rotation=270, va='bottom', size='medium')
+            cax_label_config = {'rotation': 270, 'va': 'bottom', 'size': 'medium'}
 
         icb = self.figure.colorbar(im, cax=cax, **kwargs)
 
         self.sca(ax)
 
         # set colorbar label
-        cax_label_config = pybasic.dict_set_default(cax_label_config, rotation=270, va='bottom', size='medium')
+        cax_label_config = pybasic.dict_set_default(cax_label_config, rotation=270, va='bottom', size='small')
         if cax_label is not None:
             icb.set_label(cax_label, **cax_label_config)
 

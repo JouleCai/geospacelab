@@ -15,6 +15,7 @@ from geospacelab.cs._aacgm import AACGM
 from geospacelab.cs._apex import APEX
 from geopack import geopack
 
+GEOC=GEOCSpherical
 
 def set_cs(name=None, **kwargs):
     kind = kwargs.pop('kind', None)

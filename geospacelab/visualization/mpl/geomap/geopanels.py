@@ -169,7 +169,7 @@ class PolarMapPanel(GeoPanel):
 
             # csObj = scs.SpaceCS(x, y, CS='GEO', dt=self.dt, coords_labels=['lon', 'lat'])
 
-        coords = {'lat': y, 'lon': x, 'height': 250.}
+        coords = {'lat': y, 'lon': x, 'height': 1.}
         coords = self.cs_transform(cs_fr='GEO', cs_to=self.cs, coords=coords)
         x_new = coords['lon']
         y_new = coords['lat']

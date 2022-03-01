@@ -1,16 +1,15 @@
 import datetime
+import pathlib
+import re
 import matplotlib.pyplot as plt
 
 import geospacelab.visualization.mpl.geomap.geodashboards as geomap
 from geospacelab.visualization.mpl.dashboards import TSDashboard
+import geospacelab.toolbox.utilities.pydatetime as dttool
 
-def test_ssusi():
-    dt_fr = datetime.datetime(2015, 9, 8, 8)
-    dt_to = datetime.datetime(2015, 9, 8, 23, 59)
-    time1 = datetime.datetime(2015, 9, 8, 20, 21)
-    pole = 'N'
-    sat_id = 'f16'
-    band = 'LBHS'
+def show_dmsp(sat_id=None, pole='N', band='LBHS', dt_c=None, file_dir=None):
+    dt_fr = dttool.get_start_of_the_day(dt_c)
+    dt_to = dttool.get_end_of_the_day(dt_c)
 
     # Create a geodashboard object
     dashboard = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (14, 10)})
@@ -21,8 +20,8 @@ def test_ssusi():
     dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole=pole, sat_id=sat_id, orbit_id=None)
     ds_s1 = dashboard.dock(
         datasource_contents=['madrigal', 'dmsp', 's1'],
-        dt_fr=time1 - datetime.timedelta(minutes=45),
-        dt_to=time1 + datetime.timedelta(minutes=45),
+        dt_fr=dt_c - datetime.timedelta(minutes=45),
+        dt_to=dt_c + datetime.timedelta(minutes=45),
         sat_id=sat_id, replace_orbit=True)
 
     dashboard.set_layout(1, 1, left=0.05, right=0.28)
@@ -35,8 +34,8 @@ def test_ssusi():
     mlt = dashboard.assign_variable(('GRID_MLT'), dataset_index=1).value
 
     # Search the index for the time to plot, used as an input to the following polar map
-    ind_t = dashboard.datasets[1].get_time_ind(ut=time1)
-    if (dts[ind_t] - time1).total_seconds()/60 > 60:     # in minutes
+    ind_t = dashboard.datasets[1].get_time_ind(ut=dt_c)
+    if (dts[ind_t] - dt_c).total_seconds()/60 > 60:     # in minutes
         raise ValueError("The time does not match any SSUSI data!")
     lbhs_ = lbhs.value[ind_t, :, :]
     mlat_ = mlat[ind_t, ::]
@@ -45,7 +44,7 @@ def test_ssusi():
     # Add a polar map panel to the dashboard. Currently the style is the fixed MLT at mlt_c=0. See the keywords below:
     panel1 = dashboard.add_polar_map(
         row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM',
-        mlt_c=0., pole=pole, ut=time1, boundary_lat=55., mirror_south=True
+        mlt_c=0., pole=pole, ut=dt_c, boundary_lat=55., mirror_south=True
     )
 
     # Some settings for plotting.
@@ -83,11 +82,10 @@ def test_ssusi():
 
     # Add the title and save the figure
     polestr = 'North' if pole == 'N' else 'South'
-    panel1.add_title(title='DMSP/SSUSI, ' + band + ', ' + sat_id.upper() + ', ' + polestr + ', ' + time1.strftime('%Y-%m-%d %H%M UT'))
+    panel1.add_title(title='DMSP/SSUSI, ' + band + ', ' + sat_id.upper() + ', ' + polestr + ', ' + dt_c.strftime('%Y-%m-%d %H%M UT'))
 
     # Add TSDashboard
     diff_minutes = 5
-    dt_c = time1
     dt_fr_2 = dt_c - datetime.timedelta(minutes=diff_minutes / 2)
     dt_to_2 = dt_c + datetime.timedelta(minutes=diff_minutes / 2)
     dashboard_2 = TSDashboard(dt_fr=dt_fr_2, dt_to=dt_to_2, figure=dashboard.figure, timeline_extra_labels=['GEO_LAT', 'GEO_LON', 'AACGM_LAT', 'AACGM_MLT'])
@@ -133,11 +131,47 @@ def test_ssusi():
     dashboard_2.add_panel_labels()
 
 
-    plt.savefig('DMSP_SSUSI_' + time1.strftime('%Y%m%d-%H%M') + '_' + band + '_' + sat_id.upper() + '_' + pole, dpi=300)
+    plt.savefig('DMSP_SSUSI_' + dt_c.strftime('%Y%m%d-%H%M') + '_' + band + '_' + sat_id.upper() + '_' + pole, dpi=300)
 
     # show the figure
     plt.show()
 
 
+def search_record():
+    root_dir = pathlib.Path("/home/lei/01-Work/01-Project/OY21-VisitingPhD/events/good_cases")
+    file_paths = root_dir.glob("**/*conjugation*.png")
+    sat_ids = []
+    dts = []
+    file_dirs = []
+    for ind, fp in enumerate(file_paths):
+        fn = fp.stem
+        print(fp)
+        rc = re.compile("(F[\d]+)[\w\s]+([\d]{8}\s[\d]{6})")
+        result = rc.findall(fn)
+        if not list(result):
+            continue
+        sat_id = result[0][0]
+        dt = datetime.datetime.strptime(result[0][1], "%Y%m%d %H%M%S")
+        file_dirs.append(fp.parent.resolve())
+        sat_ids.append(sat_id.lower())
+        dts.append(dt)
+
+    return file_dirs, sat_ids, dts
+
+
+def good_events():
+    file_dirs, sat_ids, dts = search_record()
+
+    falsed_events = []
+    for i, (fd, sat_id, dt) in enumerate(zip(file_dirs, sat_ids, dts)):
+        #try:
+        #    show_dmsp(sat_id=sat_id, dt_c=dt, file_dir=fd)
+        #except:
+        #    falsed_events.append([dt, fd, sat_id])
+        show_dmsp(sat_id=sat_id, dt_c=dt, file_dir=fd)
+
+    for info in falsed_events:
+        print(info)
+        
 if __name__ == "__main__":
-    test_ssusi()
+    good_events()
