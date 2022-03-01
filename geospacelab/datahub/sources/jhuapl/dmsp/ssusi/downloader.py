@@ -27,7 +27,7 @@ class Downloader(object):
             dt_to = dt_to + datetime.timedelta(hours=23, minutes=59)
         self.dt_fr = dt_fr  # datetime from
         self.dt_to = dt_to  # datetime to
-        self.sat_id = sat_id
+        self.sat_id = sat_id.lower()
         self.orbit_id = orbit_id
 
         if data_file_root_dir is None:
