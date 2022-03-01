@@ -55,7 +55,7 @@ class GeoPanelBase(panels.PanelBase):
         kwargs.setdefault('ha', 'center')
         kwargs.setdefault('va', 'baseline')
         super().add_title(x=x, y=y, title=title, **kwargs)
-
+    
     @property
     def proj_class(self):
         return self._proj_class

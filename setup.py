@@ -61,6 +61,7 @@ setuptools.setup(
               'cdflib>=0.3.20',
               'geopack>=1.0.8',
               'toml',
+              'sscws',
           ],
     python_requires='>=3.7',
     # py_modules=["geospacelab"],

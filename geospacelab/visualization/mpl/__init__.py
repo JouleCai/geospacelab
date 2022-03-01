@@ -8,7 +8,10 @@ __license__ = "BSD-3-Clause License"
 __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
-
+from geospacelab.visualization.mpl.__base__ import FigureBase
 from geospacelab.visualization.mpl.dashboards import Dashboard
 from geospacelab.visualization.mpl.panels import Panel
+
+def create_figure(*args, watermark=None, watermark_style=None, **kwargs):
+    return FigureBase(*args, watermark=None, watermark_style=None, **kwargs)
 

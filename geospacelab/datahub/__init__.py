@@ -461,8 +461,9 @@ class DataHub(object):
         pass
 
     def __repr__(self):
-        rep = f"GeospaceLab DataHub object <starting time: {str(self.dt_fr)} and stopping time: {str(self.dt_to)}>"
-        return rep
+        name = self.__class__.__name__
+        r =  f"GeospaceLab {name} object <starting time: {str(self.dt_fr)} and stopping time: {str(self.dt_to)}>"
+        return r
 
 
 if __name__ == "__main__":

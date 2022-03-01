@@ -49,7 +49,6 @@ class Dashboard(DataHub, DashboardBase):
     def __init__(self, figure=None, figure_config=None, **kwargs):
         super(Dashboard, self).__init__(figure=figure, figure_config=figure_config, **kwargs)
 
-
 class TSDashboard(Dashboard):
     _default_figure_config = {
         'figsize': (10, 8),

@@ -104,7 +104,7 @@ pip install git+https://github.com/JouleCai/geospacelab@master
 The package dependencies need to be installed before or after the installation of the package. 
 Several dependencies will be installed automatically with the package installation, 
 including __toml__, __requests__, __bueatifulsoup4__, __numpy__, __scipy__, __matplotlib__, __h5py__, __netcdf4__,
-__cdflib__, __madrigalweb__, and __aacgmv2__.
+__cdflib__, __madrigalweb__, __sscws__, and __aacgmv2__.
 
 Other dependencies will be needed if you see a *__ImportError__* or *__ModuleNotFoundError__* 
 displayed in the python console. Some frequently used modules and their installation methods are listed below:

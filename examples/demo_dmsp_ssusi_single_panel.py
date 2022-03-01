@@ -26,6 +26,7 @@ def test_ssusi():
         sat_id=sat_id)
 
     dashboard.set_layout(1, 1)
+    repr(dashboard)
 
     # Get the variables: LBHS emission intensiy, corresponding times and locations
     lbhs = dashboard.assign_variable('GRID_AUR_' + band, dataset_index=1)

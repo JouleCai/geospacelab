@@ -11,6 +11,7 @@ from geospacelab.toolbox.utilities.pyclass import StrBase
 import geospacelab.toolbox.utilities.pybasic as pybasic
 from geospacelab.visualization.mpl._helpers import check_panel_ax
 import geospacelab.toolbox.utilities.pylogging as mylog
+# from geospacelab.visualization.mpl.dashboards import Dashboard
 
 
 class FigureBase(Figure):
@@ -40,8 +41,15 @@ class FigureBase(Figure):
 
     def add_dashboard(self, *args, label=None, dashboard_class=None, **kwargs):
         import geospacelab.visualization.mpl.dashboards as dashboards
+        
         if label is None:
             label = len(self.dashboards) + 1
+        
+        if len(args) == 1:
+            if issubclass(args[0].__class__, dashboards.Dashboard):
+                self.dashboards[label] = args[0]
+                return args[0]
+            
         if dashboard_class is None:
             dashboard_class = self._default_dashboard_class
         if isinstance(dashboard_class, str):
@@ -299,7 +307,7 @@ class DashboardBase(object):
         ax.set_xlim([0, 1])
         ax.set_ylim([0, 1])
         return ax
-
+    
     @property
     def figure(self):
         if self._figure_ref is None:
@@ -331,6 +339,8 @@ class DashboardBase(object):
         else:
             raise TypeError
 
+        if issubclass(figure.__class__, FigureBase):
+            figure.add_dashboard(self)
         self._figure_ref = weakref.ref(figure)
 
     def __repr__(self):
