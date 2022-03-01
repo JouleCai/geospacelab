@@ -166,7 +166,7 @@ class Dataset(datahub.DatasetSourced):
 
         glat_1 = self['SC_GEO_LAT'].value.flatten()
         glon_1 = self['SC_GEO_LON'].value.flatten()
-        if glat_1.size<2:
+        if glat_1.size < 2:
             return
 
         dts_1 = self['SC_DATETIME'].value.flatten()
