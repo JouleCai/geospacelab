@@ -5,11 +5,11 @@ import geospacelab.visualization.mpl.geomap.geodashboards as geomap
 
 
 def test_ssusi():
-    dt_fr = datetime.datetime(2011, 11, 1, 8)
-    dt_to = datetime.datetime(2011, 11, 1, 23, 59)
-    time1 = datetime.datetime(2011, 11, 1, 14, 40)
+    dt_fr = datetime.datetime(2015, 9, 8, 8)
+    dt_to = datetime.datetime(2015, 9, 8, 23, 59)
+    time1 = datetime.datetime(2015, 9, 8, 20, 21)
     pole = 'N'
-    sat_id = 'f17'
+    sat_id = 'f16'
     band = 'LBHS'
 
     # Create a geodashboard object
@@ -72,7 +72,7 @@ def test_ssusi():
 
     v_H = ds_s1['v_i_H'].value.flatten()
     panel1.overlay_cross_track_vector(
-        vector=v_H, unit_vector=1000, vector_unit='m/s', alpha=0.5, color='r',
+        vector=v_H, unit_vector=1000, vector_unit='m/s', alpha=0.3, color='red',
         sc_coords=sc_coords, sc_ut=sc_dt, cs='GEO',
     )
     # Overlay the satellite trajectory with ticks

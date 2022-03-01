@@ -47,7 +47,7 @@ class TSPanel(Panel):
         'loc': 'upper left',
         'bbox_to_anchor': (1.0, 1.0),
         'frameon': False,
-        'fontsize': 'medium'
+        'fontsize': 'small'
     }
     _default_xtick_params = {
         'labelsize': plt.rcParams['xtick.labelsize'],
@@ -317,11 +317,11 @@ class TSPanel(Panel):
             ax.set_xlabel('UT', fontsize=12, fontweight='normal')
             return
 
-        figlength = self.figure.get_size_inches()[1]*2.54
-        if figlength > 20:
-            yoffset = 0.02
-        else:
-            yoffset = 0.04
+        figheight = self.figure.get_size_inches()[1]*2.54
+        figwidth = self.figure.get_size_inches()[0]*2.54
+        xoffset = 0.1 - figwidth * 0.002
+        yoffset = 0.07 - figheight * 0.0022
+
         ticks = ax.get_xticks()
         ylim0, _ = ax.get_ylim()
         xy_fig = []
@@ -370,7 +370,7 @@ class TSPanel(Panel):
 
         for ind, xticks in enumerate(ys):
             ax.text(
-                0.1, xy_fig[0][1] - yoffset * ind - 0.013,
+                xy_fig[0][0] - xoffset, xy_fig[0][1] - yoffset * ind - 0.013,
                 xlabels[ind].replace('_', '/'),
                 fontsize=plt.rcParams['xtick.labelsize'], fontweight='normal',
                 horizontalalignment='right', verticalalignment='top',

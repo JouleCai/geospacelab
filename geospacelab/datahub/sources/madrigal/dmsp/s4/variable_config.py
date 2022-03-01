@@ -61,10 +61,10 @@ default_axis_dict_2d = {
 
 default_plot_config = {
     'line':         {
-        'linestyle':        '-',
+        'linestyle':        '',
         'linewidth':        1.5,
         'marker':           '.',
-        'markersize':       2,
+        'markersize':       3,
     },
     'pcolormesh':   {
         'cmap':            default_colormap,
