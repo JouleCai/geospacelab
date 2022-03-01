@@ -682,9 +682,9 @@ class PolarMapPanel(GeoPanel):
                 )
 
     def overlay_cross_track_vector(
-            self, vector, unit_vector, sc_ut=None, sc_coords=None, cs='GEO', *,
+            self, vector, unit_vector, sc_ut=None, sc_coords=None, cs=None, *,
             unit_vector_scale=0.1, vector_unit='',
-            color='r', alpha=0.5,
+            color='r', alpha=0.5, quiverkey_config={},
             **kwargs):
 
         cs_new = self.cs_transform(cs_fr=cs, coords=sc_coords, ut=sc_ut)
@@ -712,13 +712,27 @@ class PolarMapPanel(GeoPanel):
         uq1 = - sign * vector * np.sin(slope)
         vq1 = sign * vector * np.cos(slope)
 
-        self.major_ax.quiver(
+        iq = self.major_ax.quiver(
             xq, yq, uq1, vq1,
             units='xy', angles='xy', scale=1., scale_units='xy',
             width=0.001 * (self._extent[1] - self._extent[0]),
             headlength=0, headaxislength=0, pivot='tail', color=color, alpha=alpha, **kwargs
         )
-        pass
+
+        # Add quiverkey
+        quiverkey_config = pybasic.dict_set_default(
+            quiverkey_config, X=0.9, Y=0.95, U=width*unit_vector_scale,
+            linewidth=1, label=str(unit_vector) + ' ' + vector_unit, color=color,
+        )
+        X = quiverkey_config.pop('X')
+        Y = quiverkey_config.pop('Y')
+        U = quiverkey_config.pop('U')
+        label = quiverkey_config.pop('label')
+        iqk = self.major_ax.quiverkey(
+            iq, X, Y, U, label, **kwargs
+        )
+
+        return iq
 
     def overlay_sc_coloured_line(
             self, data, sc_coords=None, sc_ut=None, cs=None, *,
@@ -766,13 +780,9 @@ class PolarMapPanel(GeoPanel):
         # cbar.set_label(r'$n_e$' + '\n' + r'(cm$^{-3}$)', rotation=270, labelpad=25)
 
     def overlay_sites(self, site_ids=None, coords=None, cs=None, **kwargs):
-        pybasic.dict_set_default(kwargs, s=10, c='k')
-        if cs is None:
-            cs = self.cs
-        if cs != self.cs:
-            cs_new = self.cs_transform(cs_fr=cs,coords=coords)
-        else:
-            cs_new = self.cs_transform(cs_fr=cs, coords=coords)
+        kwargs = pybasic.dict_set_default(kwargs, s=10, c='k')
+
+        cs_new = self.cs_transform(cs_fr=cs, coords=coords)
         
         isc = self().scatter(cs_new['lon'], cs_new['lat'], transform=ccrs.PlateCarree(), **kwargs)
         return isc

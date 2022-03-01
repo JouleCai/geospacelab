@@ -106,6 +106,7 @@ class Dataset(datahub.DatasetSourced):
                     value = load_obj.variables[var_name][np.newaxis, ::]
                 self._variables[var_name].join(value)
 
+            self.orbit_id = load_obj.metadata['ORBIT_ID']
             # self.select_beams(field_aligned=True)
         if self.time_clip:
             self.time_filter_by_range()

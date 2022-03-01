@@ -380,8 +380,11 @@ class DatasetSourced(DatasetBase):
             var_datetime = self[var_datetime_name]
         if var_datetime.value is None:
             return
+        dts = var_datetime.value.flatten()
+        if ut > dts[-1] or ut < dts[0]:
+            raise ValueError("The input time is out of the range!")
+        delta_sectime = [delta_t.total_seconds() for delta_t in (dts - ut)]
 
-        delta_sectime = [delta_t.total_seconds() for delta_t in (self['DATETIME'].value.flatten() - ut)]
         ind = np.where(np.abs(delta_sectime) == np.min(np.abs(delta_sectime)))[0][0]
         return ind
 

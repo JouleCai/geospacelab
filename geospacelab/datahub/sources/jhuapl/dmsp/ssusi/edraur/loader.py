@@ -23,6 +23,7 @@ class Loader(object):
     def load_data(self):
         dataset = netCDF4.Dataset(self.file_path)
         variables = {}
+        metadata = {}
 
         if self.pole == 'N':
             pole = self.pole
@@ -104,6 +105,8 @@ class Loader(object):
         variables['MAOB_PL_MLON'] = np.array(dataset.variables['MODEL_' + pole_str + '_POLAR_GEOMAGNETIC_LONGITUDE'])
         variables['MAOB_PL_MLT'] = np.array(dataset.variables['MODEL_' + pole_str + '_POLAR_MAGNETIC_LOCAL_TIME'])
 
+        metadata.setdefault('ORBIT_ID', dataset.STARTING_ORBIT_NUMBER)
         dataset.close()
 
         self.variables = variables
+        self.metadata = metadata

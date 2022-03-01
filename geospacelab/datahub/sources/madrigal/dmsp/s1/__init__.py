@@ -40,6 +40,7 @@ default_dataset_attrs = {
     'time_clip': True,
     'add_AACGM': True,
     'calib_orbit': True,
+    'replace_orbit': True,
 }
 
 default_variable_names = [
@@ -80,6 +81,7 @@ class Dataset(datahub.DatasetSourced):
         self.force_download = kwargs.pop('force_download', False)
         self.add_AACGM = kwargs.pop('add_AACGM', False)
         self.calib_orbit = kwargs.pop('calib_orbit', False)
+        self.replace_orbit = kwargs.pop('replace_orbit', False)
 
         self.sat_id = kwargs.pop('sat_id', None)
 
@@ -164,6 +166,8 @@ class Dataset(datahub.DatasetSourced):
 
         glat_1 = self['SC_GEO_LAT'].value.flatten()
         glon_1 = self['SC_GEO_LON'].value.flatten()
+        if glat_1.size<2:
+            return
 
         dts_1 = self['SC_DATETIME'].value.flatten()
         dt0 = dttool.get_start_of_the_day(self.dt_fr)
@@ -188,7 +192,10 @@ class Dataset(datahub.DatasetSourced):
 
         ind_outliers = np.where(np.abs(sin_glon_1 - sin_glon_2_i) > 0.03)[0]
 
-        glon_1[ind_outliers] = glon_new[ind_outliers]
+        if self.replace_orbit:
+            glon_1 = glon_new
+        else:
+            glon_1[ind_outliers] = glon_new[ind_outliers]
         self['SC_GEO_LON'].value = glon_1.reshape((glon_1.size, 1))
 
     def search_data_files(self, **kwargs):

@@ -87,6 +87,8 @@ class SpaceCSBase(object):
             self.coords = coords
         for key, value in attrs.items():
             if hasattr(self.coords, key):
+                if 'unit' not in key:
+                    value = validate_coord_value(value)
                 setattr(self.coords, key, value)
             else:
                 mylog.StreamLogger.warning(
@@ -241,6 +243,7 @@ class CoordinatesBase(object):
 
     def add_coord(self, name, value=None, unit=None):
         if not hasattr(self, name):
+            value = validate_coord_value(value)
             setattr(self, name, value)
             if unit is None:
                 unit = default_coord_attrs[self.kind][name]['unit']
@@ -261,6 +264,19 @@ class CartesianCoordinates(CoordinatesBase):
         self.Re = np.double(6371.2)     # Earth rad in km
         kwargs.setdefault('new_coords', ['x', 'y', 'z'])
         super().__init__(cs=cs, kind='car', **kwargs)
+
+
+def validate_coord_value(value):
+
+    if type(value) in (int, float):
+        value = value
+    elif type(value) in (list, tuple):
+        value = np.array(value)
+    elif isinstance(value, np.ndarray):
+        value = value
+    elif value is not None:
+        raise TypeError
+    return value
 
 # def check_cs_method(cls):
 #     sph_methods = ["convert_latlon_to_thetaphi", "convert_thetaphi_to_latlon",
