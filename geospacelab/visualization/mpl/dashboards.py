@@ -347,7 +347,8 @@ class TSDashboard(Dashboard):
                 else:
                     itpf = interp1d(x0, y0, bounds_error=False, fill_value='extrapolate')
                     y1 = itpf(x1)
-
+            else:
+                y1 = y0[ind_1]
             if type(value) in (int, float):
                 ind_1 = argrelmin(np.abs(y1 - value))
             elif type(value) is list:

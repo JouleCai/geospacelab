@@ -722,7 +722,7 @@ class PolarMapPanel(GeoPanel):
         # Add quiverkey
         quiverkey_config = pybasic.dict_set_default(
             quiverkey_config, X=0.9, Y=0.95, U=width*unit_vector_scale,
-            linewidth=4, label=str(unit_vector) + ' ' + vector_unit, color=color,
+            linewidth=0.01 * (self._extent[1] - self._extent[0]), label=str(unit_vector) + ' ' + vector_unit, color=color,
         )
         X = quiverkey_config.pop('X')
         Y = quiverkey_config.pop('Y')

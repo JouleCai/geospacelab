@@ -12,7 +12,7 @@ def show_dmsp(sat_id=None, pole='N', band='LBHS', dt_c=None, file_dir=None):
     dt_to = dttool.get_end_of_the_day(dt_c)
 
     # Create a geodashboard object
-    dashboard = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (14, 10)})
+    dashboard = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (16, 10)})
 
     # If the orbit_id is specified, only one file will be downloaded. This option saves the downloading time.
     # dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole='N', sat_id='f17', orbit_id='46863')
@@ -24,7 +24,7 @@ def show_dmsp(sat_id=None, pole='N', band='LBHS', dt_c=None, file_dir=None):
         dt_to=dt_c + datetime.timedelta(minutes=45),
         sat_id=sat_id, replace_orbit=True)
 
-    dashboard.set_layout(1, 1, left=0.05, right=0.28)
+    dashboard.set_layout(1, 1, left=0.05, right=0.35)
 
     # Get the variables: LBHS emission intensiy, corresponding times and locations
     lbhs = dashboard.assign_variable('GRID_AUR_' + band, dataset_index=1)
@@ -44,7 +44,7 @@ def show_dmsp(sat_id=None, pole='N', band='LBHS', dt_c=None, file_dir=None):
     # Add a polar map panel to the dashboard. Currently the style is the fixed MLT at mlt_c=0. See the keywords below:
     panel1 = dashboard.add_polar_map(
         row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM',
-        mlt_c=0., pole=pole, ut=dt_c, boundary_lat=55., mirror_south=True
+        mlt_c=0., pole=pole, ut=dt_c, boundary_lat=60., mirror_south=True
     )
 
     # Some settings for plotting.
@@ -120,25 +120,27 @@ def show_dmsp(sat_id=None, pole='N', band='LBHS', dt_c=None, file_dir=None):
           [jE_e],
           [jE_i],
     ]
-    dashboard_2.set_layout(panel_layouts=layout, left=0.45, right=0.9, hspace=0.01)
+    dashboard_2.set_layout(panel_layouts=layout, left=0.5, right=0.9, hspace=0.01)
     dashboard_2.draw()
-    uts = dashboard_2.search_UTs(GEO_LAT=69.58, GEO_LON=[0, 40])
+    uts = dashboard_2.search_UTs(AACGM_LAT=66.6, GEO_LON=[0, 40])
     if list(uts):
           dashboard_2.add_vertical_line(uts[0])
-    uts = dashboard_2.search_UTs(GEO_LAT=78.15, GEO_LON=[0, 40])
+    uts = dashboard_2.search_UTs(AACGM_LAT=75.4, GEO_LON=[0, 40])
     if list(uts):
           dashboard_2.add_vertical_line(uts[0])
     dashboard_2.add_panel_labels()
 
-
-    plt.savefig('DMSP_SSUSI_' + dt_c.strftime('%Y%m%d-%H%M') + '_' + band + '_' + sat_id.upper() + '_' + pole, dpi=300)
+    file_name = 'DMSP_' + dt_c.strftime(
+        '%Y-%m-%d_%H%M') + '_' + sat_id.upper() + '_SSUSI_' + band + '_SSJ_SSM_SSIES_' + pole
+    file_path_out = file_dir / file_name
+    plt.savefig(file_path_out, dpi=300)
 
     # show the figure
     plt.show()
 
 
 def search_record():
-    root_dir = pathlib.Path("/home/lei/01-Work/01-Project/OY21-VisitingPhD/events/good_cases")
+    root_dir = pathlib.Path("/Users/lcai/Downloads/good_cases")
     file_paths = root_dir.glob("**/*conjugation*.png")
     sat_ids = []
     dts = []
