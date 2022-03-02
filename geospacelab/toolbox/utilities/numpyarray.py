@@ -80,7 +80,7 @@ def numpy_array_self_mask(data, conditions=None):
 def data_resample(
         x=None, y=None, xtype=None, xres=None, xresscale=1.1,
         method='Null',  # Null - insert NaN, 'linear', 'cubic', ... (interpolation method)
-        axis=0, forward=True
+        axis=0, forward=True, depth=0.
 ):
 
     x1 = x
@@ -95,6 +95,8 @@ def data_resample(
     inds = numpy.where(diff_x1 > xres * xresscale)[0]
 
     if len(inds) == 0:
+        return x, y
+    if depth > 10:
         return x, y
 
     inds = [i+1 for i in inds]
@@ -125,7 +127,7 @@ def data_resample(
         xnew, ynew = data_resample(
         x=xnew, y=ynew, xtype=xtype, xres=xres, xresscale=xresscale,
         method='Null',  # Null - insert NaN, 'linear', 'cubic', ... (interpolation method)
-        axis=axis, forward=False
+        axis=axis, forward=False, depth=depth+1
 )
 
     return xnew, ynew
@@ -134,7 +136,7 @@ def data_resample(
 def data_resample_2d(
         x=None, y=None, z=None, xtype=None, xres=None, xresscale=1.1,
         method='Null',  # Null - insert NaN, 'linear', 'cubic', ... (interpolation method)
-        axis=0, forward=True
+        axis=0, forward=True, depth=0
 ):
 
     x1 = x
@@ -149,6 +151,9 @@ def data_resample_2d(
     inds = numpy.where(diff_x1 > xres * xresscale)[0]
 
     if len(inds) == 0:
+        return x, y, z
+
+    if depth > 10:
         return x, y, z
 
     inds = [i+1 for i in inds]
@@ -186,7 +191,7 @@ def data_resample_2d(
         xnew, ynew, znew = data_resample_2d(
             x=xnew, y=ynew, z=znew, xtype=xtype, xres=xres, xresscale=xresscale,
             method='Null',  # Null - insert NaN, 'linear', 'cubic', ... (interpolation method)
-            axis=axis, forward=False
+            axis=axis, forward=False, depth=depth+1
         )
 
     return xnew, ynew, znew
