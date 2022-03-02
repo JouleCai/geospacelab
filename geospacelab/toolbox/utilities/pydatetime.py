@@ -90,7 +90,7 @@ def get_first_day_of_month(dt):
     if type(dt) is date:
         mydate = dt
         datetype = 0
-    elif type(dt) is datetime:
+    elif issubclass(dt.__class__, datetime):
         mydate = convert_datetime_to_date(dt)
         datetype = 1
     this_month = mydate - timedelta(days=mydate.day - 1)
@@ -104,7 +104,7 @@ def get_last_day_of_month(dt, end=False):
     if type(dt) is date:
         mydate = dt
         datetype = 0
-    elif type(dt) is datetime:
+    elif issubclass(dt.__class__, datetime):
         mydate = convert_datetime_to_date(dt)
         datetype = 1
     next_month = mydate.replace(day=28) + timedelta(days=4)  # this will never fail
@@ -123,7 +123,7 @@ def get_next_of_month(dt):
     if type(dt) is date:
         mydate = dt
         datetype = 0
-    elif type(dt) is datetime:
+    elif issubclass(dt.__class__, datetime):
         mydate = convert_datetime_to_date(dt)
         datetype = 1
     next_month = mydate.replace(day=28) + timedelta(days=4)  # this will never fail
@@ -138,7 +138,7 @@ def get_next_n_months(dt, nm):
     if type(dt) is date:
         mydate = dt
         datetype = 0
-    elif type(dt) is datetime:
+    elif issubclass(dt.__class__, datetime):
         mydate = convert_datetime_to_date(dt)
         datetype = 1
     this_month = get_first_day_of_month(mydate)

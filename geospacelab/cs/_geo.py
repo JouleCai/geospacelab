@@ -379,7 +379,7 @@ class GEOCSpherical(SpaceSphericalCS):
             uts = self.ut
         lat_shape = self.coords.lat.shape
         lon_shape = self.coords.lon.shape
-        if ut_type is datetime.datetime:
+        if issubclass(self.ut.__class__, datetime.datetime):
 
             lat, lon, r = aacgm.convert_latlon_arr(
                 in_lat=self.coords.lat.flatten(), in_lon=self.coords.lon.flatten(), height=self.coords.height.flatten(),
@@ -404,7 +404,7 @@ class GEOCSpherical(SpaceSphericalCS):
                        ut=self.ut)
         if append_mlt:
             lon = lon.flatten()
-            if ut_type is datetime.datetime:
+            if issubclass(self.ut.__class__, datetime.datetime):
                 mlt = aacgm.convert_mlt(lon, self.ut)
             else:
                 mlt = np.empty_like(lon)
@@ -426,7 +426,7 @@ class GEOCSpherical(SpaceSphericalCS):
             uts = cs_in.ut
 
         mlt = None
-        if ut_type is datetime.datetime:
+        if issubclass(self.ut.__class__, datetime.datetime):
             apex_obj = apex.Apex(cs_in.ut)
             mlat, mlon = apex_obj.convert(
                 cs_in.coords.lat, cs_in.coords.lon, 'geo', 'apex', height=cs_in.coords.height,
