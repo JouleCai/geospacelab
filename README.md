@@ -3,7 +3,7 @@
 [![Python](./docs/images/python-badge.svg)](https://www.python.org/) 
 [![DOI](https://zenodo.org/badge/347315860.svg)](https://zenodo.org/badge/latestdoi/347315860)
 [![Downloads](https://static.pepy.tech/personalized-badge/geospacelab?period=total&units=international_system&left_color=brightgreen&right_color=orange&left_text=Downloads)](https://pepy.tech/project/geospacelab)
-![](https://tokei.rs/b1/github.com/JouleCai/geospacelab)
+![](https://tokei.rs/b2/github.com/JouleCai/geospacelab)
 
 
 To collect, manage, and visualize geospace data, aiming to speed up the research in space physics. The documentation can be found 
