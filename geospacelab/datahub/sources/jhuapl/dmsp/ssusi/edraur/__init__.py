@@ -29,7 +29,7 @@ default_dataset_attrs = {
     'allow_download': True,
     'data_search_recursive': False,
     'label_fields': ['database', 'facility', 'instrument', 'product'],
-    'time_clip': True,
+    'time_clip': False,
 }
 
 default_variable_names = [
@@ -110,6 +110,10 @@ class Dataset(datahub.DatasetSourced):
             # self.select_beams(field_aligned=True)
         if self.time_clip:
             self.time_filter_by_range()
+
+    def get_time_ind(self, ut, time_res=20*60, var_datetime_name='DATETIME', edge_cutoff=False, **kwargs):
+        ind = super().get_time_ind(ut, time_res=time_res, var_datetime_name=var_datetime_name, edge_cutoff=edge_cutoff, **kwargs)
+        return ind
 
     def search_data_files(self, **kwargs):
         dt_fr = self.dt_fr

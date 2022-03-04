@@ -39,11 +39,11 @@ SEC_PER_WEEK = SEC_PER_DAY * DAYS_PER_WEEK
 
 
 class DatetimeMajorLocator(mdates.AutoDateLocator):
-    def __init__(self, tz=None, minticks=4, maxticks=7, interval_multiples=True):
+    def __init__(self, tz=None, minticks=5, maxticks=12, interval_multiples=True):
 
         super().__init__(tz=tz, minticks=minticks, maxticks=maxticks, interval_multiples=interval_multiples)
         self.intervald[MINUTELY] = [1, 3, 5, 10, 15, 30]
-        self.intervald[SECONDLY] = [1, 3, 5, 10, 15, 30]
+        self.intervald[SECONDLY] = [1, 5, 10, 15, 30]
 
 
 class DatetimeMinorLocator(mdates.AutoDateLocator):

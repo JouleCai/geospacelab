@@ -268,7 +268,7 @@ class CartesianCoordinates(CoordinatesBase):
 
 def validate_coord_value(value):
 
-    if type(value) in (int, float):
+    if np.issubdtype(type(value), np.number):
         value = value
     elif type(value) in (list, tuple):
         value = np.array(value)

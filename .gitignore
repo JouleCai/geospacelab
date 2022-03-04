@@ -3,6 +3,7 @@
 *.pyc
 *.log
 *.DS_Store
+test_local
 dist
 build
 .eggs

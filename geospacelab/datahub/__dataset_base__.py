@@ -373,7 +373,7 @@ class DatasetSourced(DatasetBase):
             if var.value.shape[0] == shape_0 and len(var.value.shape) > 1:
                 var.value = var.value[inds, ::]
 
-    def get_time_ind(self, ut, var_datetime=None, var_datetime_name=None):
+    def get_time_ind(self, ut, time_res=None, var_datetime=None, var_datetime_name=None, edge_cutoff=True):
         if var_datetime is None and var_datetime_name is None:
             var_datetime = self['DATETIME']
         if var_datetime_name is not None:
@@ -381,11 +381,22 @@ class DatasetSourced(DatasetBase):
         if var_datetime.value is None:
             return
         dts = var_datetime.value.flatten()
-        if ut > dts[-1] or ut < dts[0]:
-            raise ValueError("The input time is out of the range!")
+
+        if time_res is not None:
+            edge_cutoff = False
+
+        ind = []
+        if edge_cutoff:
+            if ut > dts[-1] or ut < dts[0]:
+                mylog.StreamLogger.warning('The input time is out of the range! Set "edge_cutoff=False" if needed!')
+                return ind
         delta_sectime = [delta_t.total_seconds() for delta_t in (dts - ut)]
 
         ind = np.where(np.abs(delta_sectime) == np.min(np.abs(delta_sectime)))[0][0]
+
+        if np.abs((dts[ind] - ut).total_seconds()) > time_res:
+            mylog.StreamLogger.warning('The input time does not match any time in the list! Check the time resolution ("time_res") in seconds!')
+            return []
         return ind
 
     def _set_default_variables(self, default_variable_names, configured_variables=None):

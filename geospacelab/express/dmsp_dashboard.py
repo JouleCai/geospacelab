@@ -24,7 +24,7 @@ class DMSPDashboard(TSDashboard):
             load_mode: str = 'AUTO',
             figure: str = 'new',
             figure_config: dict = {'figsize': (10, 10)},
-            timeline_extra_labels = None,
+            timeline_extra_labels: list = None,
             **kwargs
     ):
         if timeline_extra_labels is None:
@@ -36,7 +36,7 @@ class DMSPDashboard(TSDashboard):
         self.dataset_e = self.dock(datasource_contents=['madrigal', 'dmsp', 'e'], sat_id=sat_id, load_mode=load_mode, **kwargs)
         self.dataset_s4 = self.dock(datasource_contents=['madrigal', 'dmsp', 's4'], sat_id=sat_id, load_mode=load_mode, **kwargs)
         # ds_1.list_all_variables()
-        self.title = kwargs.pop('title', ', '.join([self.dataset_s1.facility, self.dataset_s4.sat_id]))
+        self.title = kwargs.pop('title', ', '.join([self.dataset_s1.database, self.dataset_s1.facility, self.dataset_s1.sat_id]))
 
     def save_figure(self, **kwargs):
         file_name = kwargs.pop('file_name', self.title.replace(', ', '_'))
@@ -85,8 +85,6 @@ class DMSPDashboard(TSDashboard):
         # dt_to_1 = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
 
         self.draw()
-        uts = self.search_UTs(GEO_LAT=69.23)
-        self.add_vertical_line(uts[0])
         self.add_title()
         self.add_panel_labels()
 
@@ -101,6 +99,7 @@ def example():
     )
     dashboard.quicklook()
     dashboard.show()
+
 
 if __name__ == '__main__':
     example()
