@@ -369,9 +369,9 @@ sc_alt = ds_s1['SC_GEO_ALT'].value.flatten()
 sc_coords = {'lat': sc_lat, 'lon': sc_lon, 'height': sc_alt}
 
 v_H = ds_s1['v_i_H'].value.flatten()
-panel1.overlay_cross_track_vector(vector=v_H, unit_vector=1000, alpha=0.5, color='r', sc_coords=sc_coords, sc_ut=sc_dt)
+panel1.overlay_cross_track_vector(vector=v_H, unit_vector=1000, alpha=0.5, color='r', sc_coords=sc_coords, sc_ut=sc_dt, cs='GEOC')
 # Overlay the satellite trajectory with ticks
-panel1.overlay_sc_trajectory(sc_ut=sc_dt, sc_coords=sc_coords, cs='GEO')
+panel1.overlay_sc_trajectory(sc_ut=sc_dt, sc_coords=sc_coords, cs='GEOC')
 
 # Add the title and save the figure
 polestr = 'North' if pole == 'N' else 'South'
