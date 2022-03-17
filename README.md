@@ -5,7 +5,7 @@
 [![Downloads](https://static.pepy.tech/personalized-badge/geospacelab?period=total&units=international_system&left_color=brightgreen&right_color=orange&left_text=Downloads)](https://pepy.tech/project/geospacelab)
 ![](https://tokei.rs/b1/github/JouleCai/geospacelab)
 [![PyPI version fury.io](https://badge.fury.io/py/ansicolortags.svg)](https://pypi.python.org/pypi/geospacelab/)
-[![PyPI download](https://img.shields.io/pypi/dm/ansicolortags.svg)](https://pypi.python.org/pypi/geospacelab/)
+[\\]<>([![PyPI download](https://img.shields.io/pypi/dm/ansicolortags.svg)](https://pypi.python.org/pypi/geospacelab/))
 
 
 To collect, manage, and visualize geospace data, aiming to speed up the research in space physics. The documentation can be found 
