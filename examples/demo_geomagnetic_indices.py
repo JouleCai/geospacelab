@@ -24,6 +24,7 @@ def test():
 
     ds4 = tsdb.dock(datasource_contents=['gfz', 'kpap'])
     ds5 = tsdb.dock(datasource_contents=['gfz', 'hpo'], data_res=60)
+    ds6 = tsdb.dock(datasource_contents=['gfz', 'snf107'])
 
     asy_d = tsdb.assign_variable('ASY_D', dataset=ds1)
     asy_h = tsdb.assign_variable('ASY_H', dataset=ds1)
