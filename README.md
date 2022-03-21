@@ -118,8 +118,8 @@ coordinate system.
   - ```pip install geopack ```
 
 > ([\*]()): The **_gcc_** or **_gfortran_** compilers are required before installing the package. 
-> - MacOS: ```brew install gcc ``` 
-> - Linux: ```sudo apt install gcc gfortran ```  
+> - gcc: ```conda install -c conda-forge gcc``` 
+> - gfortran: ```conda install -c conda-forge gfortran ``` 
 
 Please install the packages above, if needed.
 
