@@ -112,7 +112,7 @@ class Dataset(datahub.DatasetSourced):
     def search_data_files(self, **kwargs):
         dt_fr = self.dt_fr
         dt_to = self.dt_to
-        diff_years = dt_fr.year - dt_to.year
+        diff_years = dt_to.year - dt_fr.year
         dt0 = datetime.datetime(dt_fr.year, 1, 1)
         for i in range(diff_years + 1):
             thisyear = datetime.datetime(dt0.year + i, 1, 1)
