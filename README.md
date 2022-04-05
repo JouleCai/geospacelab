@@ -192,7 +192,7 @@ modulation = 'ant'
 # create a datahub instance
 dh = DataHub(dt_fr, dt_to)
 # dock a dataset
-ds_1 = dh.dock(datasource_contents=[database_name, facility_name],
+ds_1 = dh.dock(datasource_contents=[database_name, 'isr', facility_name],
                       site=site, antenna=antenna, modulation=modulation, data_file_type='eiscat-hdf5')
 # load data
 ds_1.load_data()
