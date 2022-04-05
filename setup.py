@@ -59,6 +59,7 @@ setuptools.setup(
               'matplotlib>=3.5',
               'madrigalweb>=3.2',
               'aacgmv2>=2.6.2',
+              'apexpy',
               'cdflib>=0.3.20',
               'geopack>=1.0.8',
               'toml',

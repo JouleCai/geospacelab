@@ -198,7 +198,7 @@ class Dataset(datahub.DatasetSourced):
             raise ValueError
         self.time_filter_by_inds(inds)
 
-    def calc_lat_lon(self, AACGM=True, APEX=True):
+    def calc_lat_lon(self, AACGM=True, APEX=False):
         from geospacelab.cs import LENUSpherical
         az = self['AZ'].value
         el = self['EL'].value
