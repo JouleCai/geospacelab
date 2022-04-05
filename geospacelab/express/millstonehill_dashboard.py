@@ -13,42 +13,55 @@ import datetime
 
 from geospacelab.visualization.mpl.dashboards import TSDashboard
 import geospacelab.toolbox.utilities.pylogging as mylog
+import geospacelab.toolbox.utilities.pybasic as pybasic
 
 
-class EISCATDashboard(TSDashboard):
-    def __init__(self, dt_fr, dt_to, **kwargs):
+class MillstoneHillISRDashboard(TSDashboard):
+    def __init__(
+            self, dt_fr, dt_to,
+            data_file_type='combined', antenna='zenith', pulse_code='single pulse', pulse_length=0,
+            **kwargs):
         kwargs.setdefault('load_mode', 'AUTO')
 
+        self.az = None
+        self.el = None
         figure = kwargs.pop('figure', 'new')
         super().__init__(dt_fr=dt_fr, dt_to=dt_to, figure=figure)
-        ds_1 = self.dock(datasource_contents=['madrigal', 'isr', 'eiscat'], **kwargs)
-        ds_1.load_data(load_mode=kwargs['load_mode'])
+        ds_1 = self.dock(datasource_contents=['madrigal', 'isr', 'millstonehill', 'basic'],
+                         data_file_type=data_file_type, antenna=antenna, pulse_code=pulse_code,
+                         pulse_length=pulse_length, **kwargs)
+
+        # ds_1.load_data(load_mode=kwargs['load_mode'])
         # ds_1.list_all_variables()
-        self.title = kwargs.pop('title', ', '.join([ds_1.facility, ds_1.site, ds_1.pulse_code, ds_1.scan_mode, ds_1.modulation]))
+
+        pass
 
     @property
-    def dataset(self):
+    def host_dataset(self):
         return self.datasets[1]
 
     def status_mask(self, bad_status=None):
-        self.dataset.status_mask(bad_status=bad_status)
+        self.host_dataset.status_mask(bad_status=bad_status)
 
     def residual_mask(self, residual_lim=None):
-        self.dataset.residual_mask(residual_lim=residual_lim)
+        self.host_dataset.residual_mask(residual_lim=residual_lim)
 
     def outlier_mask(self, condition, fill_value=None):
-        self.dataset.outlier_mask(condition, fill_value=fill_value)
+        self.host_dataset.outlier_mask(condition, fill_value=fill_value)
 
     def select_beams(self, field_aligned=False, az_el_pairs=None):
-        self.dataset.select_beams(field_aligned=field_aligned, az_el_pairs=az_el_pairs)
+        if len(az_el_pairs) == 1:
+            self.az = az_el_pairs[0][0]
+            self.el = az_el_pairs[0][1]
+        self.host_dataset.select_beams(field_aligned=field_aligned, az_el_pairs=az_el_pairs)
 
-    def list_eiscat_variables(self):
+    def list_all_variables(self):
         self.datasets[1].list_all_variables()
 
     def check_beams(self, error=0.5, logging=True, full_sequence=False):
         import numpy as np
-        azV = self.dataset['AZ']
-        elV = self.dataset['EL']
+        azV = self.host_dataset['AZ']
+        elV = self.host_dataset['EL']
         az_arr = np.round(azV.value, decimals=1)
         el_arr = np.round(elV.value, decimals=1)
         beams = np.array([[az_arr[0, 0], el_arr[0, 0]]])
@@ -85,7 +98,7 @@ class EISCATDashboard(TSDashboard):
         beams_counts = beams_counts[count_ind]
         beams_sequence_inds = beams_sequence_inds[count_ind]
         if logging:
-            label = self.dataset.label()
+            label = self.host_dataset.label()
             mylog.simpleinfo.info("Dataset: {}".format(label))
             mylog.simpleinfo.info("Listing all the beams ...")
             mylog.simpleinfo.info('{:^20s}{:^20s}{:^20s}{:80s}'.format('No.', '(az, el)', 'Counts', 'Sequence indices'))
@@ -105,10 +118,20 @@ class EISCATDashboard(TSDashboard):
         return beams, beams_counts, beams_sequence_inds
 
     def save_figure(self, **kwargs):
-        file_name = kwargs.pop('file_name', self.title.replace(', ', '_'))
+        file_name = kwargs.pop('file_name', self.title.replace(', ', '_').replace(': ', '_'))
         super().save_figure(file_name=file_name, **kwargs)
 
     def add_title(self, **kwargs):
+        if self.az is not None and self.el is not None:
+            azstr = 'az: {:.1f}'.format(self.az)
+            elstr = 'el: {:.1f}'.format(self.el)
+        else:
+            azstr = ''
+            elstr = ''
+        self.title = kwargs.pop('title', pybasic.str_join(*[
+            self.host_dataset.facility, self.host_dataset.antenna,
+            self.host_dataset.pulse_code, r'PL: {:.1f}'.format(self.host_dataset.pulse_length), azstr, elstr
+            ], separator=', '))
         title = kwargs.pop('title', self.title)
         super().add_title(x=0.5, y=1.06, title=title)
 
@@ -120,7 +143,7 @@ class EISCATDashboard(TSDashboard):
         az = self.assign_variable('AZ')
         el = self.assign_variable('EL')
         ptx = self.assign_variable('P_Tx')
-        tsys = self.assign_variable('T_SYS_1')
+        tsys = self.assign_variable('T_SYS')
         self.list_assigned_variables()
         self.list_datasets()
         self.check_beams()
@@ -136,51 +159,29 @@ class EISCATDashboard(TSDashboard):
         self.add_panel_labels()
 
 
-def example():
+def example(dt_fr, dt_to):
 
-    dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
-    dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
+    #dt_fr = datetime.datetime.strptime('20160315' + '1200', '%Y%m%d%H%M')
+    #dt_to = datetime.datetime.strptime('20160316' + '1200', '%Y%m%d%H%M')
 
-    site = 'UHF'
-    antenna = 'UHF'
-    modulation = '60'
+    antenna = 'misa'
+    pulse_code = 'alternating'
+    pulse_length = 480
     load_mode = 'AUTO'
-    dashboard = EISCATDashboard(
-        dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO'
+    dashboard = MillstoneHillISRDashboard(
+        dt_fr, dt_to, antenna=antenna, pulse_code=pulse_code, pulse_length=pulse_length,
     )
+    dashboard.select_beams(az_el_pairs=[[-40.5, 45]])
     dashboard.quicklook()
-
-    # viewer.save_figure() # comment this if you need to run the following codes
-    # viewer.show()   # comment this if you need to run the following codes.
-
-    """
-    As the viewer is an instance of the class EISCATViewer, which is a heritage of the class Datahub.
-    The variables can be retrieved in the same ways as shown in Example 1. 
-    """
-    n_e = dashboard.assign_variable('n_e')
-    print(n_e.value)
-
-    """
-    Several marking tools (vertical lines, shadings, and top bars) can be added as the overlays 
-    on the top of the quicklook plot.
-    """
-    # add vertical line
-    dt_fr_2 = datetime.datetime.strptime('20201209' + '2030', "%Y%m%d%H%M")
-    dt_to_2 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
-    dashboard.add_vertical_line(dt_fr_2, bottom_extend=0, top_extend=0.02, label='Line 1', label_position='top')
-    # add shading
-    dashboard.add_shading(dt_fr_2, dt_to_2, bottom_extend=0, top_extend=0.02, label='Shading 1', label_position='top')
-    # add top bar
-    dt_fr_3 = datetime.datetime.strptime('20201210' + '0130', "%Y%m%d%H%M")
-    dt_to_3 = datetime.datetime.strptime('20201210' + '0430', "%Y%m%d%H%M")
-    dashboard.add_top_bar(dt_fr_3, dt_to_3, bottom=0., top=0.02, label='Top bar 1')
-
-    # save figure
     dashboard.save_figure()
-    # show on screen
-    dashboard.show()
+    # dashboard.show()
 
+def example2():
+
+    for i in range(6):
+        dt0 = datetime.datetime(2016, 3, 13)
+        example(dt_fr=dt0 + datetime.timedelta(days=i, hours=12), dt_to = dt0 + datetime.timedelta(days=i+1, hours=12))
 
 if __name__ == '__main__':
-    example()
+    example2()
 

@@ -786,7 +786,7 @@ class SeasonalFluxEstimator(object):
             ovation prime does always I think, so I've made it default)
             The original code says that this result is appropriate for
             the northern hemisphere, and to use 365 - actual doy to
-            get a combined result appropriate for the southern hemisphere
+            get a basic result appropriate for the southern hemisphere
 
         interp_N, bool, optional
             Interpolate flux linearly for each latitude ring in the wedge

@@ -30,7 +30,7 @@ class GEO(SpaceSphericalCS):
 
     def to_APEX(self, append_mlt=False):
         cs_geoc = self.to_GEOC(kind='sph')
-        cs_new = cs_geoc.to_aacgm(append_mlt=append_mlt)
+        cs_new = cs_geoc.to_APEX(append_mlt=append_mlt)
         return cs_new
 
     def to_LENU(self, lat_0=None, lon_0=None, height_0=None, kind='car', **kwargs):
@@ -361,7 +361,7 @@ class GEOCSpherical(SpaceSphericalCS):
 
         coords = {'lat': lat*factor, 'lon': lon*factor, 'height': h}
         vector = self.vector
-        # if vector is not None:
+        # if vi is not None:
         #    raise NotImplementedError
 
         cs_new = GEO(coords=coords, vector=vector, ut=self.ut)

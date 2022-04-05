@@ -17,9 +17,7 @@ import re
 from geospacelab import preferences as prf
 
 import geospacelab.toolbox.utilities.pydatetime as dttool
-import geospacelab.toolbox.utilities.pylogging as pylog
-import geospacelab.toolbox.utilities.numpyarray as arraytool
-import geospacelab.datahub.sources.madrigal.eiscat as eiscat
+import geospacelab.datahub.sources.madrigal.isr.eiscat as eiscat
 import geospacelab.toolbox.utilities.pylogging as mylog
 
 
@@ -278,7 +276,7 @@ class Loader:
             exp_params = list(zip(*tuple(exp_params)))
             fn_id = exp_params[0].index(b'Cedar file name')
             fn = exp_params[1][fn_id].decode('UTF-8')
-            rc = re.compile(r'^MAD[\w]+_[\d]{4}-[\d]{2}-[\d]{2}_(\w+)@(\w+)\.hdf5')
+            rc = re.compile(r'^MAD[\w]+_[\d]{4}-[\d]{2}-[\d]{2}_([\w.]+)@(\w+)\.hdf5')
             rm = rc.findall(fn)[0]
             pattern_1 = rm[0]
             pattern_2 = rm[1]

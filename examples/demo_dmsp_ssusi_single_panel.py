@@ -20,7 +20,7 @@ def test_ssusi():
     # If not specified, the data during the whole day will be downloaded.
     dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole=pole, sat_id=sat_id, orbit_id=None)
     ds_s1 = dashboard.dock(
-        datasource_contents=['madrigal', 'dmsp', 's1'],
+        datasource_contents=['madrigal', 'satellites', 'dmsp', 's1'],
         dt_fr=time1 - datetime.timedelta(minutes=45),
         dt_to=time1 + datetime.timedelta(minutes=45),
         sat_id=sat_id, replace_orbit=True)

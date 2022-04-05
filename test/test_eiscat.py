@@ -219,4 +219,3 @@ if __name__ == "__main__":
 
     plt.savefig('eiscat_example.png')
     plt.show()
-    db.list_sourced_datasets()

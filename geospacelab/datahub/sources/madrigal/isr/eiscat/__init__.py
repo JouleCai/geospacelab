@@ -18,10 +18,10 @@ from geospacelab.datahub.sources.madrigal import madrigal_database
 from geospacelab import preferences as prf
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pybasic as basic
-from geospacelab.datahub.sources.madrigal.eiscat.loader import Loader as default_Loader
-from geospacelab.datahub.sources.madrigal.eiscat.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.madrigal.eiscat.variable_config as var_config
-from geospacelab.datahub.sources.madrigal.eiscat.utilities import *
+from geospacelab.datahub.sources.madrigal.isr.eiscat.loader import Loader as default_Loader
+from geospacelab.datahub.sources.madrigal.isr.eiscat.downloader import Downloader as default_Downloader
+import geospacelab.datahub.sources.madrigal.isr.eiscat.variable_config as var_config
+from geospacelab.datahub.sources.madrigal.isr.eiscat.utilities import *
 
 default_dataset_attrs = {
     'kind': 'sourced',
@@ -34,6 +34,7 @@ default_dataset_attrs = {
     'status_control': False,
     'rasidual_contorl': False,
     'data_search_recursive': True,
+    'beam_location': True,
     'label_fields': ['database', 'facility', 'site', 'antenna', 'experiment'],
 }
 
@@ -190,14 +191,15 @@ class Dataset(datahub.DatasetSourced):
         elif isinstance(az_el_pairs, list):
             inds = []
             for az1, el1 in az_el_pairs:
+                az1 = az1 % 360.
                 inds.extend(np.where(((np.abs(az - az1) <= 0.5) & (np.abs(el-el1) <= 0.5)))[0])
             inds.sort()
         else:
             raise ValueError
         self.time_filter_by_inds(inds)
 
-    def calc_lat_lon(self, AACGM=True):
-        from geospacelab.cs import GEO, LENUSpherical
+    def calc_lat_lon(self, AACGM=True, APEX=True):
+        from geospacelab.cs import LENUSpherical
         az = self['AZ'].value
         el = self['EL'].value
         range = self['RANGE'].value
@@ -224,10 +226,19 @@ class Dataset(datahub.DatasetSourced):
         if AACGM:
             cs_new.ut = self['DATETIME'].value
             cs_new = cs_new.to_AACGM()
-        var = self.add_variable(var_name='AACGM_LAT', value=cs_new['lat'],
-                                configured_variables=configured_variables)
-        var = self.add_variable(var_name='AACGM_LON', value=cs_new['lon'],
-                                configured_variables=configured_variables)
+            var = self.add_variable(var_name='AACGM_LAT', value=cs_new['lat'],
+                                    configured_variables=configured_variables)
+            var = self.add_variable(var_name='AACGM_LON', value=cs_new['lon'],
+                                    configured_variables=configured_variables)
+        # var = self.add_variable(var_name='AACGM_ALT', value=cs_new['height'])
+
+        if APEX:
+            cs_new.ut = self['DATETIME'].value
+            cs_new = cs_new.to_APEX()
+            var = self.add_variable(var_name='APEX_LAT', value=cs_new['lat'],
+                                    configured_variables=configured_variables)
+            var = self.add_variable(var_name='APEX_LON', value=cs_new['lon'],
+                                    configured_variables=configured_variables)
         # var = self.add_variable(var_name='AACGM_ALT', value=cs_new['height'])
         pass
 

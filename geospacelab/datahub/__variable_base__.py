@@ -300,7 +300,7 @@ class VariableBase(object):
         self.value = value
         self.error = error
 
-        self.variable_type = variable_type  # scalar, vector, tensor, ...
+        self.variable_type = variable_type  # scalar, vi, tensor, ...
         self.ndim = ndim
         self._depends = {}
         self.depends = depends
@@ -627,7 +627,7 @@ class VariableBase(object):
         if value is None:
             self._variable_type = None
             return
-        if value.lower() not in ['scalar', 'vector', 'matrix', 'tensor']:
+        if value.lower() not in ['scalar', 'vi', 'matrix', 'tensor']:
             raise AttributeError
         self._variable_type = value.lower()
 
@@ -646,7 +646,7 @@ class VariableBase(object):
             offset = 0
             if var_type == 'scalar':
                 offset = -1
-            elif var_type == 'vector':
+            elif var_type == 'vi':
                 offset = -1
             elif var_type == 'matrix':
                 offset = -2

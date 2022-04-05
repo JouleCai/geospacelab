@@ -13,7 +13,12 @@ import numpy as np
 
 
 def isnumeric(v):
-    return np.issubdtype(type(v), (np.floating, np.integer))
+    v_type = type(v)
+
+    if np.issubdtype(v_type, np.integer) or np.issubdtype(v_type, np.floating):
+        return True
+    else:
+        return False
 
 
 def input_with_default(prompt, default=''):

@@ -134,7 +134,7 @@ def data_resample(
 
 
 def data_resample_2d(
-        x=None, y=None, z=None, xtype=None, xres=None, xresscale=1.1,
+        x=None, y=None, z=None, xtype=None, xres=None, xresscale=3,
         method='Null',  # Null - insert NaN, 'linear', 'cubic', ... (interpolation method)
         axis=0, forward=True, depth=0
 ):

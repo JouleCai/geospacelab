@@ -48,6 +48,7 @@ setuptools.setup(
     # download_url = 'https://github.com/JouleCai/geospacelab/archive/refs/tags/v0.1.tar.gz',    # I explain this later on
     keywords = ['Geospace', 'EISCAT', 'DMSP', 'Space weather', 'Ionosphere', 'Space', 'Magnetosphere'],   # Keywords that define your package best
     install_requires=[            # I get to this in a second
+              'cython',
               'requests>=2.26.0',
               'beautifulsoup4>=4.9.3',
               'natsort>=7.1.1',

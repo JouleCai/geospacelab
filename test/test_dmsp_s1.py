@@ -18,7 +18,7 @@ dashboard = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsiz
 # If not specified, the data during the whole day will be downloaded.
 dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole=pole, sat_id=sat_id, orbit_id=None)
 ds_s1 = dashboard.dock(
-    datasource_contents=['madrigal', 'dmsp', 's1'],
+    datasource_contents=['madrigal', 'satellites', 'dmsp', 's1'],
     dt_fr=time1 - datetime.timedelta(minutes=45),
     dt_to=time1 + datetime.timedelta(minutes=45),
     sat_id=sat_id)

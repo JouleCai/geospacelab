@@ -247,5 +247,5 @@ def convert_unix_time_to_datetime_cftime(times):
     elif type_in is list:
         return dts.tolist()
     elif 'numpy' in str(type_in):
-        return dts
+        return dts.reshape(times.shape)
 

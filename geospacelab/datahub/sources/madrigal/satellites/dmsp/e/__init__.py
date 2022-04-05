@@ -14,14 +14,14 @@ import datetime
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, InstrumentModel, ProductModel
 from geospacelab.datahub.sources.madrigal import madrigal_database
-from geospacelab.datahub.sources.madrigal.dmsp import dmsp_facility
+from geospacelab.datahub.sources.madrigal.satellites.dmsp import dmsp_facility
 from geospacelab import preferences as prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
-from geospacelab.datahub.sources.madrigal.dmsp.e.loader import Loader as default_Loader
-from geospacelab.datahub.sources.madrigal.dmsp.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.madrigal.dmsp.e.variable_config as var_config
+from geospacelab.datahub.sources.madrigal.satellites.dmsp.e.loader import Loader as default_Loader
+from geospacelab.datahub.sources.madrigal.satellites.dmsp.downloader import Downloader as default_Downloader
+import geospacelab.datahub.sources.madrigal.satellites.dmsp.e.variable_config as var_config
 
 
 default_dataset_attrs = {

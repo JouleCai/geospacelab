@@ -14,21 +14,21 @@ import datetime
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, InstrumentModel, ProductModel
 from geospacelab.datahub.sources.madrigal import madrigal_database
-from geospacelab.datahub.sources.madrigal.dmsp import dmsp_facility
+from geospacelab.datahub.sources.madrigal.satellites.dmsp import dmsp_facility
 from geospacelab import preferences as prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
-from geospacelab.datahub.sources.madrigal.dmsp.s4.loader import Loader as default_Loader
-from geospacelab.datahub.sources.madrigal.dmsp.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.madrigal.dmsp.s4.variable_config as var_config
+from geospacelab.datahub.sources.madrigal.satellites.dmsp.s1.loader import Loader as default_Loader
+from geospacelab.datahub.sources.madrigal.satellites.dmsp.downloader import Downloader as default_Downloader
+import geospacelab.datahub.sources.madrigal.satellites.dmsp.s1.variable_config as var_config
 
 
 default_dataset_attrs = {
     'database': madrigal_database,
     'facility': dmsp_facility,
-    'instrument': 'SSIES',
-    'product': 's4',
+    'instrument': 'SSIES&SSM',
+    'product': 's1',
     'data_file_ext': 'hdf5',
     'data_root_dir': prf.datahub_data_root_dir / 'Madrigal' / 'DMSP',
     'allow_load': True,
@@ -51,10 +51,15 @@ default_variable_names = [
     'SC_MAG_LAT',
     'SC_MAG_LON',
     'SC_MAG_MLT',
-    'T_i',
-    'T_e',
-    'COMP_O_p',
-    'phi_E',
+    'n_e',
+    'v_i_H',
+    'v_i_V',
+    'B_D',
+    'B_F',
+    'B_P',
+    'd_B_D',
+    'd_B_F',
+    'd_B_P',
     ]
 
 # default_data_search_recursive = True
@@ -70,8 +75,8 @@ class Dataset(datahub.DatasetSourced):
 
         self.database = kwargs.pop('database', 'Madrigal')
         self.facility = kwargs.pop('facility', 'DMSP')
-        self.instrument = kwargs.pop('instrument', 'SSIES')
-        self.product = kwargs.pop('product', 's4')
+        self.instrument = kwargs.pop('instrument', 'SSIES&SSM')
+        self.product = kwargs.pop('product', 's1')
         self.allow_download = kwargs.pop('allow_download', False)
         self.force_download = kwargs.pop('force_download', False)
         self.add_AACGM = kwargs.pop('add_AACGM', False)

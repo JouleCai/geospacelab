@@ -1,6 +1,5 @@
-import os
 import geospacelab.datahub.sources.madrigal.utilities as madrigal
-import geospacelab.datahub.sources.madrigal.eiscat as eiscat
+import geospacelab.datahub.sources.madrigal.isr.eiscat as eiscat
 
 fn = "EISCAT_2021-03-10_beata_ant@uhfa.hdf5"
 madrigal.show_hdf5_structure(filename=fn, filepath="")

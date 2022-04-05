@@ -45,6 +45,10 @@ def list_experiments(instrument_code, dt_fr, dt_to, madrigal_url=default_madriga
         dt_to.year, dt_to.month, dt_to.day, dt_to.hour, dt_to.minute, dt_to.second,
         local=0
     )
+
+    if not list(exp_list):
+        raise ValueError('Cannot find the experiments for the database! Check the input values!')
+
     if exp_list[0].id == -1:
         madrigal_url = exp_list[0].madrigalUrl
         mylog.simpleinfo.info("Madrigal sources has been relocated to %s", madrigal_url)

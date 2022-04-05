@@ -51,7 +51,7 @@ class Downloader(object):
         self.user_affiliation = user_affiliation
 
         dt_fr = dttool.get_start_of_the_day(dt_fr)
-        dt_to = dttool.get_start_of_the_day(dt_to)
+        dt_to = dttool.get_end_of_the_day(dt_to)
         if dt_fr == dt_to:
             dt_to = dt_to + datetime.timedelta(hours=23, minutes=59)
         self.dt_fr = dt_fr  # datetime from

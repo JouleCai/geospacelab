@@ -55,7 +55,7 @@ class Downloader(object):
         self.instrument_code = 8100
 
         dt_fr = dttool.get_start_of_the_day(dt_fr)
-        dt_to = dttool.get_start_of_the_day(dt_to)
+        dt_to = dttool.get_end_of_the_day(dt_to)
 
         if sat_id is None:
             sat_id = input("input the sat_id (e.g., f16)")

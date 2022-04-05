@@ -110,7 +110,7 @@ class DatasetBase(object):
             self[var_name] = variable_class(dataset=self, name=var_name, visual=self.visual, **kwargs)
         return self[var_name]
 
-    def label(self, fields=None, separator=' | ', lowercase=True) -> str:
+    def label(self, fields=None, separator=' | ', lowercase=True, num_to_str=True) -> str:
         """
         Return a label of the data set.
         :param fields: The attribute names for the label.
@@ -125,7 +125,10 @@ class DatasetBase(object):
             if not str(attr_name):
                 sublabels.append('*')
             else:
-                sublabels.append(getattr(self, attr_name))
+                attr = getattr(self, attr_name)
+                if pybasic.isnumeric(attr) and num_to_str:
+                    attr = str(attr)
+                sublabels.append(attr)
         label = pybasic.str_join(*sublabels, separator=separator, lowercase=lowercase)
         return label
 
