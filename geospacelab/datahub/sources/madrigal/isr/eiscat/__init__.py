@@ -213,31 +213,31 @@ class Dataset(datahub.DatasetSourced):
                                 lat_0=self.site.location['GEO_LAT'],
                                 lon_0=self.site.location['GEO_LON'],
                                 height_0=self.site.location['GEO_ALT'])
-        cs_new = cs_LENU.to_GEO()
+        cs_geo = cs_LENU.to_GEO()
         configured_variables = var_config.configured_variables
 
-        var = self.add_variable(var_name='GEO_LAT', value=cs_new['lat'],
+        var = self.add_variable(var_name='GEO_LAT', value=cs_geo['lat'],
                                 configured_variables=configured_variables)
-        var = self.add_variable(var_name='GEO_LON', value=cs_new['lon'],
+        var = self.add_variable(var_name='GEO_LON', value=cs_geo['lon'],
                                 configured_variables=configured_variables)
-        var = self.add_variable(var_name='GEO_ALT', value=cs_new['height'],
+        var = self.add_variable(var_name='GEO_ALT', value=cs_geo['height'],
                                 configured_variables=configured_variables)
 
         if AACGM:
-            cs_new.ut = self['DATETIME'].value
-            cs_new = cs_new.to_AACGM()
-            var = self.add_variable(var_name='AACGM_LAT', value=cs_new['lat'],
+            cs_geo.ut = self['DATETIME'].value
+            cs_aacgm = cs_geo.to_AACGM()
+            var = self.add_variable(var_name='AACGM_LAT', value=cs_aacgm['lat'],
                                     configured_variables=configured_variables)
-            var = self.add_variable(var_name='AACGM_LON', value=cs_new['lon'],
+            var = self.add_variable(var_name='AACGM_LON', value=cs_aacgm['lon'],
                                     configured_variables=configured_variables)
         # var = self.add_variable(var_name='AACGM_ALT', value=cs_new['height'])
 
         if APEX:
-            cs_new.ut = self['DATETIME'].value
-            cs_new = cs_new.to_APEX()
-            var = self.add_variable(var_name='APEX_LAT', value=cs_new['lat'],
+            cs_geo.ut = self['DATETIME'].value
+            cs_apex = cs_geo.to_APEX()
+            var = self.add_variable(var_name='APEX_LAT', value=cs_apex['lat'],
                                     configured_variables=configured_variables)
-            var = self.add_variable(var_name='APEX_LON', value=cs_new['lon'],
+            var = self.add_variable(var_name='APEX_LON', value=cs_apex['lon'],
                                     configured_variables=configured_variables)
         # var = self.add_variable(var_name='AACGM_ALT', value=cs_new['height'])
         pass
