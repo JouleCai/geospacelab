@@ -159,29 +159,3 @@ class MillstoneHillISRDashboard(TSDashboard):
         self.add_panel_labels()
 
 
-def example(dt_fr, dt_to):
-
-    #dt_fr = datetime.datetime.strptime('20160315' + '1200', '%Y%m%d%H%M')
-    #dt_to = datetime.datetime.strptime('20160316' + '1200', '%Y%m%d%H%M')
-
-    antenna = 'misa'
-    pulse_code = 'alternating'
-    pulse_length = 480
-    load_mode = 'AUTO'
-    dashboard = MillstoneHillISRDashboard(
-        dt_fr, dt_to, antenna=antenna, pulse_code=pulse_code, pulse_length=pulse_length,
-    )
-    dashboard.select_beams(az_el_pairs=[[-40.5, 45]])
-    dashboard.quicklook()
-    dashboard.save_figure()
-    # dashboard.show()
-
-def example2():
-
-    for i in range(6):
-        dt0 = datetime.datetime(2016, 3, 13)
-        example(dt_fr=dt0 + datetime.timedelta(days=i, hours=12), dt_to = dt0 + datetime.timedelta(days=i+1, hours=12))
-
-if __name__ == '__main__':
-    example2()
-
