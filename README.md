@@ -2,7 +2,7 @@
 [![License](./docs/images/license-badge.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Python](./docs/images/python-badge.svg)](https://www.python.org/) 
 [![DOI](https://zenodo.org/badge/347315860.svg)](https://zenodo.org/badge/latestdoi/347315860)
-[![Downloads](https://static.pepy.tech/personalized-badge/geospacelab?period=total&units=international_system&left_color=brightgreen&right_color=orange&left_text=Downloads)](https://pepy.tech/project/geospacelab)
+[![Downloads](https://pepy.tech/badge/geospacelab)](https://pepy.tech/project/geospacelab)
 ![](https://tokei.rs/b1/github/JouleCai/geospacelab)
 [![PyPI version fury.io](https://badge.fury.io/py/ansicolortags.svg)](https://pypi.python.org/pypi/geospacelab/)
 
