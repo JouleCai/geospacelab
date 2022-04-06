@@ -44,10 +44,8 @@ def example_combined_datasets():
     n_e_grid = dashboard.assign_variable('n_e', dataset=ds2)
     n_e_grid.label = r'$n_e^{gridded}$'
 
-    # ds2 = dashboard.dock(
-    #     datasource_contents=['madrigal', 'isr', 'millstonehill', 'gridded'])
     layout = [[n_e], [n_e_grid], [v_i_Z], [v_i_E], [v_i_N], [E_E], [E_N]]
-    # layout = [[Bz, By], [v_sw], [n_p], [sym_h]]
+
     dashboard.set_layout(panel_layouts=layout, hspace=0.1)
     dashboard.draw()
     dashboard.save_figure(file_name='example_combined', append_time=True)
