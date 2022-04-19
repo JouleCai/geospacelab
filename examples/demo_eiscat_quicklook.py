@@ -11,15 +11,15 @@ __docformat__ = "reStructureText"
 import datetime
 import geospacelab.express.eiscat_dashboard as eiscat
 
-dt_fr = datetime.datetime.strptime('20201209' + '1800', '%Y%m%d%H%M')
-dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
+dt_fr = datetime.datetime.strptime('20201122' + '1800', '%Y%m%d%H%M')
+dt_to = datetime.datetime.strptime('20201122' + '2300', '%Y%m%d%H%M')
 
 site = 'UHF'
 antenna = 'UHF'
-modulation = '60'
+modulation = 'ant'
 load_mode = 'AUTO'
 dashboard = eiscat.EISCATDashboard(
-    dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO'
+    dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO', data_file_type='madrigal-hdf5'
 )
 dashboard.quicklook()
 

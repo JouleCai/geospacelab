@@ -332,6 +332,14 @@ class OrbitPosition_SSCWS(DatasetSourced):
 
         return station_list[ind]
 
+    @staticmethod
+    def calc_orbit_az_el(lat, lon, height):
+        cs_geo = gsl_cs.GEOCSpherical(coords={'lat': lat, 'lon': lon, 'height':height})
+        
+        cs_geo = cs_geo.to_cartesian()
+        
+        
+        
 
 if __name__ == "__main__":
     dt_fr = datetime.datetime(2012, 1, 3,)

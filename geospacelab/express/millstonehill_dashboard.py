@@ -111,7 +111,8 @@ class MillstoneHillISRDashboard(TSDashboard):
                     sequence_str = repr(beams_sequence_inds[ind][:10]).replace(']', ', ...]')
                 mylog.simpleinfo.info(
                     '{:^20d}{:^20s}{:^20d}{:80s}'.format(
-                        ind+1, f"({beams[ind, 0]}, {beams[ind, 1]})", beams_counts[ind], sequence_str
+                        ind+1, f"({'{:.1f}'.format(beams[ind, 0])}, {'{:.1f}'.format(beams[ind, 1])})",
+                        beams_counts[ind], sequence_str
                     )
                 )
 

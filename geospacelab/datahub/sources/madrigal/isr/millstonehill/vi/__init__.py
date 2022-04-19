@@ -26,13 +26,14 @@ default_dataset_attrs = {
     'kind': 'sourced',
     'database': madrigal_database,
     'facility': 'MillstoneHillISR',
-    'experiment_key': '',
+    'exp_name_pattern': '',
+    'exp_check': False,
     'data_file_type': 'ion velocity',
     'data_file_ext': 'hdf5',
     'data_root_dir': prf.datahub_data_root_dir / 'Madrigal' / 'MillstoneHill_ISR',
     'allow_download': True,
     'status_control': False,
-    'rasidual_contorl': False,
+    'residual_control': False,
     'beam_location': True,
     'data_search_recursive': True,
     'label_fields': ['database', 'facility', 'site', 'data_file_type'],
@@ -58,7 +59,8 @@ class Dataset(datahub.DatasetSourced):
         self.facility = kwargs.pop('facility', '')
         self.site = kwargs.pop('site', MillstoneHillSite('MillstoneHill'))
         self.experiment = kwargs.pop('experiment', '')
-        self.experiment_key = kwargs.pop('experiment_key', '')
+        self.exp_name_pattern = kwargs.pop('exp_name_pattern', '')
+        self.exp_check = kwargs.pop('exp_check', False)
         self.data_file_type = kwargs.pop('data_file_type', '')
         self.affiliation = kwargs.pop('affiliation', '')
         self.allow_download = kwargs.pop('allow_download', True)
@@ -92,6 +94,9 @@ class Dataset(datahub.DatasetSourced):
             if not str(attr):
                 mylog.StreamLogger.warning("The parameter {} is required before loading data!".format(attr_name))
 
+        if self.exp_check:
+            self.download_data()
+
     def label(self, **kwargs):
         label = super().label()
         return label
@@ -109,7 +114,7 @@ class Dataset(datahub.DatasetSourced):
         if self.time_clip:
             self.time_filter_by_range()
 
-    def search_data_files(self, **kwargs):
+    def search_data_files(self, recursive=True, **kwargs):
         dt_fr = self.dt_fr
         dt_to = self.dt_to
         diff_days = dttool.get_diff_days(dt_fr, dt_to)
@@ -125,8 +130,12 @@ class Dataset(datahub.DatasetSourced):
 
             search_pattern = '*' + '*'.join(file_patterns) + '*'
 
+            if str(self.exp_name_pattern):
+                search_pattern = '*' + self.exp_name_pattern.replace(' ', '-') + '*/' + search_pattern
+                recursive = False
+
             done = super().search_data_files(
-                initial_file_dir=initial_file_dir, search_pattern=search_pattern)
+                initial_file_dir=initial_file_dir, search_pattern=search_pattern, recursive=recursive)
 
             # Validate file paths
 
@@ -138,6 +147,18 @@ class Dataset(datahub.DatasetSourced):
                 else:
                     print('The requested experiment does not exist in the online database!')
 
+            if len(done) > 1:
+                if str(self.exp_name_pattern):
+                    mylog.StreamLogger.error(
+                        "Multiple data files detected! Check the files:")
+                else:
+                    mylog.StreamLogger.error(
+                        "Multiple data files detected!" +
+                        "Specify the experiment name by the keyword 'exp_name_pattern' if possible.")
+                for fp in done:
+                    mylog.simpleinfo.info(fp)
+                raise KeyError
+
         return done
 
     def download_data(self):
@@ -145,8 +166,9 @@ class Dataset(datahub.DatasetSourced):
             dt_fr=self.dt_fr, dt_to=self.dt_to,
             data_file_root_dir=self.data_root_dir,
             file_type=self.data_file_type,
-            experiment_key=self.experiment_key)
+            exp_name_pattern=self.exp_name_pattern)
         return download_obj.done
+
 
     @property
     def database(self):
