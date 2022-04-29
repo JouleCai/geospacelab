@@ -302,11 +302,10 @@ class DatasetSourced(DatasetBase):
         """
         Open a dialog to select the data files.
         """
-
+        import tkinter as tk
+        from tkinter import filedialog
+        from tkinter import simpledialog
         def tk_open_file():
-
-            import tkinter as tk
-            from tkinter import filedialog
 
             root = tk.Tk()
             root.withdraw()
@@ -323,6 +322,21 @@ class DatasetSourced(DatasetBase):
             )
 
             return file_name
+
+        root = tk.Tk()
+        root.withdraw()
+        self.data_file_num = kwargs.pop('data_file_num', self.data_file_num)
+        if self.data_file_num == 0:
+            self.data_file_num = simpledialog.askinteger('Input dialog', 'Input the number of files:', initialvalue=1)
+
+        for nf in range(self.data_file_num):
+            title = f"Select File {nf+1}: "
+            file_types = (('eiscat files', '*.' + self.data_file_ext), ('all files', '*.*'))
+            file_name = filedialog.askopenfilename(
+                title=title,
+                initialdir=initial_file_dir
+            )
+            self.data_file_paths.append(pathlib.Path(file_name))
 
     def check_data_files(self, load_mode: str = None, **kwargs):
         """

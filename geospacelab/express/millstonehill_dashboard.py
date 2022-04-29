@@ -118,11 +118,13 @@ class MillstoneHillISRDashboard(TSDashboard):
 
         return beams, beams_counts, beams_sequence_inds
 
-    def save_figure(self, **kwargs):
-        file_name = kwargs.pop('file_name', self.title.replace(', ', '_').replace(': ', '_'))
-        super().save_figure(file_name=file_name, **kwargs)
+    def save_figure(self, file_name=None, file_dir=None, append_time=True, **kwargs):
+        if file_name is None:
+            file_name = kwargs.pop('file_name', self.title.replace(', ', '_'))
+        super().save_figure(file_name=file_name, file_dir=file_dir, append_time=append_time, **kwargs)
 
-    def add_title(self, **kwargs):
+    def add_title(self, x=0.5, y=1.06, title=None, append_time=True, **kwargs):
+
         if self.az is not None and self.el is not None:
             azstr = 'az: {:.1f}'.format(self.az)
             elstr = 'el: {:.1f}'.format(self.el)
@@ -133,8 +135,9 @@ class MillstoneHillISRDashboard(TSDashboard):
             self.host_dataset.facility, self.host_dataset.antenna,
             self.host_dataset.pulse_code, r'PL: {:.1f}'.format(self.host_dataset.pulse_length), azstr, elstr
             ], separator=', '))
-        title = kwargs.pop('title', self.title)
-        super().add_title(x=0.5, y=1.06, title=title)
+        if title is None:
+            title = self.title
+        super().add_title(x=x, y=y, title=title, append_time=append_time, **kwargs)
 
     def quicklook(self):
         n_e = self.assign_variable('n_e')

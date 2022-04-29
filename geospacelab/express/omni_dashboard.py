@@ -36,13 +36,15 @@ class OMNIDashboard(TSDashboard):
         for key, dataset in self.datasets.items():
             dataset.list_all_variables()
 
-    def save_figure(self, **kwargs):
-        file_name = kwargs.pop('filen_ame', self.title.replace(', ', '_'))
-        super().save_figure(file_name=file_name, **kwargs)
+    def save_figure(self, file_name=None, file_dir=None, append_time=True, **kwargs):
+        if file_name is None:
+            file_name = kwargs.pop('file_name', self.title.replace(', ', '_'))
+        super().save_figure(file_name=file_name, file_dir=file_dir, append_time=append_time, **kwargs)
 
-    def add_title(self, **kwargs):
-        title = kwargs.pop('title', self.title)
-        super().add_title(x=0.5, y=1.06, title=title)
+    def add_title(self, x=0.5, y=1.06, title=None, append_time=True, **kwargs):
+        if title is None:
+            title = self.title
+        super().add_title(x=x, y=y, title=title, append_time=append_time, **kwargs)
 
     def quicklook(self):
         Bx = self.assign_variable('B_x_GSM', dataset=self.datasets[1])

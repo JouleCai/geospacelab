@@ -47,6 +47,7 @@ on [readthedocs.io](https://geospacelab.readthedocs.io/en/latest/).
 | Madrigal/DMSP/s1              | DMSP SSM, SSIES, etc  | *hdf5*                | *True*        | __DMSPTSDashboard__  | beta      |
 | Madrigal/DMSP/s4              | DMSP SSIES            | *hdf5*                | *True*        | __DMSPTSDashboard__  | beta      |
 | Madrigal/DMSP/e               | DMSP SSJ              | *hdf5*                | *True*        | __DMSPTSDashboard__  | beta      |
+| Madrigal/Millstone Hill ISR   | Millstone Hill ISR    | *hdf5*                | *True*        | __MillstoneHillISRDashboard__ | stable |
 | JHUAPL/DMSP/SSUSI             | DMSP SSUSI            | *netcdf*              | *True*        | __DMSPSSUSIDashboard__  | beta      |
 | JHUAPL/AMPERE/fitted          | AMPERE FAC            | *netcdf*              | *False*        | __AMPEREDashboard__  | stable      |
 | SuperDARN/POTMAP              | SuperDARN potential map | *ascii*             | *False*       | - | stable |                  
@@ -73,7 +74,7 @@ It's also recommended installing the package and dependencies in a virtual envir
 After [installing the anaconda distribution](https://docs.anaconda.com/anaconda/install/index.html), a virtual environment can be created by the code below in the terminal:
 
 ```shell
-conda create --name [YOUR_ENV_NAME] python=3.8 spyder
+conda create --name [YOUR_ENV_NAME] -c conda-forge python cython cartopy
 ```
 The package "spyder" is a widely-used python IDE. Other IDEs, like "VS Code" or "Pycharm" also work.
 

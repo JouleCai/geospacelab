@@ -21,17 +21,16 @@ import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 
 from geospacelab.datahub.sources.gfz import gfz_database
-from geospacelab.datahub.sources.gfz.hpo.loader import Loader as default_Loader
-from geospacelab.datahub.sources.gfz.hpo.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.gfz.hpo.variable_config as var_config
+from geospacelab.datahub.sources.gfz.kpap.loader import Loader as default_Loader
+from geospacelab.datahub.sources.gfz.kpap.downloader import Downloader as default_Downloader
+import geospacelab.datahub.sources.gfz.kpap.variable_config as var_config
 
 
 default_dataset_attrs = {
     'database': gfz_database,
-    'product': 'Hpo',
+    'product': 'KpAp',
     'data_file_ext': 'nc',
     'data_root_dir': prf.datahub_data_root_dir / 'GFZ' / 'Indices',
-    'data_res': 30,
     'allow_load': True,
     'allow_download': True,
     'force_download': False,
@@ -40,24 +39,24 @@ default_dataset_attrs = {
     'time_clip': True,
 }
 
-default_variable_names = ['DATETIME', 'Hp', 'ap']
+default_variable_names = ['DATETIME', 'Kp', 'ap', 'Ap']
 
 # default_data_search_recursive = True
 
 default_attrs_required = []
 
 
-class Dataset(datahub.DatasetSourced):
+class TT(datahub.DatasetSourced):
     def __init__(self, **kwargs):
         kwargs = basic.dict_set_default(kwargs, **default_dataset_attrs)
 
         super().__init__(**kwargs)
 
         self.database = kwargs.pop('database', gfz_database)
-        self.product = kwargs.pop('product', 'Hpo')
+        self.product = kwargs.pop('product', 'KpAp')
         self.allow_download = kwargs.pop('allow_download', True)
         self.force_download = kwargs.pop('force_download', True)
-        self.data_res = kwargs.pop('data_res', 30)
+
         self.metadata = None
 
         allow_load = kwargs.pop('allow_load', False)
@@ -94,18 +93,11 @@ class Dataset(datahub.DatasetSourced):
         self.check_data_files(**kwargs)
 
         for file_path in self.data_file_paths:
-            load_obj = self.loader(file_path, file_type=self.data_file_ext, data_res=self.data_res)
+            load_obj = self.loader(file_path, file_type=self.data_file_ext)
 
             for var_name in self._variables.keys():
                 self._variables[var_name].join(load_obj.variables[var_name])
 
-            self._variables['Hp'].config(name=f'Hp{self.data_res}', label=f'Hp{self.data_res}')
-            if self.visual == 'on':
-                import matplotlib.dates as mdates
-                self._variables['Hp'].visual.plot_config.bar['width'] = \
-                    (mdates.date2num(datetime.datetime(2000, 1, 1,) + datetime.timedelta(minutes=self.data_res)) \
-                    - mdates.date2num(datetime.datetime(2000, 1, 1))) * 0.9
-            self._variables['ap'].config(name=f'Hp{self.data_res}', label=f'ap{self.data_res}')
             # self.select_beams(field_aligned=True)
         if self.time_clip:
             self.time_filter_by_range()
@@ -122,7 +114,7 @@ class Dataset(datahub.DatasetSourced):
 
             initial_file_dir = kwargs.pop('initial_file_dir', None)
             if initial_file_dir is None:
-                initial_file_dir = self.data_root_dir / 'Hpo' / f'Hp{self.data_res}'
+                initial_file_dir = self.data_root_dir / 'Kp_Ap'
             file_patterns = [thisyear.strftime("%Y")]
             # remove empty str
             file_patterns = [pattern for pattern in file_patterns if str(pattern)]
@@ -150,10 +142,7 @@ class Dataset(datahub.DatasetSourced):
 
     def download_data(self):
         if self.data_file_ext == 'nc':
-            download_obj = self.downloader(
-                self.dt_fr, self.dt_to,
-                data_res=self.data_res,
-                data_file_root_dir=self.data_root_dir, force=self.force_download)
+            download_obj = self.downloader(self.dt_fr, self.dt_to, data_file_root_dir=self.data_root_dir, force=self.force_download)
         else:
             raise NotImplementedError
         return download_obj.done

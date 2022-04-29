@@ -442,30 +442,34 @@ class TSPanel(Panel):
         # set yticks and yticklabels, usually do not change the matplotlib default
         yticks = var_for_config.visual.axis[1].ticks
         yticklabels = var_for_config.visual.axis[1].tick_labels
-        if yticks is not None:
-            ax.set_yticks(yticks)
-            if yticklabels is not None:
-                ax.set_yticklabels(yticklabels)
-        else:
-            if yscale == 'linear':
+
+        if yscale == 'linear':
+            if yticks is not None:
+                ax.set_yticks(yticks)
+                if yticklabels is not None:
+                    ax.set_yticklabels(yticklabels)
+            else:
                 major_max = var_for_config.visual.axis[1].major_tick_max
-                minor_max = var_for_config.visual.axis[1].minor_tick_max
                 if major_max is None:
                     ax.yaxis.set_minor_locator(mpl_ticker.AutoLocator())
                 else:
                     ax.yaxis.set_major_locator(mpl_ticker.MaxNLocator(major_max))
-                if minor_max is None:
-                    ax.yaxis.set_minor_locator(mpl_ticker.AutoMinorLocator())
-                else:
-                    ax.yaxis.set_minor_locator(mpl_ticker.MaxNLocator(minor_max))
+            minor_max = var_for_config.visual.axis[1].minor_tick_max
+            if minor_max is None:
+                ax.yaxis.set_minor_locator(mpl_ticker.AutoMinorLocator())
+            else:
+                ax.yaxis.set_minor_locator(mpl_ticker.MaxNLocator(minor_max))
 
-            if yscale == 'log':
-                locmin = mpl_ticker.LogLocator(base=10.0,
+        elif yscale == 'log':
+            locmin = mpl_ticker.LogLocator(base=10.0,
                                            subs=(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
                                            numticks=12
                                            )
-                ax.yaxis.set_minor_locator(locmin)
-                # ax.yaxis.set_minor_formatter(mpl.ticker.NullFormatter())
+            ax.yaxis.set_minor_locator(locmin)
+            # ax.yaxis.set_minor_formatter(mpl.ticker.NullFormatter())
+        else:
+            raise NotImplementedError
+
         ax.set_ylim(ylim)
 
     @check_panel_ax

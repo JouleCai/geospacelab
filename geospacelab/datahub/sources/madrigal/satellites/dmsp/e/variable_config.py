@@ -40,7 +40,7 @@ default_axis_dict_1d = {
     1: {
         'data':     '@v.value',
         'label':    '@v.group',
-        'unit':     '@v.unit',
+        'unit':     '@v.unit_label',
         'label_pos': [-0.1, 0.5],
     },
     2: {
