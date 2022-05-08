@@ -541,7 +541,11 @@ class PolarMapPanel(GeoPanel):
         return ict
 
     def grid_data(self, lon_in, lat_in, data_in, grid_res=0.1, data_res=0.5, interp_method='linear'):
-        ind_data = np.where(np.isfinite(data_in))
+        if self.pole == "N":
+            sign_lat = 1.
+        else:
+            sign_lat = -1.
+        ind_data = np.where(np.isfinite(data_in) & (lat_in * sign_lat > (self.boundary_lat-5.)) & np.isfinite(lon_in))
         data_pts = data_in[ind_data]
         lat_pts = lat_in[ind_data]
         lon_pts = lon_in[ind_data]
