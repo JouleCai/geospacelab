@@ -19,7 +19,8 @@ antenna = 'UHF'
 modulation = '60'
 load_mode = 'AUTO'
 dashboard = eiscat.EISCATDashboard(
-    dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO'
+    dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO',
+    data_file_type = "madrigal-hdf5"
 )
 dashboard.quicklook()
 
