@@ -13,16 +13,16 @@ from geospacelab import preferences as prf
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
-from geospacelab.datahub.sources.jhuapl.dmsp.ssusi.edraur.loader import Loader as default_Loader
+from geospacelab.datahub.sources.jhuapl.dmsp.ssusi.sdrdisk.loader import Loader as default_Loader
 from geospacelab.datahub.sources.jhuapl.dmsp.ssusi.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.jhuapl.dmsp.ssusi.edraur.variable_config as var_config
+import geospacelab.datahub.sources.jhuapl.dmsp.ssusi.sdrdisk.variable_config as var_config
 
 
 default_dataset_attrs = {
     'database': jhuapl_database,
     'facility': 'DMSP',
     'instrument': 'SSUSI',
-    'product': 'EDR-AUR',
+    'product': 'SDR-DISK',
     'data_file_ext': 'NC',
     'data_root_dir': prf.datahub_data_root_dir / 'JHUAPL' / 'DMSP' / 'SSUSI',
     'allow_load': True,
@@ -33,14 +33,26 @@ default_dataset_attrs = {
 }
 
 default_variable_names = [
-    'DATETIME', 'STARTING_TIME', 'STOPPING_TIME',
-    'GRID_MLAT', 'GRID_MLON', 'GRID_MLT', 'GRID_UT',
-    'GRID_AUR_1216', 'GRID_AUR_1304', 'GRID_AUR_1356', 'GRID_AUR_LBHS', 'GRID_AUR_LBHL',
+    'STARTING_TIME', 'STOPPING_TIME', 'DATETIME',
+    'FILE_VERSION', 'DATA_PRODUCT_VERSION', 'SOFTWARE_VERSION_NUMBER', 'CALIBRATION_PERIOD_VERSION', 'EMISSION_SPECTRA',
+    'SC_DATETIME', 'SC_ORBIT_ID', 'SC_GEO_LAT', 'SC_GEO_LON', 'SC_GEO_ALT',
+    'DISK_GEO_LAT', 'DISK_GEO_LON', 'DISK_GEO_ALT', 'DISK_SZA', 'DISK_SAA',
+    'ACROSS_PIXEL_SIZE', 'ALONG_PIXEL_SIZE', 'EFFECTIVE_LOOK_ANGLE', 'EXPOSURE', 'SAA_COUNT', 'DARK_COUNT_CORRECTION',
+    'SCATTER_LIGHT_1216_CORRECTION', 'SCATTER_LIGHT_1304_CORRECTION', 'OVERLAP_1304_1356_CORRECTION', 'LONG_WAVE_SCATTER_CORRECTION',
+    'RED_LEAK_CORRECTION', 'DQI',
+    'DISK_COUNTS_1216', 'DISK_COUNTS_1304', 'DISK_COUNTS_1356', 'DISK_COUNTS_LBHS', 'DISK_COUNTS_LBHL',
+    'DISK_R_1216', 'DISK_R_1304', 'DISK_R_1356', 'DISK_R_LBHS', 'DISK_R_LBHL',
+    'DISK_R_RECT_1216', 'DISK_R_RECT_1304', 'DISK_R_RECT_1356', 'DISK_R_RECT_LBHS', 'DISK_R_RECT_LBHL',
+    'DISK_R_1216_ERROR', 'DISK_R_1304_ERROR', 'DISK_R_1356_ERROR', 'DISK_R_LBHS_ERROR', 'DISK_R_LBHL_ERROR',
+    'DISK_R_RECT_1216_ERROR', 'DISK_R_RECT_1304_ERROR', 'DISK_R_RECT_1356_ERROR', 'DISK_R_RECT_LBHS_ERROR', 'DISK_R_RECT_LBHL_ERROR',
+    'DISK_DECOMP_1216_ERROR', 'DISK_DECOMP_1304_ERROR', 'DISK_DECOMP_1356_ERROR', 'DISK_DECOMP_LBHS_ERROR', 'DISK_DECOMP_LBHL_ERROR',
+    'DISK_CALIB_1216_ERROR', 'DISK_CALIB_1304_ERROR', 'DISK_CALIB_1356_ERROR', 'DISK_CALIB_LBHS_ERROR', 'DISK_CALIB_LBHL_ERROR',
+    'DQI_1216', 'DQI_1304', 'DQI_1356', 'DQI_LBHS', 'DQI_LBHL'
 ]
 
 # default_data_search_recursive = True
 
-default_attrs_required = []
+default_attrs_required = ['sat_id', 'orbit_id', 'pp_type', 'pole']
 
 
 class Dataset(datahub.DatasetSourced):
@@ -52,12 +64,13 @@ class Dataset(datahub.DatasetSourced):
         self.database = kwargs.pop('database', 'JHUAPL')
         self.facility = kwargs.pop('facility', 'DMSP')
         self.instrument = kwargs.pop('instrument', 'SSUSI')
-        self.product = kwargs.pop('product', 'EDR-EUR')
+        self.product = kwargs.pop('product', 'SDR-DISK')
         self.allow_download = kwargs.pop('allow_download', True)
 
         self.sat_id = kwargs.pop('sat_id', '')
         self.orbit_id = kwargs.pop('orbit_id', None)
         self.pole = kwargs.pop('pole', '')
+        self.pp_type = kwargs.pop('pp_type', '')
 
         self.metadata = None
 
@@ -81,6 +94,9 @@ class Dataset(datahub.DatasetSourced):
             attr = getattr(self, attr_name)
             if not str(attr):
                 mylog.StreamLogger.warning("The parameter {} is required before loading data!".format(attr_name))
+            if attr_name == 'orbit_id':
+                if attr is None or attr == '':
+                    mylog.StreamLogger.warning("For a fast process, it's better to specify the orbit id.")
 
     def label(self, **kwargs):
         label = super().label()
@@ -94,13 +110,15 @@ class Dataset(datahub.DatasetSourced):
             configured_variables=var_config.configured_variables
         )
         for file_path in self.data_file_paths:
-            load_obj = self.loader(file_path, file_type=self.product.lower(), pole=self.pole)
+            load_obj = self.loader(file_path, file_type=self.product.lower(), pole=self.pole, pp_type=self.pp_type)
 
             for var_name in self._variables.keys():
                 if var_name == 'EMISSION_SPECTRA':
                     self._variables[var_name].value = load_obj.variables[var_name]
                     continue
-                if var_name in ['DATETIME', 'STARTING_TIME', 'STOPPING_TIME']:
+                if var_name in ['DATETIME', 'STARTING_TIME', 'STOPPING_TIME',
+                                'FILE_VERSION', 'DATA_PRODUCT_VERSION', 'SOFTWARE_VERSION_NUMBER',
+                                'CALIBRATION_PERIOD_VERSION']:
                     value = np.array([load_obj.variables[var_name]])[np.newaxis, :]
                 else:
                     value = load_obj.variables[var_name][np.newaxis, ::]
@@ -143,7 +161,7 @@ class Dataset(datahub.DatasetSourced):
             if self.orbit_id is not None:
                 multiple_files = False
             else:
-                fp_log = initial_file_dir / 'EDR-AUR.full.log'
+                fp_log = initial_file_dir / (self.product.upper() + '.full.log')
                 if not fp_log.is_file():
                     self.download_data(dt_fr=thisday, dt_to=thisday)
                 multiple_files = True

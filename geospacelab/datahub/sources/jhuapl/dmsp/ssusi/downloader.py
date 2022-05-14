@@ -18,11 +18,12 @@ class Downloader(object):
     A class to Download SSUSI data
     :param file_type:  "l1b", "edr-aur", or "sdr"
     """
-    def __init__(self, dt_fr, dt_to, sat_id=None, orbit_id=None, data_file_root_dir=None, file_type='edr_aur'):
+    def __init__(self, dt_fr, dt_to, sat_id=None, orbit_id=None, data_file_root_dir=None, file_type='edr-aur'):
 
         dt_fr = dttool.get_start_of_the_day(dt_fr)
         dt_to = dttool.get_start_of_the_day(dt_to)
-        self.file_type = file_type
+
+        self.file_type = file_type.lower()
         if dt_fr == dt_to:
             dt_to = dt_to + datetime.timedelta(hours=23, minutes=59)
         self.dt_fr = dt_fr  # datetime from
@@ -57,7 +58,20 @@ class Downloader(object):
             doy = thisday.timetuple().tm_yday
             doy_str = "{:03d}".format(doy)
 
-            payload = {"spc": self.sat_id, "type": self.file_type,
+            if self.file_type in ['l1b', 'edr-aur', 'edr-iono']:
+                payload_type = self.file_type
+            elif self.file_type in ['sdr-limb', 'sdr-disk', 'sdr2-disk']:
+                payload_type = 'sdr'
+            elif self.file_type in ['edr-night-disk', 'edr-day-disk']:
+                payload_type = 'edr-disk'
+            elif self.file_type in ['edr-night-limb', 'edr-day-limb']:
+                payload_type = 'edr-limb'
+            elif self.file_type in ['edr-gaim-disk', 'edr-gaim-lim']:
+                payload_type = 'edr-gaim'
+            else:
+                raise NotImplementedError
+
+            payload = {"spc": self.sat_id, "type": payload_type,
                        "Doy": doy_str, "year": "{:d}".format(thisday.year)}
 
             # get a list of the files from dmsp ssusi website
@@ -79,9 +93,8 @@ class Downloader(object):
                     continue
                 # If working with sdr data use only
                 # sdr-disk files
-                if self.file_type == "sdr":
-                    if "SDR-DISK" not in f_url:
-                        continue
+                if self.file_type.upper() not in f_url:
+                    continue
 
                 if self.orbit_id is not None:
                     if len(self.orbit_id) != 5:

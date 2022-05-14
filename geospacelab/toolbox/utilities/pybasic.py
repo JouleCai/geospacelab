@@ -91,6 +91,9 @@ def str_join(*args, separator='_', uppercase=False, lowercase=False):
     """
     Join multiple strings into one. The empty string '' will be ignored.
     """
+    if uppercase and lowercase:
+        raise KeyError("The keywords 'uppercase' and 'lowercase' cannot be set as True at the same time!")
+
     strList_new = []
     for elem in args:
         if elem == '' or elem is None:
