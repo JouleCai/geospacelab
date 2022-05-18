@@ -407,6 +407,7 @@ class GEOCSpherical(SpaceSphericalCS):
             if issubclass(self.ut.__class__, datetime.datetime):
                 mlt = aacgm.convert_mlt(lon, self.ut)
             else:
+                lon = cs_new['lon']
                 mlt = np.empty_like(lon)
                 for ind_dt, dt in enumerate(self.ut.flatten()):
                     mlt[ind_dt] = aacgm.convert_mlt(lon[ind_dt], dt)

@@ -450,6 +450,7 @@ class PolarMapPanel(GeoPanel):
 
     def overlay_pcolormesh(
             self, data=None, coords=None, cs=None, *,
+            ut = None,
             regridding: bool = True,
             data_res: float = 0.7,
             grid_res: float = 0.1,
@@ -458,7 +459,6 @@ class PolarMapPanel(GeoPanel):
             **kwargs):
 
         kwargs.setdefault('shading', 'auto')
-
         if c_lim is None:
             c_lim = [0, 0]
             c_lim[0] = np.nanmin(data.flatten())
@@ -471,7 +471,7 @@ class PolarMapPanel(GeoPanel):
             kwargs.update(vmin=c_lim[0])
             kwargs.update(vmax=c_lim[1])
 
-        cs_new = self.cs_transform(cs_fr=cs, coords=coords)
+        cs_new = self.cs_transform(cs_fr=cs, coords=coords, ut=ut)
         lat_in = cs_new['lat']
         lon_in = cs_new['lon']
         data_in = data

@@ -103,7 +103,9 @@ class Dataset(datahub.DatasetSourced):
                 if var_name in ['DATETIME', 'STARTING_TIME', 'STOPPING_TIME']:
                     value = np.array([load_obj.variables[var_name]])[np.newaxis, :]
                 else:
-                    value = load_obj.variables[var_name][np.newaxis, ::]
+                    value = np.empty((1, ), dtype=object)
+                    value[0] = load_obj.variables[var_name]
+                    # value = load_obj.variables[var_name][np.newaxis, ::]
                 self._variables[var_name].join(value)
 
             self.orbit_id = load_obj.metadata['ORBIT_ID']

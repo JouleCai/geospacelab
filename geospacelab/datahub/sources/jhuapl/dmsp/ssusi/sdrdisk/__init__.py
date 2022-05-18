@@ -121,10 +121,12 @@ class Dataset(datahub.DatasetSourced):
                                 'CALIBRATION_PERIOD_VERSION']:
                     value = np.array([load_obj.variables[var_name]])[np.newaxis, :]
                 else:
-                    value = load_obj.variables[var_name][np.newaxis, ::]
+                    value = np.empty((1, ), dtype=object)
+                    value[0] = load_obj.variables[var_name]
+                    # value = np.array([[load_obj.variables[var_name]]], dtype=object)
                 self._variables[var_name].join(value)
 
-            self.orbit_id = load_obj.metadata['ORBIT_ID']
+            # self.orbit_id = load_obj.metadata['ORBIT_ID']
             # self.select_beams(field_aligned=True)
         if self.time_clip:
             self.time_filter_by_range()
@@ -132,6 +134,62 @@ class Dataset(datahub.DatasetSourced):
     def get_time_ind(self, ut, time_res=20*60, var_datetime_name='DATETIME', edge_cutoff=False, **kwargs):
         ind = super().get_time_ind(ut, time_res=time_res, var_datetime_name=var_datetime_name, edge_cutoff=edge_cutoff, **kwargs)
         return ind
+    
+    def regriddata(self, disk_data=None, disk_geo_lat=None, disk_geo_lon=None, *, across_res=20., interp_method='linear'):
+        from scipy.interpolate import interp1d, griddata
+        
+        data_pts = disk_data.flatten()
+        ind_valid = np.where(np.isfinite(data_pts))[0]
+        xd = range(disk_data.shape[0])
+        yd = range(disk_data.shape[1])
+
+        # create the new grids
+        ps_across = self['ACROSS_PIXEL_SIZE'].value[0]
+        xx = range(disk_data.shape[0])
+        yy = []
+        for ind in range(disk_data.shape[1]-1):
+            ps1 = ps_across[ind]
+            ps2 = ps_across[ind+1]
+            n_insert = int(np.round((ps1 + ps2) / 2 / across_res) - 1)
+            yy.extend(np.linspace(ind, ind+1-0.001, n_insert + 2)[0: -1])
+        yy.extend([ind+1])
+        # grid_x, grid_y = np.meshgrid(xx, yy, indexing='ij')
+        
+        factor = np.pi / 180.
+        sin_glat = np.sin(disk_geo_lat * factor)
+        itpf_sin = interp1d(yd, sin_glat, kind='cubic', bounds_error=False, fill_value='extrapolate')
+        sin_glat_i = itpf_sin(yy)
+        sin_glat_i[sin_glat_i>1.] = 1.
+        sin_glat_i[sin_glat_i<-1.] = -1. 
+        
+        cos_glat = np.cos(disk_geo_lat * factor)
+        itpf_cos = interp1d(yd, cos_glat, kind='cubic', bounds_error=False, fill_value='extrapolate')
+        cos_glat_i = itpf_cos(yy)
+        cos_glat_i[cos_glat_i>1.] = 1.
+        cos_glat_i[cos_glat_i<-1.] = -1.  
+        
+        rad = np.sign(sin_glat_i) * (np.pi / 2 - np.arcsin(cos_glat_i))
+        grid_lat = rad / factor
+        
+        sin_glon = np.sin(disk_geo_lon * factor)
+        itpf_sin = interp1d(yd, sin_glon, kind='cubic', bounds_error=False, fill_value='extrapolate')
+        sin_glon_i = itpf_sin(yy)
+        sin_glon_i[sin_glon_i>1.] = 1.
+        sin_glon_i[sin_glon_i<-1.] = -1. 
+        
+        cos_glon = np.cos(disk_geo_lon * factor)
+        itpf_cos = interp1d(yd, cos_glon, kind='cubic', bounds_error=False, fill_value='extrapolate')
+        cos_glon_i = itpf_cos(yy)
+        cos_glon_i[cos_glon_i>1.] = 1.
+        cos_glon_i[cos_glon_i<-1.] = -1.  
+        
+        rad = np.sign(sin_glon_i) * (np.pi / 2 - np.arcsin(cos_glon_i))
+        grid_lon = rad / factor 
+        
+        itpf_data = interp1d(yd, disk_data, kind='linear', bounds_error=False, fill_value='extrapolate')
+        grid_data = itpf_data(yy)
+        return grid_lat, grid_lon, grid_data
+        
 
     def search_data_files(self, **kwargs):
         dt_fr = self.dt_fr

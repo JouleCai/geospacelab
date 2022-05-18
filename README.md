@@ -341,10 +341,10 @@ mlt = dashboard.assign_variable(('GRID_MLT'), dataset_index=1).value
 
 # Search the index for the time to plot, used as an input to the following polar map
 ind_t = dashboard.datasets[1].get_time_ind(ut=time1)
-lbhs_ = lbhs.value[ind_t, :, :]
-mlat_ = mlat[ind_t, ::]
-mlon_ = mlon[ind_t, ::]
-mlt_ = mlt[ind_t, ::]
+lbhs_ = lbhs.value[ind_t]
+mlat_ = mlat[ind_t]
+mlon_ = mlon[ind_t]
+mlt_ = mlt[ind_t]
 # Add a polar map panel to the dashboard. Currently the style is the fixed MLT at mlt_c=0. See the keywords below:
 panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, boundary_lat=65., mirror_south=True)
 

@@ -185,7 +185,13 @@ class Dataset(datahub.DatasetSourced):
         itpf_sin = interp1d(sectime_2, sin_glon_2, kind='cubic', bounds_error=False, fill_value='extrapolate')
         itpf_cos = interp1d(sectime_2, cos_glon_2, kind='cubic', bounds_error=False, fill_value='extrapolate')
         sin_glon_2_i = itpf_sin(sectime_1)
+        sin_glon_2_i = np.where(sin_glon_2_i > 1., 1., sin_glon_2_i)
+        sin_glon_2_i = np.where(sin_glon_2_i < -1., -1., sin_glon_2_i)
+        
         cos_glon_2_i = itpf_cos(sectime_1)
+        cos_glon_2_i = np.where(cos_glon_2_i > 1., 1., cos_glon_2_i)
+        cos_glon_2_i = np.where(cos_glon_2_i < -1., -1., cos_glon_2_i)
+        
         rad = np.sign(sin_glon_2_i) * (np.pi / 2 - np.arcsin(cos_glon_2_i))
         glon_new = rad / factor
         # rad = np.where((rad >= 0), rad, rad + 2 * numpy.pi)

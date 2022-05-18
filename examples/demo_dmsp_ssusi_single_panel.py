@@ -38,10 +38,10 @@ def test_ssusi():
     ind_t = dashboard.datasets[1].get_time_ind(ut=time1)
     if (dts[ind_t] - time1).total_seconds()/60 > 60:     # in minutes
         raise ValueError("The time does not match any SSUSI data!")
-    lbhs_ = lbhs.value[ind_t, :, :]
-    mlat_ = mlat[ind_t, ::]
-    mlon_ = mlon[ind_t, ::]
-    mlt_ = mlt[ind_t, ::]
+    lbhs_ = lbhs.value[ind_t]
+    mlat_ = mlat[ind_t]
+    mlon_ = mlon[ind_t]
+    mlt_ = mlt[ind_t]
     # Add a polar map panel to the dashboard. Currently the style is the fixed MLT at mlt_c=0. See the keywords below:
     panel1 = dashboard.add_polar_map(
         row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM',

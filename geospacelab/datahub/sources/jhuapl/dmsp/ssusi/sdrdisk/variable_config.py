@@ -38,13 +38,13 @@ default_plot_config = {
 configured_variables = {}
 visual = 'on'
 
-depend_0 = {'UT': 'DATETIME'}
-depend_1 = {'AACGM_LAT': 'GRID_MLAT'}
-depend_2 = {'AACGM_LON': 'GRID_MLON'}
+depend_0 = {'GEO_LAT': 'DISK_GEO_LAT', 'GEO_LON': 'DISK_GEO_LON'}
+depend_1 = {'GEO_LAT': 'DISK_GEO_LAT'}
+depend_2 = {'GEO_LAT': 'DISK_GEO_LAT', 'GEO_LON': 'DISK_GEO_LON'}
 depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
 
 ####################################################################################################################
-var_name = 'GRID_AUR_LBHS'
+var_name = 'DISK_R_LBHS'
 var = Var(name=var_name, ndim=3, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'Auroral emission intensity at LBHS'
@@ -62,8 +62,10 @@ axis = var.visual.axis
 
 configured_variables[var_name] = var
 
+configured_variables['DISK_R_RECT_LBHS'] = var.clone()
+
 ####################################################################################################################
-var_name = 'GRID_AUR_LBHL'
+var_name = 'DISK_R_LBHL'
 var = Var(name=var_name, ndim=3, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'Auroral emission intensity at LBHL'
@@ -81,8 +83,10 @@ axis = var.visual.axis
 
 configured_variables[var_name] = var
 
+configured_variables['DISK_R_RECT_LBHL'] = var.clone()
+
 ####################################################################################################################
-var_name = 'GRID_AUR_1304'
+var_name = 'DISK_R_1304'
 var = Var(name=var_name, ndim=3, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'Auroral emission intensity at 130.4 nm'
@@ -100,8 +104,10 @@ axis = var.visual.axis
 
 configured_variables[var_name] = var
 
+configured_variables['DISK_R_RECT_1304'] = var.clone()
+
 ####################################################################################################################
-var_name = 'GRID_AUR_1356'
+var_name = 'DISK_R_1356'
 var = Var(name=var_name, ndim=3, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'Auroral emission intensity at 135.6 nm'
@@ -119,8 +125,10 @@ axis = var.visual.axis
 
 configured_variables[var_name] = var
 
+configured_variables['DISK_R_RECT_1356'] = var.clone()
+
 ####################################################################################################################
-var_name = 'GRID_AUR_1216'
+var_name = 'DISK_R_1216'
 var = Var(name=var_name, ndim=3, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'Auroral emission intensity at 121.6 nm'
@@ -137,3 +145,5 @@ axis = var.visual.axis
 
 
 configured_variables[var_name] = var
+
+configured_variables['DISK_R_RECT_1216'] = var.clone()
