@@ -40,17 +40,16 @@ class Downloader(DownloaderBase):
 
     def __init__(self,
                  dt_fr, dt_to,
-                 data_file_root_dir=None, ftp_data_dir=None, force=True, direct_download=True, file_version=None,
+                 data_file_root_dir=None, ftp_data_dir=None, force=True, direct_download=True, file_name_patterns=[],
                  **kwargs):
-        self.ftp_host = "swarm-diss.eo.esa.int"
+        self.ftp_host = "thermosphere.tudelft.nl"
         self.ftp_port = 21
         if ftp_data_dir is None:
             raise ValueError
 
         self.ftp_data_dir = ftp_data_dir
-        if file_version is None:
-            file_version = 'latest'
-        self.file_version = file_version
+
+        self.file_version = file_name_patterns
 
         super(Downloader, self).__init__(
             dt_fr, dt_to, data_file_root_dir=data_file_root_dir, force=force, direct_download=direct_download, **kwargs
