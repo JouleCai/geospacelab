@@ -1,5 +1,5 @@
 ![logo](docs/images/logo_20220601_landscape_2.png)
-# GeospaceLab (geospacelab)
+# GeospaceLAB (geospacelab)
 [![License](./docs/images/license-badge.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Python](./docs/images/python-badge.svg)](https://www.python.org/) 
 [![DOI](https://zenodo.org/badge/347315860.svg)](https://zenodo.org/badge/latestdoi/347315860)
