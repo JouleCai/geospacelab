@@ -1,4 +1,4 @@
-![logo](docs/images/logo_20220601_landscape_2.png)
+![logo](docs/images/logo_20220601_landscape_2.png | width=100)
 # GeospaceLAB (geospacelab)
 [![License](./docs/images/license-badge.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Python](./docs/images/python-badge.svg)](https://www.python.org/) 
