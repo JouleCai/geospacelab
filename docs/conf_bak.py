@@ -12,8 +12,6 @@
 #
 import os
 import sys
-import warnings
-import geospacelab
 # sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath("../"))
@@ -26,12 +24,8 @@ copyright = '2021, Lei Cai'
 author = 'Lei Cai'
 
 # The full version, including alpha/beta/rc tags
-release = 'beta-v' + geospacelab.__version__
+release = 'beta-v0.3.1'
 
-# Unless we catch the warning explicitly somewhere, a warning should cause the
-# docs build to fail. This is especially useful for getting rid of deprecated
-# usage in the gallery.
-warnings.filterwarnings('error', append=True)
 
 # -- General configuration ---------------------------------------------------
 
@@ -40,27 +34,12 @@ warnings.filterwarnings('error', append=True)
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.doctest',
-    'sphinx.ext.inheritance_diagram',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.ifconfig',
-    'IPython.sphinxext.ipython_console_highlighting',
-    'IPython.sphinxext.ipython_directive',
-    'numpydoc',  # Needs to be loaded *after* autodoc.
-    'sphinx_gallery.gen_gallery',
-    'matplotlib.sphinxext.mathmpl',
-    'matplotlib.sphinxext.plot_directive',
-    'sphinxcontrib.inkscapeconverter',
-    'sphinxext.custom_roles',
-    'sphinxext.github',
-    'sphinxext.math_symbol_table',
-    'sphinxext.missing_references',
-    'sphinxext.mock_gui_toolkits',
-    'sphinxext.skip_deprecated',
-    'sphinxext.redirect_from',
+    'sphinx.ext.doctest',
     'sphinx_copybutton',
-    'sphinx_panels',
+    'myst_parser'
 ]
 
 
