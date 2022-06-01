@@ -1,4 +1,8 @@
-# GeospaceLab (geospacelab)
+<p align="center">
+  <img width="500" src="https://github.com/JouleCai/geospacelab/blob/master/docs/images/logo_v1_landscape_accent_colors.png">
+</p>
+
+# GeospaceLAB (geospacelab)
 [![License](./docs/images/license-badge.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Python](./docs/images/python-badge.svg)](https://www.python.org/) 
 [![DOI](https://zenodo.org/badge/347315860.svg)](https://zenodo.org/badge/latestdoi/347315860)
