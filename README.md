@@ -1,4 +1,5 @@
-![logo](docs/images/logo_20220601_landscape_2.png)
+<img src="[https://your-image-url.type](https://github.com/JouleCai/geospacelab/blob/master/docs/images/logo_v1_landscape_accent_colors.png" width="100" height="100">
+
 # GeospaceLAB (geospacelab)
 [![License](./docs/images/license-badge.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Python](./docs/images/python-badge.svg)](https://www.python.org/) 
