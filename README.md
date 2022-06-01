@@ -1,4 +1,4 @@
-<img src="https://github.com/JouleCai/geospacelab/blob/master/docs/images/logo_v1_landscape_accent_colors.png" width="100" height="100">
+<img src="https://github.com/JouleCai/geospacelab/blob/master/docs/images/logo_v1_landscape_accent_colors.png" width="300">
 
 # GeospaceLAB (geospacelab)
 [![License](./docs/images/license-badge.svg)](https://opensource.org/licenses/BSD-3-Clause)
