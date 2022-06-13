@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath("../"))
 
 # -- Project information -----------------------------------------------------
 
-project = 'GeospaceLab'
+project = 'GeospaceLAB'
 copyright = '2021, Lei Cai'
 author = 'Lei Cai'
 
@@ -100,5 +100,8 @@ copybutton_prompt_text = ">>> "
 
 # Settings for intersphinx
 intersphinx_mapping = {
-    'numpy': ('http://docs.scipy.org/doc/numpy', None),
+    'python': ('http://docs.python.org/2', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+    'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
+    'matplotlib': ('http://matplotlib.sourceforge.net/', None)
 }
