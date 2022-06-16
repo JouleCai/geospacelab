@@ -77,7 +77,7 @@ class Dataset(datahub.DatasetSourced):
         self.facility = kwargs.pop('facility', 'SWARM')
         self.instrument = kwargs.pop('instrument', 'EFI-LP')
         self.product = kwargs.pop('product', 'HM02')
-        self.product_version = kwargs.pop('product', '')
+        self.product_version = kwargs.pop('product_version', '')
         self.local_latest_version = ''
         self.allow_download = kwargs.pop('allow_download', False)
         self.force_download = kwargs.pop('force_download', False)

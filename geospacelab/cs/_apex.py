@@ -18,5 +18,5 @@ import geospacelab.toolbox.utilities.pylogging as mylog
 
 class APEX(SpaceCSBase):
     def __init__(self, coords=None, ut=None, **kwargs):
-        kwargs.setdefault('new_coords', ['lat', 'lon', 'r', 'mlt'])
+        kwargs.setdefault('new_coords', ['lat', 'lon', 'height', 'r', 'mlt'])
         super().__init__(name='APEX', coords=coords, ut=ut, kind='sph', **kwargs)

@@ -49,7 +49,7 @@ class Downloader(DownloaderBase):
 
         self.ftp_data_dir = ftp_data_dir
 
-        self.file_version = file_name_patterns
+        self.file_name_patterns = file_name_patterns
 
         super(Downloader, self).__init__(
             dt_fr, dt_to, data_file_root_dir=data_file_root_dir, force=force, direct_download=direct_download, **kwargs
@@ -64,13 +64,11 @@ class Downloader(DownloaderBase):
             ftp.cwd(self.ftp_data_dir)
             file_list = ftp.nlst()
 
-            file_names, versions = self.search_files(file_list=file_list)
+            file_names = self.search_files(file_list=file_list, file_name_patterns=self.file_name_patterns)
             file_dir = self.data_file_root_dir
             for ind_f, file_name in enumerate(file_names):
-                dt_regex = re.compile(r'(\d{8}T\d{6})_(\d{8}T\d{6})_(\d{4})')
-                rm = dt_regex.findall(file_name)
-                this_day = datetime.datetime.strptime(rm[0][0], '%Y%m%dT%H%M%S')
-                file_path = file_dir / rm[0][2] / file_name
+
+                file_path = file_dir / file_name
 
                 if file_path.is_file():
                     mylog.simpleinfo.info(
@@ -117,20 +115,16 @@ class Downloader(DownloaderBase):
     def search_files(self, file_list=None, file_name_patterns=None):
         def extract_timeline(files):
             nf = len(files)
-            dt_ranges = np.empty((nf, 2), dtype=datetime.datetime)
-            # dts = np.empty((nf, ), dtype=datetime.datetime)
-            vers = np.empty((nf, ), dtype=object)
+            dt_list = np.empty((nf,), dtype=datetime.datetime)
             for ind, fn in enumerate(files):
-                dt_regex = re.compile(r'(\d{8}T\d{6})_(\d{8}T\d{6})_(\d{4})')
+                dt_regex = re.compile(r'_(\d{4}_\d{2})_')
                 rm = dt_regex.findall(fn)
                 if not list(rm):
-                    dt_ranges[ind, :] = np.nan
+                    dt_list[ind] = np.nan
                     continue
-                dt_ranges[ind, 0] = datetime.datetime.strptime(rm[0][0], '%Y%m%dT%H%M%S')
-                dt_ranges[ind, 1] = datetime.datetime.strptime(rm[0][1], '%Y%m%dT%H%M%S')
-                vers[ind] = rm[0][2]
+                dt_list[ind] = datetime.datetime.strptime(rm[0] + '_01', '%Y_%m_%d')
 
-            return dt_ranges[:, 0], dt_ranges[:, 1], vers
+            return dt_list
 
         if file_name_patterns is None:
             file_name_patterns = []
@@ -140,21 +134,16 @@ class Downloader(DownloaderBase):
             fn_regex = re.compile(search_pattern)
             file_list = list(filter(fn_regex.match, file_list))
 
-        start_dts, stop_dts, versions = extract_timeline(file_list)
+        dt_list = extract_timeline(file_list)
 
-        ind_dt = np.where((self.dt_fr < stop_dts) & (self.dt_to > start_dts))[0]
+        dt_fr = datetime.datetime(self.dt_fr.year, self.dt_fr.month, 1)
+        dt_to = datetime.datetime(self.dt_to.year, self.dt_to.month, 1)
+        ind_dt = np.where((dt_list >= dt_fr) & (dt_list <= dt_to))[0]
         if not list(ind_dt):
             raise FileExistsError
         file_list = [file_list[ii] for ii in ind_dt]
-        versions = [versions[ii] for ii in ind_dt]
 
-        if self.file_version == 'latest':
-            self.file_version = max(versions)
-        ind_v = np.where(np.array(versions) == self.file_version)[0]
-
-        file_list = [file_list[ii] for ii in ind_v]
-        versions = [versions[ii] for ii in ind_v]
-        return file_list, versions
+        return file_list
 
 
 

@@ -2,47 +2,38 @@
 # Copyright (C) 2021 GeospaceLab (geospacelab)
 # Author: Lei Cai, Space Physics and Astronomy, University of Oulu
 
-__author__ = "Lei Cai"
-__copyright__ = "Copyright 2021, GeospaceLab"
-__license__ = "BSD-3-Clause License"
-__email__ = "lei.cai@oulu.fi"
-__docformat__ = "reStructureText"
-
 import numpy as np
 import datetime
-import apexpy
 
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, InstrumentModel, ProductModel
-from geospacelab.datahub.sources.madrigal import madrigal_database
-from geospacelab.datahub.sources.madrigal.satellites.dmsp import dmsp_facility
+from geospacelab.datahub.sources.tud import tud_database
+from geospacelab.datahub.sources.tud.swarm import swarm_facility
 from geospacelab import preferences as prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
-from geospacelab.datahub.sources.madrigal.satellites.dmsp.s1.loader import Loader as default_Loader
-from geospacelab.datahub.sources.madrigal.satellites.dmsp.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.madrigal.satellites.dmsp.s1.variable_config as var_config
+from geospacelab.datahub.sources.tud.swarm.dns_pod.loader import Loader as default_Loader
+from geospacelab.datahub.sources.tud.swarm.dns_pod.downloader import Downloader as default_Downloader
+import geospacelab.datahub.sources.tud.swarm.dns_pod.variable_config as var_config
 
 
 default_dataset_attrs = {
-    'database': madrigal_database,
-    'facility': dmsp_facility,
-    'instrument': 'SSIES&SSM',
-    'product': 's1',
-    'data_file_ext': 'hdf5',
-    'data_root_dir': prf.datahub_data_root_dir / 'Madrigal' / 'DMSP',
+    'database': tud_database,
+    'facility': swarm_facility,
+    'instrument': 'POD',
+    'product': 'DNS-POD',
+    'data_file_ext': 'txt',
+    'product_version': 'v01',
+    'data_root_dir': prf.datahub_data_root_dir / 'TUD' / 'SWARM',
     'allow_load': True,
     'allow_download': True,
     'force_download': False,
     'data_search_recursive': False,
-    'label_fields': ['database', 'facility', 'instrument', 'product'],
+    'add_APEX': True,
+    'label_fields': ['database', 'facility', 'instrument', 'product', 'product_version'],
     'load_mode': 'AUTO',
     'time_clip': True,
-    'add_AACGM': True,
-    'add_APEX': False,
-    'calib_orbit': True,
-    'replace_orbit': True,
 }
 
 default_variable_names = [
@@ -50,23 +41,14 @@ default_variable_names = [
     'SC_GEO_LAT',
     'SC_GEO_LON',
     'SC_GEO_ALT',
-    'SC_MAG_LAT',
-    'SC_MAG_LON',
-    'SC_MAG_MLT',
-    'n_e',
-    'v_i_H',
-    'v_i_V',
-    'B_D',
-    'B_F',
-    'B_P',
-    'd_B_D',
-    'd_B_F',
-    'd_B_P',
+    'SC_ARG_LAT',
+    'SC_GEO_LST',
+    'rho_n',
     ]
 
 # default_data_search_recursive = True
 
-default_attrs_required = ['sat_id', ]
+default_attrs_required = ['sat_id']
 
 
 class Dataset(datahub.DatasetSourced):
@@ -75,18 +57,18 @@ class Dataset(datahub.DatasetSourced):
 
         super().__init__(**kwargs)
 
-        self.database = kwargs.pop('database', 'Madrigal')
-        self.facility = kwargs.pop('facility', 'DMSP')
-        self.instrument = kwargs.pop('instrument', 'SSIES&SSM')
-        self.product = kwargs.pop('product', 's1')
+        self.database = kwargs.pop('database', 'TUD')
+        self.facility = kwargs.pop('facility', 'SWARM')
+        self.instrument = kwargs.pop('instrument', 'POD')
+        self.product = kwargs.pop('product', 'DNS-POD')
+        self.product_version = kwargs.pop('product_version', 'v01')
+        self.local_latest_version = ''
         self.allow_download = kwargs.pop('allow_download', False)
         self.force_download = kwargs.pop('force_download', False)
-        self.add_AACGM = kwargs.pop('add_AACGM', False)
         self.add_APEX = kwargs.pop('add_APEX', False)
-        self.calib_orbit = kwargs.pop('calib_orbit', False)
-        self.replace_orbit = kwargs.pop('replace_orbit', False)
+        self._data_root_dir = self.data_root_dir    # Record the initial root dir
 
-        self.sat_id = kwargs.pop('sat_id', None)
+        self.sat_id = kwargs.pop('sat_id', 'A')
 
         self.metadata = None
 
@@ -108,8 +90,10 @@ class Dataset(datahub.DatasetSourced):
     def _validate_attrs(self):
         for attr_name in default_attrs_required:
             attr = getattr(self, attr_name)
-            if not list(attr):
+            if not attr:
                 mylog.StreamLogger.warning("The parameter {} is required before loading data!".format(attr_name))
+
+        self.data_root_dir = self.data_root_dir / self.product.upper() / self.product_version
 
     def label(self, **kwargs):
         label = super().label()
@@ -123,7 +107,7 @@ class Dataset(datahub.DatasetSourced):
             configured_variables=var_config.configured_variables
         )
         for file_path in self.data_file_paths:
-            load_obj = self.loader(file_path, file_ext='hdf5')
+            load_obj = self.loader(file_path, file_type='txt', version=self.product_version)
 
             for var_name in self._variables.keys():
                 value = load_obj.variables[var_name]
@@ -132,12 +116,6 @@ class Dataset(datahub.DatasetSourced):
             # self.select_beams(field_aligned=True)
         if self.time_clip:
             self.time_filter_by_range(var_datetime_name='SC_DATETIME')
-
-        if self.calib_orbit:
-            self.fix_geo_lon()
-
-        if self.add_AACGM:
-            self.convert_to_AACGM()
 
         if self.add_APEX:
             self.convert_to_APEX()
@@ -160,94 +138,26 @@ class Dataset(datahub.DatasetSourced):
         self['SC_APEX_LON'].value = cs_apex['lon'].reshape(self['SC_DATETIME'].value.shape)
         self['SC_APEX_MLT'].value = cs_apex['mlt'].reshape(self['SC_DATETIME'].value.shape)
 
-    def convert_to_AACGM(self):
-        import geospacelab.cs as gsl_cs
-
-        coords_in = {
-            'lat': self['SC_GEO_LAT'].value.flatten(),
-            'lon': self['SC_GEO_LON'].value.flatten(),
-            'height': self['SC_GEO_ALT'].value.flatten()
-        }
-        dts = self['SC_DATETIME'].value.flatten()
-        cs_sph = gsl_cs.GEOCSpherical(coords=coords_in, ut=dts)
-        cs_aacgm = cs_sph.to_AACGM(append_mlt=True)
-        self.add_variable('SC_AACGM_LAT')
-        self.add_variable('SC_AACGM_LON')
-        self.add_variable('SC_AACGM_MLT')
-        self['SC_AACGM_LAT'].value = cs_aacgm['lat'].reshape(self['SC_DATETIME'].value.shape)
-        self['SC_AACGM_LON'].value = cs_aacgm['lon'].reshape(self['SC_DATETIME'].value.shape)
-        self['SC_AACGM_MLT'].value = cs_aacgm['mlt'].reshape(self['SC_DATETIME'].value.shape)
-
-    def fix_geo_lon(self):
-        from geospacelab.observatory.sc_orbit import OrbitPosition_SSCWS
-        from scipy.interpolate import interp1d
-        # check outliers
-        orbit_obj = OrbitPosition_SSCWS(
-            dt_fr=self.dt_fr - datetime.timedelta(minutes=30),
-            dt_to=self.dt_to + datetime.timedelta(minutes=30),
-            sat_id='dmsp' + self.sat_id.lower()
-        )
-
-        glat_1 = self['SC_GEO_LAT'].value.flatten()
-        glon_1 = self['SC_GEO_LON'].value.flatten()
-        if glat_1.size < 2:
-            return
-
-        dts_1 = self['SC_DATETIME'].value.flatten()
-        dt0 = dttool.get_start_of_the_day(self.dt_fr)
-        sectime_1 = [(dt - dt0).total_seconds() for dt in dts_1]
-
-        glat_2 = orbit_obj['SC_GEO_LAT'].value.flatten()
-        glon_2 = orbit_obj['SC_GEO_LON'].value.flatten()
-        dts_2 = orbit_obj['SC_DATETIME'].value.flatten()
-        sectime_2 = [(dt - dt0).total_seconds() for dt in dts_2]
-
-        factor = np.pi / 180.
-        sin_glon_1 = np.sin(glon_1 * factor)
-        sin_glon_2 = np.sin(glon_2 * factor)
-        cos_glon_2 = np.cos(glon_2 * factor)
-        itpf_sin = interp1d(sectime_2, sin_glon_2, kind='cubic', bounds_error=False, fill_value='extrapolate')
-        itpf_cos = interp1d(sectime_2, cos_glon_2, kind='cubic', bounds_error=False, fill_value='extrapolate')
-        sin_glon_2_i = itpf_sin(sectime_1)
-        sin_glon_2_i = np.where(sin_glon_2_i > 1., 1., sin_glon_2_i)
-        sin_glon_2_i = np.where(sin_glon_2_i < -1., -1., sin_glon_2_i)
-        
-        cos_glon_2_i = itpf_cos(sectime_1)
-        cos_glon_2_i = np.where(cos_glon_2_i > 1., 1., cos_glon_2_i)
-        cos_glon_2_i = np.where(cos_glon_2_i < -1., -1., cos_glon_2_i)
-        
-        rad = np.sign(sin_glon_2_i) * (np.pi / 2 - np.arcsin(cos_glon_2_i))
-        glon_new = rad / factor
-        # rad = np.where((rad >= 0), rad, rad + 2 * numpy.pi)
-
-        ind_outliers = np.where(np.abs(sin_glon_1 - sin_glon_2_i) > 0.03)[0]
-
-        if self.replace_orbit:
-            glon_1 = glon_new
-        else:
-            glon_1[ind_outliers] = glon_new[ind_outliers]
-        self['SC_GEO_LON'].value = glon_1.reshape((glon_1.size, 1))
-
     def search_data_files(self, **kwargs):
 
         dt_fr = self.dt_fr
         dt_to = self.dt_to
 
-        diff_days = dttool.get_diff_days(dt_fr, dt_to)
+        diff_months = dttool.get_diff_months(dt_fr, dt_to)
 
-        dt0 = dttool.get_start_of_the_day(dt_fr)
+        dt0 = dttool.get_first_day_of_month(self.dt_fr)
 
-        for i in range(diff_days + 1):
-            this_day = dt0 + datetime.timedelta(days=i)
+        for i in range(diff_months + 1):
+            this_day = dttool.get_next_n_months(dt0, i)
 
             initial_file_dir = kwargs.pop(
-                'initial_file_dir', self.data_root_dir / this_day.strftime('%Y%m') / this_day.strftime('%Y%m%d')
+                'initial_file_dir', self.data_root_dir
             )
 
             file_patterns = [
-                'dms',
-                this_day.strftime('%Y%m%d'),
-                self.sat_id[1:] + self.product,
+                'S' + self.sat_id.upper(),
+                self.product.upper().replace('-', '_'),
+                this_day.strftime('%Y_%m'),
             ]
             # remove empty str
             file_patterns = [pattern for pattern in file_patterns if str(pattern)]
@@ -263,10 +173,11 @@ class Dataset(datahub.DatasetSourced):
             if (not done and self.allow_download) or self.force_download:
                 done = self.download_data()
                 if done:
+                    initial_file_dir = self.data_root_dir
                     done = super().search_data_files(
                         initial_file_dir=initial_file_dir,
                         search_pattern=search_pattern,
-                        allow_multiple_files=True
+                        allow_multiple_files=False
                     )
 
         return done
@@ -279,7 +190,8 @@ class Dataset(datahub.DatasetSourced):
         download_obj = self.downloader(
             dt_fr, dt_to,
             sat_id=self.sat_id,
-            file_type=self.product,
+            product=self.product,
+            version=self.product_version,
             force=self.force_download
         )
 
