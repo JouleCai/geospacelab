@@ -4,14 +4,70 @@ import string
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+
 from matplotlib.gridspec import GridSpec, SubplotSpec
 from matplotlib.figure import Figure
 
+from cycler import cycler
+
+from geospacelab import preferences as pref
 from geospacelab.toolbox.utilities.pyclass import StrBase
 import geospacelab.toolbox.utilities.pybasic as pybasic
 from geospacelab.visualization.mpl._helpers import check_panel_ax
 import geospacelab.toolbox.utilities.pylogging as mylog
 # from geospacelab.visualization.mpl.dashboards import Dashboard
+
+
+try:
+    mpl_style = pref.user_config['visualization']['mpl']['style']
+except KeyError:
+    uc = pref.user_config
+    uc['visualization']['mpl']['style'] = 'light'
+    pref.set_user_config(user_config=uc, set_as_default=True)
+
+
+plt.rcParams['font.serif'] = 'Ubuntu'
+plt.rcParams['font.monospace'] = 'Ubuntu Mono'
+plt.rcParams['font.size'] = 10
+plt.rcParams['axes.labelsize'] = 10
+plt.rcParams['axes.labelweight'] = 'book'
+plt.rcParams['axes.titlesize'] = 10
+plt.rcParams['xtick.labelsize'] = 8
+plt.rcParams['ytick.labelsize'] = 8
+plt.rcParams['legend.fontsize'] = 10
+plt.rcParams['figure.titlesize'] = 12
+
+# plt.style.use('https://github.com/dhaitz/matplotlib-stylesheets/raw/master/pacoty.mplstyle')
+mpl_style = pref.user_config['visualization']['mpl']['style']
+
+if mpl_style == 'light':
+    plt.rcParams['axes.facecolor'] = '#FCFCFC'
+    plt.rcParams['text.color'] = 'k'
+    default_cycler = (cycler(color=['tab:blue', 'tab:red', 'tab:green', 'tab:purple',  'tab:orange', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']))
+    default_cycler = (cycler(color=['#1f77b4DD', '#ff7f0eDD', '#2ca02cDD', '#d62728DD', '#9467bdDD', '#8c564bDD', '#e377c2DD', '#7f7f7fDD', '#bcbd22DD', '#17becfDD']))     # tab10 with alpha
+    plt.rc('axes', prop_cycle=default_cycler)
+elif mpl_style == 'dark':
+    plt.rcParams['figure.facecolor'] = '#0C1C23'
+    plt.rcParams['savefig.facecolor'] = '#0C1C23'
+
+    plt.rcParams['axes.facecolor'] = '#FFFFFF20'
+    plt.rcParams['axes.edgecolor'] = '#FFFFFF3D'
+    plt.rcParams['axes.labelcolor'] = '#FFFFFFD9'
+
+    plt.rcParams['xtick.color'] = '#FFFFFFD9'
+    plt.rcParams['ytick.color'] = '#FFFFFFD9'
+    plt.rcParams['text.color'] = 'white'
+
+    plt.rcParams['grid.color'] = '#FFFFFF'
+    plt.rcParams['legend.facecolor'] = plt.rcParams['axes.facecolor']
+    plt.rcParams['legend.edgecolor'] = '#FFFFFFD9'
+
+    # seaborn dark:['#001c7f', '#b1400d', '#12711c', '#8c0800', '#591e71', '#592f0d', '#a23582', '#3c3c3c', '#b8850a', '#006374']
+    # seaborn pastel '#a1c9f4', '#ffb482', '#8de5a1', '#ff9f9b', '#d0bbff', '#debb9b', '#fab0e4', '#cfcfcf', '#fffea3', '#b9f2f0'
+    default_cycler = (cycler(color=['#F5EE33', '#33FF99', 'r', '#9467bd', '#08C7FE', '#FE66BB', ]))
+    plt.rc('axes', prop_cycle=default_cycler)
+else:
+    plt.style.use(mpl_style)
 
 
 class FigureBase(Figure):

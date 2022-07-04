@@ -15,64 +15,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import datetime
 import matplotlib as mpl
-from cycler import cycler
 import matplotlib.dates as mdates
 
 from geospacelab.datahub import DataHub
-from geospacelab import preferences as pref
+
 import geospacelab.visualization.mpl.panels as mpl_panel
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pydatetime as dttool
 from geospacelab.visualization.mpl.__base__ import DashboardBase
 import geospacelab.visualization.mpl.panels as panels
-
-try:
-    mpl_style = pref.user_config['visualization']['mpl']['style']
-except KeyError:
-    uc = pref.user_config
-    uc['visualization']['mpl']['style'] = 'light'
-    pref.set_user_config(user_config=uc, set_as_default=True)
-
-
-plt.rcParams['font.serif'] = 'Ubuntu'
-plt.rcParams['font.monospace'] = 'Ubuntu Mono'
-plt.rcParams['font.size'] = 10
-plt.rcParams['axes.labelsize'] = 10
-plt.rcParams['axes.labelweight'] = 'book'
-plt.rcParams['axes.titlesize'] = 10
-plt.rcParams['xtick.labelsize'] = 8
-plt.rcParams['ytick.labelsize'] = 8
-plt.rcParams['legend.fontsize'] = 10
-plt.rcParams['figure.titlesize'] = 12
-
-# plt.style.use('https://github.com/dhaitz/matplotlib-stylesheets/raw/master/pacoty.mplstyle')
-mpl_style = pref.user_config['visualization']['mpl']['style']
-
-if mpl_style == 'light':
-    plt.rcParams['axes.facecolor'] = '#FCFCFC'
-    plt.rcParams['text.color'] = 'k'
-    default_cycler = (cycler(color=['tab:blue', 'tab:red', 'tab:green', 'tab:orange', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']))
-    plt.rc('axes', prop_cycle=default_cycler)
-elif mpl_style == 'dark':
-    plt.rcParams['figure.facecolor'] = '#0C1C23'
-    plt.rcParams['savefig.facecolor'] = '#0C1C23'
-
-    plt.rcParams['axes.facecolor'] = '#FFFFFF20'
-    plt.rcParams['axes.edgecolor'] = '#FFFFFF3D'
-    plt.rcParams['axes.labelcolor'] = '#FFFFFFD9'
-
-    plt.rcParams['xtick.color'] = '#FFFFFFD9'
-    plt.rcParams['ytick.color'] = '#FFFFFFD9'
-    plt.rcParams['text.color'] = 'white'
-
-    plt.rcParams['grid.color'] = '#FFFFFF'
-    plt.rcParams['legend.facecolor'] = plt.rcParams['axes.facecolor']
-    plt.rcParams['legend.edgecolor'] = '#FFFFFFD9'
-
-    default_cycler = (cycler(color=['tab:blue', 'tab:red', 'tab:purple', 'tab:green', 'tab:orange', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']))
-    plt.rc('axes', prop_cycle=default_cycler)
-else:
-    plt.style.use(mpl_style)
 
 
 class Dashboard(DataHub, DashboardBase):

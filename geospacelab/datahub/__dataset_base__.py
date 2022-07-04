@@ -207,9 +207,12 @@ class DatasetBase(object):
     def get_variable_names(self) -> list:
         return list(self._variables.keys())
 
+    def register_method(self, func):
+        from types import MethodType
+        setattr(self, func.__name__, MethodType(func, self))
+
 
 class DatasetUser(DatasetBase):
-
     def __init__(self,
                  dt_fr: datetime.datetime = None,
                  dt_to: datetime.datetime = None,
@@ -220,6 +223,8 @@ class DatasetUser(DatasetBase):
         super().__init__(
             dt_fr=dt_fr, dt_to=dt_to, name=name, kind='user-defined', visual=visual, label_fields=label_fields, **kwargs
         )
+
+
 
 
 class DatasetSourced(DatasetBase):
