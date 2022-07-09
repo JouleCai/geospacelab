@@ -32,9 +32,9 @@ class DMSPDashboard(TSDashboard):
         super().__init__(dt_fr=dt_fr, dt_to=dt_to,
                          figure=figure, figure_config=figure_config,
                          timeline_extra_labels=timeline_extra_labels)
-        self.dataset_s1 = self.dock(datasource_contents=['madrigal', 'dmsp', 's1'], sat_id=sat_id, load_mode=load_mode, **kwargs)
-        self.dataset_e = self.dock(datasource_contents=['madrigal', 'dmsp', 'e'], sat_id=sat_id, load_mode=load_mode, **kwargs)
-        self.dataset_s4 = self.dock(datasource_contents=['madrigal', 'dmsp', 's4'], sat_id=sat_id, load_mode=load_mode, **kwargs)
+        self.dataset_s1 = self.dock(datasource_contents=['madrigal', 'satellites', 'dmsp', 's1'], sat_id=sat_id, load_mode=load_mode, **kwargs)
+        self.dataset_e = self.dock(datasource_contents=['madrigal', 'satellites', 'dmsp', 'e'], sat_id=sat_id, load_mode=load_mode, **kwargs)
+        self.dataset_s4 = self.dock(datasource_contents=['madrigal', 'satellites', 'dmsp', 's4'], sat_id=sat_id, load_mode=load_mode, **kwargs)
         # ds_1.list_all_variables()
         self.title = kwargs.pop('title', ', '.join([self.dataset_s1.database, self.dataset_s1.facility, self.dataset_s1.sat_id]))
 
@@ -82,9 +82,6 @@ class DMSPDashboard(TSDashboard):
             [T_e, T_i],
         ]
         self.set_layout(panel_layouts=layout, hspace=0.1)
-        # plt.style.use('dark_background')
-        # dt_fr_1 = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
-        # dt_to_1 = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
 
         self.draw()
         self.add_title()

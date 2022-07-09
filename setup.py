@@ -61,7 +61,6 @@ setuptools.setup(
               'aacgmv2>=2.6.2',
               'cdflib>=0.3.20',
               'geopack>=1.0.8',
-              'apexpy',
               'toml',
               'sscws',
           ],

@@ -238,6 +238,8 @@ class DataHub(object):
             dataset = dataset_class(name='temporary', **kwargs)
             self._append_dataset(dataset)
             return dataset
+        else:
+            kind = 'user-defined'
 
         for dataset in args:
             kwargs['datasets'].append(dataset)
