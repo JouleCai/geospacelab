@@ -149,7 +149,16 @@ class TSPanel(Panel):
         elif plot_style in ['1C']:
             iplt = self.overlay_multiple_colored_line(var, ax=ax)
         else:
-            raise NotImplementedError
+            mylog.StreamLogger.warning(f'The attribute "plot_config.style" of {var.name} is not defined!')
+            ndim = var.ndim
+            if ndim == 1:
+                mylog.simpleinfo.info("Set plot_config.style = '1P' for a line plot!")
+                iplt = self.overlay_line(var, ax=ax) 
+            elif ndim == 2:
+                mylog.simpleinfo.info("Set plot_config.style = '2P' for a 2D pcolor plot!") 
+                iplt = self.overlay_pcolormesh(var, ax=ax)
+            else:
+                raise NotImplementedError
 
         return iplt
 
@@ -553,10 +562,18 @@ class TSPanel(Panel):
             x_data = x_data[0]
         if x_data is None:
             depend_0 = var.get_depend(axis=0)
-            x_data = depend_0['UT']  # numpy array, type=datetime
-            if x_data is None:
-                x_data = np.array([0, 1]).reshape(2, 1)
-                var.visual.axis[0].mask_gap = False
+            try:
+                x_data = depend_0['UT']  # numpy array, type=datetime
+            except:
+                try:
+                    x_data = var.dataset['DATETIME'].value
+                except:
+                    try:
+                        x_data = var.dataset['SC_DATETIME'].value
+                    except:
+                        mylog.StreamLogger.error("Cannot find the datetime array!")
+                        x_data = None
+            
 
         y_data = var.get_visual_axis_attr(axis=1, attr_name='data')
         if y_data is None:
@@ -600,7 +617,10 @@ class TSPanel(Panel):
             x_data = x_data[0]
         if x_data is None:
             depend_0 = var.get_depend(axis=0)
-            x_data = depend_0['UT']  # numpy array, type=datetime
+            try:
+                x_data = depend_0['UT']  # numpy array, type=datetime
+            except:
+                x_data = None
             if x_data is None:
                 x_data = np.array([self._xlim[0], self._xlim[1]]).reshape(2, 1)
                 var.visual.axis[0].mask_gap = False
