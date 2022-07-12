@@ -4,6 +4,7 @@
 
 import numpy as np
 import datetime
+import copy
 
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, InstrumentModel, ProductModel
@@ -83,7 +84,7 @@ class Dataset(datahub.DatasetSourced):
         self.force_download = kwargs.pop('force_download', False)
         self.quality_control = kwargs.pop('quality_control', False)
         self.calib_control = kwargs.pop('calib_control', False)
-        self._data_root_dir = self.data_root_dir    # Record the initial root dir
+        self._data_root_dir_init = copy.deepcopy(self.data_root_dir)   # Record the initial root dir
 
         self.sat_id = kwargs.pop('sat_id', 'A')
 
@@ -113,11 +114,11 @@ class Dataset(datahub.DatasetSourced):
         self.data_root_dir = self.data_root_dir / self.instrument / self.product
 
         if str(self.product_version) and self.product_version != 'latest':
-            self.data_root_dir = self._data_root_dir / self.product_version
+            self.data_root_dir = self.data_root_dir / self.product_version
         else:
             self.product_version = 'latest'
             try:
-                dirs_product_version = [f.name for f in self._data_root_dir.iterdir() if f.is_dir()]
+                dirs_product_version = [f.name for f in self.data_root_dir.iterdir() if f.is_dir()]
             except FileNotFoundError:
                 dirs_product_version = []
                 self.force_download = True
@@ -127,7 +128,7 @@ class Dataset(datahub.DatasetSourced):
 
             if list(dirs_product_version):
                 self.local_latest_version = max(dirs_product_version)
-                self.data_root_dir = self._data_root_dir / self.local_latest_version
+                self.data_root_dir = self.data_root_dir / self.local_latest_version
                 if not self.force_download:
                     mylog.simpleinfo.info(
                         "Note: Loading the local files " +
@@ -215,7 +216,6 @@ class Dataset(datahub.DatasetSourced):
             if (not done and self.allow_download) or self.force_download:
                 done = self.download_data()
                 if done:
-                    self._validate_attrs()
                     initial_file_dir = self.data_root_dir
                     done = super().search_data_files(
                         initial_file_dir=initial_file_dir,
@@ -245,7 +245,7 @@ class Dataset(datahub.DatasetSourced):
                     f"A newer version of data files have been downloaded ({download_obj.file_version})"
                 )
             self.product_version = download_obj.file_version
-            self.data_root_dir = self._data_root_dir
+            self.data_root_dir = copy.deepcopy(self._data_root_dir_init)
             self._validate_attrs()
 
         return download_obj.done
