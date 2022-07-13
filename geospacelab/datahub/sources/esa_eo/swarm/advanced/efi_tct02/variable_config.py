@@ -35,8 +35,8 @@ default_plot_config = {
 configured_variables = {}
 visual = 'on'
 
-depend_0 = {'UT': 'DATETIME'}
-depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
+depend_0 = {'UT': 'SC_DATETIME'}
+# depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
 
 ####################################################################################################################
 var_name = 'v_i_H_x'
@@ -55,7 +55,7 @@ plot_config.style = '1E'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-2000, 2000]
+axis[1].lim = [-3000, 3000]
 axis[1].label = '@v.group'
 axis[1].unit = ''
 axis[2].label = '@v.label'
@@ -80,7 +80,7 @@ plot_config.style = '1E'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-2000, 2000]
+axis[1].lim = [-3000, 3000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
@@ -104,7 +104,7 @@ plot_config.style = '1E'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-2000, 2000]
+axis[1].lim = [-3000, 3000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
@@ -127,7 +127,7 @@ plot_config.style = '1E'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-2000, 2000]
+axis[1].lim = [-3000, 3000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
@@ -149,7 +149,7 @@ plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-2000, 2000]
+axis[1].lim = [-3000, 3000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'

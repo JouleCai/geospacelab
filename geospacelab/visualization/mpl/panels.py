@@ -52,6 +52,8 @@ class TSPanel(Panel):
     _default_xtick_params = {
         'labelsize': plt.rcParams['xtick.labelsize'],
         'direction': 'inout',
+        'extral_labels_x_offset': None,
+        'extral_labels_y_offset': None, 
     }
     _default_colorbar_offset = 0.1
 
@@ -190,7 +192,7 @@ class TSPanel(Panel):
         elif errorbar == 'on':
             errorbar_config = dict(plot_config)
             errorbar_config.update(var.visual.plot_config.errorbar)
-            il = ax.errorbar(x, y, yerr=y_err, ax=ax, **errorbar_config)
+            il = ax.errorbar(x.flatten(), y.flatten(), yerr=y_err.flatten(), **errorbar_config)
         if type(il) is not list:
             il = [il]
         self.axes_overview[ax]['lines'].extend(il)
@@ -326,11 +328,21 @@ class TSPanel(Panel):
             ax.set_xlabel('UT', fontsize=12, fontweight='normal')
             return
 
-        figheight = self.figure.get_size_inches()[1]*2.54
-        figwidth = self.figure.get_size_inches()[0]*2.54
-        xoffset = 0.1 - figwidth * 0.002
-        yoffset = 0.07 - figheight * 0.0022
+        
+        ax_pos = ax.get_position()
+        
+        if self._default_xtick_params['extral_labels_x_offset'] is None:
+            figwidth = self.figure.get_size_inches()[0]*2.54
+            xoffset = - 0.02 - 0.06 * 16/figwidth * ax_pos.width
+        else:
+            xoffset = self._default_xtick_params['extral_labels_x_offset']
 
+        if self._default_xtick_params['extral_labels_y_offset'] is None:             
+            figheight = self.figure.get_size_inches()[1]*2.54
+            yoffset = - 0.01 - 0.03 * 10/figheight * ax_pos.height
+        else:
+            yoffset = self._default_xtick_params['extral_labels_y_offset']
+        
         ticks = ax.get_xticks()
         ylim0, _ = ax.get_ylim()
         xy_fig = []
@@ -379,7 +391,7 @@ class TSPanel(Panel):
 
         for ind, xticks in enumerate(ys):
             ax.text(
-                xy_fig[0][0] - xoffset, xy_fig[0][1] - yoffset * ind - 0.013,
+                xy_fig[0][0] + xoffset, xy_fig[0][1] + yoffset * ind - 0.013,
                 xlabels[ind].replace('_', '/'),
                 fontsize=plt.rcParams['xtick.labelsize'], fontweight='normal',
                 horizontalalignment='right', verticalalignment='top',
@@ -395,7 +407,7 @@ class TSPanel(Panel):
                 else:
                     text = '%.1f' % xtick
                 ax.text(
-                    xy_fig[ind_pos][0], xy_fig[ind_pos][1] - yoffset * ind - 0.013,
+                    xy_fig[ind_pos][0], xy_fig[ind_pos][1] + yoffset * ind - 0.013,
                     text,
                     fontsize=plt.rcParams['xtick.labelsize'],
                     horizontalalignment='center', verticalalignment='top',

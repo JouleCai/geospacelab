@@ -117,24 +117,28 @@ class Dataset(datahub.DatasetSourced):
             self.data_root_dir = self.data_root_dir / self.product_version
         else:
             self.product_version = 'latest'
-            try:
-                dirs_product_version = [f.name for f in self.data_root_dir.iterdir() if f.is_dir()]
-            except FileNotFoundError:
-                dirs_product_version = []
-                self.force_download = True
-            else:
-                if not list(dirs_product_version):
-                    self.force_download = True
+            self.force_download = False
+            mylog.simpleinfo.info(f'Checking the latest version of the data file ...')
+            self.download_data()
+            
+            # try:
+            #     dirs_product_version = [f.name for f in self.data_root_dir.iterdir() if f.is_dir()]
+            # except FileNotFoundError:
+            #     dirs_product_version = []
+            #     self.force_download = True
+            # else:
+            #     if not list(dirs_product_version):
+            #         self.force_download = True
 
-            if list(dirs_product_version):
-                self.local_latest_version = max(dirs_product_version)
-                self.data_root_dir = self.data_root_dir / self.local_latest_version
-                if not self.force_download:
-                    mylog.simpleinfo.info(
-                        "Note: Loading the local files " +
-                        "with the latest version {} ".format(self.local_latest_version) +
-                        "Keep an eye on the latest baselines online!"
-                    )
+            # if list(dirs_product_version):
+            #     self.local_latest_version = max(dirs_product_version)
+            #     self.data_root_dir = self.data_root_dir / self.local_latest_version
+            #     if not self.force_download:
+            #         mylog.simpleinfo.info(
+            #             "Note: Loading the local files " +
+            #             "with the latest version {} ".format(self.local_latest_version) +
+            #             "Keep an eye on the latest baselines online!"
+            #         )
 
     def label(self, **kwargs):
         label = super().label()
@@ -242,7 +246,7 @@ class Dataset(datahub.DatasetSourced):
 
             if download_obj.file_version != self.local_latest_version and self.product_version == 'latest':
                 mylog.StreamLogger.warning(
-                    f"A newer version of data files have been downloaded ({download_obj.file_version})"
+                    f"The data with the latest version ({download_obj.file_version}) have been downloaded"
                 )
             self.product_version = download_obj.file_version
             self.data_root_dir = copy.deepcopy(self._data_root_dir_init)

@@ -20,6 +20,7 @@ class Downloader(DownloaderModel):
             sat_id=None,
             data_type='LP_HM',
             file_version=None,
+            file_extension = '.cdf',
             data_file_root_dir=None,
             ftp_data_dir=None,
             force=True, direct_download=True, **kwargs
@@ -38,6 +39,7 @@ class Downloader(DownloaderModel):
             data_file_root_dir=data_file_root_dir,
             ftp_data_dir=ftp_data_dir,
             file_version=file_version,
+            file_extension = file_extension,
             force=force, direct_download=direct_download, **kwargs
         )
 
