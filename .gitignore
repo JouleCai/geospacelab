@@ -1,5 +1,6 @@
 .idea
 .vscode
+.VSCodeCounter*
 *.pyc
 *.log
 *.DS_Store

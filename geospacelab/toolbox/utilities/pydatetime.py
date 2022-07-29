@@ -10,6 +10,7 @@ __docformat__ = "reStructureText"
 
 
 import numpy
+import bisect
 
 from datetime import timedelta
 from datetime import datetime
@@ -248,4 +249,91 @@ def convert_unix_time_to_datetime_cftime(times):
         return dts.tolist()
     elif 'numpy' in str(type_in):
         return dts.reshape(times.shape)
+
+
+def convert_gps_time_to_datetime(times, weeks=None):
+    
+    type_in = type(times)
+
+    ts = numpy.array(times).flatten()
+    if weeks is None:
+        weeks = numpy.zeros_like(ts)
+    else:
+        weeks = numpy.array(weeks).flatten()
+
+    gps_seconds = weeks * _SECONDS_PER_WEEK + times
+    gps_seconds_add = numpy.array([bisect.bisect_left(_LEAP_SECONDS_GPS_TIME, gs) for gs in gps_seconds])
+    dts = numpy.array([_GPS_DATETIME_0 + timedelta(seconds=sec) for sec in (gps_seconds - gps_seconds_add)])
+
+    if type_in in (int, float):
+        return dts[0]
+    elif type_in is list:
+        return dts.tolist()
+    elif 'numpy' in str(type_in):
+        return dts.reshape(times.shape)
+
+def convert_datetime_to_gps_times(times: datetime, with_weeks=False):
+    
+    type_in = type(times)
+
+    ts = numpy.array(times).flatten()
+    
+    ts_seconds = numpy.array([ (t - _GPS_DATETIME_0).total_seconds() for t in ts])
+    print(ts_seconds)
+    
+    leap_seconds_dates = [datetime(i[0], i[1], i[2], 23, 59, 59) for i in _LEAP_SECONDS_DATES_GPS] 
+
+    gps_seconds = numpy.array([sec + bisect.bisect_left(leap_seconds_dates, t) for sec, t in zip(ts_seconds, ts)])
+    print(gps_seconds)
+    if with_weeks:
+        weeks = numpy.floor(gps_seconds / _SECONDS_PER_WEEK)
+        gps_seconds = gps_seconds % _SECONDS_PER_WEEK
+        if type_in is datetime:
+            return gps_seconds[0], weeks[0]
+        elif type_in is list: 
+            return gps_seconds.tolist(), weeks.tolist()
+        elif 'numpy' in str(type_in):
+            return gps_seconds.reshape(times.shape), weeks.reshape(times.shape)
+    else:
+        if type_in is datetime:
+            return gps_seconds[0]
+        elif type_in is list: 
+            return gps_seconds.tolist()
+        elif 'numpy' in str(type_in):
+            return gps_seconds.reshape(times.shape)
+        
+
+_GPS_DATETIME_0 = datetime(1980, 1, 6)
+_SECONDS_PER_WEEK = 604800.0
+_LEAP_SECONDS_DATES = [
+    (1972, 6, 30), (1972, 12, 31), (1973, 12, 31), (1974, 12, 31), (1975, 12, 31), 
+    (1976, 12, 31), (1977, 12, 31), (1978, 12, 31), (1979, 12, 31), (1980, 6, 30), 
+    (1982, 6, 30), (1983, 6, 30), (1985, 6, 30), (1987, 12, 31), (1989, 12, 31), 
+    (1990, 12, 31), (1992, 6, 30), (1993, 6, 30),  (1994, 6, 30), (1995, 12, 31),
+    (1997, 6, 30), (1998, 12, 31), (2005, 12, 31), (2008, 12, 31), (2012, 6, 30),
+    (2015, 6, 30), (2016, 12, 31), 
+]
+
+_LEAP_SECONDS_DATES_GPS = [
+    (1980, 6, 30), (1982, 6, 30), (1983, 6, 30), (1985, 6, 30), (1987, 12, 31), 
+    (1989, 12, 31), (1990, 12, 31), (1992, 6, 30), (1993, 6, 30),  (1994, 6, 30), 
+    (1995, 12, 31), (1997, 6, 30), (1998, 12, 31), (2005, 12, 31), (2008, 12, 31), 
+    (2012, 6, 30), (2015, 6, 30), (2016, 12, 31), 
+]
+
+_LEAP_SECONDS_COUNT_GPS = [
+    0., 1., 2., 3., 4., 
+    5., 6., 7., 8., 9., 10., 
+    11., 12., 13., 14., 15.,
+    16., 17., 18., 
+]
+
+# gps_seconds = [(datetime(i[0], i[1], i[2], 23, 59, 59) - _GPS_DATETIME_0).total_seconds() + j - 1 for i, j in zip(_LEAP_SECONDS_DATES, _LEAP_SECONDS_COUNT_GPS)]
+
+_LEAP_SECONDS_GPS_TIME = [
+    15292799.0, 78364800.0, 109900801.0, 173059202.0, 252028803.0, 
+    315187204.0, 346723205.0, 393984006.0, 425520007.0, 457056008.0, 
+    504489609.0, 551750410.0, 599184011.0, 820108812.0, 914803213.0, 
+    1025136014.0, 1119744015.0, 1167264016.0
+]
 

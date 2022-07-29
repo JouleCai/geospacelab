@@ -56,3 +56,6 @@ class Loader(LoaderModel):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('variable_name_dict', default_variable_name_dict)
         super(Loader, self).__init__(*args, **kwargs)
+        self.variables['SC_GEO_r'] = self.variables['SC_GEO_r'] * 1e-3  # in km
+        self.variables['SC_GEO_ALT'] = self.variables['SC_GEO_r'] - 6371.2
+

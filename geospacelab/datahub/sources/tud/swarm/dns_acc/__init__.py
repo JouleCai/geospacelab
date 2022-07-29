@@ -31,7 +31,8 @@ default_dataset_attrs = {
     'allow_download': True,
     'force_download': False,
     'data_search_recursive': False,
-    'add_APEX': True,
+    'add_AACGM': False,
+    'add_APEX': False,
     'label_fields': ['database', 'facility', 'instrument', 'product', 'product_version'],
     'load_mode': 'AUTO',
     'time_clip': True,
@@ -66,6 +67,7 @@ class Dataset(datahub.DatasetSourced):
         self.local_latest_version = ''
         self.allow_download = kwargs.pop('allow_download', False)
         self.force_download = kwargs.pop('force_download', False)
+        self.add_AACGM = kwargs.pop('add_AACGM', False) 
         self.add_APEX = kwargs.pop('add_APEX', False)
         self._data_root_dir = self.data_root_dir    # Record the initial root dir
 
@@ -118,9 +120,13 @@ class Dataset(datahub.DatasetSourced):
         if self.time_clip:
             self.time_filter_by_range(var_datetime_name='SC_DATETIME')
 
+        if self.add_AACGM:
+            self.convert_to_AACGM()
+
         if self.add_APEX:
             self.convert_to_APEX()
-
+            
+    
     def convert_to_APEX(self):
         import geospacelab.cs as gsl_cs
 
@@ -138,6 +144,24 @@ class Dataset(datahub.DatasetSourced):
         self['SC_APEX_LAT'].value = cs_apex['lat'].reshape(self['SC_DATETIME'].value.shape)
         self['SC_APEX_LON'].value = cs_apex['lon'].reshape(self['SC_DATETIME'].value.shape)
         self['SC_APEX_MLT'].value = cs_apex['mlt'].reshape(self['SC_DATETIME'].value.shape)
+
+    def convert_to_AACGM(self):
+        import geospacelab.cs as gsl_cs
+
+        coords_in = {
+            'lat': self['SC_GEO_LAT'].value.flatten(),
+            'lon': self['SC_GEO_LON'].value.flatten(),
+            'height': self['SC_GEO_ALT'].value.flatten()
+        }
+        dts = self['SC_DATETIME'].value.flatten()
+        cs_sph = gsl_cs.GEOCSpherical(coords=coords_in, ut=dts)
+        cs_aacgm = cs_sph.to_AACGM(append_mlt=True)
+        self.add_variable('SC_AACGM_LAT')
+        self.add_variable('SC_AACGM_LON')
+        self.add_variable('SC_AACGM_MLT')
+        self['SC_AACGM_LAT'].value = cs_aacgm['lat'].reshape(self['SC_DATETIME'].value.shape)
+        self['SC_AACGM_LON'].value = cs_aacgm['lon'].reshape(self['SC_DATETIME'].value.shape)
+        self['SC_AACGM_MLT'].value = cs_aacgm['mlt'].reshape(self['SC_DATETIME'].value.shape)
 
     def search_data_files(self, **kwargs):
 

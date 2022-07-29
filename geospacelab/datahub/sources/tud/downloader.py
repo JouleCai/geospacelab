@@ -107,22 +107,24 @@ class Downloader(DownloaderBase):
 
             done = True
             ftp.quit()
-        except:
+        except Exception as err:
+            print(err)
             print('Error during download from FTP')
             done = False
         return done
 
     def search_files(self, file_list=None, file_name_patterns=None):
         def extract_timeline(files):
+            
             nf = len(files)
-            dt_list = np.empty((nf,), dtype=datetime.datetime)
+            dt_list = []
             for ind, fn in enumerate(files):
                 dt_regex = re.compile(r'_(\d{4}_\d{2})_')
                 rm = dt_regex.findall(fn)
                 if not list(rm):
-                    dt_list[ind] = np.nan
                     continue
-                dt_list[ind] = datetime.datetime.strptime(rm[0] + '_01', '%Y_%m_%d')
+                dt_list.append(datetime.datetime.strptime(rm[0] + '_01', '%Y_%m_%d'))
+            dt_list = np.array(dt_list, dtype=datetime.datetime)
 
             return dt_list
 
