@@ -123,6 +123,12 @@ class Dataset(datahub.DatasetSourced):
             default_variable_names,
             configured_variables=var_config.configured_variables
         )
+        
+        if self.product_version == 'v01':
+            if self.visual == 'on':
+                self['rho_n'].error = None
+                self['rho_n'].visual.plot_config.style = '1P' 
+                
         for file_path in self.data_file_paths:
             load_obj = self.loader(file_path, file_type='txt', version=self.product_version)
 
