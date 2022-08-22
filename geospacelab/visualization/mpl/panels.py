@@ -94,6 +94,8 @@ class TSPanel(Panel):
                 raise ValueError("The first element in the plot layout cannot be a list!")
             if any(type(i) is list for i in layout_in):
                 self.axes_overview[ax]['twinx'] = 'on'
+            if len(layout_in) == 1:
+                self.axes_overview[ax]['legend'] = 'off'
 
         if level > 1:
             raise NotImplemented
@@ -198,6 +200,8 @@ class TSPanel(Panel):
         self.axes_overview[ax]['lines'].extend(il)
         if self.axes_overview[ax]['legend'] is None:
             self.axes_overview[ax]['legend'] = 'on'
+        elif self.axes_overview[ax]['legend'] == 'off':
+            var.visual.axis[1].label = '@v.label'
         return il
 
     @check_panel_ax
@@ -293,7 +297,7 @@ class TSPanel(Panel):
         if self.timeline_reverse:
             ax.set_xlim((self._xlim[1], self._xlim[0]))
 
-        ax.xaxis.set_tick_params(labelsize=self._default_xtick_params['labelsize'])
+        ax.xaxis.set_tick_params(labelsize=plt.rcParams['xtick.labelsize'])
         ax.xaxis.set_tick_params(
             which='both',
             direction=self._default_xtick_params['direction'],
@@ -325,7 +329,7 @@ class TSPanel(Panel):
         # set UT timeline
         if not list(self.timeline_extra_labels):
 
-            ax.set_xlabel('UT', fontsize=12, fontweight='normal')
+            ax.set_xlabel('UT', fontsize=plt.rcParams['axes.labelsize'], fontweight='normal')
             return
 
         
@@ -393,7 +397,7 @@ class TSPanel(Panel):
             ax.text(
                 xy_fig[0][0] + xoffset, xy_fig[0][1] + yoffset * ind - 0.013,
                 xlabels[ind].replace('_', '/'),
-                fontsize=plt.rcParams['xtick.labelsize'], fontweight='normal',
+                fontsize=plt.rcParams['xtick.labelsize']-2, fontweight='normal',
                 horizontalalignment='right', verticalalignment='top',
                 transform=self.figure.transFigure
             )

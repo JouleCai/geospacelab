@@ -213,8 +213,8 @@ def test_vhf_lowel():
 if __name__ == "__main__":
     # db = test_vhf_lowel()
 
-    # test_uhf_cp3()
-    test_UHF_CP2()
+    test_uhf_cp3()
+    # test_UHF_CP2()
     # test_esr_32m()
 
     plt.savefig('eiscat_example.png')

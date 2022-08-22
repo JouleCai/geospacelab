@@ -32,8 +32,8 @@ plt.rcParams['font.size'] = 10
 plt.rcParams['axes.labelsize'] = 10
 plt.rcParams['axes.labelweight'] = 'book'
 plt.rcParams['axes.titlesize'] = 10
-plt.rcParams['xtick.labelsize'] = 8
-plt.rcParams['ytick.labelsize'] = 8
+plt.rcParams['xtick.labelsize'] = 10
+plt.rcParams['ytick.labelsize'] = 10
 plt.rcParams['legend.fontsize'] = 10
 plt.rcParams['figure.titlesize'] = 12
 

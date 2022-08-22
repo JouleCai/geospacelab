@@ -413,7 +413,7 @@ class DatasetSourced(DatasetBase):
                 mylog.StreamLogger.warning('The input time is out of the range! Set "edge_cutoff=False" if needed!')
                 return ind
         delta_sectime = [delta_t.total_seconds() for delta_t in (dts - ut)]
-
+        
         ind = np.where(np.abs(delta_sectime) == np.min(np.abs(delta_sectime)))[0][0]
 
         if np.abs((dts[ind] - ut).total_seconds()) > time_res:
