@@ -207,9 +207,12 @@ class DatasetBase(object):
     def get_variable_names(self) -> list:
         return list(self._variables.keys())
 
+    def register_method(self, func):
+        from types import MethodType
+        setattr(self, func.__name__, MethodType(func, self))
+
 
 class DatasetUser(DatasetBase):
-
     def __init__(self,
                  dt_fr: datetime.datetime = None,
                  dt_to: datetime.datetime = None,
@@ -220,6 +223,8 @@ class DatasetUser(DatasetBase):
         super().__init__(
             dt_fr=dt_fr, dt_to=dt_to, name=name, kind='user-defined', visual=visual, label_fields=label_fields, **kwargs
         )
+
+
 
 
 class DatasetSourced(DatasetBase):
@@ -408,7 +413,7 @@ class DatasetSourced(DatasetBase):
                 mylog.StreamLogger.warning('The input time is out of the range! Set "edge_cutoff=False" if needed!')
                 return ind
         delta_sectime = [delta_t.total_seconds() for delta_t in (dts - ut)]
-
+        
         ind = np.where(np.abs(delta_sectime) == np.min(np.abs(delta_sectime)))[0][0]
 
         if np.abs((dts[ind] - ut).total_seconds()) > time_res:

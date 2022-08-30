@@ -6,7 +6,11 @@ __author__ = "Lei Cai"
 __copyright__ = "Copyright 2021, GeospaceLab"
 __credits__ = ["Lei Cai"]
 __license__ = "BSD-3-Clause License"
+<<<<<<< HEAD
 __version__ = "0.5.0"
+=======
+__version__ = "0.5.1"
+>>>>>>> master
 __maintainer__ = "Lei Cai"
 __email__ = "lei.cai@oulu.fi"
 __status__ = "Developing"

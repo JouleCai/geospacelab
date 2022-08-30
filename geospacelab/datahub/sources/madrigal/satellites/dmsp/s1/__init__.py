@@ -10,6 +10,7 @@ __docformat__ = "reStructureText"
 
 import numpy as np
 import datetime
+import apexpy
 
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, InstrumentModel, ProductModel
@@ -39,6 +40,7 @@ default_dataset_attrs = {
     'load_mode': 'AUTO',
     'time_clip': True,
     'add_AACGM': True,
+    'add_APEX': False,
     'calib_orbit': True,
     'replace_orbit': True,
 }
@@ -80,6 +82,7 @@ class Dataset(datahub.DatasetSourced):
         self.allow_download = kwargs.pop('allow_download', False)
         self.force_download = kwargs.pop('force_download', False)
         self.add_AACGM = kwargs.pop('add_AACGM', False)
+        self.add_APEX = kwargs.pop('add_APEX', False)
         self.calib_orbit = kwargs.pop('calib_orbit', False)
         self.replace_orbit = kwargs.pop('replace_orbit', False)
 
@@ -135,6 +138,27 @@ class Dataset(datahub.DatasetSourced):
 
         if self.add_AACGM:
             self.convert_to_AACGM()
+
+        if self.add_APEX:
+            self.convert_to_APEX()
+
+    def convert_to_APEX(self):
+        import geospacelab.cs as gsl_cs
+
+        coords_in = {
+            'lat': self['SC_GEO_LAT'].value.flatten(),
+            'lon': self['SC_GEO_LON'].value.flatten(),
+            'height': self['SC_GEO_ALT'].value.flatten()
+        }
+        dts = self['SC_DATETIME'].value.flatten()
+        cs_sph = gsl_cs.GEOCSpherical(coords=coords_in, ut=dts)
+        cs_apex = cs_sph.to_APEX(append_mlt=True)
+        self.add_variable('SC_APEX_LAT')
+        self.add_variable('SC_APEX_LON')
+        self.add_variable('SC_APEX_MLT')
+        self['SC_APEX_LAT'].value = cs_apex['lat'].reshape(self['SC_DATETIME'].value.shape)
+        self['SC_APEX_LON'].value = cs_apex['lon'].reshape(self['SC_DATETIME'].value.shape)
+        self['SC_APEX_MLT'].value = cs_apex['mlt'].reshape(self['SC_DATETIME'].value.shape)
 
     def convert_to_AACGM(self):
         import geospacelab.cs as gsl_cs

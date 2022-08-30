@@ -14,8 +14,8 @@ import geospacelab.express.omni_dashboard as omni
 dt_fr = datetime.datetime.strptime('20160321' + '0600', '%Y%m%d%H%M')
 dt_to = datetime.datetime.strptime('20160330' + '0600', '%Y%m%d%H%M')
 
-omni_type = 'OMNI2'
-omni_res = '1min'
+omni_type = 'OMNI2'     # 'OMNI' or 'OMNI2'
+omni_res = '5min'       # '1min' or '5min'
 load_mode = 'AUTO'
 dashboard = omni.OMNIDashboard(
     dt_fr, dt_to, omni_type=omni_type, omni_res=omni_res, load_mode=load_mode

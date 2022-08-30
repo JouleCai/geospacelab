@@ -15,5 +15,5 @@ import geospacelab.toolbox.utilities.pylogging as mylog
 
 class AACGM(SpaceCSBase):
     def __init__(self, coords=None, ut=None, **kwargs):
-        kwargs.setdefault('new_coords',  ['lat', 'lon', 'r', 'mlt'])
+        kwargs.setdefault('new_coords',  ['lat', 'lon', 'height', 'r', 'mlt'])
         super().__init__(name='AACGM', coords=coords, ut=ut, kind='sph', **kwargs)

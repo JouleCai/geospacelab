@@ -37,7 +37,9 @@ default_plot_config = {
 configured_variables = {}
 visual = 'on'
 
-depend_0 = {'UT': 'SC_DATETIME'}
+depend_0 = {'UT': 'SC_DATETIME',
+            'GEO_LAT': 'SC_GEO_LAT', 'GEO_LON': 'SC_GEO_LON',
+            'AACGM_LAT': 'SC_AACGM_LAT', 'AACGM_LON': 'SC_AACGM_LON', 'AACGM_MLT': 'SC_AACGM_MLT'}
 # depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
 
 ####################################################################################################################

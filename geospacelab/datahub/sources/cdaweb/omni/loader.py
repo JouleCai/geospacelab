@@ -36,7 +36,7 @@ class Loader:
         for var_name, var_name_cdf in cdf_variable_name_dict.items():
             var = f_cdf.varget(var_name_cdf)
             var_attr = f_cdf.varattsget(var_name_cdf)
-            fillval = var_attr['FILLVAL'][0]
+            fillval = var_attr['FILLVAL']
             var = np.where(var == fillval, np.nan, var)
             variables[var_name] = np.reshape(var, (var.size, 1))
             self.metadata['var_attrs'].update(var_name=f_cdf.varattsget(var_name_cdf))

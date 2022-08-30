@@ -35,8 +35,10 @@ default_plot_config = {
 configured_variables = {}
 visual = 'on'
 
-depend_0 = {'UT': 'DATETIME'}
-depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
+depend_0 = {'UT': 'SC_DATETIME',
+            'GEO_LAT': 'SC_GEO_LAT', 'GEO_LON': 'SC_GEO_LON',
+            'AACGM_LAT': 'SC_AACGM_LAT', 'AACGM_LON': 'SC_AACGM_LON', 'AACGM_MLT': 'SC_AACGM_MLT'}
+# depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
 
 ####################################################################################################################
 var_name = 'v_i_H_x'
@@ -55,7 +57,7 @@ plot_config.style = '1E'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-2000, 2000]
+axis[1].lim = [-4000, 4000]
 axis[1].label = '@v.group'
 axis[1].unit = ''
 axis[2].label = '@v.label'
@@ -80,7 +82,7 @@ plot_config.style = '1E'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-2000, 2000]
+axis[1].lim = [-4000, 4000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
@@ -104,7 +106,7 @@ plot_config.style = '1E'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-2000, 2000]
+axis[1].lim = [-4000, 4000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
@@ -117,6 +119,7 @@ var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'TII-V ion velocity (x component)'
 var.label = r'$v_{ix}^{(V)}$'
+var.unit = 'm/s'
 var.group = r'$v_i$'
 var.error = var_name + '_err'
 var.depends = {0: depend_0}
@@ -127,7 +130,7 @@ plot_config.style = '1E'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-2000, 2000]
+axis[1].lim = [-4000, 4000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
@@ -140,7 +143,8 @@ var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'Magnetic field (x component)'
 var.label = r'$B_x$'
-var.group = r'$B_x$'
+var.group = r'$B$'
+var.unit = 'nT'
 var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
@@ -149,10 +153,30 @@ plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-2000, 2000]
+axis[1].lim = [None, None]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
 
+####################################################################################################################
+var_name = 'B_y'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Magnetic field (y component)'
+var.label = r'$B_y$'
+var.group = r'$B$'
+var.unit = 'nT'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [None, None]
+axis[1].label = '@v.group'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
 
 configured_variables[var_name] = var

@@ -18,22 +18,12 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 
 from geospacelab.datahub import DataHub
+
 import geospacelab.visualization.mpl.panels as mpl_panel
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pydatetime as dttool
 from geospacelab.visualization.mpl.__base__ import DashboardBase
 import geospacelab.visualization.mpl.panels as panels
-
-plt.rcParams['font.serif'] = 'Ubuntu'
-plt.rcParams['font.monospace'] = 'Ubuntu Mono'
-plt.rcParams['font.size'] = 10
-plt.rcParams['axes.labelsize'] = 10
-plt.rcParams['axes.labelweight'] = 'book'
-plt.rcParams['axes.titlesize'] = 10
-plt.rcParams['xtick.labelsize'] = 8
-plt.rcParams['ytick.labelsize'] = 8
-plt.rcParams['legend.fontsize'] = 10
-plt.rcParams['figure.titlesize'] = 12
 
 
 class Dashboard(DataHub, DashboardBase):
@@ -48,6 +38,7 @@ class Dashboard(DataHub, DashboardBase):
 
     def __init__(self, figure=None, figure_config=None, **kwargs):
         super(Dashboard, self).__init__(figure=figure, figure_config=figure_config, **kwargs)
+
 
 class TSDashboard(Dashboard):
     _default_figure_config = {

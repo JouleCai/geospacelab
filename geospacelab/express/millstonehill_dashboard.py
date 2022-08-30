@@ -26,7 +26,8 @@ class MillstoneHillISRDashboard(TSDashboard):
         self.az = None
         self.el = None
         figure = kwargs.pop('figure', 'new')
-        super().__init__(dt_fr=dt_fr, dt_to=dt_to, figure=figure)
+        figure_config = kwargs.pop('figure_config', {})
+        super().__init__(dt_fr=dt_fr, dt_to=dt_to, figure=figure, figure_config=figure_config)
         ds_1 = self.dock(datasource_contents=['madrigal', 'isr', 'millstonehill', 'basic'],
                          data_file_type=data_file_type, antenna=antenna, pulse_code=pulse_code,
                          pulse_length=pulse_length, **kwargs)
@@ -139,7 +140,7 @@ class MillstoneHillISRDashboard(TSDashboard):
             title = self.title
         super().add_title(x=x, y=y, title=title, append_time=append_time, **kwargs)
 
-    def quicklook(self):
+    def quicklook(self, depend_MLAT=True):
         n_e = self.assign_variable('n_e')
         T_i = self.assign_variable('T_i')
         T_e = self.assign_variable('T_e')
@@ -148,6 +149,24 @@ class MillstoneHillISRDashboard(TSDashboard):
         el = self.assign_variable('EL')
         ptx = self.assign_variable('P_Tx')
         tsys = self.assign_variable('T_SYS')
+
+        if depend_MLAT:
+            n_e.visual.axis[1].data = '@d.AACGM_LAT.value'
+            n_e.visual.axis[1].label = 'MLAT'
+            n_e.visual.axis[1].unit = 'deg'
+            n_e.visual.axis[1].lim = [None, None]
+            T_i.visual.axis[1].data = '@d.AACGM_LAT.value'
+            T_i.visual.axis[1].label = 'MLAT'
+            T_i.visual.axis[1].unit = 'deg'
+            T_i.visual.axis[1].lim = [None, None]
+            T_e.visual.axis[1].data = '@d.AACGM_LAT.value'
+            T_e.visual.axis[1].label = 'MLAT'
+            T_e.visual.axis[1].unit = 'deg'
+            T_e.visual.axis[1].lim = [None, None]
+            v_i.visual.axis[1].data = '@d.AACGM_LAT.value'
+            v_i.visual.axis[1].label = 'MLAT'
+            v_i.visual.axis[1].unit = 'deg'
+            v_i.visual.axis[1].lim = [None, None]
         self.list_assigned_variables()
         self.list_datasets()
         self.check_beams()

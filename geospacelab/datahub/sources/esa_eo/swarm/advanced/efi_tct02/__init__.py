@@ -4,6 +4,7 @@
 
 import numpy as np
 import datetime
+import copy
 
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, InstrumentModel, ProductModel
@@ -32,13 +33,15 @@ default_dataset_attrs = {
     'data_search_recursive': False,
     'quality_control': False,
     'calib_control': False,
+    'add_AACGM': False,
+    'add_APEX': False,
     'label_fields': ['database', 'facility', 'instrument', 'product'],
     'load_mode': 'AUTO',
     'time_clip': True,
 }
 
 default_variable_names = [
-    'SC_DATETIME', 'SC_GEO_LAT', 'SC_GEO_LON', 'SC_GEO_r',
+    'SC_DATETIME', 'SC_GEO_LAT', 'SC_GEO_LON', 'SC_GEO_r', 'SC_GEO_ALT',
     'SC_QD_LAT', 'SC_QD_MLT',
     'v_i_H_x', 'v_i_H_x_err', 'v_i_V_x', 'v_i_V_x_err', 'v_i_H_y', 'v_i_H_y_err',
     'v_i_V_z', 'v_i_V_z_err',
@@ -65,13 +68,15 @@ class Dataset(datahub.DatasetSourced):
         self.facility = kwargs.pop('facility', 'SWARM')
         self.instrument = kwargs.pop('instrument', 'EFI-TII')
         self.product = kwargs.pop('product', 'TCT02')
-        self.product_version = kwargs.pop('product', '')
+        self.product_version = kwargs.pop('product_version', '')
         self.local_latest_version = ''
         self.allow_download = kwargs.pop('allow_download', False)
         self.force_download = kwargs.pop('force_download', False)
         self.quality_control = kwargs.pop('quality_control', False)
         self.calib_control = kwargs.pop('calib_control', False)
-        self._data_root_dir = self.data_root_dir    # Record the initial root dir
+        self.add_AACGM = kwargs.pop('add_AACGM', False) 
+        self.add_APEX = kwargs.pop('add_APEX', False)
+        self._data_root_dir_init = copy.deepcopy(self.data_root_dir)    # Record the initial root dir
 
         self.sat_id = kwargs.pop('sat_id', 'A')
 
@@ -104,24 +109,29 @@ class Dataset(datahub.DatasetSourced):
             self.data_root_dir = self.data_root_dir / self.product_version
         else:
             self.product_version = 'latest'
-            try:
-                dirs_product_version = [f.name for f in self.data_root_dir.iterdir() if f.is_dir()]
-            except FileNotFoundError:
-                dirs_product_version = []
-                self.force_download = True
-            else:
-                if not list(dirs_product_version):
-                    self.force_download = True
+            self.force_download = False
+            mylog.simpleinfo.info(f'Checking the latest version of the data file ...')
+            self.download_data()
+            
+            # self.product_version = 'latest'
+            # try:
+            #     dirs_product_version = [f.name for f in self.data_root_dir.iterdir() if f.is_dir()]
+            # except FileNotFoundError:
+            #     dirs_product_version = []
+            #     self.force_download = True
+            # else:
+            #     if not list(dirs_product_version):
+            #         self.force_download = True
 
-            if list(dirs_product_version):
-                self.local_latest_version = max(dirs_product_version)
-                self.data_root_dir = self.data_root_dir / self.local_latest_version
-                if not self.force_download:
-                    mylog.simpleinfo.info(
-                        "Note: Loading the local files " +
-                        "with the latest version {} ".format(self.local_latest_version) +
-                        "Keep an eye on the latest baselines online!"
-                    )
+            # if list(dirs_product_version):
+            #     self.local_latest_version = max(dirs_product_version)
+            #     self.data_root_dir = self.data_root_dir / self.local_latest_version
+            #     if not self.force_download:
+            #         mylog.simpleinfo.info(
+            #             "Note: Loading the local files " +
+            #             "with the latest version {} ".format(self.local_latest_version) +
+            #             "Keep an eye on the latest baselines online!"
+            #         )
 
     def label(self, **kwargs):
         label = super().label()
@@ -148,6 +158,49 @@ class Dataset(datahub.DatasetSourced):
             self.time_filter_by_quality()
         if self.calib_control:
             self.time_filter_by_calib()
+            
+        if self.add_AACGM:
+            self.convert_to_AACGM()
+
+        if self.add_APEX:
+            self.convert_to_APEX()
+            
+    
+    def convert_to_APEX(self):
+        import geospacelab.cs as gsl_cs
+
+        coords_in = {
+            'lat': self['SC_GEO_LAT'].value.flatten(),
+            'lon': self['SC_GEO_LON'].value.flatten(),
+            'r': self['SC_GEO_r'].value.flatten() / 6371.2
+        }
+        dts = self['SC_DATETIME'].value.flatten()
+        cs_sph = gsl_cs.GEOCSpherical(coords=coords_in, ut=dts)
+        cs_apex = cs_sph.to_APEX(append_mlt=True)
+        self.add_variable('SC_APEX_LAT')
+        self.add_variable('SC_APEX_LON')
+        self.add_variable('SC_APEX_MLT')
+        self['SC_APEX_LAT'].value = cs_apex['lat'].reshape(self['SC_DATETIME'].value.shape)
+        self['SC_APEX_LON'].value = cs_apex['lon'].reshape(self['SC_DATETIME'].value.shape)
+        self['SC_APEX_MLT'].value = cs_apex['mlt'].reshape(self['SC_DATETIME'].value.shape)
+
+    def convert_to_AACGM(self):
+        import geospacelab.cs as gsl_cs
+
+        coords_in = {
+            'lat': self['SC_GEO_LAT'].value.flatten(),
+            'lon': self['SC_GEO_LON'].value.flatten(),
+            'r': self['SC_GEO_r'].value.flatten() / 6371.2
+        }
+        dts = self['SC_DATETIME'].value.flatten()
+        cs_sph = gsl_cs.GEOCSpherical(coords=coords_in, ut=dts)
+        cs_aacgm = cs_sph.to_AACGM(append_mlt=True)
+        self.add_variable('SC_AACGM_LAT')
+        self.add_variable('SC_AACGM_LON')
+        self.add_variable('SC_AACGM_MLT')
+        self['SC_AACGM_LAT'].value = cs_aacgm['lat'].reshape(self['SC_DATETIME'].value.shape)
+        self['SC_AACGM_LON'].value = cs_aacgm['lon'].reshape(self['SC_DATETIME'].value.shape)
+        self['SC_AACGM_MLT'].value = cs_aacgm['mlt'].reshape(self['SC_DATETIME'].value.shape)
 
     def time_filter_by_quality(self, quality_flags=None):
         if quality_flags is None:
@@ -203,7 +256,6 @@ class Dataset(datahub.DatasetSourced):
             if (not done and self.allow_download) or self.force_download:
                 done = self.download_data()
                 if done:
-                    self._validate_attrs()
                     initial_file_dir = self.data_root_dir
                     done = super().search_data_files(
                         initial_file_dir=initial_file_dir,
@@ -233,7 +285,7 @@ class Dataset(datahub.DatasetSourced):
                     f"A newer version of data files have been downloaded ({download_obj.file_version})"
                 )
             self.product_version = download_obj.file_version
-            self.data_root_dir = self._data_root_dir
+            self.data_root_dir = copy.deepcopy(self._data_root_dir_init)
             self._validate_attrs()
 
         return download_obj.done

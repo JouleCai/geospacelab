@@ -52,6 +52,8 @@ class TSPanel(Panel):
     _default_xtick_params = {
         'labelsize': plt.rcParams['xtick.labelsize'],
         'direction': 'inout',
+        'extral_labels_x_offset': None,
+        'extral_labels_y_offset': None, 
     }
     _default_colorbar_offset = 0.1
 
@@ -92,6 +94,8 @@ class TSPanel(Panel):
                 raise ValueError("The first element in the plot layout cannot be a list!")
             if any(type(i) is list for i in layout_in):
                 self.axes_overview[ax]['twinx'] = 'on'
+            if len(layout_in) == 1:
+                self.axes_overview[ax]['legend'] = 'off'
 
         if level > 1:
             raise NotImplemented
@@ -149,7 +153,16 @@ class TSPanel(Panel):
         elif plot_style in ['1C']:
             iplt = self.overlay_multiple_colored_line(var, ax=ax)
         else:
-            raise NotImplementedError
+            mylog.StreamLogger.warning(f'The attribute "plot_config.style" of {var.name} is not defined!')
+            ndim = var.ndim
+            if ndim == 1:
+                mylog.simpleinfo.info("Set plot_config.style = '1P' for a line plot!")
+                iplt = self.overlay_line(var, ax=ax) 
+            elif ndim == 2:
+                mylog.simpleinfo.info("Set plot_config.style = '2P' for a 2D pcolor plot!") 
+                iplt = self.overlay_pcolormesh(var, ax=ax)
+            else:
+                raise NotImplementedError
 
         return iplt
 
@@ -181,12 +194,14 @@ class TSPanel(Panel):
         elif errorbar == 'on':
             errorbar_config = dict(plot_config)
             errorbar_config.update(var.visual.plot_config.errorbar)
-            il = ax.errorbar(x, y, yerr=y_err, ax=ax, **errorbar_config)
+            il = ax.errorbar(x.flatten(), y.flatten(), yerr=y_err.flatten(), **errorbar_config)
         if type(il) is not list:
             il = [il]
         self.axes_overview[ax]['lines'].extend(il)
         if self.axes_overview[ax]['legend'] is None:
             self.axes_overview[ax]['legend'] = 'on'
+        elif self.axes_overview[ax]['legend'] == 'off':
+            var.visual.axis[1].label = '@v.label'
         return il
 
     @check_panel_ax
@@ -282,7 +297,7 @@ class TSPanel(Panel):
         if self.timeline_reverse:
             ax.set_xlim((self._xlim[1], self._xlim[0]))
 
-        ax.xaxis.set_tick_params(labelsize=self._default_xtick_params['labelsize'])
+        ax.xaxis.set_tick_params(labelsize=plt.rcParams['xtick.labelsize'])
         ax.xaxis.set_tick_params(
             which='both',
             direction=self._default_xtick_params['direction'],
@@ -314,14 +329,24 @@ class TSPanel(Panel):
         # set UT timeline
         if not list(self.timeline_extra_labels):
 
-            ax.set_xlabel('UT', fontsize=12, fontweight='normal')
+            ax.set_xlabel('UT', fontsize=plt.rcParams['axes.labelsize'], fontweight='normal')
             return
 
-        figheight = self.figure.get_size_inches()[1]*2.54
-        figwidth = self.figure.get_size_inches()[0]*2.54
-        xoffset = 0.1 - figwidth * 0.002
-        yoffset = 0.07 - figheight * 0.0022
+        
+        ax_pos = ax.get_position()
+        
+        if self._default_xtick_params['extral_labels_x_offset'] is None:
+            figwidth = self.figure.get_size_inches()[0]*2.54
+            xoffset = - 0.02 - 0.06 * 16/figwidth * ax_pos.width
+        else:
+            xoffset = self._default_xtick_params['extral_labels_x_offset']
 
+        if self._default_xtick_params['extral_labels_y_offset'] is None:             
+            figheight = self.figure.get_size_inches()[1]*2.54
+            yoffset = - 0.01 - 0.03 * 10/figheight * ax_pos.height
+        else:
+            yoffset = self._default_xtick_params['extral_labels_y_offset']
+        
         ticks = ax.get_xticks()
         ylim0, _ = ax.get_ylim()
         xy_fig = []
@@ -370,9 +395,9 @@ class TSPanel(Panel):
 
         for ind, xticks in enumerate(ys):
             ax.text(
-                xy_fig[0][0] - xoffset, xy_fig[0][1] - yoffset * ind - 0.013,
+                xy_fig[0][0] + xoffset, xy_fig[0][1] + yoffset * ind - 0.013,
                 xlabels[ind].replace('_', '/'),
-                fontsize=plt.rcParams['xtick.labelsize'], fontweight='normal',
+                fontsize=plt.rcParams['xtick.labelsize']-2, fontweight='normal',
                 horizontalalignment='right', verticalalignment='top',
                 transform=self.figure.transFigure
             )
@@ -386,7 +411,7 @@ class TSPanel(Panel):
                 else:
                     text = '%.1f' % xtick
                 ax.text(
-                    xy_fig[ind_pos][0], xy_fig[ind_pos][1] - yoffset * ind - 0.013,
+                    xy_fig[ind_pos][0], xy_fig[ind_pos][1] + yoffset * ind - 0.013,
                     text,
                     fontsize=plt.rcParams['xtick.labelsize'],
                     horizontalalignment='center', verticalalignment='top',
@@ -553,10 +578,18 @@ class TSPanel(Panel):
             x_data = x_data[0]
         if x_data is None:
             depend_0 = var.get_depend(axis=0)
-            x_data = depend_0['UT']  # numpy array, type=datetime
-            if x_data is None:
-                x_data = np.array([0, 1]).reshape(2, 1)
-                var.visual.axis[0].mask_gap = False
+            try:
+                x_data = depend_0['UT']  # numpy array, type=datetime
+            except:
+                try:
+                    x_data = var.dataset['DATETIME'].value
+                except:
+                    try:
+                        x_data = var.dataset['SC_DATETIME'].value
+                    except:
+                        mylog.StreamLogger.error("Cannot find the datetime array!")
+                        x_data = None
+            
 
         y_data = var.get_visual_axis_attr(axis=1, attr_name='data')
         if y_data is None:
@@ -600,7 +633,10 @@ class TSPanel(Panel):
             x_data = x_data[0]
         if x_data is None:
             depend_0 = var.get_depend(axis=0)
-            x_data = depend_0['UT']  # numpy array, type=datetime
+            try:
+                x_data = depend_0['UT']  # numpy array, type=datetime
+            except:
+                x_data = None
             if x_data is None:
                 x_data = np.array([self._xlim[0], self._xlim[1]]).reshape(2, 1)
                 var.visual.axis[0].mask_gap = False

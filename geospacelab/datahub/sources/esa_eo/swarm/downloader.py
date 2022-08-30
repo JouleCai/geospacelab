@@ -41,6 +41,7 @@ class Downloader(DownloaderBase):
     def __init__(self,
                  dt_fr, dt_to,
                  data_file_root_dir=None, ftp_data_dir=None, force=True, direct_download=True, file_version=None,
+                 file_extension = '.cdf',
                  **kwargs):
         self.ftp_host = "swarm-diss.eo.esa.int"
         self.ftp_port = 21
@@ -51,6 +52,7 @@ class Downloader(DownloaderBase):
         if file_version is None:
             file_version = 'latest'
         self.file_version = file_version
+        self.file_extension = file_extension
 
         super(Downloader, self).__init__(
             dt_fr, dt_to, data_file_root_dir=data_file_root_dir, force=force, direct_download=direct_download, **kwargs
@@ -72,8 +74,8 @@ class Downloader(DownloaderBase):
                 rm = dt_regex.findall(file_name)
                 this_day = datetime.datetime.strptime(rm[0][0], '%Y%m%dT%H%M%S')
                 file_path = file_dir / rm[0][2] / file_name
-
-                if file_path.is_file():
+                file_path_cdf = file_path.parent.resolve() / ((file_path.stem.split('.')[0] + self.file_extension))
+                if file_path_cdf.is_file():
                     mylog.simpleinfo.info(
                         "The file {} exists in the directory {}.".format(
                             file_path.name, file_path.parent.resolve()

@@ -1,6 +1,8 @@
 import datetime
 import matplotlib.pyplot as plt
 
+# from geospacelab import preferences as pref
+# pref.user_config['visualization']['mpl']['style'] = 'dark'
 import geospacelab.visualization.mpl.geomap.geodashboards as geomap
 
 
