@@ -2,3 +2,10 @@
 setup.cfg
 setup.py
 geospacelab/__init__.py
+
+prune test
+prune local
+recursive-exclude test *
+recursive-exclude local *
+
+

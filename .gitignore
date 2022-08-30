@@ -4,7 +4,7 @@
 *.pyc
 *.log
 *.DS_Store
-test_local
+local
 dist
 build
 .eggs
