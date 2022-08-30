@@ -9,3 +9,8 @@ version: 0.4.19
 doi: 10.5281/zenodo.5377318
 date-released: 2022-08-29
 url: "https://github.com/JouleCai/geospacelab"
+identifiers:
+  - type: 'doi'
+    value: '10.5281/zenodo.5377318'
+  - type: 'url'
+    value: 'https://github.com/JouleCai/geospacelab'
