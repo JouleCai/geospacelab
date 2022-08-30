@@ -70,8 +70,8 @@ on [readthedocs.io](https://geospacelab.readthedocs.io/en/latest/).
 | TUDelft/SWARM/DNS_ACC       | Swarm $\rho_n$ (GPS+Accelerometer) | *ASCII*               | *True*       |  -           | stable |
 | TUDelft/GOCE/WIND_ACC       | GOCE neutral wind                  | *ASCII*               | *True*       |  -           | stable |
 | TUDelft/GRACE/WIND_ACC      | GRACE neutral wind                 | *ASCII*               | *True*       |  -           | stable |
-| TUDelft/GRACE/DNS_ACC       | Grace $\rou_n$                     | *ASCII*               | *True*       |  -           | stable |
-| TUDelft/CHAMP/DNS_ACC       | CHAMP $\rou_n$                     | *ASCII*               | *True*       |  -           | stable |
+| TUDelft/GRACE/DNS_ACC       | Grace $\rho_n$                     | *ASCII*               | *True*       |  -           | stable |
+| TUDelft/CHAMP/DNS_ACC       | CHAMP $\rho_n$                     | *ASCII*               | *True*       |  -           | stable |
  | UTA/GITM/2DALL              | GITM 2D output                     | *binary*, *IDL-sav*   | *False*       | -              | beta   |
  | UTA/GITM/3DALL              | GITM 3D output                     | *binary*, *IDL-sav*   | *False*       | -              | beta   |
 
