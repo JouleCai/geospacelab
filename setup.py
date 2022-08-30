@@ -43,10 +43,10 @@ setuptools.setup(
     author_email='lei.cai@oulu.fi',      # Type in your E-Mail
     long_description=long_description,      # Long description read from the the readme file
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=['test', 'test_local']),
     url='https://github.com/JouleCai/geospacelab',   # Provide either the link to your github or to your website
     # download_url = 'https://github.com/JouleCai/geospacelab/archive/refs/tags/v0.1.tar.gz',    # I explain this later on
-    keywords = ['Geospace', 'EISCAT', 'DMSP', 'Space weather', 'Ionosphere', 'Space', 'Magnetosphere'],   # Keywords that define your package best
+    keywords=['Geospace', 'EISCAT', 'DMSP', 'Space weather', 'Ionosphere', 'Space', 'Magnetosphere'],   # Keywords that define your package best
     install_requires=[            # I get to this in a second
               'cython',
               'requests>=2.26.0',

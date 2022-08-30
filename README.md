@@ -16,17 +16,19 @@ on [readthedocs.io](https://geospacelab.readthedocs.io/en/latest/).
 
 ## Features
 - Class-based data manager, including
-  - __DataHub__: the core module to manage data from multiple sources,
-  - __DatasetModel__: the base class to download, load, and process data from a data source, 
-  - __VariableModel__: the base class to store the value, error, and other attributes for a variable.
+  - __DataHub__: the core module (top-level class) to manage data from multiple sources,
+  - __Dataset__: the middle-level class to download, load, and process data from a data source, 
+  - __Variable__: the base-level class to store the data array of a variable with various attributes, including its 
+  error, name, label, unit, group, and dependencies.
 - Extendable
   - Provide a standard procedure from downloading, loading, and post-processing the data.
-  - Easy to extend for a data source which has not been included in the package.
+  - Easy to extend for a data source which has not been supported in the package.
   - Flexible to add functions for post-processing.
 - Visualization
   - Time series plots with 
     - automatically adjustable time ticks and tick labels.
-    - dynamical panels (easily adding or removing panels).
+    - dynamical panels (flexible to add or remove panels).
+    - automatically detect the time gaps.
     - useful marking tools (vertical line crossing panels, shadings, top bars, etc, see Example 2 in
 [Usage](https://github.com/JouleCai/geospacelab#usage))
   - Map projection
@@ -38,33 +40,40 @@ on [readthedocs.io](https://geospacelab.readthedocs.io/en/latest/).
       - nadir colored 1-D plots
       - gridded surface plots 
 - Space coordinate system transformation
+  - Unified interface for cs transformations.
 - Toolboxes for data analysis
   - Basic toolboxes for numpy array, datetime, logging, python dict, list, and class.
-  - Coordinate system transformation.
 
 ## Built-in data sources:
-| Data Source                   | Variables             | File Format           | Downloadable  | Express         | Status      | 
-|-------------------------------|-----------------------|-----------------------|---------------|-----------------|-------------|
-| CDAWeb/OMNI                   | Solar wind and IMF    |*cdf*                 | *True*        | __OMNIDashboard__  | stable      |
-| Madrigal/EISCAT               | Ionospheric Ne, Te, Ti, ... | *EISCAT-hdf5*, *Madrigal-hdf5* | *True* | __EISCATDashboard__ | stable    |
-| Madrigal/GNSS/TECMAP          | Ionospheric GPS TEC map | *hdf5*                | *True*        | -  | beta      |
-| Madrigal/DMSP/s1              | DMSP SSM, SSIES, etc  | *hdf5*                | *True*        | __DMSPTSDashboard__  | beta      |
-| Madrigal/DMSP/s4              | DMSP SSIES            | *hdf5*                | *True*        | __DMSPTSDashboard__  | beta      |
-| Madrigal/DMSP/e               | DMSP SSJ              | *hdf5*                | *True*        | __DMSPTSDashboard__  | beta      |
-| Madrigal/Millstone Hill ISR   | Millstone Hill ISR    | *hdf5*                | *True*        | __MillstoneHillISRDashboard__ | stable |
-| JHUAPL/DMSP/SSUSI             | DMSP SSUSI            | *netcdf*              | *True*        | __DMSPSSUSIDashboard__  | beta      |
-| JHUAPL/AMPERE/fitted          | AMPERE FAC            | *netcdf*              | *False*        | __AMPEREDashboard__  | stable      |
-| SuperDARN/POTMAP              | SuperDARN potential map | *ascii*             | *False*       | - | stable |                  
-| WDC/Dst                       | Dst index             | *IAGA2002-ASCII*      | *True*        | - | stable |
-| WDC/ASYSYM                    | ASY/SYM indices       | *IAGA2002-ASCII*      | *True*        | __OMNIDashboard__ | stable |
-| WDC/AE                        | AE indices            | *IAGA2002-ASCII*      | *True*        | __OMNIDashboard__ | stable |
-| GFZ/Kp                        | Kp/Ap indices         | *ASCII*               | *True*        | -              | stable   |
-| GFZ/Hpo                        | Hp30 or Hp60 indices         | *ASCII*               | *True*        | -              | stable   |
-| GFZ/SNF107                    | SN, F107              | *ASCII*               | *True*        | -              | stable   |
-| ESA/SWARM/EFI_LP_1B           | SWARM Ne, Te, etc.    | *netcdf*              | *True*        | -              | stable   |
-| ESA/SWARM/AOB_FAC_2F          | SWARM FAC, auroral oval boundary | *netcdf*              | *True*        | -              | beta   |
-| UTA/GITM/2DALL                | GITM 2D output        | *binary*, *IDL-sav*   | *False*       | -              | beta   |
-| UTA/GITM/3DALL                | GITM 3D output        | *binary*, *IDL-sav*   | *False*       | -              | beta   |
+| Data Source                 | Variables                          | File Format           | Downloadable  | Express         | Status | 
+|-----------------------------|------------------------------------|-----------------------|---------------|-----------------|--------|
+| CDAWeb/OMNI                 | Solar wind and IMF                 |*cdf*                 | *True*        | __OMNIDashboard__  | stable |
+| Madrigal/EISCAT             | Ionospheric Ne, Te, Ti, ...        | *EISCAT-hdf5*, *Madrigal-hdf5* | *True* | __EISCATDashboard__ | stable |
+| Madrigal/GNSS/TECMAP        | Ionospheric GPS TEC map            | *hdf5*                | *True*        | -  | beta   |
+| Madrigal/DMSP/s1            | DMSP SSM, SSIES, etc               | *hdf5*                | *True*        | __DMSPTSDashboard__  | stable |
+| Madrigal/DMSP/s4            | DMSP SSIES                         | *hdf5*                | *True*        | __DMSPTSDashboard__  | stable |
+| Madrigal/DMSP/e             | DMSP SSJ                           | *hdf5*                | *True*        | __DMSPTSDashboard__  | stable |
+| Madrigal/Millstone Hill ISR | Millstone Hill ISR                 | *hdf5*                | *True*        | __MillstoneHillISRDashboard__ | stable |
+| JHUAPL/DMSP/SSUSI           | DMSP SSUSI                         | *netcdf*              | *True*        | __DMSPSSUSIDashboard__  | stable |
+| JHUAPL/AMPERE/fitted        | AMPERE FAC                         | *netcdf*              | *False*        | __AMPEREDashboard__  | stable |
+| SuperDARN/POTMAP            | SuperDARN potential map            | *ascii*             | *False*       | - | stable |                  
+| WDC/Dst                     | Dst index                          | *IAGA2002-ASCII*      | *True*        | - | stable |
+| WDC/ASYSYM                  | ASY/SYM indices                    | *IAGA2002-ASCII*      | *True*        | __OMNIDashboard__ | stable |
+| WDC/AE                      | AE indices                         | *IAGA2002-ASCII*      | *True*        | __OMNIDashboard__ | stable |
+| GFZ/Kp                      | Kp/Ap indices                      | *ASCII*               | *True*        | -              | stable |
+| GFZ/Hpo                     | Hp30 or Hp60 indices               | *ASCII*               | *True*        | -              | stable |
+| GFZ/SNF107                  | SN, F107                           | *ASCII*               | *True*        | -              | stable |
+| ESA/SWARM/EFI_LP_HM         | SWARM Ne, Te, etc.                 | *netcdf*              | *True*        | -              | stable |
+| ESA/SWARM/EFI_TCT02         | SWARM cross track vi               | *netcdf*              | *True*        | -              | stable |
+| ESA/SWARM/AOB_FAC_2F        | SWARM FAC, auroral oval boundary   | *netcdf*              | *True*        | -              | beta   |
+| TUDelft/SWARM/DNS_POD       | Swarm $\rou_n$ (GPS derived)       | *ASCII*               | *True*       |  -           | stable |
+| TUDelft/SWARM/DNS_ACC       | Swarm $\rou_n$ (GPS+Accelerometer) | *ASCII*               | *True*       |  -           | stable |
+| TUDelft/GOCE/WIND_ACC       | GOCE neutral wind                  | *ASCII*               | *True*       |  -           | stable |
+| TUDelft/GRACE/WIND_ACC      | GRACE neutral wind                 | *ASCII*               | *True*       |  -           | stable |
+| TUDelft/GRACE/DNS_ACC       | Grace $\rou_n$                     | *ASCII*               | *True*       |  -           | stable |
+| TUDelft/CHAMP/DNS_ACC       | CHAMP $\rou_n$                     | *ASCII*               | *True*       |  -           | stable |
+ | UTA/GITM/2DALL              | GITM 2D output                     | *binary*, *IDL-sav*   | *False*       | -              | beta   |
+ | UTA/GITM/3DALL              | GITM 3D output                     | *binary*, *IDL-sav*   | *False*       | -              | beta   |
 
 
 
@@ -82,7 +91,7 @@ conda create --name [YOUR_ENV_NAME] -c conda-forge python cython cartopy
 ```
 The package "spyder" is a widely-used python IDE. Other IDEs, like "VS Code" or "Pycharm" also work.
 
-> **_Note:_**   The recommended IDE is Spyder. Sometime, a *RuntimeError* can be raised 
+> **_Note:_**   The recommended IDE is Spyder. Sometimes, a *RuntimeError* can be raised 
 > when the __aacgmv2__ package is called in **PyCharm** or **VS Code**. 
 > If you meet this issue, try to compile the codes in **Spyder** several times. 
 

@@ -8,10 +8,14 @@ __license__ = "BSD-3-Clause License"
 __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
+import matplotlib.pyplot as plt
 from geospacelab.visualization.mpl.__base__ import FigureBase
 from geospacelab.visualization.mpl.dashboards import Dashboard
 from geospacelab.visualization.mpl.panels import Panel
 
-def create_figure(*args, watermark=None, watermark_style=None, **kwargs):
-    return FigureBase(*args, watermark=None, watermark_style=None, **kwargs)
+
+def create_figure(*args, watermark=None, watermark_style=None, **kwargs) -> FigureBase:
+    # return FigureBase(*args, watermark=None, watermark_style=None, **kwargs)
+    fig = plt.figure(*args, FigureClass=FigureBase, watermark=None, watermark_style=None, **kwargs)
+    return fig
 

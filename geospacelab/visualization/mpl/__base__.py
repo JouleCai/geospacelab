@@ -102,8 +102,9 @@ class FigureBase(Figure):
             label = len(self.dashboards) + 1
         
         if len(args) == 1:
-            if issubclass(args[0].__class__, dashboards.Dashboard):
-                self.dashboards[label] = args[0]
+            if issubclass(args[0].__class__, DashboardBase):
+                if args[0] not in self.dashboards.values():
+                    self.dashboards[label] = args[0]
                 return args[0]
             
         if dashboard_class is None:
@@ -119,7 +120,7 @@ class FigureBase(Figure):
         else:
             raise ValueError
 
-        self.dashboards[label] = db(*args, figure=self, **kwargs)
+        self.dashboards[label] = db(*args, figure=self, from_figure=True, **kwargs)
         return self.dashboards[label]
 
     def add_text(self, *args, **kwargs):
@@ -185,7 +186,7 @@ class DashboardBase(object):
 
     _default_dashboard_fontsize = 12
 
-    def __init__(self, figure=None, figure_config=None, figure_class=FigureBase, **kwargs):
+    def __init__(self, figure=None, figure_config=None, figure_class=FigureBase, from_figure=False, **kwargs):
         """
         Initialization
 
@@ -199,6 +200,7 @@ class DashboardBase(object):
         super().__init__(**kwargs)
 
         self._figure_class = figure_class
+        self._from_figure = from_figure
         if figure_config is None:
             figure_config = {}
         self._figure_config = figure_config
@@ -395,7 +397,7 @@ class DashboardBase(object):
         else:
             raise TypeError
 
-        if issubclass(figure.__class__, FigureBase):
+        if issubclass(figure.__class__, FigureBase) and not self._from_figure:
             figure.add_dashboard(self)
         self._figure_ref = weakref.ref(figure)
 
