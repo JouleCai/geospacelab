@@ -66,8 +66,8 @@ on [readthedocs.io](https://geospacelab.readthedocs.io/en/latest/).
 | ESA/SWARM/EFI_LP_HM         | SWARM Ne, Te, etc.                 | *netcdf*              | *True*        | -              | stable |
 | ESA/SWARM/EFI_TCT02         | SWARM cross track vi               | *netcdf*              | *True*        | -              | stable |
 | ESA/SWARM/AOB_FAC_2F        | SWARM FAC, auroral oval boundary   | *netcdf*              | *True*        | -              | beta   |
-| TUDelft/SWARM/DNS_POD       | Swarm $\rou_n$ (GPS derived)       | *ASCII*               | *True*       |  -           | stable |
-| TUDelft/SWARM/DNS_ACC       | Swarm $\rou_n$ (GPS+Accelerometer) | *ASCII*               | *True*       |  -           | stable |
+| TUDelft/SWARM/DNS_POD       | Swarm $\rho_n$ (GPS derived)       | *ASCII*               | *True*       |  -           | stable |
+| TUDelft/SWARM/DNS_ACC       | Swarm $\rho_n$ (GPS+Accelerometer) | *ASCII*               | *True*       |  -           | stable |
 | TUDelft/GOCE/WIND_ACC       | GOCE neutral wind                  | *ASCII*               | *True*       |  -           | stable |
 | TUDelft/GRACE/WIND_ACC      | GRACE neutral wind                 | *ASCII*               | *True*       |  -           | stable |
 | TUDelft/GRACE/DNS_ACC       | Grace $\rou_n$                     | *ASCII*               | *True*       |  -           | stable |
