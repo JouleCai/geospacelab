@@ -192,8 +192,9 @@ class DataHub(object):
             module = importlib.import_module('.'.join(module_keys))
             dataset = getattr(module, 'Dataset')(**kwargs)
             dataset.kind = 'sourced'
-        except ImportError or ModuleNotFoundError as error:
-            print(error)
+        except Exception as error:
+            error_str = str(error)
+            print(error_str.replace(pfr.package_name + '.datahub.sources.', ''))
             mylog.StreamLogger.error(
                 'The data source cannot be docked. \n'
                 + 'Check the built-in sourced data using the method: "list_sourced_dataset". \n'
@@ -261,7 +262,7 @@ class DataHub(object):
         :return: None
         """
 
-        ind = len(self.datasets.keys()) + 1
+        ind = len(self.datasets.keys())
         name = 'dataset_{:02d}'.format(ind)
         if dataset.name is None:
             dataset.name = name
@@ -380,8 +381,12 @@ class DataHub(object):
         :param var: a object of :class:`~geospacelab.datahub.VariableModel`
         :return: None
         """
-        ind = len(self.variables.keys()) + 1
+        ind = len(self.variables.keys())
         self.variables[ind] = var
+
+    @property
+    def host_dataset(self):
+        return self.datasets[0]
 
     @staticmethod
     def list_sourced_datasets():

@@ -11,6 +11,7 @@ __docformat__ = "reStructureText"
 
 import numpy as np
 from numpy.polynomial import Polynomial
+from scipy.interpolate import interp1d
 
 
 def trig_arctan_to_sph_lon(x, y):
@@ -43,6 +44,21 @@ def calc_curve_tangent_slope(x, y, degree=3, unit='radians'):
         slope = slope / np.pi * 180.
 
     return slope
+
+
+def interp_period_data(x, y, xq,  period=360., method='linear', **kwargs):
+    factor = 2 * np.pi / period
+
+    sin_y = np.sin(y * factor)
+    cos_y = np.cos(y * factor)
+    itpf_sin = interp1d(x, sin_y, kind=method, **kwargs)
+    itpf_cos = interp1d(x, cos_y, kind=method, **kwargs)
+    sin_y_i = itpf_sin(xq)
+    cos_y_i = itpf_cos(xq)
+    rad = np.sign(sin_y_i) * (np.pi / 2 - np.arcsin(cos_y_i))
+    rad = np.mod(rad, 2*np.pi)
+    yq = rad / factor
+    return yq
 
 
 if __name__ == "__main__":

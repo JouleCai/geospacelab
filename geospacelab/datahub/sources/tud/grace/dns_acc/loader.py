@@ -22,6 +22,7 @@ class Loader(object):
         self.version = version
         self.variables = {}
         self.done = False
+        self.t_res = 10
         if direct_load:
             self.load()
 
@@ -43,12 +44,13 @@ class Loader(object):
             re.M)
             results = list(zip(*results))
             dts = [datetime.datetime.strptime(dtstr + '000', "%Y-%m-%d %H:%M:%S.%f") for dtstr in results[0]]
+
+            num_rec = len(dts)
             if results[1][0] == 'GPS':
-                
+                self.variables['SC_GPSTIME'] = np.array(dts).reshape(num_rec, 1)
                 t_gps = [(dt - dttool._GPS_DATETIME_0).total_seconds() for dt in dts]
                 dts = dttool.convert_gps_time_to_datetime(t_gps, weeks=None)
-            
-            num_rec = len(dts)
+
             self.variables['SC_DATETIME'] = np.array(dts).reshape(num_rec, 1)
             self.variables['SC_GEO_ALT'] = np.array(results[2]).astype(np.float32).reshape(num_rec, 1) * 1e-3   # in km
             self.variables['SC_GEO_LON'] = np.array(results[3]).astype(np.float32).reshape(num_rec, 1)
@@ -67,10 +69,12 @@ class Loader(object):
             re.M)
             results = list(zip(*results))
             dts = [datetime.datetime.strptime(dtstr + '000', "%Y-%m-%d %H:%M:%S.%f") for dtstr in results[0]]
+            num_rec = len(dts)
             if results[1][0] == 'GPS':
+                self.variables['SC_GPSTIME'] = np.array(dts).reshape(num_rec, 1)
                 t_gps = [(dt - dttool._GPS_DATETIME_0).total_seconds() for dt in dts]
                 dts = dttool.convert_gps_time_to_datetime(t_gps, weeks=None)
-            num_rec = len(dts)
+
             self.variables['SC_DATETIME'] = np.array(dts).reshape(num_rec, 1)
             self.variables['SC_GEO_ALT'] = np.array(results[2]).astype(np.float32).reshape(num_rec, 1) * 1e-3   # in km
             self.variables['SC_GEO_LON'] = np.array(results[3]).astype(np.float32).reshape(num_rec, 1)
@@ -78,6 +82,6 @@ class Loader(object):
             self.variables['SC_GEO_LST'] = np.array(results[5]).astype(np.float32).reshape(num_rec, 1)
             self.variables['SC_ARG_LAT'] = np.array(results[6]).astype(np.float32).reshape(num_rec, 1)
             self.variables['rho_n'] = np.array(results[7]).astype(np.float32).reshape(num_rec, 1)
-            self.variables['rho_n_MEAN'] = np.array(results[8]).astype(np.float32).reshape(num_rec, 1) 
-            self.variables['FLAG'] = np.array(results[9]).astype(np.float32).reshape(num_rec, 1) 
-            self.variables['FLAG_MEAN'] = np.array(results[10]).astype(np.float32).reshape(num_rec, 1)  
+            self.variables['rho_n_MEAN'] = np.array(results[8]).astype(np.float32).reshape(num_rec, 1)
+            self.variables['FLAG'] = np.array(results[9]).astype(np.float32).reshape(num_rec, 1)
+            self.variables['FLAG_MEAN'] = np.array(results[10]).astype(np.float32).reshape(num_rec, 1)

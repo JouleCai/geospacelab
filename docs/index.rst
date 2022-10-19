@@ -14,6 +14,7 @@ A python-based library to collect, manage, and visualize the geospace data.
    installation
    quickstart
    user/manual
+   dev/guidance
    copyright
    citation
 

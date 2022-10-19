@@ -190,7 +190,7 @@ class TSPanel(Panel):
         label = var.get_visual_axis_attr(axis=2, attr_name='label')
         plot_config = basic.dict_set_default(plot_config, label=label)
         if errorbar == 'off':
-            il = ax.plot(x, y, **kwargs)
+            il = ax.plot(x, y, **plot_config)
         elif errorbar == 'on':
             errorbar_config = dict(plot_config)
             errorbar_config.update(var.visual.plot_config.errorbar)
@@ -287,16 +287,18 @@ class TSPanel(Panel):
         return var_for_config
 
     def _set_xaxis(self, ax):
-
+        var_for_config = self._get_var_for_config(ax=ax)
         if self._xlim[0] is None:
             self._xlim[0] = mpl_dates.num2date(ax.get_xlim()[0])
         if self._xlim[1] is None:
             self._xlim[1] = mpl_dates.num2date(ax.get_xlim()[1])
-        ax.set_xlim(self._xlim)
+
         # reverse the x axis if timeline_reverse=True
         if self.timeline_reverse:
-            ax.set_xlim((self._xlim[1], self._xlim[0]))
-
+            var_for_config.visual.axis[0].reserve = True
+        if var_for_config.visual.axis[0].reverse:
+            self._xlim = [self._xlim[1], self._xlim[0]]
+        ax.set_xlim(self._xlim)
         ax.xaxis.set_tick_params(labelsize=plt.rcParams['xtick.labelsize'])
         ax.xaxis.set_tick_params(
             which='both',
@@ -517,6 +519,9 @@ class TSPanel(Panel):
         if zero_line == 'on' and self.axes_overview[ax]['twinx']=='off':
             if (ylim[0] < 0) and (ylim[1] > 0):
                 ax.plot(ax.get_xlim(), [0, 0], 'k--', linewidth=0.5)
+
+        if var_for_config.visual.axis[1].reverse:
+            ylim = [ylim[1], ylim[0]]
         ax.set_ylim(ylim)
         return
 

@@ -405,9 +405,13 @@ This is an example showing the HiLDA aurora in the dayside polar cap region
 Other examples for the time-series plots and map projections can be found [here](https://github.com/JouleCai/geospacelab/tree/master/examples)
 
 ## Citation and Acknowledgements
+### Acknowlegements
+We acknowledge all the dependencies listed above for their contributions to implement a lot of functionality in GeospaceLAB. 
 
-We acknowledge all the dependencies used in developing GeospaceLAB.
+### Co-authorship
+GeospaceLAB aims to help users to manage and visualize multiple kinds of data in space physics in a convenient way. We welcome collaboration to support your research work. If the functionality of GeospaceLAB plays a critical role in a research paper, the co-authorship is expected to be offered to one or more developers.
 
+### Citation
 If GeospaceLAB is used for your scientific work, please mention it in the publication and cite the package:
 > Cai, L. (2022). GeospaceLAB (Version 0.4.19) [Computer software]. https://doi.org/10.5281/zenodo.5377318.
 

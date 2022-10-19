@@ -109,6 +109,16 @@ class DatasetBase(object):
         else:
             self[var_name] = variable_class(dataset=self, name=var_name, visual=self.visual, **kwargs)
         return self[var_name]
+    
+    def clone_variables(self, ds, variable_names=None):
+        if not isinstance(ds, DatasetBase):
+            raise TypeError
+        if variable_names is None:
+            variable_names = ds.keys()
+        for var_name in variable_names:
+            self[var_name] = ds[var_name].clone()
+            self[var_name].dataset = self
+        return None
 
     def label(self, fields=None, separator=' | ', lowercase=True, num_to_str=True) -> str:
         """
@@ -223,8 +233,6 @@ class DatasetUser(DatasetBase):
         super().__init__(
             dt_fr=dt_fr, dt_to=dt_to, name=name, kind='user-defined', visual=visual, label_fields=label_fields, **kwargs
         )
-
-
 
 
 class DatasetSourced(DatasetBase):

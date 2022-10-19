@@ -45,6 +45,7 @@ class VisualAxis(object):
         self.minor_ticks = None
         self.major_tick_max = 6
         self.minor_tick_max = None
+        self.reverse = False
         self.visible = True
 
     def config(self, logging=True, **kwargs):

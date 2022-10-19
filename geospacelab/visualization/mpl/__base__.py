@@ -4,6 +4,7 @@ import string
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import pathlib
 
 from matplotlib.gridspec import GridSpec, SubplotSpec
 from matplotlib.figure import Figure
@@ -99,7 +100,7 @@ class FigureBase(Figure):
         import geospacelab.visualization.mpl.dashboards as dashboards
         
         if label is None:
-            label = len(self.dashboards) + 1
+            label = len(self.dashboards)
         
         if len(args) == 1:
             if issubclass(args[0].__class__, DashboardBase):
@@ -260,7 +261,7 @@ class DashboardBase(object):
         # panel.add_subplot(self.gs[row_ind[0]:row_ind[1], col_ind[0]:col_ind[1]], major=True, **kwargs)
 
         if index is None:
-            index = len(self.panels.keys()) + 1
+            index = len(self.panels.keys())
         elif index in self.panels.keys():
             raise ValueError('The panel index has been occupied. Change to a new one!')
         self.panels[index] = panel
@@ -365,6 +366,49 @@ class DashboardBase(object):
         ax.set_xlim([0, 1])
         ax.set_ylim([0, 1])
         return ax
+    
+    def save_figure(self, *args, file_dir=None, file_name=None, dpi=300, **kwargs):
+        default_filetypes = {'ps': 'Postscript', 
+                     'eps': 'Encapsulated Postscript', 
+                     'pdf': 'Portable Document Format', 
+                     'pgf': 'PGF code for LaTeX', 
+                     'png': 'Portable Network Graphics', 
+                     'raw': 'Raw RGBA bitmap', 
+                     'rgba': 'Raw RGBA bitmap', 
+                     'svg': 'Scalable Vector Graphics', 
+                     'svgz': 'Scalable Vector Graphics', 
+                     'jpg': 'Joint Photographic Experts Group', 
+                     'jpeg': 'Joint Photographic Experts Group', 
+                     'tif': 'Tagged Image File Format', 
+                     'tiff': 'Tagged Image File Format'}
+        if len(args) == 1:
+            file_path = args[0]
+        elif len(args) == 0:
+            if type(file_name) is not str:
+                raise ValueError('The file name ("file_name") must be assigned!')
+            
+            if file_dir is None:
+                file_dir = pathlib.Path().cwd()
+            else:
+                file_dir = pathlib.Path(file_dir)
+
+            file_path = file_dir / file_name
+        else:
+            raise ValueError
+        
+        # check the file extension
+        sufs = file_path.suffixes
+        if not list(sufs):
+            format = 'png'
+            file_path = file_path.with_suffix('.png')
+        else:
+            if sufs[-1] in default_filetypes.keys():
+                format = sufs[-1].split('.')[-1]
+            else:
+                format = 'png'
+                file_path = pathlib.Path(file_path + '.png')
+
+        plt.savefig(file_path, dpi=dpi, format=format, **kwargs)
     
     @property
     def figure(self):

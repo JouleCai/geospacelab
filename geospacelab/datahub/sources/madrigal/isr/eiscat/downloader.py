@@ -30,10 +30,10 @@ import geospacelab.toolbox.utilities.pydatetime as dttool
 
 
 def test():
-    sites = ['VHF']
-    dt_fr = datetime.datetime(2010, 1, 1,)
-    dt_to = datetime.datetime(2021, 12, 31)
-    download_obj = Downloader(dt_fr, dt_to, sites=sites, kind_data="madrigal")
+    sites = ['UHF']
+    dt_fr = datetime.datetime(2014, 1, 1,)
+    dt_to = datetime.datetime(2014, 12, 31)
+    # download_obj = Downloader(dt_fr, dt_to, sites=sites, kind_data="madrigal")
     # schedule = EISCATSchedule(dt_fr=dt_fr, dt_to=dt_to)
     # schedule.to_txt()
 
@@ -256,7 +256,7 @@ class EISCATSchedule(object):
         self.monthly = monthly  # True: download the whole month data. False: only for the specific date
         self.search_archives()
         self.analyze_archives()
-        # self.to_txt()
+        self.to_txt()
 
     def search_archives(self):
         """
@@ -308,6 +308,16 @@ class EISCATSchedule(object):
                 # print(dt_fr)
                 # print(info)
                 antenna = info[0]
+                any_pattern = False
+                for site in self.sites:
+                    if site.lower() in antenna.lower():
+                        any_pattern = True
+                    if site == 'ESR':
+                        if ('32' in antenna) or ('42' in antenna):
+                            any_pattern = True
+                if not any_pattern:
+                    continue
+
                 exp = info[1]
                 info = item_text[65:-1].split(')')[-1].strip()
 
@@ -320,6 +330,8 @@ class EISCATSchedule(object):
                 if len(info_splits) > 2:
                     version = info_splits[2]
 
+                # if not (('ip2' in mode.lower()) or 'cp2' in mode.lower()):
+                #    continue
                 # try:
                 #     code = info.split('_')[0]
                 #     mode = info.split('_')[1]
@@ -330,7 +342,7 @@ class EISCATSchedule(object):
 
                 ind_diff = np.diff(inds)
                 ind_gaps = np.where(ind_diff > 3)[0]  # time difference greater than 1.5 h
-                ind_ranges = [];
+                ind_ranges = []
                 for ind_, ind_gap in enumerate(ind_gaps):
                     if ind_ == 0:
                         ind_fr = inds[0]

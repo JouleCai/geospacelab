@@ -25,12 +25,12 @@ class OMNIDashboard(TSDashboard):
             'load_mode': kwargs.get('load_mode', 'AUTO'),
             'allow_load': kwargs.get('allow_load', True)
         }
-        ds_1 = self.dock(datasource_contents=['cdaweb', 'omni'], **omni_config)
-        ds_2 = self.dock(datasource_contents=['wdc', 'ae'], allow_load=True, load_mode='AUTO')
-        ds_3 = self.dock(datasource_contents=['wdc', 'asysym'])
-        ds_4 = self.dock(datasource_contents=['gfz', 'kpap'])
+        self.ds_omni = self.dock(datasource_contents=['cdaweb', 'omni'], **omni_config)
+        self.ds_ae = self.dock(datasource_contents=['wdc', 'ae'], allow_load=True, load_mode='AUTO')
+        self.ds_asysym = self.dock(datasource_contents=['wdc', 'asysym'])
+        self.ds_kpap = self.dock(datasource_contents=['gfz', 'kpap'])
         # ds_1.list_all_variables()
-        self.title = kwargs.pop('title', ', '.join([ds_1.facility, ds_1.omni_res]))
+        self.title = kwargs.pop('title', ', '.join([self.ds_omni.facility, self.ds_omni.omni_res]))
 
     def list_all_variables(self):
         for key, dataset in self.datasets.items():
@@ -47,23 +47,23 @@ class OMNIDashboard(TSDashboard):
         super().add_title(x=x, y=y, title=title, append_time=append_time, **kwargs)
 
     def quicklook(self):
-        Bx = self.assign_variable('B_x_GSM', dataset=self.datasets[1])
-        By = self.assign_variable('B_y_GSM', dataset=self.datasets[1])
-        Bz = self.assign_variable('B_z_GSM', dataset=self.datasets[1])
+        Bx = self.assign_variable('B_x_GSM', dataset=self.ds_omni)
+        By = self.assign_variable('B_y_GSM', dataset=self.ds_omni)
+        Bz = self.assign_variable('B_z_GSM', dataset=self.ds_omni)
 
-        n_p = self.assign_variable('n_p', dataset=self.datasets[1])
-        v_sw = self.assign_variable('v_sw', dataset=self.datasets[1])
-        p_dyn = self.assign_variable('p_dyn', dataset=self.datasets[1])
+        n_p = self.assign_variable('n_p', dataset=self.ds_omni)
+        v_sw = self.assign_variable('v_sw', dataset=self.ds_omni)
+        p_dyn = self.assign_variable('p_dyn', dataset=self.ds_omni)
 
-        au = self.assign_variable('AU', dataset=self.datasets[2])
+        au = self.assign_variable('AU', dataset=self.ds_ae)
         au.visual.axis[1].lim = [None, None]
-        al = self.assign_variable('AL', dataset=self.datasets[2])
+        al = self.assign_variable('AL', dataset=self.ds_ae)
 
-        sym_h = self.assign_variable('SYM_H', dataset=self.datasets[3])
+        sym_h = self.assign_variable('SYM_H', dataset=self.ds_asysym)
         sym_h.visual.axis[1].lim = [None, None]
         sym_h.visual.axis[1].label = '@v.label'
 
-        kp = self.assign_variable('Kp', dataset=self.datasets[4])
+        kp = self.assign_variable('Kp', dataset=self.ds_kpap)
         self.list_assigned_variables()
         self.list_datasets()
 

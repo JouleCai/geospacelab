@@ -21,34 +21,32 @@ class EISCATDashboard(TSDashboard):
 
         figure = kwargs.pop('figure', 'new')
         super().__init__(dt_fr=dt_fr, dt_to=dt_to, figure=figure)
-        ds_1 = self.dock(datasource_contents=['madrigal', 'isr', 'eiscat'], **kwargs)
-        ds_1.load_data(load_mode=kwargs['load_mode'])
+        self.dock(datasource_contents=['madrigal', 'isr', 'eiscat'], **kwargs)
+        self.host_dataset.load_data(load_mode=kwargs['load_mode'])
         # ds_1.list_all_variables()
-        self.title = kwargs.pop('title', ', '.join([ds_1.facility, ds_1.site, ds_1.pulse_code, ds_1.scan_mode, ds_1.modulation]))
-
-    @property
-    def dataset(self):
-        return self.datasets[1]
+        self.title = kwargs.pop('title', ', '.join([self.host_dataset.facility,
+                                                    self.host_dataset.site, self.host_dataset.pulse_code,
+                                                    self.host_dataset.scan_mode, self.host_dataset.modulation]))
 
     def status_mask(self, bad_status=None):
-        self.dataset.status_mask(bad_status=bad_status)
+        self.host_dataset.status_mask(bad_status=bad_status)
 
     def residual_mask(self, residual_lim=None):
-        self.dataset.residual_mask(residual_lim=residual_lim)
+        self.host_dataset.residual_mask(residual_lim=residual_lim)
 
     def outlier_mask(self, condition, fill_value=None):
-        self.dataset.outlier_mask(condition, fill_value=fill_value)
+        self.host_dataset.outlier_mask(condition, fill_value=fill_value)
 
     def select_beams(self, field_aligned=False, az_el_pairs=None):
-        self.dataset.select_beams(field_aligned=field_aligned, az_el_pairs=az_el_pairs)
+        self.host_dataset.select_beams(field_aligned=field_aligned, az_el_pairs=az_el_pairs)
 
     def list_eiscat_variables(self):
-        self.datasets[1].list_all_variables()
+        self.host_dataset.list_all_variables()
 
     def check_beams(self, error=0.5, logging=True, full_sequence=False):
         import numpy as np
-        azV = self.dataset['AZ']
-        elV = self.dataset['EL']
+        azV = self.host_dataset['AZ']
+        elV = self.host_dataset['EL']
         az_arr = np.round(azV.value, decimals=1)
         el_arr = np.round(elV.value, decimals=1)
         beams = np.array([[az_arr[0, 0], el_arr[0, 0]]])
@@ -85,7 +83,7 @@ class EISCATDashboard(TSDashboard):
         beams_counts = beams_counts[count_ind]
         beams_sequence_inds = beams_sequence_inds[count_ind]
         if logging:
-            label = self.dataset.label()
+            label = self.host_dataset.label()
             mylog.simpleinfo.info("Dataset: {}".format(label))
             mylog.simpleinfo.info("Listing all the beams ...")
             mylog.simpleinfo.info('{:^20s}{:^20s}{:^20s}{:80s}'.format('No.', '(az, el)', 'Counts', 'Sequence indices'))

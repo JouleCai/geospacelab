@@ -10,7 +10,7 @@ __docformat__ = "reStructureText"
 
 import datetime
 
-from geospacelab.express.dmsp_dashboard import DMSPDashboard
+from geospacelab.express.dmsp_dashboard import DMSPTSDashboard
 
 
 def show_dmsp():
@@ -20,7 +20,7 @@ def show_dmsp():
     dt_fr = dt_c - datetime.timedelta(minutes=diff_minutes/2)
     dt_to = dt_c + datetime.timedelta(minutes=diff_minutes/2)
 
-    dashboard = DMSPDashboard(
+    dashboard = DMSPTSDashboard(
         dt_fr, dt_to, sat_id=sat_id,
     )
     dashboard.quicklook()

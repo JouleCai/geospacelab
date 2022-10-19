@@ -37,10 +37,6 @@ class MillstoneHillISRDashboard(TSDashboard):
 
         pass
 
-    @property
-    def host_dataset(self):
-        return self.datasets[1]
-
     def status_mask(self, bad_status=None):
         self.host_dataset.status_mask(bad_status=bad_status)
 

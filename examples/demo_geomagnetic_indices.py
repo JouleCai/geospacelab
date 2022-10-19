@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import geospacelab.visualization.mpl.dashboards as dashboards
 
 
-def test():
+def quicklook_geomag_indices():
     dt_fr = datetime.datetime(2005, 8, 31, 12)
     dt_to = datetime.datetime(2005, 9, 2, 12)
     tsdb = dashboards.TSDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (12, 8)})
@@ -48,5 +48,5 @@ def test():
 
 
 if __name__ == "__main__":
-    test()
+    quicklook_geomag_indices()
     plt.show()

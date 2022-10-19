@@ -7,10 +7,11 @@ dt_fr = datetime.datetime(2015, 3, 16, 12)  # from
 dt_to = datetime.datetime(2015, 3, 19, 12)  # to
 
 # Create a DataHub instance
-db = TSDashboard(dt_fr=dt_fr, dt_to=dt_to)
+db = TSDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (6, 6)})
 
 # Dock the sourced datasets
-ds_omni = db.dock(datasource_contents=['cdaweb', 'omni'], omni_type='OMNI2', omni_res='1min', load_mode='AUTO', allow_load=True)
+ds_omni = db.dock(datasource_contents=['cdaweb', 'omni'], omni_type='OMNI2', omni_res='1min', load_mode='AUTO',
+                  allow_load=True)
 ds_kp = db.dock(datasource_contents=['gfz', 'kpap'])
 ds_sym = db.dock(datasource_contents=['wdc', 'asysym'])
 

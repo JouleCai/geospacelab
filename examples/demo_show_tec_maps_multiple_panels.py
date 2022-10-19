@@ -11,28 +11,63 @@ def test_tec():
 
     dt_fr = datetime.datetime(2021, 8, 24, 1)
     dt_to = datetime.datetime(2021, 8, 24, 23)
-    viewer = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (15, 10)})
-    viewer.dock(datasource_contents=['madrigal', 'gnss', 'tecmap'])
-    viewer.set_layout(2, 3, wspace=0.5)
+    db = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (15, 10)})
+    db.dock(datasource_contents=['madrigal', 'gnss', 'tecmap'])
+    db.set_layout(2, 3, wspace=0.5)
 
-    tec = viewer.assign_variable('TEC_MAP', dataset_index=1)
-    dts = viewer.assign_variable('DATETIME', dataset_index=1).value.flatten()
-    glat = viewer.assign_variable('GEO_LAT', dataset_index=1).value
-    glon = viewer.assign_variable('GEO_LON', dataset_index=1).value
+    tec = db.assign_variable('TEC_MAP', dataset_index=0)
+    dts = db.assign_variable('DATETIME', dataset_index=0).value.flatten()
+    glat = db.assign_variable('GEO_LAT', dataset_index=0).value
+    glon = db.assign_variable('GEO_LON', dataset_index=0).value
 
-    time1 = datetime.datetime(2021, 8, 24, 9, 30)
-    ind_t = np.where(dts == time1)[0]
+    """
+    Generation of the first panel
+    """
+    time_c = datetime.datetime(2021, 8, 24, 9, 30)
+    ind_t = np.where(dts == time_c)[0]
 
-    panel1 = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time1, mirror_south=True)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time1, boundary_lat=60)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='S', ut=time1,
+    # Add the first panel
+    # AACGM LAT-MLT in the northern hemisphere
+    panel = db.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=60)
+    # AACGM LAT-MLT in the southern hemisphere
+    # panel = db.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time_c, mirror_south=True)
+    # GEO LAT-LST in the northern hemisphere
+    # panel = db.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time_c, boundary_lat=60)
+    # GEO LAT-LST in the southern hemisphere
+    # panel = db.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time_c, mirror_south=True)
+    # GEO LAT-LON in the southern hemisphere
+    # panel = db.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='S', ut=time_c,
     #                          boundary_lat=0, mirror_south=False)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
+    # GEO LAT-LON in the northern hemisphere
+    # pid = db.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time_c,
     #                        boundary_lat=30, mirror_south=False)
-    panel1.overlay_coastlines()
-    panel1.overlay_gridlines()
+    panel.overlay_coastlines()
+    panel.overlay_gridlines()
+    #
+    # retrieve the data array
+    tec_ = tec.value[ind_t[0]]
+    # Configuration for plotting
+    pcolormesh_config = tec.visual.plot_config.pcolormesh
+    pcolormesh_config.update(c_lim=[5, 12])
+    import geospacelab.visualization.mpl.colormaps as cm
+    pcolormesh_config.update(cmap='jet')
+
+    # overlay the 2-D TEC map
+    ipc = panel.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
+    panel.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
+    # add the panel title
+    panel.add_title(title=time_c.strftime("%Y-%m-%d %H:%M"))
+
+    """
+    Repeating process for the second panel
+    """
+    time_c = datetime.datetime(2021, 8, 24, 10, 0)
+    ind_t = np.where(dts == time_c)[0]
+
+    panel = db.add_polar_map(row_ind=0, col_ind=1, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=60)
+
+    panel.overlay_coastlines()
+    panel.overlay_gridlines()
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
@@ -40,26 +75,20 @@ def test_tec():
 
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
-    ipc = panel1.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
-    panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
-    #
-    # # viewer.add_text(0.5, 1.1, "dashboard title")
-    panel1().text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1().transAxes)
+    ipc = panel.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
+    panel.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
+    panel.add_title(title=time_c.strftime("%Y-%m-%d %H:%M"))
 
-    ####
-    time1 = datetime.datetime(2021, 8, 24, 10, 0)
-    ind_t = np.where(dts == time1)[0]
+    """
+    Repeating process for the third panel
+    """
+    time_c = datetime.datetime(2021, 8, 24, 10, 30)
+    ind_t = np.where(dts == time_c)[0]
 
-    panel1 = viewer.add_polar_map(row_ind=0, col_ind=1, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time1, mirror_south=True)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time1, boundary_lat=60)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='S', ut=time1,
-    #                          boundary_lat=0, mirror_south=False)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
-    #                        boundary_lat=30, mirror_south=False)
-    panel1.overlay_coastlines()
-    panel1.overlay_gridlines()
+    panel = db.add_polar_map(row_ind=0, col_ind=2, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=60)
+
+    panel.overlay_coastlines()
+    panel.overlay_gridlines()
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
@@ -67,54 +96,20 @@ def test_tec():
 
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
-    ipc = panel1.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
-    panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
-    #
-    # # viewer.add_text(0.5, 1.1, "dashboard title")
-    panel1().text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1().transAxes)
+    ipc = panel.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
+    panel.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
+    panel.add_title(title=time_c.strftime("%Y-%m-%d %H:%M"))
 
-    ####
-    time1 = datetime.datetime(2021, 8, 24, 10, 30)
-    ind_t = np.where(dts == time1)[0]
+    """
+    Repeating process for the fourth panel
+    """
+    time_c = datetime.datetime(2021, 8, 24, 11, 0)
+    ind_t = np.where(dts == time_c)[0]
 
-    panel1 = viewer.add_polar_map(row_ind=0, col_ind=2, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time1, mirror_south=True)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time1, boundary_lat=60)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='S', ut=time1,
-    #                          boundary_lat=0, mirror_south=False)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
-    #                        boundary_lat=30, mirror_south=False)
+    panel = db.add_polar_map(row_ind=1, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=60)
 
-    panel1.overlay_coastlines()
-    panel1.overlay_gridlines()
-    #
-    tec_ = tec.value[ind_t[0], :, :]
-    pcolormesh_config = tec.visual.plot_config.pcolormesh
-    pcolormesh_config.update(c_lim=[5, 12])
-
-    import geospacelab.visualization.mpl.colormaps as cm
-    pcolormesh_config.update(cmap='jet')
-    ipc = panel1.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
-    panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
-    #
-    # # viewer.add_text(0.5, 1.1, "dashboard title")
-    panel1().text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1().transAxes)
-
-    ####
-    time1 = datetime.datetime(2021, 8, 24, 11, 0)
-    ind_t = np.where(dts == time1)[0]
-
-    panel1 = viewer.add_polar_map(row_ind=1, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time1, mirror_south=True)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time1, boundary_lat=60)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='S', ut=time1,
-    #                          boundary_lat=0, mirror_south=False)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
-    #                        boundary_lat=30, mirror_south=False)
-    panel1.overlay_coastlines()
-    panel1.overlay_gridlines()
+    panel.overlay_coastlines()
+    panel.overlay_gridlines()
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
@@ -122,62 +117,19 @@ def test_tec():
 
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
-    ipc = panel1.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
-    panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
-    #
-    # # viewer.add_text(0.5, 1.1, "dashboard title")
-    panel1().text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1().transAxes)
+    ipc = panel.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
+    panel.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
+    panel.add_title(title=time_c.strftime("%Y-%m-%d %H:%M"))
 
-    ####
-    time1 = datetime.datetime(2021, 8, 24, 11, 30)
-    ind_t = np.where(dts == time1)[0]
+    """
+    Repeating process for the fifth panel
+    """
+    time_c = datetime.datetime(2021, 8, 24, 11, 30)
+    ind_t = np.where(dts == time_c)[0]
 
-    panel1 = viewer.add_polar_map(row_ind=1, col_ind=1, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time1, mirror_south=True)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time1, boundary_lat=60)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='S', ut=time1,
-    #                          boundary_lat=0, mirror_south=False)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
-    #                        boundary_lat=30, mirror_south=False)
-    panel1.overlay_coastlines()
-    panel1.overlay_gridlines()
-    #
-    tec_ = tec.value[ind_t[0], :, :]
-    pcolormesh_config = tec.visual.plot_config.pcolormesh
-    pcolormesh_config.update(c_lim=[5, 15])
-    # Licensed under the BSD 3-Clause License
-    # Copyright (C) 2021 GeospaceLab (geospacelab)
-    # Author: Lei Cai, Space Physics and Astronomy, University of Oulu
-
-    __author__ = "Lei Cai"
-    __copyright__ = "Copyright 2021, GeospaceLab"
-    __license__ = "BSD-3-Clause License"
-    __email__ = "lei.cai@oulu.fi"
-    __docformat__ = "reStructureText"
-
-    import geospacelab.visualization.mpl.colormaps as cm
-    pcolormesh_config.update(cmap='jet')
-    ipc = panel1.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
-    panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
-    #
-    # # viewer.add_text(0.5, 1.1, "dashboard title")
-    panel1().text(0.3, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1().transAxes)
-
-    ####
-    time1 = datetime.datetime(2021, 8, 24, 12, 0)
-    ind_t = np.where(dts == time1)[0]
-
-    panel1 = viewer.add_polar_map(row_ind=1, col_ind=2, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time1, boundary_lat=60)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time1, mirror_south=True)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time1, boundary_lat=60)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time1, mirror_south=True)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='S', ut=time1,
-    #                          boundary_lat=0, mirror_south=False)
-    # pid = viewer.add_polar_map(row_ind=0, col_ind=0, style='lon-fixed', cs='GEO', lon_c=0., pole='N', ut=time1,
-    #                        boundary_lat=30, mirror_south=False)
-    panel1.overlay_coastlines()
-    panel1.overlay_gridlines()
+    panel = db.add_polar_map(row_ind=1, col_ind=1, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=60)
+    panel.overlay_coastlines()
+    panel.overlay_gridlines()
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
@@ -185,12 +137,30 @@ def test_tec():
 
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
-    ipc = panel1.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
-    panel1.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
-    #
-    # # viewer.add_text(0.5, 1.1, "dashboard title")
-    panel1().text(0.4, 1.1, time1.strftime("%Y-%m-%d %H:%M"), transform=panel1().transAxes)
+    ipc = panel.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
+    panel.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
+    panel.add_title(title=time_c.strftime("%Y-%m-%d %H:%M"))
 
+    """
+        Repeating process for the sixth panel
+    """
+    time_c = datetime.datetime(2021, 8, 24, 12, 0)
+    ind_t = np.where(dts == time_c)[0]
+
+    panel = db.add_polar_map(row_ind=1, col_ind=2, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=60)
+
+    panel.overlay_coastlines()
+    panel.overlay_gridlines()
+    #
+    tec_ = tec.value[ind_t[0], :, :]
+    pcolormesh_config = tec.visual.plot_config.pcolormesh
+    pcolormesh_config.update(c_lim=[5, 15])
+
+    import geospacelab.visualization.mpl.colormaps as cm
+    pcolormesh_config.update(cmap='jet')
+    ipc = panel.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
+    panel.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
+    panel.add_title(title=time_c.strftime("%Y-%m-%d %H:%M"))
 
     plt.savefig('example_tec_aacgm_fixed_mlt', dpi=200)
     plt.show()

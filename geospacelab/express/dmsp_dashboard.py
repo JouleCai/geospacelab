@@ -15,7 +15,7 @@ from geospacelab.visualization.mpl.dashboards import TSDashboard
 import geospacelab.toolbox.utilities.pylogging as mylog
 
 
-class DMSPDashboard(TSDashboard):
+class DMSPTSDashboard(TSDashboard):
     def __init__(
             self,
             dt_fr: datetime.datetime,
@@ -93,7 +93,7 @@ def example():
     dt_fr = datetime.datetime.strptime('20150908' + '2034', '%Y%m%d%H%M')
     dt_to = datetime.datetime.strptime('20150908' + '2036', '%Y%m%d%H%M')
 
-    dashboard = DMSPDashboard(
+    dashboard = DMSPTSDashboard(
         dt_fr, dt_to, sat_id='F18',
     )
     dashboard.quicklook()

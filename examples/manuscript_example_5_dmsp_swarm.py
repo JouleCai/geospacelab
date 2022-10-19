@@ -3,7 +3,6 @@ import scipy.io as sio
 import pathlib
 import datetime
 import numpy as np
-import pandas as pd
 
 from geospacelab.datahub import DatasetUser
 from geospacelab.visualization.mpl.dashboards import TSDashboard
@@ -23,7 +22,7 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
     orbit_id = dmsp_orbit_id
 
     # Create a geodashboard object
-    dashboard = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (18, 15)})
+    dashboard = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (16, 14)})
 
     # If the orbit_id is specified, only one file will be downloaded. This option saves the downloading time.
     # dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole='N', sat_id='f17', orbit_id='46863')
@@ -60,7 +59,7 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
     mlon_ = mlon.value[ind_t]
     mlt_ = mlt.value[ind_t]
     # Add a polar map panel to the dashboard. Currently the style is the fixed MLT at mlt_c=0. See the keywords below:
-    panel1 = dashboard.add_polar_map(
+    panel = dashboard.add_polar_map(
         row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM',
         mlt_c=0., pole=pole, ut=time_c, boundary_lat=55., mirror_south=True
     )
@@ -68,17 +67,17 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
     # Some settings for plotting.
     pcolormesh_config = lbhs.visual.plot_config.pcolormesh
     # Overlay the SSUSI image in the map.
-    ipc = panel1.overlay_pcolormesh(
+    ipc = panel.overlay_pcolormesh(
         data=lbhs_, coords={'lat': mlat_, 'lon': mlon_, 'mlt': mlt_}, cs='AACGM', **pcolormesh_config)
     # Add a color bar
-    panel1.add_colorbar(ipc, c_label=band + " (R)", c_scale=pcolormesh_config['c_scale'], left=1.1, bottom=0.1,
+    panel.add_colorbar(ipc, c_label=band + " (R)", c_scale=pcolormesh_config['c_scale'], left=1.1, bottom=0.1,
                         width=0.05, height=0.7)
 
     # Overlay the gridlines
-    panel1.overlay_gridlines(lat_res=5, lon_label_separator=5)
+    panel.overlay_gridlines(lat_res=5, lon_label_separator=5)
 
     # Overlay the coastlines in the AACGM coordinate
-    panel1.overlay_coastlines()
+    panel.overlay_coastlines()
 
     # Overlay cross-track velocity along satellite trajectory
     sc_dt = ds_s1['SC_DATETIME'].value.flatten()
@@ -88,12 +87,12 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
     sc_coords = {'lat': sc_lat, 'lon': sc_lon, 'height': sc_alt}
 
     v_H = ds_s1['v_i_H'].value.flatten()
-    panel1.overlay_cross_track_vector(
+    panel.overlay_cross_track_vector(
         vector=v_H, unit_vector=1000, vector_unit='m/s', alpha=0.3, color='red',
         sc_coords=sc_coords, sc_ut=sc_dt, cs='GEO',
     )
     # Overlay the satellite trajectory with ticks
-    panel1.overlay_sc_trajectory(sc_ut=sc_dt, sc_coords=sc_coords, cs='GEO')
+    panel.overlay_sc_trajectory(sc_ut=sc_dt, sc_coords=sc_coords, cs='GEO')
     
     # Overlay swarm satellite trajectory
     sc2_dt = ds_swarm['SC_DATETIME'].value.flatten()
@@ -102,14 +101,14 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
     sc2_alt = ds_swarm['SC_GEO_ALT'].value.flatten()
     sc2_coords = {'lat': sc2_lat, 'lon': sc2_lon, 'height': sc2_alt}
 
-    panel1.overlay_sc_trajectory(sc_ut=sc2_dt, sc_coords=sc2_coords, cs='GEO', color='m')
+    panel.overlay_sc_trajectory(sc_ut=sc2_dt, sc_coords=sc2_coords, cs='GEO', color='m')
 
     # Overlay sites
-    panel1.overlay_sites(site_ids=['TRO', 'ESR'], coords={'lat': [69.58, 78.15], 'lon': [19.23, 16.02], 'height': 0.}, cs='GEO', marker='^', markersize=5)
+    panel.overlay_sites(site_ids=['TRO', 'ESR'], coords={'lat': [69.58, 78.15], 'lon': [19.23, 16.02], 'height': 0.}, cs='GEO', marker='^', markersize=5)
 
     # Add the title
     polestr = 'North' if pole == 'N' else 'South'
-    panel1.add_title(
+    panel.add_title(
             title='DMSP/SSUSI, EDR-AUR, ' + band + ', ' + sat_id.upper() + ', ' + polestr + ', ' + time_c.strftime('%Y-%m-%d %H%M UT'))
 
     # Add the second polar map on the right side
@@ -134,7 +133,7 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
 
     glat_, glon_, lbhs_ = ds_dmsp_ssusi_disk.regriddata(disk_data=lbhs_, disk_geo_lat=glat_, disk_geo_lon=glon_)
     # Add a polar map panel to the dashboard. Currently the style is the fixed MLT at mlt_c=0. See the keywords below:
-    panel1 = dashboard.add_polar_map(
+    panel = dashboard.add_polar_map(
         row_ind=0, col_ind=1, style='mlt-fixed', cs='AACGM',
         mlt_c=0., pole=pole, ut=time_c, boundary_lat=55., mirror_south=True
     )
@@ -143,18 +142,18 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
     pcolormesh_config = lbhs.visual.plot_config.pcolormesh
     scdt_ = scdt.value[ind_t][:, np.newaxis]
     # Overlay the SSUSI image in the map.
-    ipc = panel1.overlay_pcolormesh(
+    ipc = panel.overlay_pcolormesh(
         data=lbhs_, coords={'lat': glat_, 'lon': glon_, 'height': alt_}, ut=scdt_, cs='GEO', **pcolormesh_config,
         regridding=True, data_res=0.5, grid_res=0.05)
     # Add a color bar
-    panel1.add_colorbar(ipc, c_label=band + " (R)", c_scale=pcolormesh_config['c_scale'], left=1.1, bottom=0.1,
+    panel.add_colorbar(ipc, c_label=band + " (R)", c_scale=pcolormesh_config['c_scale'], left=1.1, bottom=0.1,
                         width=0.05, height=0.7)
 
     # Overlay the gridlines
-    panel1.overlay_gridlines(lat_res=5, lon_label_separator=5)
+    panel.overlay_gridlines(lat_res=5, lon_label_separator=5)
 
     # Overlay the coastlines in the AACGM coordinate
-    panel1.overlay_coastlines()
+    panel.overlay_coastlines()
 
     # Overlay cross-track velocity along satellite trajectory
     sc_dt = ds_s1['SC_DATETIME'].value.flatten()
@@ -164,12 +163,12 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
     sc_coords = {'lat': sc_lat, 'lon': sc_lon, 'height': sc_alt}
 
     v_H = ds_s1['v_i_H'].value.flatten()
-    panel1.overlay_cross_track_vector(
+    panel.overlay_cross_track_vector(
         vector=v_H, unit_vector=1000, vector_unit='m/s', alpha=0.3, color='red',
         sc_coords=sc_coords, sc_ut=sc_dt, cs='GEO',
     )
     # Overlay the satellite trajectory with ticks
-    panel1.overlay_sc_trajectory(sc_ut=sc_dt, sc_coords=sc_coords, cs='GEO')
+    panel.overlay_sc_trajectory(sc_ut=sc_dt, sc_coords=sc_coords, cs='GEO')
 
     # Overlay swarm satellite trajectory
     sc2_dt = ds_swarm['SC_DATETIME'].value.flatten()
@@ -178,15 +177,15 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
     sc2_alt = ds_swarm['SC_GEO_ALT'].value.flatten()
     sc2_coords = {'lat': sc2_lat, 'lon': sc2_lon, 'height': sc2_alt}
 
-    panel1.overlay_sc_trajectory(sc_ut=sc2_dt, sc_coords=sc2_coords, cs='GEO', color='m')
+    panel.overlay_sc_trajectory(sc_ut=sc2_dt, sc_coords=sc2_coords, cs='GEO', color='m')
 
     # Overlay sites
-    panel1.overlay_sites(site_ids=['TRO', 'ESR'], coords={'lat': [69.58, 78.15], 'lon': [19.23, 16.02], 'height': 0.},
+    panel.overlay_sites(site_ids=['TRO', 'ESR'], coords={'lat': [69.58, 78.15], 'lon': [19.23, 16.02], 'height': 0.},
                          cs='GEO', marker='^', markersize=5)
 
     # Add the title
     polestr = 'North' if pole == 'N' else 'South'
-    panel1.add_title(
+    panel.add_title(
         title='DMSP/SSUSI, SDR-DISK, ' + band + ', ' + sat_id.upper() + ', ' + polestr + ', ' + time_c.strftime(
             '%Y-%m-%d %H%M UT'))
 
@@ -277,159 +276,8 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
                        left=0.58, right=0.93, top=0.5, hspace=0)
     db_swarm.draw()
     db_swarm.add_panel_labels()
-    
-    """ SWARM/POD
-    """
-    # try:
-    #     db_rou = TSDashboard(dt_fr=dt_fr, dt_to=dt_to, figure=dashboard.figure)
-    #
-    #     # Dock the datasets. Different datasets store different types of data.
-    #     # Dock the SWARM-A DNS-POD data
-    #     ds_pod = db_rou.dock(datasource_contents=['tud', 'swarm', 'dns_pod'], sat_id='C')
-    #     ds_acc = db_rou.dock(datasource_contents=['tud', 'swarm', 'dns_acc'], sat_id='C')
-    #
-    #     # Assign variables from the datasets for visualization.
-    #     rho_n_pod = db_rou.assign_variable('rho_n', dataset=ds_pod)
-    #     rho_n_acc = db_rou.assign_variable('rho_n', dataset=ds_acc)
-    #     rho_n_pod.visual.axis[1].label = r'$\rho$'
-    #     rho_n_pod.visual.axis[2].label = 'POD'
-    #     rho_n_acc.visual.axis[2].label = 'ACC'
-    #
-    #     glat = db_rou.assign_variable('SC_GEO_LAT', dataset=ds_pod)
-    #     glon = db_rou.assign_variable('SC_GEO_LON', dataset=ds_pod)
-    #
-    #     db_rou.set_layout([[rho_n_pod, rho_n_acc]], left=0.5, right=0.9, bottom=0.8, hspace=0.01)
-    #     db_rou.draw()
-    # except:
-    #     print(swarm_dn.strftime('%Y-%m-%d %H:%M UT'))
-    #
-    # db_swarm.add_title(title='SWARM-' + swarm_sat_id.upper() + ', ' + swarm_dn.strftime('%Y-%m-%d %H:%M UT'))
-    db_swarm.save_figure(file_name = 'compare_v2_E' + swarm_dn.strftime('%Y-%m-%d') + '_SWARM-' + swarm_sat_id + '_DMSP-' + dmsp_sat_id.upper(), )
-                         # file_dir = pathlib.Path('/home/lei/01-Work/01-Project/OY22-IonosphereElectrodynamics/Lei_20220707/results'))
-    # db_swarm.show()
-    
-    # return dashboard
 
-
-def load_swarm_poynting_flux(dn0: datetime.datetime, sat_id):
-    file_dir = pathlib.Path('/home/lei/01-Work/01-Project/OY22-IonosphereElectrodynamics/Lei_20220707/results')
-    dstr = dn0.strftime('%Y%m%d-%H%M%S')
-    file_path = list(file_dir.glob("*" + sat_id.upper() + "*" + dstr + '*.mat'))[0]
-    matdata = sio.loadmat(file_path)
-     
-    ds = DatasetUser(visual='on')
-    
-    depend_0 = {
-        'UT': 'SC_DATETIME', 
-        'GEO_LAT': 'SC_GEO_LAT', 'GEO_LON': 'SC_GEO_LON', 
-        'AACGM_LAT': 'SC_AACGM_LAT', 'AACGM_LON': 'SC_AACGM_LON', 'AACGM_MLT': 'SC_AACGM_MLT'
-        }
-    
-    var_name = 'SC_DATETIME'
-    var_value: np.ndarray = matdata['tl']
-    ntl = var_value.shape[0]
-    var_value = pd.to_datetime(var_value.flatten() - 719529, unit='D').to_numpy()
-    var_value = [datetime.datetime.utcfromtimestamp(((var_value[i] - np.datetime64('1970-01-01T00:00:00')) / np.timedelta64(1, 's')))
-                 for i in range(ntl)]
-    var_value = np.array(var_value, dtype=datetime.datetime).reshape((ntl, 1))
-    ut = var_value.flatten()
-    var = ds.add_variable(var_name, value=var_value)
-    var.visual.plot_config.style = '1P'
-    
-    var_name = 'SC_GEO_LAT'
-    var_value: np.ndarray = matdata['glat']
-    glat = var_value.flatten()
-    var_value = var_value.reshape((ntl, 1))
-    var = ds.add_variable(var_name, value=var_value)
-    var.visual.plot_config.style = '1P'
-    
-    var_name = 'SC_GEO_LON'
-    var_value: np.ndarray = matdata['glon']
-    var_value = var_value.reshape((ntl, 1))
-    glon = var_value.flatten()
-    var = ds.add_variable(var_name, value=var_value)
-    var.visual.plot_config.style = '1P'
-    
-    var_name = 'SC_GEO_R'
-    var_value: np.ndarray = matdata['gR']
-    var_value = var_value.reshape((ntl, 1))
-    r = var_value.flatten()
-    var = ds.add_variable(var_name, value=var_value)
-    var.visual.plot_config.style = '1P'
-    
-    var_name = 'S_FA_V'
-    var_value: np.np.ndarray = matdata['Pvpara']
-    var_value = var_value.reshape((ntl, 1))
-    var = ds.add_variable(var_name, value=var_value)
-    var.depends[0] = depend_0
-    var.visual.plot_config.style = '1P'
-    var.visual.axis[1].label = 'S'
-    var.visual.axis[1].unit = r'W$\cdot$m$^{-3}$'
-    var.visual.axis[2].label = r'S$^V$'
-    
-    var_name = 'S_FA_H'
-    var_value: np.ndarray = matdata['Phpara']
-    var_value = var_value.reshape((ntl, 1))
-    var = ds.add_variable(var_name, value=var_value)
-    var.depends[0] = depend_0
-    var.visual.plot_config.style = '1P'
-    var.visual.axis[1].label = 'S'
-    var.visual.axis[1].unit = r'W$\cdot$m$^{-3}$'
-    var.visual.axis[2].label = r'S$^H$'    
-    
-    var_name = 'd_B_x'
-    var_value: np.ndarray = matdata['Bx']
-    var_value = var_value.reshape((ntl, 1))
-    var = ds.add_variable(var_name, value=var_value)
-    var.depends[0] = depend_0
-    var.visual.plot_config.style = '1P'
-    var.visual.axis[1].label = 'B'
-    var.visual.axis[1].unit = 'nT'
-    var.visual.axis[2].label = r'$\delta B_x$'
-    
-    var_name = 'd_B_y'
-    var_value: np.ndarray = matdata['By']
-    var_value = var_value.reshape((ntl, 1))
-    var = ds.add_variable(var_name, value=var_value)
-    var.depends[0] = depend_0
-    var.visual.plot_config.style = '1P'
-    var.visual.axis[2].label = r'$\delta B_y$'
-    
-    var_name = 'd_B_z'
-    var_value: np.ndarray = matdata['Bz']
-    var_value = var_value.reshape((ntl, 1))
-    var = ds.add_variable(var_name, value=var_value)
-    var.depends[0] = depend_0
-    var.visual.plot_config.style = '1P'
-    var.visual.axis[2].label = r'$\delta B_z$'
-    
-    var_name = 'Q_FLAG'
-    var_value: np.ndarray = matdata['tmpQ']
-    var_value = var_value.reshape((ntl, 1))
-    var = ds.add_variable(var_name, value=var_value)
-    var.depends[0] = depend_0
-    var.visual.plot_config.style = '1P'
-    var.visual.axis[1].label = 'FLAG'
-    var.visual.axis[2].label = r'Quality=1 OK'
-    
-    var_name = 'CALIB_FLAG'
-    var_value: np.ndarray = matdata['tmpC']
-    var_value = var_value.reshape((ntl, 1))
-    var = ds.add_variable(var_name, value=var_value)
-    var.depends[0] = depend_0
-    var.visual.plot_config.style = '1P'
-    var.visual.axis[1].label = 'FLAG'
-    var.visual.axis[2].label = r'Calib=0 OK'
-
-    cs = GEOCSpherical(coords={'lat': glat, 'lon': glon, 'r': r/6371.2}, ut=ut)
-    cs_new = cs.to_AACGM(append_mlt=True)
-    var = ds.add_variable('SC_AACGM_LAT', value=cs_new['lat'])
-    var = ds.add_variable('SC_AACGM_LON', value=cs_new['lon'])
-    var = ds.add_variable('SC_AACGM_MLT', value=cs_new['mlt'])
-    var = ds.add_variable('SC_GEO_ALT', value=ds['SC_GEO_R'].value - 6371.2)
-
-    
-    return ds
+    db_swarm.save_figure(file_name='manuscript_example_5_compare_v2_E' + swarm_dn.strftime('%Y-%m-%d') + '_SWARM-' + swarm_sat_id + '_DMSP-' + dmsp_sat_id.upper(), )
 
 
 def event_1_1():
@@ -445,47 +293,3 @@ def event_1_1():
 
 if __name__ == '__main__':
     event_1_1()
-    # event_1_2()
-    # event_1_3()
-    # event_1_4()
-    # event_1_5()
-    # event_1_6()
-    # event_1_7()
-    
-    # event_2_1()
-    # event_2_2()
-    # event_2_3()
-    # event_2_4()
-    # event_2_5()
-    # event_2_6()
-    
-    # event_3_1()
-    # event_3_2()
-    # event_3_3()
-    # event_3_4()
-    # event_3_5()
-    # event_3_6()
-    
-    # event_4_1()
-    # event_4_2() 
-    # event_4_3() 
-    # event_4_4() 
-    # event_4_5() 
-    # event_4_6() 
-    # event_4_7() 
-    # event_4_8() 
-    # event_4_9()
-    # event_4_10()
-      
-    # event_5_1()
-    # event_5_2() 
-    # event_5_3() 
-    # event_5_4()
-    # event_5_5()
-    # event_5_6()
-    # event_5_7()
-    # event_5_8()
-    
-    # event_6_1()
-    # event_6_2() 
-    # event_6_3() 

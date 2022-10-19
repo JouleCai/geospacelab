@@ -18,14 +18,14 @@ load_mode = 'AUTO'              # default loading mode.
 dashboard = MillstoneHillISRDashboard(
         dt_fr, dt_to, antenna=antenna, pulse_code=pulse_code, pulse_length=pulse_length,
         exp_name_pattern=exp_name_pattern, exp_check=exp_check,
-        load_mode=load_mode, figure_config={'figsize': (10, 15)}
+        load_mode=load_mode, figure_config={'figsize': (10, 12)}
     )
 # Select one or multiple beams shown in the quicklook plot.
 # if commented, all beams will shown following the time sequence.
-dashboard.select_beams(az_el_pairs=[[0, 45]])
+# dashboard.select_beams(az_el_pairs=[[0, 45]])
 # Make quicklook plot
-dashboard.quicklook(depend_MLAT=True)
+dashboard.quicklook(depend_MLAT=False)
 # Save the figure
-dashboard.save_figure(file_name="manuscript_example_3_mho_basic_quicklook_2")
+dashboard.save_figure(file_name="manuscript_example_3_mho_basic_quicklook_1")
 # Display the figure in the screen
 dashboard.show()

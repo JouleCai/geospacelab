@@ -17,6 +17,7 @@ from geopack import geopack
 
 GEOC=GEOCSpherical
 
+
 def set_cs(name=None, **kwargs):
     kind = kwargs.pop('kind', None)
     if name.upper() == 'GEO':

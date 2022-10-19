@@ -29,7 +29,7 @@ modulation = 'ant'
 # create a datahub instance
 dh = DataHub(dt_fr, dt_to)
 # dock a dataset
-ds_1 = dh.dock(datasource_contents=[database_name, facility_name],
+ds_1 = dh.dock(datasource_contents=[database_name, 'isr', facility_name],
                       site=site, antenna=antenna, modulation=modulation, data_file_type='eiscat-hdf5')
 # load data
 ds_1.load_data()
@@ -43,10 +43,12 @@ T_i = dh.get_variable('T_i')
 # if the variable is not assigned in the datahub, but exists in the its own dataset:
 comp_O_p = dh.get_variable('comp_O_p', dataset=ds_1)     # O+ ratio
 # above line is equivalent to
-comp_O_p = dh.datasets[1]['comp_O_p']
+comp_O_p = dh.datasets[0]['comp_O_p']  # the index of the datasets appended to dh starts from 0.
 
 # The variables, e.g., n_e and T_i, are the class Variable's instances,
 # which stores the variable values, errors, and many other attributes, e.g., name, label, unit, depends, ....
 # To get the value of the variable, use variable_isntance.value, e.g.,
 print(n_e.value)        # return the variable's value, type: numpy.ndarray, axis 0 is always along the time, check n_e.depends.items{}
 print(n_e.error)
+
+dh.list_sourced_datasets()

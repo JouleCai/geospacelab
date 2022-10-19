@@ -127,7 +127,7 @@ class TSDashboard(Dashboard):
         for ind, panel_config in self._panels_configs.items():
             # share x
             if ind > 0:
-                panel_config.update(sharex=self.panels[1]())
+                panel_config.update(sharex=self.panels[0]())
             if ind == len(self._panels_configs.keys())-1:
                 bottom_panel = True
                 panel_config.update(timeline_extra_labels=self.timeline_extra_labels)

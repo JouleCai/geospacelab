@@ -158,7 +158,7 @@ class Dataset(datahub.DatasetSourced):
         self['SC_AACGM_MLT'].value = cs_aacgm['mlt'].reshape(self['SC_DATETIME'].value.shape)
 
     def fix_geo_lon(self):
-        from geospacelab.observatory.sc_orbit import OrbitPosition_SSCWS
+        from geospacelab.observatory.orbit.sc_orbit import OrbitPosition_SSCWS
         from scipy.interpolate import interp1d
         # check outliers
         orbit_obj = OrbitPosition_SSCWS(
