@@ -39,14 +39,24 @@ indicating the levels of sub-catogories.
 The suggested levels of the nested folders can be like this:
     [database] -> [facility] -> [instrument] -> [data product]
 However, it is not neccessary to always organize the nested folders in above way. Some of the levels
-can be omitted. GeospaceLAB will search all the dataset classes from the folders recursively. The levels
+can be omitted. GeospaceLAB will search all the dataset classes from those folders recursively. The levels
 are kinds of guidelines for the developer to organize the sourced datasets.
 
 The modules for a specific sourced dataset can be found in a last-level sub-folder. For example,
 the modules for OMNI dataset are stored `here <https://github.com/JouleCai/geospacelab/tree/master/geospacelab/datahub/sources/cdaweb/omni>`__
 The folder includes four files: *__init__.py*, *loader.py*, *downloader.py*, and 'variable_config.py'.
 The four files are also typically included for other sourced datasets.
+First, the file *__init__.py* includes a SourcedDataset subclass with global settings.
+Second, the file *loader.py* includes a Loader class for loading the data from the local folder.
+Third, the file *downloader.py* includes a Downloader class for downloading the files from the
+online database to the local folder. 
+Finally, the file *variable_config* inlcludes the pre-settings for several key variables included 
+in the dataset. 
+The dataset class in *__init__.py* will communicate with other classes to implement the goal mentioned
+in the beginning. 
 
+To build a new sourced dataset, please refer to above folders and files. One can use the exisiting
+classess as a template or subclass them if the proposed dataset has many similarities with the existing one.
 
 
 Adding new functionality
