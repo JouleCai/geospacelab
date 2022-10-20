@@ -1,12 +1,18 @@
-from tkinter import TRUE
-import scipy.io as sio
-import pathlib
+# Licensed under the BSD 3-Clause License
+# Copyright (C) 2021 GeospaceLab (geospacelab)
+# Author: Lei Cai, Space Physics and Astronomy, University of Oulu
+
+__author__ = "Lei Cai"
+__copyright__ = "Copyright 2021, GeospaceLab"
+__license__ = "BSD-3-Clause License"
+__email__ = "lei.cai@oulu.fi"
+__docformat__ = "reStructureText"
+
+
 import datetime
 import numpy as np
 
-from geospacelab.datahub import DatasetUser
 from geospacelab.visualization.mpl.dashboards import TSDashboard
-from geospacelab.cs import GEOCSpherical
 import geospacelab.visualization.mpl.geomap.geodashboards as geomap
 
 
