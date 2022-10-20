@@ -27,12 +27,12 @@ Submitting new sourced dataset
 ^^^^^^^^^^^^^^^^^^^^
 GeospaceLAB aims to implement automatically downloading, storing, and loading data
 from pupolar online databases. To achieve this goal, it requires several stragies to
-build the specialized subclass of SourcedDataset and associated classes and modules such
+build a specialized subclass of SourcedDataset and associated classes and modules such
 as Loader, Downloader and variable configuration.
 
 For a skillful developer, it is not difficult to refer the classes for 
 the existing sourced datasets in GeospaceLAB. The source code of the existing sourced datasets
-are store in `DataHub <https://github.com/JouleCai/geospacelab/tree/master/geospacelab/datahub/sources>`__.
+are arranged in `DataHub <https://github.com/JouleCai/geospacelab/tree/master/geospacelab/datahub/sources>`__.
 In that directory, the listed folders are the main categories of a sourced dataset, indicating
 the data providers, e.g., madrigal for the Madrigal database. A main catogory can have nested subfolders,
 indicating the levels of sub-catogories. 
@@ -54,9 +54,9 @@ Finally, the file *variable_config* inlcludes the pre-settings for several key v
 in the dataset. 
 The dataset class in *__init__.py* will communicate with other classes to implement the goal mentioned
 in the beginning. 
-
 To build a new sourced dataset, please refer to above folders and files. One can use the exisiting
-classess as a template or subclass them if the proposed dataset has many similarities with the existing one.
+classess as a template or build subclasses from them.
+This can be applied for a proposed dataset that has several similarities with the existing one.
 
 
 Adding new functionality

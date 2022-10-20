@@ -63,7 +63,7 @@ def example_add_user_defined_dataset_to_dashboard():
 
     # Optional settings for visualization
     n_e.set_depend(0, {'UT': 'SC_DATETIME'})    # link axis-0 to the variable "SC_DATETIME"
-    n_e.label = r'$n_e$'        # label to be displayed in the figure
+    n_e.label = r'$n_e$'        # label to be displayed in the figure{}°
     n_e.unit = 'm-3'
     n_e.unit_label = r'm$^{-3}$'
     n_e.visual.axis[1].lim = [0, 1.2e-12] # set the lim for axis-1 (y-axis)
