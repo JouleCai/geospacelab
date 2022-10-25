@@ -13,6 +13,7 @@ class LEOToolbox(DatasetUser):
 
     def __init__(self, dt_fr=None, dt_to=None):
         super().__init__(dt_fr, dt_to)
+
         self.add_variable(var_name='SC_GEO_LAT')
         self.add_variable(var_name='SC_GEO_LON')
         self.add_variable(var_name='SC_GEO_ALT')
@@ -259,7 +260,7 @@ class LEOToolbox(DatasetUser):
             raise NotImplementedError
                 
     def griddata_by_sector(self, sector_name=None, variable_names=None, x_grid_res=20*60, y_grid_res=0.5):
-
+        self.visual = 'on'
         dts_c = self['_'.join(('SECTOR', sector_name, 'DATETIME'))].value.flatten()
         dts = self['SC_DATETIME'].value.flatten()
         sector = self['SECTOR_' + sector_name].value.flatten()
@@ -303,19 +304,23 @@ class LEOToolbox(DatasetUser):
             self.sectors[sector_name]['VARIABLE_NAMES'].append(var_name_in) 
             
             # self.add_variable(var_name=var_name_in, value=grid_z.T)
-            self[var_name_in] = self[var_name].clone()
-            self[var_name_in].value = grid_z.T
-            self[var_name_in].set_depend(0, {'UT': '_'.join(('SECTOR', sector_name, 'GRID_DATETIME'))})
-            self[var_name_in].set_depend(1, {which_lat: '_'.join(('SECTOR', sector_name, 'GRID_LAT'))})
-            self[var_name_in].visual.axis[0].data = '@d.' + '_'.join(('SECTOR', sector_name, 'GRID_DATETIME'))
-            self[var_name_in].visual.axis[1].data = '@d.' + '_'.join(('SECTOR', sector_name, 'GRID_LAT'))
-            self[var_name_in].visual.axis[1].label = 'GLAT' if self.sector_cs == 'GEO' else 'MLAT'
-            self[var_name_in].visual.axis[1].unit = r'$^\circ$'
-            self[var_name_in].visual.axis[1].lim = lat_range
-            self[var_name_in].visual.axis[2].data = '@v.value'
-            self[var_name_in].visual.axis[2].unit = '@v.unit'
-            self[var_name_in].visual.plot_config.style = '2P'
-            self[var_name_in].visual.plot_config.pcolormesh.update(cmap='jet')
+            self[var_name_in] = self[var_name].clone(omit_attrs='visual')
+            self[var_name_in].visual = 'new'
+            var = self[var_name_in]
+            var.value = grid_z.T
+            var.set_depend(0, {'UT': '_'.join(('SECTOR', sector_name, 'GRID_DATETIME'))})
+            var.set_depend(1, {which_lat: '_'.join(('SECTOR', sector_name, 'GRID_LAT'))})
+            var.visual.axis[0].data = '@d.' + '_'.join(('SECTOR', sector_name, 'GRID_DATETIME'))
+            var.visual.axis[1].data = '@d.' + '_'.join(('SECTOR', sector_name, 'GRID_LAT'))
+            var.visual.axis[1].label = 'GLAT' if self.sector_cs == 'GEO' else 'MLAT'
+            var.visual.axis[1].unit = r'$^\circ$'
+            var.visual.axis[1].lim = lat_range
+            var.visual.axis[2].data = '@v.value'
+            var.visual.axis[2].data_scale = self[var_name].visual.axis[1].data_scale
+            var.visual.axis[2].label = '@v.label'
+            var.visual.axis[2].unit = '@v.unit'
+            var.visual.plot_config.style = '2P'
+            var.visual.plot_config.pcolormesh.update(cmap='jet')
 
         grid_x_name = '_'.join(('SECTOR', sector_name, 'GRID', 'X'))
         grid_x = grid_x.T
@@ -410,3 +415,51 @@ class LEOToolbox(DatasetUser):
         ax.set_ylim(y_lim)
 
         return
+
+    def smooth_along_track(self, time_window=450, time_res=None, variable_names=None, method='savgol', residuals='on'):
+        self.visual = 'on'
+        dts = self['SC_DATETIME'].value.flatten()
+        dt0 = dttool.get_start_of_the_day(self.dt_fr)
+        sectime = np.array([(dt - dt0).total_seconds() for dt in dts])
+        if time_res is None:
+            diff_secs = np.diff(sectime)
+            time_res = np.median(diff_secs)
+
+        N = int(np.fix(time_window/time_res))
+
+        for var_name in variable_names:
+            vrb = self[var_name].value.flatten()
+            vrb_avg = self.smooth_savgol(dts, vrb, N, time_res)
+            var_name_in = var_name + '_AVG'
+            self[var_name_in] = self[var_name].clone()
+            self[var_name_in].value = vrb_avg[:, np.newaxis]
+            self[var_name_in].label = 'smoothed ' + self[var_name_in].label
+            if residuals:
+                var_name_in = var_name + '_RSD'
+                self[var_name_in] = self[var_name].clone()
+                self[var_name_in].value = self[var_name].value - self[var_name + '_AVG'].value
+                self[var_name_in].label = 'RSD'
+                self[var_name_in].visual.axis[1].lim = [-np.inf, np.inf]
+                var_name_in = var_name + '_RSD_PERC'
+                self[var_name_in] = self[var_name].clone()
+                self[var_name_in].value = (self[var_name].value - self[var_name + '_AVG'].value) / \
+                    self[var_name + '_AVG'].value
+                self[var_name_in].label = "RSD pct."
+                self[var_name_in].unit = '%'
+                self[var_name_in].unit_label = None
+                self[var_name_in].visual.axis[1].data_scale = 100.
+
+    @staticmethod
+    def smooth_savgol(dts, data, box_pts, t_res):
+        delta_sectime = 1
+        sectime, _ = dttool.convert_datetime_to_sectime(dts)
+        ind_nan = np.isnan(data)
+        sectime_i = np.arange(0, sectime[-1], delta_sectime)
+        data_i = np.interp(sectime_i, sectime[~ind_nan], data[~ind_nan])
+
+        order = 1
+        window_size = int(np.floor(t_res / delta_sectime * box_pts / 2) * 2 + 1)
+        y = sig.savgol_filter(data_i, window_size, order)
+        data_new = np.interp(sectime, sectime_i, y)
+        data_new[ind_nan] = np.nan
+        return data_new

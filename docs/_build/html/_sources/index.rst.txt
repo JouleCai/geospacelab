@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-GeospaceLab (geospacelab)
+GeospaceLAB (geospacelab)
 =======================================
 A python-based library to collect, manage, and visualize the geospace data.
 

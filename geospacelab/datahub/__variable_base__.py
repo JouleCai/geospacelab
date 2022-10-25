@@ -340,10 +340,10 @@ class VariableBase(object):
         :return: new variable instance
         """
         if omit_attrs is None:
-            omit_attrs = {}
+            omit_attrs = []
         kwargs = {}
         for key in self._attrs_registered:
-            if key in omit_attrs.keys():
+            if key in omit_attrs:
                 continue
             if key == 'visual':
                 kwargs['visual'] = self.visual.clone()
@@ -473,6 +473,9 @@ class VariableBase(object):
                 mylog.StreamLogger.warning("The scalar variables have different values!")
             return
 
+    def flatten(self):
+        return self.value.flatten()
+
     def __repr__(self):
         value_repr = repr(self.value)
         rep = f"GeospaceLab Variable object <name: {self.name}, value: {value_repr}, unit: {self.unit}>"
@@ -496,7 +499,7 @@ class VariableBase(object):
             if not isinstance(self._visual, Visual):
                 self.visual = 'new'
             pyclass.set_object_attributes(self.visual, append=False, logging=True, **value)
-        elif value == 'off':
+        elif value == 'off' or value is None:
             self._visual = None
         else:
             raise ValueError

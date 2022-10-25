@@ -103,11 +103,11 @@ and adding new functionality for the existing classes and modules.</p>
 <h3>Submitting new sourced dataset<a class="headerlink" href="#submitting-new-sourced-dataset" title="Permalink to this heading"></a></h3>
 <p>GeospaceLAB aims to implement automatically downloading, storing, and loading data
 from pupolar online databases. To achieve this goal, it requires several stragies to
-build the specialized subclass of SourcedDataset and associated classes and modules such
+build a specialized subclass of SourcedDataset and associated classes and modules such
 as Loader, Downloader and variable configuration.</p>
 <p>For a skillful developer, it is not difficult to refer the classes for
 the existing sourced datasets in GeospaceLAB. The source code of the existing sourced datasets
-are store in <a class="reference external" href="https://github.com/JouleCai/geospacelab/tree/master/geospacelab/datahub/sources">DataHub</a>.
+are arranged in <a class="reference external" href="https://github.com/JouleCai/geospacelab/tree/master/geospacelab/datahub/sources">DataHub</a>.
 In that directory, the listed folders are the main categories of a sourced dataset, indicating
 the data providers, e.g., madrigal for the Madrigal database. A main catogory can have nested subfolders,
 indicating the levels of sub-catogories.
@@ -116,12 +116,23 @@ The suggested levels of the nested folders can be like this:</p>
 <div><p>[database] -&gt; [facility] -&gt; [instrument] -&gt; [data product]</p>
 </div></blockquote>
 <p>However, it is not neccessary to always organize the nested folders in above way. Some of the levels
-can be omitted. GeospaceLAB will search all the dataset classes from the folders recursively. The levels
+can be omitted. GeospaceLAB will search all the dataset classes from those folders recursively. The levels
 are kinds of guidelines for the developer to organize the sourced datasets.</p>
 <p>The modules for a specific sourced dataset can be found in a last-level sub-folder. For example,
 the modules for OMNI dataset are stored <a class="reference external" href="https://github.com/JouleCai/geospacelab/tree/master/geospacelab/datahub/sources/cdaweb/omni">here</a>
 The folder includes four files: <em>__init__.py</em>, <em>loader.py</em>, <em>downloader.py</em>, and ‘variable_config.py’.
-The four files are also typically included for other sourced datasets.</p>
+The four files are also typically included for other sourced datasets.
+First, the file <em>__init__.py</em> includes a SourcedDataset subclass with global settings.
+Second, the file <em>loader.py</em> includes a Loader class for loading the data from the local folder.
+Third, the file <em>downloader.py</em> includes a Downloader class for downloading the files from the
+online database to the local folder.
+Finally, the file <em>variable_config</em> inlcludes the pre-settings for several key variables included
+in the dataset.
+The dataset class in <em>__init__.py</em> will communicate with other classes to implement the goal mentioned
+in the beginning.
+To build a new sourced dataset, please refer to above folders and files. One can use the exisiting
+classess as a template or build subclasses from them.
+This can be applied for a proposed dataset that has several similarities with the existing one.</p>
 </section>
 <section id="adding-new-functionality">
 <h3>Adding new functionality<a class="headerlink" href="#adding-new-functionality" title="Permalink to this heading"></a></h3>
