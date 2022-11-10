@@ -22,6 +22,9 @@ class LEOToolbox(DatasetUser):
         self.add_variable(var_name='SC_AACGM_LAT')
         self.add_variable(var_name='SC_AACGM_LON')
         self.add_variable(var_name='SC_AACGM_MLT')
+        self.add_variable(var_name='SC_APEX_LAT')
+        self.add_variable(var_name='SC_APEX_LON')
+        self.add_variable(var_name='SC_APEX_MLT')
         self.ascending_nodes = {}
         self.descending_nodes = {}
         self.sector_cs = 'GEO'
@@ -62,9 +65,16 @@ class LEOToolbox(DatasetUser):
         glat = self['SC_GEO_LAT'].value.flatten()
         glon = self['SC_GEO_LON'].value.flatten()
         lst = self['SC_GEO_LST'].value.flatten()
-        mlat = self['SC_AACGM_LAT'].value.flatten()
-        mlon = self['SC_AACGM_LON'].value.flatten()
-        mlt = self['SC_AACGM_MLT'].value.flatten()
+        
+        if self.sector_cs == 'AACGM':
+            mlat = self['SC_AACGM_LAT'].value.flatten()
+            mlon = self['SC_AACGM_LON'].value.flatten()
+            mlt = self['SC_AACGM_MLT'].value.flatten()
+        elif self.sector_cs == 'APEX':
+            mlat = self['SC_APEX_LAT'].value.flatten()
+            mlon = self['SC_APEX_LON'].value.flatten()
+            mlt = self['SC_APEX_MLT'].value.flatten()
+        
         dts = self['SC_DATETIME'].value.flatten()
         
         inds_asc = self.ascending_nodes['INDEX']
@@ -74,6 +84,9 @@ class LEOToolbox(DatasetUser):
             lat = glat
             lt = lst
         elif self.sector_cs == 'AACGM':
+            lat = mlat
+            lt = mlt
+        elif self.sector_cs == 'APEX':
             lat = mlat
             lt = mlt
         else:
@@ -289,8 +302,11 @@ class LEOToolbox(DatasetUser):
 
         grid_lat = griddata((x, y), y, (grid_x, grid_y), method='nearest')
         if self.sector_cs == 'AACGM':
-            mask = np.abs(grid_y - grid_lat) > 1
+            mask = np.abs(grid_y - grid_lat) > 2
             which_lat = 'AACGM_LAT'
+        if self.sector_cs == 'APEX':
+            mask = np.abs(grid_y - grid_lat) > 2
+            which_lat = 'APEX_LAT' 
         else:
             mask = np.abs(grid_y - grid_lat) > 1
             which_lat = 'GEO_LAT'
@@ -387,9 +403,12 @@ class LEOToolbox(DatasetUser):
             if lat > 0:
                 lat_format_1 = r'' + lat_format + r'$^\circ$N'
                 lb = lat_format_1.format(lat)
-            else:
+            elif lat < 0:
                 lat_format_1 = r'' + lat_format + r'$^\circ$S'
                 lb = lat_format_1.format(np.abs(lat))
+            else:
+                lat_format_1 = r'' + '{:4.0f}' + r'$^\circ$'
+                lb = lat_format_1.format(lat) 
             ylabels.append(lb)
 
         if sector_name == 'N':

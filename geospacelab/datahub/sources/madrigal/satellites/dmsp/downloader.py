@@ -128,6 +128,5 @@ class Downloader(object):
                 mylog.simpleinfo.info("Save the file as {} in the directory {}".format(file_name, data_file_dir))
 
 
-
 if __name__ == "__main__":
     test()

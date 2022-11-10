@@ -20,7 +20,7 @@ import geospacelab.toolbox.utilities.pybasic as pybasic
 class GEO(SpaceSphericalCS):
     def __init__(self, coords=None, ut=None, vector=None, **kwargs):
         
-        kwargs.setdefault('new_coords', ['lat', 'lon', 'height'])
+        kwargs.setdefault('new_coords', ['lat', 'lon', 'height', 'lst'])
         super().__init__(name='GEO', coords=coords, vector=vector, ut=ut, **kwargs)
 
     def to_AACGM(self, append_mlt=False):

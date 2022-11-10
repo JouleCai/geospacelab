@@ -103,6 +103,12 @@ class PolarMapPanel(GeoPanel):
         lon = mlt / 24. * 360.
         lon = np.mod(lon, 360.)
         return lon
+    
+    @staticmethod
+    def _transform_lst_to_lon(lst):
+        lon = lst / 24. * 360.
+        lon = np.mod(lon, 360.)
+        return lon
 
     def add_axes(self, *args, major=False, label=None, **kwargs):
         if major:
@@ -138,6 +144,11 @@ class PolarMapPanel(GeoPanel):
             cs2 = cs1(cs_to=cs_to, append_mlt=self.depend_mlt)
         else:
             cs2 = cs1
+        if self.style == 'lst-fixed':
+            try:
+                cs2.coords.lon = self._transform_lst_to_lon(cs2.coords.lst)
+            except:
+                mylog.StreamLogger.warning("LST is not specified!")
         if self.depend_mlt:
             cs2.coords.lon = self._transform_mlt_to_lon(cs2.coords.mlt)
         return cs2
@@ -592,8 +603,9 @@ class PolarMapPanel(GeoPanel):
         kwargs.setdefault('trajectory_config', {
             'linewidth': 1,
             'linestyle': '-',
-            'color': color,
+            'color': 'k',
         })
+        kwargs['trajectory_config'].update(color=color) 
 
         cs_new = self.cs_transform(cs_fr=cs, coords=sc_coords, ut=sc_ut)
 
