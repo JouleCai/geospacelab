@@ -47,6 +47,8 @@ class Loader:
             dts[ind, 0] = datetime.datetime.strptime(dt_str + '000', '%Y-%m-%dT%H:%M:%S.%f')
         variables['DATETIME'] = dts
         variables['B_x_GSM'] = variables['B_x_GSE']
+        variables['B_T_GSM'] = np.sqrt(variables['B_z_GSM']**2 + variables['B_y_GSM']**2)
+        variables['B_TOTAL'] = np.sqrt(variables['B_z_GSM']**2 + variables['B_y_GSM']**2 + variables['B_x_GSM']**2)
 
         self.variables = variables
         self.metadata.update(f_cdf.globalattsget(expand=False))

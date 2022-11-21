@@ -26,6 +26,7 @@ class OMNIDashboard(TSDashboard):
             'allow_load': kwargs.get('allow_load', True)
         }
         self.ds_omni = self.dock(datasource_contents=['cdaweb', 'omni'], **omni_config)
+        self.ds_omni.add_NCF()
         self.ds_ae = self.dock(datasource_contents=['wdc', 'ae'], allow_load=True, load_mode='AUTO')
         self.ds_asysym = self.dock(datasource_contents=['wdc', 'asysym'])
         self.ds_kpap = self.dock(datasource_contents=['gfz', 'kpap'])

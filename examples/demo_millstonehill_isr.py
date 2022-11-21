@@ -18,11 +18,11 @@ from geospacelab.express.millstonehill_dashboard import MillstoneHillISRDashboar
 def example_basic_quicklook():
 
     # Set the starting and stopping times
-    dt_fr = datetime.datetime.strptime('20160316' + '1200', '%Y%m%d%H%M')
-    dt_to = datetime.datetime.strptime('20160317' + '1200', '%Y%m%d%H%M')
+    dt_fr = datetime.datetime.strptime('20160314' + '1900', '%Y%m%d%H%M')
+    dt_to = datetime.datetime.strptime('20160315' + '0100', '%Y%m%d%H%M')
 
     # Set the radar parameters
-    antenna = 'zenith'    # antenna name: 'zenith', or 'misa'
+    antenna = 'misa'    # antenna name: 'zenith', or 'misa'
     pulse_code = 'single pulse'     # pulse code: 'single pulse', 'alternating'
     pulse_length = 480              # pulse length: an integer. If not specified,
                                     # the package will search all the pulses in the data file
@@ -37,9 +37,9 @@ def example_basic_quicklook():
     )
     # Select one or multiple beams shown in the quicklook plot.
     # if commented, all beams will shown following the time sequence.
-    # dashboard.select_beams(az_el_pairs=[[-40.5, 45]])
+    dashboard.select_beams(az_el_pairs=[[13.5, 45]])
     # Make quicklook plot
-    dashboard.quicklook()
+    dashboard.quicklook(depend_MLAT=False)
     # Save the figure
     dashboard.save_figure(file_name="example_mho_basic_quicklook")
     # Display the figure in the screen
@@ -98,4 +98,4 @@ def example_combined_datasets():
 
 if __name__ == '__main__':
     example_basic_quicklook()
-    example_combined_datasets()
+    # example_combined_datasets()

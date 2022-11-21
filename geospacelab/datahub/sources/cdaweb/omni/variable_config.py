@@ -111,6 +111,54 @@ axis[2].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ####################################################################################################################
+var_name = 'B_T_GSM'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Transverse magnetic flux density in the GSM y-z plane'
+var.label = r'$B_T^{GSM}$'
+var.group = r'$B$'
+var.unit = 'nT'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [-np.inf, np.inf]
+axis[1].label = '@v.group'
+axis[1].unit = '@v.unit_label'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'B_TOTAL'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Total magnetic flux density'
+var.label = r'$B_{TOT}$'
+var.group = r'$B$'
+var.unit = 'nT'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [-np.inf, np.inf]
+axis[1].label = '@v.group'
+axis[1].unit = '@v.unit_label'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
+
+configured_variables[var_name] = var
+
+####################################################################################################################
 var_name = 'v_sw'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs

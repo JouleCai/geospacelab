@@ -11,6 +11,7 @@ __docformat__ = "reStructureText"
 
 import datetime
 import numpy as np
+import functools
 
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel
@@ -41,7 +42,7 @@ default_dataset_attrs = {
 default_variable_names = ['DATETIME', 'SC_ID_IMF', 'SC_ID_PLS', 'IMF_PTS', 'PLS_PTS', 'PCT_INTERP',
                           'Timeshift', 'Timeshift_RMS',
                           'B_x_GSE', 'B_y_GSE', 'B_z_GSE',
-                          'B_x_GSM', 'B_y_GSM', 'B_z_GSM',
+                          'B_x_GSM', 'B_y_GSM', 'B_z_GSM', 'B_T_GSM', 'B_TOTAL',
                           'v_sw', 'v_x', 'v_y', 'v_z',
                           'n_p', 'T', 'p_dyn', 'E', 'beta', 'Ma_A', 'Ma_MSP',
                           'BSN_x', 'BSN_y', 'BSN_z']
@@ -166,6 +167,134 @@ class Dataset(datahub.DatasetSourced):
         else:
             raise NotImplementedError
         return download_obj.done
+
+    def _validate_IMF_cs(func):
+        @functools.wraps(func)
+        def wrapper(self, **kwargs):
+            kwargs.setdefault('cs', 'GSM')
+            kwargs.setdefault('to_radian', False)
+            cs = kwargs['cs']
+            if cs == 'GSM':
+                kwargs.setdefault('Bx', self['B_x_GSM'].flatten())
+                kwargs.setdefault('By', self['B_y_GSM'].flatten())
+                kwargs.setdefault('Bz', self['B_z_GSM'].flatten())
+            elif cs == 'GSE':
+                kwargs.setdefault('Bx', self['B_x_GSE'].flatten())
+                kwargs.setdefault('By', self['B_y_GSE'].flatten())
+                kwargs.setdefault('Bz', self['B_z_GSE'].flatten())
+            else:
+                raise NotImplementedError
+            result = func(self, **kwargs)
+
+            if kwargs['to_radian']:
+                unit = 'degree'
+                unit_label = r'$^\circ$'
+            else:
+                unit = 'radiance'
+                unit_label = r''
+            result.unit = unit
+            result.unit_label = unit_label
+            result.depends = self['B_x_GSE'].depends
+            if self.visual == 'on':
+                result.visual.plot_config.style = '1P'
+                result.visual.axis[1].unit = '@v.unit_label'
+            return result
+        return wrapper
+
+    _validate_IMF_cs = staticmethod(_validate_IMF_cs)
+
+    @_validate_IMF_cs
+    def add_IMF_CA(self, cs='GSM', to_radian=False,  **kwargs):
+        """
+        IMF clock angle in the IMF By-Bz (x-y) plane in the GSE/GSM coordinate system.
+        :return:
+        """
+        Bz = kwargs['Bz']
+        By = kwargs['By']
+        Bt = np.sqrt(By**2+Bz**2);
+        ca = np.sign(By) * (np.pi/2 - np.arcsin(Bz / Bt))
+        ca = np.mod(ca, 2 * np.pi)
+
+        if not to_radian:
+            ca = ca / np.pi * 180
+
+        var_name = 'CA_' + cs
+        var = self['B_x_GSM'].clone()
+        var.name = var_name
+        var.value = ca.reshape(ca.size, 1)
+        var.label = r'$\theta$'
+        self[var_name] = var
+        return self[var_name]
+
+    @_validate_IMF_cs
+    def add_IMF_AZ(self, cs='GSM', to_radian=False,  **kwargs):
+        """
+        IMF azimuthal angle in the IMF Bx-By (x-y) plane in the GSE/GSM coordinate system.
+        :return:
+        """
+        By = kwargs['By']
+        Bx = kwargs['Bx']
+        Bt = np.sqrt(By**2+Bx**2);
+        az = np.sign(Bx) * (np.pi/2 - np.arcsin(By / Bt))
+        az = np.mod(az, 2 * np.pi)
+
+        if not to_radian:
+            az = az / np.pi * 180
+
+        var_name = 'AZ_' + cs
+        var = self['B_x_GSM'].clone()
+        var.name = var_name
+        var.value = az.reshape(az.size, 1)
+        var.label = r'$\phi$'
+        self[var_name] = var
+        return self[var_name]
+
+    @_validate_IMF_cs
+    def add_IMF_EL(self, cs='GSM', to_radian=False,  **kwargs):
+        """
+        IMF elevation angle in the IMF Bz-Bx (x-y) plane in the GSE/GSM coordinate system.
+        :return:
+        """
+        Bx = kwargs['Bx']
+        Bz = kwargs['Bz']
+        Bt = np.sqrt(Bx ** 2 + Bz ** 2);
+        el = np.sign(Bz) * (np.pi / 2 - np.arcsin(Bx / Bt))
+        el = np.mod(el, 2 * np.pi)
+
+        if not to_radian:
+            el = el / np.pi * 180
+
+        var_name = 'EL_' + cs
+        var = self['B_x_GSM'].clone()
+        var.name = var_name
+        var.value = el.reshape(el.size, 1)
+        var.label = r'$\alpha$'
+        self[var_name] = var
+        return self[var_name]
+
+    def add_NCF(self):
+        """
+        Solar wind-magnetosphere coupling function by Newell et al., JGR, 2007.
+        :return:
+        """
+        if 'CA_GSM' not in self.keys():
+            self.add_IMF_CA()
+
+        ca = self['CA_GSM'].value
+        ca = ca * np.pi / 180
+        v = self['v_sw'].value
+        BT = self['B_T_GSM'].value
+        ncf = np.abs(v)**(4/3) * np.abs(BT)**(2/3) * np.abs(np.sin(ca*0.5))**(8/3)
+
+        var = self['CA_GSM'].clone()
+        var.value = ncf
+        var.name = 'NCF'
+        var.label = r'd$\Phi_{MP}/$d$t$'
+        var.unit = ''
+        var.unit_label = ''
+        var.visual.axis[1].lim = [None, None]
+        self['NCF'] = var
+        return self['NCF']
 
     @property
     def database(self):

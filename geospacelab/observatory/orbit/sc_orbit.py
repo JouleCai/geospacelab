@@ -340,6 +340,7 @@ class OrbitPosition_SSCWS(DatasetSourced):
         
 
 if __name__ == "__main__":
-    dt_fr = datetime.datetime(2012, 1, 3,)
-    dt_to = datetime.datetime(2012, 3, 3)
-    orbit_info = OrbitPosition_SSCWS(dt_fr, dt_to, sat_id='dmspf16')
+    dt_fr = datetime.datetime(2016, 1, 1,)
+    dt_to = datetime.datetime(2016, 3, 3)
+    OrbitPosition_SSCWS.list_satellites()
+    orbit_info = OrbitPosition_SSCWS(dt_fr, dt_to, sat_id='swarma')

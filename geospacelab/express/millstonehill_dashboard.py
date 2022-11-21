@@ -136,7 +136,7 @@ class MillstoneHillISRDashboard(TSDashboard):
             title = self.title
         super().add_title(x=x, y=y, title=title, append_time=append_time, **kwargs)
 
-    def quicklook(self, depend_MLAT=True):
+    def quicklook(self, depend_MLAT=False):
         n_e = self.assign_variable('n_e')
         T_i = self.assign_variable('T_i')
         T_e = self.assign_variable('T_e')
