@@ -348,7 +348,7 @@ class DashboardBase(object):
 
         self.add_text(x, y, title, **kwargs)
 
-    def add_panel_labels(self, panel_indices=None, style='alphabets', **kwargs):
+    def add_panel_labels(self, panel_indices=None, style='alphabets', bbox_config=None, **kwargs):
         if panel_indices is None:
             panel_indices = self.panels.keys()
 
@@ -378,7 +378,8 @@ class DashboardBase(object):
                 label = panel.label
             kwargs.setdefault('fontsize', plt.rcParams['axes.labelsize'])
             kwargs.setdefault('fontweight', 'book')
-            bbox_config = {'facecolor': 'yellow', 'alpha': 0.3, 'edgecolor': 'none'}
+            if bbox_config is None:
+                bbox_config = {'facecolor': 'yellow', 'alpha': 0.3, 'edgecolor': 'none'}
             kwargs.setdefault('bbox', bbox_config)
             y_new = 1 - pos_0.height / pos_1.height + y * pos_0.height / pos_1.height
             panel.add_label(x, y_new, label, **kwargs)

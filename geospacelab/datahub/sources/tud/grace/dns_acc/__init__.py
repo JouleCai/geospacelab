@@ -182,7 +182,7 @@ class Dataset(datahub.DatasetSourced):
         self['SC_AACGM_LON'].value = cs_aacgm['lon'].reshape(self['SC_DATETIME'].value.shape)
         self['SC_AACGM_MLT'].value = cs_aacgm['mlt'].reshape(self['SC_DATETIME'].value.shape)
 
-    def interp_evenly(self, time_res=10, dt_fr=None, dt_to=None):
+    def interp_evenly(self, time_res=10, time_res_o=10, dt_fr=None, dt_to=None):
         from scipy.interpolate import interp1d
         import geospacelab.toolbox.utilities.numpymath as nm
 
@@ -205,7 +205,7 @@ class Dataset(datahub.DatasetSourced):
 
         f = interp1d(x_0, x_0, kind='nearest', bounds_error=False, fill_value=(x_0[0], x_0[-1]))
         pseudo_x = f(x_1)
-        mask = np.abs(pseudo_x-x_1) > time_res/1.5
+        mask = np.abs(pseudo_x-x_1) > time_res_o/1.5
 
         dts_new = np.array([dt0 + datetime.timedelta(seconds=sec) for sec in x_1])
         ds_new['SC_DATETIME'].value = dts_new.reshape((dts_new.size, 1))
