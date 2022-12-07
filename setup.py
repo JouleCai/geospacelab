@@ -61,7 +61,7 @@ setuptools.setup(
               'aacgmv2>=2.6.2',
               'cdflib>=0.3.20',
               'geopack>=1.0.8',
-              'palettable'
+              'palettable',
               'toml',
               'sscws',
           ],
@@ -80,5 +80,6 @@ setuptools.setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         ],
 )
