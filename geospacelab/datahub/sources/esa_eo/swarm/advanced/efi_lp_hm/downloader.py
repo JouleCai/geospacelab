@@ -15,6 +15,7 @@ from geospacelab.datahub.sources.esa_eo.swarm.downloader import Downloader as Do
 
 class Downloader(DownloaderModel):
 
+    _default_file_name_patterns = ['SW_EXTD']
     def __init__(
             self, dt_fr, dt_to,
             sat_id=None,
@@ -33,14 +34,16 @@ class Downloader(DownloaderModel):
 
         if data_file_root_dir is None:
             data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Advanced" / "EFI-LP" / data_type
-
+        file_name_patterns = list(self._default_file_name_patterns)
+        file_name_patterns.extend(['EFI' + sat_id.upper(), dt_fr.strftime("%Y%m")])
         super(Downloader, self).__init__(
             dt_fr, dt_to,
             data_file_root_dir=data_file_root_dir,
             ftp_data_dir=ftp_data_dir,
             file_version=file_version,
             file_extension = file_extension,
-            force=force, direct_download=direct_download, **kwargs
+            force=force, direct_download=direct_download,
+            file_name_patterns=file_name_patterns, **kwargs
         )
 
     def download(self, **kwargs):

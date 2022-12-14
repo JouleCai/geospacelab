@@ -66,8 +66,8 @@ class Downloader(DownloaderBase):
             ftp.login()
             ftp.cwd(self.ftp_data_dir)
             file_list = ftp.nlst()
-
-            file_names, versions = self.search_files(file_list=file_list)
+            kwargs.setdefault("file_name_patterns", [])
+            file_names, versions = self.search_files(file_list=file_list, file_name_patterns=kwargs['file_name_patterns'])
             file_dir = self.data_file_root_dir
             for ind_f, file_name in enumerate(file_names):
                 dt_regex = re.compile(r'(\d{8}T\d{6})_(\d{8}T\d{6})_(\d{4})')
@@ -127,7 +127,7 @@ class Downloader(DownloaderBase):
                 dt_regex = re.compile(r'(\d{8}T\d{6})_(\d{8}T\d{6})_(\d{4})')
                 rm = dt_regex.findall(fn)
                 if not list(rm):
-                    dt_ranges[ind, :] = np.nan
+                    dt_ranges[ind, :] = [datetime.datetime(1900, 1, 1), datetime.datetime(1900, 1, 1)]
                     continue
                 dt_ranges[ind, 0] = datetime.datetime.strptime(rm[0][0], '%Y%m%dT%H%M%S')
                 dt_ranges[ind, 1] = datetime.datetime.strptime(rm[0][1], '%Y%m%dT%H%M%S')

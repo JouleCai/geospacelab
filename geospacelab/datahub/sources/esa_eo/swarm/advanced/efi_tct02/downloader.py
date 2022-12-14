@@ -35,7 +35,7 @@ class Downloader(DownloaderModel):
             raise NotImplementedError
 
         if ftp_data_dir is None:
-            ftp_data_dir = f'Advanced/Plasma_Data/{frq_str}_TII_Cross-track_Dataset/New_baseline/Sat_{sat_id.upper()}'
+            ftp_data_dir = f'Advanced/Plasma_Data/{frq_str}_TII_Cross-track_Dataset/Sat_{sat_id.upper()}'
 
         if data_file_root_dir is None:
             data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Advanced" / "EFI-TII" / data_type

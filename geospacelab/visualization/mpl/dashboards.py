@@ -203,10 +203,6 @@ class TSDashboard(Dashboard):
 
         plt.savefig(file_dir / file_name, dpi=dpi, format=file_format, **kwargs)
 
-    @staticmethod
-    def show():
-        plt.show()
-
     def add_title(self, x=0.5, y=1.08, title=None, **kwargs):
         append_time = kwargs.pop('append_time', True)
         kwargs.setdefault('fontsize', plt.rcParams['figure.titlesize'])

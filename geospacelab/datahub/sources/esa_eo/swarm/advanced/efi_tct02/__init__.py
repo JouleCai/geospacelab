@@ -281,8 +281,8 @@ class Dataset(datahub.DatasetSourced):
             self.force_download = False
 
             if download_obj.file_version != self.local_latest_version and self.product_version == 'latest':
-                mylog.StreamLogger.warning(
-                    f"A newer version of data files have been downloaded ({download_obj.file_version})"
+                mylog.simpleinfo.warning(
+                    f"NOTE: A newer version of data files have been downloaded ({download_obj.file_version})"
                 )
             self.product_version = download_obj.file_version
             self.data_root_dir = copy.deepcopy(self._data_root_dir_init)

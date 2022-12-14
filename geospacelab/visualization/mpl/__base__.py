@@ -250,6 +250,8 @@ class DashboardBase(object):
         self.figure = figure
 
         self.panels = {}
+        self.num_rows = None
+        self.num_cols = None
         self.title = kwargs.pop('title', None)
         self.label = kwargs.pop('label', None)
         self.extra_axes = {}
@@ -266,6 +268,8 @@ class DashboardBase(object):
         :param kwargs: Optional keyword arguments used in **matplotlib GridSpec**.
         """
         kwargs = pybasic.dict_set_default(kwargs, **self._default_layout_config)
+        self.num_rows = num_rows
+        self.num_cols = num_cols
         self.gs = self.figure.add_gridspec(num_rows, num_cols)
         self.gs.update(**kwargs)
 
@@ -287,6 +291,10 @@ class DashboardBase(object):
         :param kwargs: Optional keyword arguments to create a Panel instance.
         :return: index
         """
+        if (row_ind is None) or (col_ind is None):
+            num_panels = len(self.panels.keys())
+            row_ind = int(np.floor(num_panels / self.num_cols))
+            col_ind = int(num_panels - row_ind * self.num_cols)
         if isinstance(row_ind, int):
             row_ind = [row_ind, row_ind + 1]
         if isinstance(col_ind, int):
@@ -448,10 +456,14 @@ class DashboardBase(object):
                 format = sufs[-1].split('.')[-1]
             else:
                 format = 'png'
-                file_path = pathlib.Path(file_path + '.png')
+                file_path = file_path.with_suffix('.png')
 
         plt.savefig(file_path, dpi=dpi, format=format, **kwargs)
-    
+
+    @staticmethod
+    def show():
+        plt.show()
+
     @property
     def figure(self):
         if self._figure_ref is None:

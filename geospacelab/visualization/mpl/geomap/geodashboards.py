@@ -54,7 +54,7 @@ class GeoDashboard(mpl.Dashboard):
         super().set_layout(num_rows=num_rows, num_cols=num_cols, left=left, right=right, bottom=bottom, top=top,
                            hspace=hspace, wspace=wspace, **kwargs)
 
-    def add_polar_map(self, row_ind, col_ind, label=None, cs='GEO', style='lon-fixed', pole='N',
+    def add_polar_map(self, row_ind=None, col_ind=None, label=None, cs='GEO', style='lon-fixed', pole='N',
                       ut=None, lon_c=None, lst_c=None, mlt_c=None, mlon_c=None, boundary_lat=30.,
                       boundary_style='circle', mirror_south=False,
                       proj_type='Stereographic', **kwargs) -> PolarMapPanel:

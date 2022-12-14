@@ -6,9 +6,9 @@ import geospacelab.visualization.mpl.dashboards as dashboards
 
 
 def test_swarm():
-    dt_fr = datetime.datetime(2022, 1, 15, 0)
-    dt_to = datetime.datetime(2022, 1, 15, 23, 59)
-    time1 = datetime.datetime(2022, 1, 15, 21, 10)
+    dt_fr = datetime.datetime(2015, 2, 15, 20, 5)
+    dt_to = datetime.datetime(2015, 2, 15, 20, 25)
+    time1 = datetime.datetime(2014, 1, 15, 21, 10)
     # specify the file full path
 
     db = dashboards.TSDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)})
