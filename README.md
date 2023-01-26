@@ -404,23 +404,22 @@ This is an example showing the HiLDA aurora in the dayside polar cap region
 
 Other examples for the time-series plots and map projections can be found [here](https://github.com/JouleCai/geospacelab/tree/master/examples)
 
-## Citation and Acknowledgements
-### Acknowlegements
-We acknowledge all the dependencies listed above for their contributions to implement a lot of functionality in GeospaceLAB. 
-
-### Co-authorship
-GeospaceLAB aims to help users to manage and visualize multiple kinds of data in space physics in a convenient way. We welcome collaboration to support your research work. If the functionality of GeospaceLAB plays a critical role in a research paper, the co-authorship is expected to be offered to one or more developers.
+## Acknowledgements and Citation
+### Acknowledgements
+We acknowledge all the dependencies listed above for their contributions to implement a lot of functionality in GeospaceLAB.
 
 ### Citation
 If GeospaceLAB is used for your scientific work, please mention it in the publication and cite the package:
 > Cai L, Aikio A, Kullen A, Deng Y, Zhang Y, Zhang S-R, Virtanen I and Vanhamäki H (2022), GeospaceLAB: Python package 
 for managing and visualizing data in space physics. Front. Astron. Space Sci. 9:1023163. doi: [10.3389/fspas.2022.1023163](https://www.frontiersin.org/articles/10.3389/fspas.2022.1023163/full)
 
-> Cai, L. (2022). GeospaceLAB (Version xx.xx.xx) [Computer software]. https://doi.org/10.5281/zenodo.5377318.
+In addition, please add the following text in the "Methods" or "Acknowledgements" section: 
+> This research has made use of GeospaceLAB v?.?.?, an open-source Python package to manage and visualize data in space physics. 
 
-In addition, please add the in the methods or acknowledgements section the following: "This research has made use of 
-GeospaceLAB v?.?.?, an open-source Python package to manage and visualize data in space physics". 
 Please include the project logo (see the top) to acknowledge GeospaceLAB in posters or talks. 
+
+### Co-authorship
+GeospaceLAB aims to help users to manage and visualize multiple kinds of data in space physics in a convenient way. We welcome collaboration to support your research work. If the functionality of GeospaceLAB plays a critical role in a research paper, the co-authorship is expected to be offered to one or more developers.
 
 
 ## Notes
