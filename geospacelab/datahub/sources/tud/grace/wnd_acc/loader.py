@@ -57,6 +57,6 @@ class Loader(object):
             self.variables['SC_ARG_LAT'] = np.array(results[6]).astype(np.float32).reshape(num_rec, 1)
             self.variables['u_CROSS'] = np.array(results[7]).astype(np.float32).reshape(num_rec, 1)
             self.variables['UNIT_VECTOR_N'] = np.array(results[8]).astype(np.float32).reshape(num_rec, 1)
-            self.variables['UNIT_VECTOR_E'] = np.array(results[6]).astype(np.float32).reshape(num_rec, 1)
-            self.variables['UNIT_VECTOR_D'] = np.array(results[6]).astype(np.float32).reshape(num_rec, 1)
+            self.variables['UNIT_VECTOR_E'] = np.array(results[9]).astype(np.float32).reshape(num_rec, 1)
+            self.variables['UNIT_VECTOR_D'] = np.array(results[10]).astype(np.float32).reshape(num_rec, 1)
             self.variables['FLAG'] = np.array(results[6]).astype(np.float32).reshape(num_rec, 1)

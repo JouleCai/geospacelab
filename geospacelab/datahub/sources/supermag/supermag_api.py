@@ -15,7 +15,7 @@ import re
 import datetime
 
 """
-;supermag-api.py
+;supermag_api.py
 ; ================
 ; Author S. Antunes, based on supermag-api.pro by R.J.Barnes
 
@@ -512,3 +512,15 @@ def supermag_testing(userid):
 # sm_microtest(1,userid)   # sample stations fetch
 # sm_microtest(2,userid)   # sample data fetch, with plotting
 # sm_microtest(3,userid)   # sample indices fetch, with plotting
+
+
+def test_indices():
+    userid = 'JouleCai'
+    start = [2019, 11, 15, 10, 40, 00]
+    (status, idxdata) = SuperMAGGetIndices(userid, start, 3600, 'all,swiall,imfall')
+    idxdata  # 1440 rows x 77 columns dataframe
+    idxdata.keys()
+
+if __name__ == "__main__":
+
+    test_indices()

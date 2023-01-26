@@ -25,6 +25,39 @@ import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.datahub.sources.gfz.downloader as downloader
 import geospacelab.datahub.sources.wdc as wdc
 from geospacelab import preferences as prf
+import geospacelab.datahub.sources.supermag.supermag_api as smapi
+
+
+
+class Downloader(object):
+
+    def __init__(
+            self,
+            dt_fr: datetime.datetime,
+            dt_to: datetime.datetime,
+            user_id: str = None,
+            product_flag: str = None,
+            force_download=False,
+            **kwargs
+    ):
+        self.dt_fr = dt_fr
+        self.dt_to = dt_to
+        self.user_id = user_id
+        self.product_flag = product_flag
+        self.download()
+
+    def download(self):
+
+         duration = (self.dt_fr)
+         (status,idxdata) = smapi.SuperMAGGetIndices(
+             self.user_id,
+             self.dt_fr,
+             3600,'all,swiall,imfall'
+         )
+    def get_url(self):
+    def save_to_nc(self):
+        pass
+
 
 
 class Downloader(downloader.Downloader):

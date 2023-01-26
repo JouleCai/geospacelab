@@ -7,6 +7,7 @@ import scipy.signal as sig
 
 from geospacelab.datahub import DatasetUser
 from geospacelab.toolbox.utilities import pydatetime as dttool
+from geospacelab.cs import GEOCSpherical
 
 
 class LEOToolbox(DatasetUser):
@@ -482,3 +483,72 @@ class LEOToolbox(DatasetUser):
         data_new = np.interp(sectime, sectime_i, y)
         data_new[ind_nan] = np.nan
         return data_new
+    
+    def trajectory_local_unit_vector(self):
+        lat_0 = self['SC_GEO_LAT'].flatten()
+        lon_0 = self['SC_GEO_LON'].flatten()
+        height_0 = self['SC_GEO_ALT'].flatten()
+        
+        cs_0 = GEOCSpherical(coords={'lat': lat_0, 'lon': lon_0, 'height': height_0})
+        phi_0 = cs_0['phi']
+        theta_0 = cs_0['theta']
+        cs_0 = cs_0.to_cartesian()
+        x_0 = cs_0['x']
+        y_0 = cs_0['y']
+        z_0 = cs_0['z']
+        
+        dx = np.concatenate(
+            (
+                [cs_0['x'][1] - cs_0['x'][0]], 
+                cs_0['x'][2:] - cs_0['x'][0:-2],
+                [cs_0['x'][-1] - cs_0['x'][-2]]
+            ),
+            axis=0
+        )
+        dy = np.concatenate(
+            (
+                [cs_0['y'][1] - cs_0['y'][0]], 
+                cs_0['y'][2:] - cs_0['y'][0:-2],
+                [cs_0['y'][-1] - cs_0['y'][-2]]
+            ),
+            axis=0
+        )
+        dz = np.concatenate(
+            (
+                [cs_0['z'][1] - cs_0['z'][0]], 
+                cs_0['z'][2:] - cs_0['z'][0:-2],
+                [cs_0['z'][-1] - cs_0['z'][-2]]
+            ),
+            axis=0
+        )
+        
+        dv = np.array([dx.flatten(), dy.flatten(), dz.flatten()]).T
+        
+        v_new = np.empty_like(dv)
+        
+        for ind, (phi_c, theta_c) in enumerate(zip(phi_0, theta_0)):
+            R_1 = np.array([
+                [-np.sin(phi_c), -np.cos(phi_c), 0],
+                [np.cos(phi_c), -np.sin(phi_c), 0],
+                [0, 0, 1]
+            ])
+
+            R_2 = np.array([
+                [1, 0, 0],
+                [0, np.cos(theta_c), -np.sin(theta_c)],
+                [0, np.sin(theta_c), np.cos(theta_c)]
+            ])
+            v_new[ind, :] = dv[ind, :].reshape((1, 3)) @ R_1 @ R_2
+            
+        
+        norm = np.sqrt(v_new[:, 0]**2 + v_new[:, 1]**2 + v_new[:, 2]**2)
+        
+        v_unit = np.empty_like(v_new)
+        v_unit[:, 0] = v_new[:, 1] / norm
+        v_unit[:, 1] = v_new[:, 0] / norm
+        v_unit[:, 2] = - v_new[:, 2] / norm
+        
+        return v_unit
+        
+        
+         

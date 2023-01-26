@@ -20,7 +20,8 @@ class EISCATDashboard(TSDashboard):
         kwargs.setdefault('load_mode', 'AUTO')
 
         figure = kwargs.pop('figure', 'new')
-        super().__init__(dt_fr=dt_fr, dt_to=dt_to, figure=figure)
+        figure_config = kwargs.pop('figure_config', {})
+        super().__init__(dt_fr=dt_fr, dt_to=dt_to, figure=figure, figure_config=figure_config)
         self.dock(datasource_contents=['madrigal', 'isr', 'eiscat'], **kwargs)
         self.host_dataset.load_data(load_mode=kwargs['load_mode'])
         # ds_1.list_all_variables()
