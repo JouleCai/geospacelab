@@ -26,9 +26,12 @@ class Loader:
 
     def load(self):
         fnc = netCDF4.Dataset(self.file_path)
+        var_names = fnc.variables.keys()
         variables = {}
-        for var_name, var_name_nc in nc_variable_name_dict.items():
-            variables[var_name] = np.array(fnc[var_name_nc]).reshape((fnc[var_name_nc].shape[0], 1))
+        for var_name in var_names:
+            variables[var_name] = np.array(fnc[var_name])
+            if len(variables[var_name].shape) == 1:
+                variables[var_name] = variables[var_name][:, np.newaxis]
 
         time_units = fnc['UNIX_TIME'].units
 
@@ -42,11 +45,4 @@ class Loader:
         self.done = True
         fnc.close()
 
-
-nc_variable_name_dict = {
-    'UNIX_TIME':    'UNIX_TIME',
-    'Kp':     'Kp',
-    'ap':     'ap',
-    'Ap':     'Ap',
-}
 

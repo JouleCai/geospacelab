@@ -154,7 +154,7 @@ def sm_keycheck_indices(flagstring):
     # sunkeys: alias allowed of SUN___ -> ___s
     sunkeys = ["smes", "smls", "smus", "mlats", "mlts", "glats", "glons", "stids", "nums"]
     # darkkeys: alias allowed of DARK___ -> ___d
-    darkkeys = ["smed", "smld", "smud", "mlatd", "mltd", "glatd", "glond", "stidd", "num"]
+    darkkeys = ["smed", "smld", "smud", "mlatd", "mltd", "glatd", "glond", "stidd", "numd"]
     # regkeys: alias allowed of REGIONAL___ -> ___r
     regkeys = ["smer", "smlr", "smur", "mlatr", "mltr", "glatr", "glonr", "stidr", "numr"]
     pluskeys = ["smr", "ltsmr", "ltnum", "nsmr"]

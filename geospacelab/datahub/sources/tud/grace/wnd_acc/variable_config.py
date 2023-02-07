@@ -62,6 +62,7 @@ axis = var.visual.axis
 axis[1].data = "@v.value"
 # axis[1].lim = [np.nan, np.nan]
 axis[2].label = '@v.label'
+axis[1].label = '@v.label'
 axis[1].unit = '@v.unit_label'
 
 configured_variables[var_name] = var

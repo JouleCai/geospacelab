@@ -153,7 +153,7 @@ class PolarMapPanel(GeoPanel):
             cs2.coords.lon = self._transform_mlt_to_lon(cs2.coords.mlt)
         return cs2
 
-    def overlay_coastlines(self):
+    def overlay_coastlines(self, linestyle='-', linewidth=0.5, color='#797A7D', zorder=100, alpha=0.7, **kwargs):
         import cartopy.io.shapereader as shpreader
 
         resolution = '110m'
@@ -185,8 +185,11 @@ class PolarMapPanel(GeoPanel):
         x_new = coords['lon']
         y_new = coords['lat']
         # x_new, y_new = x, y
-        self().plot(x_new, y_new, transform=ccrs.Geodetic(),
-                           linestyle='-', linewidth=0.8, color='#797A7D', zorder=100, alpha=0.7)
+        self().plot(
+            x_new, y_new,
+            transform=ccrs.Geodetic(),
+            linestyle=linestyle, linewidth=linewidth, color=color, zorder=zorder, alpha=alpha,
+            **kwargs)
         # self.ax.scatter(x_new, y_new, transform=self.default_transform,
         #             marker='.', edgecolors='none', color='#C0C0C0', s=1)
 
@@ -599,13 +602,16 @@ class PolarMapPanel(GeoPanel):
     def overlay_sc_trajectory(self, sc_ut=None, sc_coords=None, cs=None, *, show_trajectory=True, color='#EEEEEE',
                           time_tick=True, time_tick_res=300., time_tick_scale=0.05,
                           time_tick_label=True, time_tick_label_format="%H:%M", time_tick_label_fontsize=8,
-                          time_minor_tick=True, time_minor_tick_res=60, **kwargs):
+                          time_tick_label_rotation=45., time_tick_label_offset=0.05,
+                          time_minor_tick=True, time_minor_tick_res=60,
+                          time_tick_width=1, **kwargs):
         kwargs.setdefault('trajectory_config', {
             'linewidth': 1,
             'linestyle': '-',
             'color': 'k',
+            'zorder': max([_.zorder for _ in self.major_ax.get_children()])
         })
-        kwargs['trajectory_config'].update(color=color) 
+        kwargs['trajectory_config'].update(color=color)
 
         cs_new = self.cs_transform(cs_fr=cs, coords=sc_coords, ut=sc_ut)
 
@@ -617,6 +623,9 @@ class PolarMapPanel(GeoPanel):
         lat_in = cs_new['lat'][ind_lat]
         lon_in = cs_new['lon'][ind_lat]
         dts_in = sc_ut[ind_lat]
+
+        if self.ut is None:
+            self.ut = sc_ut[0]
         if show_trajectory:
             self.major_ax.plot(lon_in, lat_in, transform=ccrs.Geodetic(), **kwargs['trajectory_config'])
 
@@ -648,24 +657,28 @@ class PolarMapPanel(GeoPanel):
             uq1 = - l * np.sin(slope_i)
             vq1 = l * np.cos(slope_i)
 
+            zorder = kwargs['trajectory_config']['zorder']
             self.major_ax.quiver(
                 xq, yq, uq1, vq1,
                 units='xy', angles='xy', scale=1., scale_units='xy',
-                width=0.003 * (self._extent[1] - self._extent[0]),
-                headlength=0, headaxislength=0, pivot='middle', color=color
+                width=time_tick_width*0.003 * (self._extent[1] - self._extent[0]),
+                headlength=0, headaxislength=0, pivot='middle', color=color,
+                zorder=zorder
             )
 
             if time_tick_label:
+                offset = time_tick_label_offset * (self._extent[1] - self._extent[0])
                 for ind, time_tick in enumerate(time_ticks):
                     time = dt0 + datetime.timedelta(seconds=time_tick)
-                    x_time_tick = x_i[ind]
-                    y_time_tick = y_i[ind]
+                    x_time_tick = x_i[ind] - offset * np.sin(slope_i[ind])
+                    y_time_tick = y_i[ind] + offset * np.cos(slope_i[ind])
 
                     self.major_ax.text(
                         x_time_tick, y_time_tick, time.strftime(time_tick_label_format),
                         fontsize=time_tick_label_fontsize,
-                        rotation=slope[ind] * 180. / np.pi + 45,
-                        ha='left', va='baseline', color=color
+                        rotation=slope[ind] * 180. / np.pi + time_tick_label_rotation,
+                        ha='center', va='center', color=color,
+                        zorder=zorder
                     )
 
             # self.major_ax.plot(x_time_ticks, y_time_ticks, **kwargs['time_tick_config'])
@@ -693,15 +706,31 @@ class PolarMapPanel(GeoPanel):
                 self.major_ax.quiver(
                     xq, yq, uq1, vq1,
                     units='xy', angles='xy', scale=1., scale_units='xy',
-                    width=0.003*(self._extent[1] - self._extent[0]),
-                    headlength=0, headaxislength=0, pivot='middle', color=color
+                    width=time_tick_width*0.002*(self._extent[1] - self._extent[0]),
+                    headlength=0, headaxislength=0, pivot='middle', color=color,
+                    zorder=zorder
                 )
 
     def overlay_cross_track_vector(
             self, vector, unit_vector, sc_ut=None, sc_coords=None, cs=None, *,
             unit_vector_scale=0.1, vector_unit='',
-            color='r', alpha=0.5, quiverkey_config={},
+            color='r', alpha=0.8, quiverkey_config={},
+            vector_width=0.5,
+            edge='off',
+            edge_color=None,
+            edge_linestyle='-',
+            edge_linewidth=1.,
+            edge_marker=None,
+            edge_markersize=5,
+            edge_alpha=0.8,
             **kwargs):
+
+        if edge_color is None:
+            edge_color = color
+
+        kwargs.setdefault(
+            'zorder', max([_.zorder for _ in self.major_ax.get_children()])
+        )
 
         cs_new = self.cs_transform(cs_fr=cs, coords=sc_coords, ut=sc_ut)
 
@@ -731,14 +760,15 @@ class PolarMapPanel(GeoPanel):
         iq = self.major_ax.quiver(
             xq, yq, uq1, vq1,
             units='xy', angles='xy', scale=1., scale_units='xy',
-            width=0.001 * (self._extent[1] - self._extent[0]),
+            width=vector_width*0.002 * (self._extent[1] - self._extent[0]),
             headlength=0, headaxislength=0, pivot='tail', color=color, alpha=alpha, **kwargs
         )
 
         # Add quiverkey
         quiverkey_config = pybasic.dict_set_default(
             quiverkey_config, X=0.9, Y=0.95, U=width*unit_vector_scale,
-            linewidth=0.01 * (self._extent[1] - self._extent[0]), label=str(unit_vector) + ' ' + vector_unit, color=color,
+            width=2 * vector_width * 0.002 * (self._extent[1] - self._extent[0]),
+            label=str(unit_vector) + ' ' + vector_unit, color=color,
         )
         X = quiverkey_config.pop('X')
         Y = quiverkey_config.pop('Y')
@@ -748,18 +778,28 @@ class PolarMapPanel(GeoPanel):
             iq, X, Y, U, label, **kwargs
         )
 
+        if edge == 'on':
+            xx = iq.X + iq.U
+            yy = iq.Y + iq.V
+            self.major_ax.plot(xx, yy, linestyle=edge_linestyle, linewidth=edge_linewidth,
+                               color=edge_color, marker=edge_marker, markersize=edge_markersize,
+                               alpha=edge_alpha)
+
         return iq
 
     def overlay_sc_coloured_line(
-            self, data, sc_coords=None, sc_ut=None, cs=None, *,
+            self, z_data, sc_coords=None, sc_ut=None, cs=None, *, c_map='jet',
             c_scale='linear', c_lim=None, line_width=6., **kwargs):
         from matplotlib.collections import LineCollection
         import matplotlib.colors as mpl_color
 
+        kwargs.setdefault(
+            'zorder', max([_.zorder for _ in self.major_ax.get_children()])
+        )
         if c_lim is None:
             c_lim = [0, 0]
-            c_lim[0] = np.nanmin(data.flatten())
-            c_lim[1] = np.nanmax(data.flatten())
+            c_lim[0] = np.nanmin(z_data.flatten())
+            c_lim[1] = np.nanmax(z_data.flatten())
 
         if c_scale == 'log':
             norm = mcolors.LogNorm(vmin=c_lim[0], vmax=c_lim[1])
@@ -778,18 +818,18 @@ class PolarMapPanel(GeoPanel):
         dts_in = sc_ut[ind_lat]
 
         pos_data = self.projection.transform_points(ccrs.PlateCarree(), lon_in, lat_in)
-        x = pos_data[:, 0]
-        y = pos_data[:, 1]
-        z = data.flatten()
+        x = np.float32(pos_data[:, 0])
+        y = np.float32(pos_data[:, 1])
+        z = z_data[ind_lat]
 
         points = np.array([x, y]).T.reshape(-1, 1, 2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
-        lc = LineCollection(segments, norm=norm, **kwargs)
+        lc = LineCollection(segments, norm=norm, cmap=c_map, **kwargs)
         lc.set_array(z)
         lc.set_linewidth(line_width)
-        im = self().add_collection(lc)
-        return im
+        self().add_collection(lc)
+        return lc
         # clabel = label + ' (' + unit + ')'
         # self.add_colorbar(self.major_ax, line, cscale=scale, clabel=clabel)
         # cbar = plt.gcf().colorbar(line, ax=panel.major_ax, pad=0.1, fraction=0.03)

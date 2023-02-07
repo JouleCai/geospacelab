@@ -28,6 +28,8 @@ class LEOToolbox(DatasetUser):
         self.add_variable(var_name='SC_APEX_MLT')
         self.ascending_nodes = {}
         self.descending_nodes = {}
+        self.northern_nodes = {}
+        self.southern_nodes = {}
         self.sector_cs = 'GEO'
         self.sectors = {}
 
@@ -38,6 +40,7 @@ class LEOToolbox(DatasetUser):
         dts = self['SC_DATETIME'].value.flatten()
         ind_1 = argrelextrema(np.abs(glat), np.less)[0]
         ind_2 = argrelextrema(glat, np.greater)[0]
+        ind_3 = argrelextrema(glat, np.less)[0]
         inds_asc = []
         inds_dsc = []
         for ind_N in ind_2:
@@ -57,6 +60,16 @@ class LEOToolbox(DatasetUser):
         self.descending_nodes['GEO_LON'] = glon[inds_dsc]
         self.descending_nodes['GEO_LST'] = lst[inds_dsc]
         self.descending_nodes['DATETIME'] = dts[inds_asc]
+
+        self.northern_nodes['INDEX'] = ind_2
+        self.northern_nodes['GEO_LON'] = glon[ind_2]
+        self.northern_nodes['GEO_LST'] = lst[ind_2]
+        self.northern_nodes['DATETIME'] = dts[ind_2]
+        self.southern_nodes['INDEX'] = ind_3
+        self.southern_nodes['GEO_LON'] = glon[ind_3]
+        self.southern_nodes['GEO_LST'] = lst[ind_3]
+        self.southern_nodes['DATETIME'] = dts[ind_3]
+
 
     def group_by_sector(self, sector_name, boundary_lat, sector_cs='GEO'):
         self.sector_cs = sector_cs

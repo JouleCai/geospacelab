@@ -13,7 +13,7 @@ import copy
 import numpy as np
 from geospacelab.datahub import VariableModel as Var
 
-database = 'WDC'
+database = 'FMI'
 
 timestamps = {
     'DATETIME': 'DATETIME',

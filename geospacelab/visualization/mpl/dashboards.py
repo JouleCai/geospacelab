@@ -236,7 +236,7 @@ class TSDashboard(Dashboard):
             dt_range_str = dt_fr.strftime(fmt1) + '-' + dt_to.strftime(fmt2)
         return dt_range_str
 
-    def add_vertical_line(self, dt_in, panel_index=0,
+    def add_vertical_line(self, dt_in, panel_index=-1,
                           label=None, label_position=None, top_extend=0., bottom_extend=0., **kwargs):
         if type(dt_in) is not datetime.datetime:
             return
@@ -249,7 +249,7 @@ class TSDashboard(Dashboard):
         kwargs.setdefault('color', 'k')
         kwargs.setdefault('alpha', 0.8)
 
-        if panel_index == 0:
+        if panel_index == -1:
             if 'major' not in self.extra_axes.keys():
                 ax = self.add_major_axes()
             else:
@@ -257,7 +257,7 @@ class TSDashboard(Dashboard):
         else:
             ax = self.panels[panel_index].axes['major']
 
-        xlim = self.panels[1].axes['major'].get_xlim()
+        xlim = self.panels[0].axes['major'].get_xlim()
         ylim = ax.get_ylim()
         diff_xlim = xlim[1] - xlim[0]
         diff_ylim = ylim[1] - ylim[0]
@@ -286,6 +286,30 @@ class TSDashboard(Dashboard):
             text_config.setdefault('fontweight', 'medium')
             text_config.setdefault('clip_on', False)
             ax.text(x, y, label, transform=ax.transAxes, **text_config)
+
+    def add_horizontal_line(self, ys, panel_index=-1, *,
+                          label=None, label_position=None, top_extend=0., bottom_extend=0., **kwargs):
+
+        if label_position is None:
+            label_position = 'top'
+        text_config = kwargs.pop('text_config', {})
+        kwargs.setdefault('linewidth', 1)
+        kwargs.setdefault('linestyle', '--')
+        kwargs.setdefault('color', 'k')
+        kwargs.setdefault('alpha', 0.8)
+
+        if panel_index == -1:
+            ax_list = [p.axes['major'] for p in self.panels]
+        else:
+            ax_list = [self.panels[panel_index].axes['major']]
+
+        if type(ys) is not list:
+            ys = [ys] * len(ax_list)
+        for ind, ax in enumerate(ax_list):
+            xx = ax.get_xlim()
+            yy = [ys[ind], ys[ind]]
+            ax.plot(xx, yy, **kwargs)
+
 
     def search_UTs(self, search_step=1/86400, **kwargs) -> list:
         from scipy.interpolate import interp1d

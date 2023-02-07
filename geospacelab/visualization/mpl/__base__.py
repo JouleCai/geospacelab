@@ -376,7 +376,7 @@ class DashboardBase(object):
         kwargs.setdefault('ha', 'left')  # horizontal alignment
         kwargs.setdefault('va', 'center')  # vertical alignment
 
-        pos_0 = self.panels[1].axes['major'].get_position()  # adjust y in case of different gs_row_heights
+        pos_0 = self.panels[0].axes['major'].get_position()  # adjust y in case of different gs_row_heights
         for ind, p_index in enumerate(panel_indices):
             panel = self.panels[p_index]
             pos_1 = panel.axes['major'].get_position()

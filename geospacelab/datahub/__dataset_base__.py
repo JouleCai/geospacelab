@@ -79,7 +79,6 @@ class DatasetBase(object):
         self.kind = kind
         self.dt_fr = dt_fr
         self.dt_to = dt_to
-
         self.visual = visual
 
         self.label_fields = label_fields
@@ -104,7 +103,7 @@ class DatasetBase(object):
                 self[var_name] = variable_class(**configured_variable)
             elif issubclass(configured_variable.__class__, self.__variable_model__):
                 self[var_name] = configured_variable.clone()
-            self[var_name].dataset = self
+            # self[var_name].dataset = self
             self[var_name].visual = self.visual
         else:
             self[var_name] = variable_class(dataset=self, name=var_name, visual=self.visual, **kwargs)
@@ -184,6 +183,7 @@ class DatasetBase(object):
             if not issubclass(value.__class__, self.__variable_model__):
                 raise TypeError
         self._variables[key] = value
+        self._variables[key].dataset = self
 
     def __getitem__(self, key) -> __variable_model__:
         # if key not in self._variables.keys():

@@ -15,7 +15,7 @@ import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
 from geospacelab.datahub.sources.tud.grace.wnd_acc.loader import Loader as default_Loader
 from geospacelab.datahub.sources.tud.grace.wnd_acc.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.tud.grace.dns_acc.variable_config as var_config
+import geospacelab.datahub.sources.tud.grace.wnd_acc.variable_config as var_config
 
 
 default_dataset_attrs = {
@@ -132,8 +132,33 @@ class Dataset(datahub.DatasetSourced):
 
         if self.add_APEX:
             self.convert_to_APEX()
-            
-    
+
+        self._add_u_CT()
+
+    def _add_u_CT(self):
+        from geospacelab.observatory.orbit.utilities import LEOToolbox
+        ds_leo = LEOToolbox(self.dt_fr, self.dt_to)
+        ds_leo.clone_variables(self)
+
+        wind_unit_vector = np.concatenate(
+            (
+                self['UNIT_VECTOR_N'].value,
+                self['UNIT_VECTOR_E'].value,
+                self['UNIT_VECTOR_D'].value
+            ),
+        axis=1
+        )
+        orbit_unit_vector = ds_leo.trajectory_local_unit_vector()
+        cp = np.cross(orbit_unit_vector, wind_unit_vector)
+        u_CT = -np.sign(cp[:, 2]) * self['u_CROSS'].value.flatten()
+
+        var = self['u_CROSS'].clone()
+        var.name = 'u_CT'
+        var.label = r'$u_{CT}$'
+        var.visual.axis[1].lim = [None, None]
+        var.value = u_CT[:, np.newaxis]
+        self['u_CT'] = var
+
     def convert_to_APEX(self):
         import geospacelab.cs as gsl_cs
 

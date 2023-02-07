@@ -20,17 +20,17 @@ import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 
-from geospacelab.datahub.sources.gfz import gfz_database
-from geospacelab.datahub.sources.gfz.kpap.loader import Loader as default_Loader
-from geospacelab.datahub.sources.gfz.kpap.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.gfz.kpap.variable_config as var_config
+from geospacelab.datahub.sources.supermag import supermag_database
+from geospacelab.datahub.sources.supermag.indices.loader import Loader as default_Loader
+from geospacelab.datahub.sources.supermag.indices.downloader import Downloader as default_Downloader
+import geospacelab.datahub.sources.supermag.indices.variable_config as var_config
 
 
 default_dataset_attrs = {
-    'database': gfz_database,
-    'product': 'KpAp',
+    'database': supermag_database,
+    'product': 'SuperMAG/Indices',
     'data_file_ext': 'nc',
-    'data_root_dir': prf.datahub_data_root_dir / 'GFZ' / 'Indices',
+    'data_root_dir': prf.datahub_data_root_dir / 'SuperMAG' / 'INDICES',
     'allow_load': True,
     'allow_download': True,
     'force_download': False,
@@ -39,21 +39,21 @@ default_dataset_attrs = {
     'time_clip': True,
 }
 
-default_variable_names = ['DATETIME', 'Kp', 'ap', 'Ap']
+default_variable_names = ['DATETIME', ]
 
 # default_data_search_recursive = True
 
 default_attrs_required = []
 
 
-class TT(datahub.DatasetSourced):
+class Dataset(datahub.DatasetSourced):
     def __init__(self, **kwargs):
         kwargs = basic.dict_set_default(kwargs, **default_dataset_attrs)
 
         super().__init__(**kwargs)
 
-        self.database = kwargs.pop('database', gfz_database)
-        self.product = kwargs.pop('product', 'KpAp')
+        self.database = kwargs.pop('database', supermag_database)
+        self.product = kwargs.pop('product', 'SuperMAG/Indices')
         self.allow_download = kwargs.pop('allow_download', True)
         self.force_download = kwargs.pop('force_download', True)
 
@@ -95,7 +95,24 @@ class TT(datahub.DatasetSourced):
         for file_path in self.data_file_paths:
             load_obj = self.loader(file_path, file_type=self.data_file_ext)
 
-            for var_name in self._variables.keys():
+            for var_name in load_obj.variables.keys():
+                if var_name not in self.keys():
+                    if var_name in ['SME', 'SMEs', 'SMEd', 'SMR']:
+                        self[var_name] = var_config.configured_variables['SME'].clone()
+                        self[var_name].name = var_name
+                        self[var_name].fullname = self[var_name].fullname.replace('SME', var_name)
+                        
+                    elif var_name in ['SMU', 'SMUs', 'SMUd']:
+                        self[var_name] = var_config.configured_variables['SMU'].clone()
+                        self[var_name].name = var_name
+                        self[var_name].fullname = self[var_name].fullname.replace('SMU', var_name)
+                    elif var_name in ['SML', 'SMLs', 'SMLd']:
+                        self[var_name] = var_config.configured_variables['SML'].clone() 
+                        self[var_name].name = var_name
+                        self[var_name].fullname = self[var_name].fullname.replace('SML', var_name)
+                    else:
+                        self.add_variable(var_name=var_name)
+                    
                 self._variables[var_name].join(load_obj.variables[var_name])
 
             # self.select_beams(field_aligned=True)
@@ -105,17 +122,15 @@ class TT(datahub.DatasetSourced):
     def search_data_files(self, **kwargs):
         dt_fr = self.dt_fr
         dt_to = self.dt_to
-        diff_years = dt_to.year - dt_fr.year
-        dt0 = datetime.datetime(dt_fr.year, 1, 1)
-        for i in range(diff_years + 1):
-            thisyear = datetime.datetime(dt0.year + i, 1, 1)
-            if datetime.date.today().year == thisyear.year:
-                self.force_download = True
+        diff_days = dttool.get_diff_days(dt_fr, dt_to)
+        dt0 = dt_fr
+        for i in range(diff_days + 1):
+            this_day = dt0 + datetime.timedelta(days=i)
 
             initial_file_dir = kwargs.pop('initial_file_dir', None)
             if initial_file_dir is None:
-                initial_file_dir = self.data_root_dir / 'Kp_Ap'
-            file_patterns = [thisyear.strftime("%Y")]
+                initial_file_dir = self.data_root_dir / this_day.strftime("%Y")
+            file_patterns = ['INDICES', this_day.strftime("%Y%m%d")]
             # remove empty str
             file_patterns = [pattern for pattern in file_patterns if str(pattern)]
 

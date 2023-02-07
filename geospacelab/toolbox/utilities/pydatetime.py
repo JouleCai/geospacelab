@@ -167,6 +167,20 @@ def convert_datetime_to_matlabdn(dts):
     elif 'numpy' in str(type_in):
         return dns.astype(numpy.double)
 
+def convert_matlabdn_to_datetime(dns):
+    type_in = type(dns)
+    dns = numpy.array(dns)
+    dts = numpy.empty_like(dns, dtype=datetime)
+    for ind, dn in enumerate(dns.flatten()):
+        dts[ind] = datetime.fromordinal(int(dn)) + timedelta(days=dn % 1) - timedelta(days=366)
+
+    if type_in is datetime:
+        return dts[0]
+    elif type_in is list:
+        return dts.tolist()
+    elif 'numpy' in str(type_in):
+        return dts
+
 
 def get_doy(dts, year=None, decimal=False):
     type_in = type(dts)

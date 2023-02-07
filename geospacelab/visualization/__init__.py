@@ -8,7 +8,7 @@ __license__ = "BSD-3-Clause License"
 __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
-from geospacelab.visualization.mpl.ts_viewer import TimeSeriesViewer
+from geospacelab.visualization.mpl.dashboards import TSDashboard
 from geospacelab.visualization.mpl.__base__ import plt, FigureBase
 
 

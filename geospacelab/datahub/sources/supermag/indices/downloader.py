@@ -17,6 +17,7 @@ import bs4
 import pathlib
 import re
 import netCDF4 as nc
+import pandas as pd
 import ftplib
 from contextlib import closing
 
@@ -27,7 +28,63 @@ import geospacelab.datahub.sources.wdc as wdc
 from geospacelab import preferences as prf
 import geospacelab.datahub.sources.supermag.supermag_api as smapi
 
+basekeys = ["sme", "sml", "smu", "mlat", "mlt", "glat", "glon", "stid", "num"]
+# sunkeys: alias allowed of SUN___ -> ___s
+sunkeys = ["smes", "smls", "smus", "mlats", "mlts", "glats", "glons", "stids", "nums"]
+# darkkeys: alias allowed of DARK___ -> ___d
+darkkeys = ["smed", "smld", "smud", "mlatd", "mltd", "glatd", "glond", "stidd", "numd"]
+# regkeys: alias allowed of REGIONAL___ -> ___r
+regkeys = ["smer", "smlr", "smur", "mlatr", "mltr", "glatr", "glonr", "stidr", "numr"]
+pluskeys = ["smr", "ltsmr", "ltnum", "nsmr"]
+indiceskeys = basekeys + sunkeys + darkkeys + regkeys + pluskeys
+# 'all' means all the above
 
+imfkeys = ["bgse", "bgsm", "vgse", "vgsm"]  # or imfall for all these
+swikeys = ["pdyn", "epsilon", "newell", "clockgse", "clockgsm",
+           "density"]  # % or swiall for all these
+
+var_name_dict = {
+    'sme': 'SME',
+    "sml": 'SML',
+    "smu": 'SMU',
+    "mlat": 'AACGM_LAT',
+    "mlt": 'AACGM_MLT',
+    "glat": 'GEO_LAT',
+    "glon": 'GEO_LON',
+    "stid": 'STATION_ID',
+    "num": 'STATION_NUM',
+    'smes': 'SME_S',
+    "smls": 'SML_S',
+    "smus": 'SMU_S',
+    "mlats": 'AACGM_LAT_S',
+    "mlts": 'AACGM_MLT_S',
+    "glats": 'GEO_LAT_S',
+    "glons": 'GEO_LON_S',
+    "stids": 'STATION_ID_S',
+    "nums": 'STATION_NUM_S',
+    'smed': 'SME_D',
+    "smld": 'SML_D',
+    "smud": 'SMU_D',
+    "mlatd": 'AACGM_LAT_D',
+    "mltd": 'AACGM_MLT_D',
+    "glatd": 'GEO_LAT_D',
+    "glond": 'GEO_LON_D',
+    "stidd": 'STATION_ID_D',
+    "numd": 'STATION_NUM_D',
+    'smer': 'SME_R',
+    "smlr": 'SML_R',
+    "smur": 'SMU_R',
+    "mlatr": 'AACGM_LAT_R',
+    "mltr": 'AACGM_MLT_R',
+    "glatr": 'GEO_LAT_R',
+    "glonr": 'GEO_LON_R',
+    "stidr": 'STATION_ID_R',
+    "numr": 'STATION_NUM_R',
+    "smr": 'SMR',
+    "ltsmr": 'SMR_LT',
+    "ltnum": 'LT_NUM',
+    "nsmr": 'SMR_STATION_NUM',
+}
 
 class Downloader(object):
 
@@ -36,151 +93,132 @@ class Downloader(object):
             dt_fr: datetime.datetime,
             dt_to: datetime.datetime,
             user_id: str = None,
-            product_flag: str = None,
-            force_download=False,
+            products: str = None, # 'indicesall', 'swiall', 'imfall'
+            force_download=True,
             **kwargs
     ):
+        if products is None:
+            products = ['indicesall']
+        self.data_file_root_dir = prf.datahub_data_root_dir / 'SuperMAG' / 'INDICES'
         self.dt_fr = dt_fr
         self.dt_to = dt_to
-        self.user_id = user_id
-        self.product_flag = product_flag
+        if user_id is None:
+            self.user_id = prf.user_config['datahub']['supermag']['username']
+        self.products = products
+
+        self.force_download = force_download
         self.download()
+        self.done = False
 
     def download(self):
+        num_days = dttool.get_diff_days(self.dt_fr, self.dt_to)
+        for nd in range(num_days+1):
+            this_day = dttool.get_start_of_the_day(self.dt_fr) + datetime.timedelta(days=nd)
+            extent = 86400.
 
-         duration = (self.dt_fr)
-         (status,idxdata) = smapi.SuperMAGGetIndices(
+            if self.products in [['all'], ['indicesall']]:
+                product_name = 'indices'
+            else:
+                product_name = '_'.join(self.products)
+            product_name = product_name.upper()
+            file_name = '_'.join([
+                'SuperMAG',
+                product_name,
+                this_day.strftime('%Y%m%d')
+            ]) + '.nc'
+            file_path = self.data_file_root_dir / this_day.strftime('%Y') / file_name
+            if file_path.is_file() and not self.force_download:
+                mylog.StreamLogger.info(f'The requested data file already exists! See "{file_path}".')
+                self.done = True
+                continue
+
+            (status, idxdata) = smapi.SuperMAGGetIndices(
              self.user_id,
-             self.dt_fr,
-             3600,'all,swiall,imfall'
-         )
-    def get_url(self):
-    def save_to_nc(self):
-        pass
-
-
-
-class Downloader(downloader.Downloader):
-
-    def __init__(self, dt_fr,  dt_to, data_file_root_dir=None, force=False):
-
-        ftp_sub_dir = 'Kp_ap_Ap_SN_F107'
-        ftp_filename_prefix = ftp_sub_dir + '_'
-
-        super().__init__(
-            dt_fr,  dt_to,
-            data_file_root_dir=data_file_root_dir, force=force,
-            ftp_sub_dir=ftp_sub_dir, ftp_filename_prefix=ftp_filename_prefix
-        )
-        self.data_file_root_dir = self.data_file_root_dir / 'Kp_Ap'
-        self.download()
-
-    def save_to_netcdf(self, ystr, file_path):
-        with open(file_path, 'r') as f:
-            text = f.read()
-
-            results = re.findall(
-                r'^(\d+ \d+ \d+)\s*\d+\s*[\d.]+\s*(\d+)\s*(\d+)\s*' +
-                r'([\-\d.]+)\s*([\-\d.]+)\s*([\-\d.]+)\s*([\-\d.]+)\s*([\-\d.]+)\s*([\-\d.]+)\s*([\-\d.]+)\s*([\-\d.]+)\s*' +
-                r'([\-\d]+)\s*([\-\d]+)\s*([\-\d]+)\s*([\-\d]+)\s*([\-\d]+)\s*([\-\d]+)\s*([\-\d]+)\s*([\-\d]+)\s*([\-\d]+)\s*' +
-                r'([\-\d]+)\s*([\-\d.]+)\s*([\-\d.]+)\s*([\-\d]+)',
-                text,
-                re.M
+             this_day,
+             extent,
+             ','.join(self.products),
+             FORMAT='list'
             )
-            results = list(zip(*results))
+            if status == 1:
+                self.save_to_nc(idxdata, file_path)
+            else:
+                self.done = False
+                mylog.StreamLogger.error(f'The requested data cannot be downloaded!')
+                return
+    def save_to_nc(self, idxdata, file_path):
+        def sm_t_to_datetime(tval):
+            jd = (tval / 86400.0) + 2440587.5
+            timestamp = pd.to_datetime(jd, unit='D', origin='julian')  # format YYYY-MM-DD HH:MM:SS.ssssss
+            return timestamp.to_pydatetime()
+        vars = {}
+        dts = []
+        dt_0 = dttool.get_start_of_the_day(sm_t_to_datetime(idxdata[0]['tval']))
+        for item in idxdata:
+            dt_c = sm_t_to_datetime(item['tval'])
+            dt_c = dt_0 + datetime.timedelta(minutes=np.around((dt_c - dt_0).total_seconds() / 60))
+            dts.append(dt_c)
 
-            dts = [datetime.datetime.strptime(dtstr, "%Y %m %d") for dtstr in results[0]]
-            time_array = np.array(cftime.date2num(dts, units='seconds since 1970-01-01 00:00:00.0'))
-            bsr_array = np.array(results[1])
-            bsr_array.astype(np.int32)
-            db_array = np.array(results[2]).astype(np.int32)
-            kp_array = np.array(results[3:11]).astype(np.float32)
-            kp_array = np.where(kp_array == -1, np.nan, kp_array)
-            ap_array = np.array(results[11:20]).astype(np.float32)
-            ap_array = np.where(ap_array == -1, np.nan, ap_array)
-            sn_array = np.array(results[20]).astype(np.int32)
-            sn_array = np.where(sn_array == -1, np.nan, sn_array)
-            f107o_array = np.array(results[21]).astype(np.float32)
-            f107o_array = np.where(f107o_array == -1, np.nan, f107o_array)
-            f107a_array = np.array(results[22]).astype(np.float32)
-            f107a_array = np.where(f107a_array == -1, np.nan, f107a_array)
-            flag_array = np.array(results[23]).astype(np.int32)
+            for key in item.keys():
+                if key == 'tval':
+                    continue
+                value = item[key]
+                if type(value) is list:
+                    nelem = len(value)
+                else:
+                    nelem = 1
+                    value = [value]
+                value = np.array(value)[np.newaxis, :]
+                vars.setdefault(key, np.empty((0, nelem), dtype=type(value[0, 0])))
+                vars[key] = np.vstack((vars[key], value))
+        keys = list(vars.keys())
+        for key in keys:
+            if 'mlat' in key:
+                new_key = key.replace('mlat', '_AACGM_LAT')
+            elif 'mlt' in key:
+                new_key = key.replace('mlt', '_AACGM_MLT')
+            elif 'glat' in key:
+                new_key = key.replace('glat', '_GEO_LAT')
+            elif 'glon' in key:
+                new_key = key.replace('glon', '_GEO_LON')
+            elif 'stid' in key:
+                new_key = key.replace('stid', '_STATION')
+            elif 'smr' in key:
+                new_key = key.replace('smr', 'SMR')
+            else:
+                new_key = key
+            if 'num' in new_key:
+                new_key = key.replace('num', '_NUM')
+            vars[new_key] = vars.pop(key)
 
-            num_rows = len(results[0])
+        file_path.parent.resolve().mkdir(parents=True, exist_ok=True)
+        fnc = nc.Dataset(file_path, 'w')
+        fnc.title = "SuperMAG Indices (Daily)"
 
-            ################## for SN, f10.7
-            fp = file_path.parent.resolve().parent.resolve() / "SN_F107" / ("GFZ_SN_F107_" + ystr + '.nc')
-            fp.parent.resolve().mkdir(parents=True, exist_ok=True)
-            fnc = nc.Dataset(fp, 'w')
-            fnc.createDimension('UNIX_TIME', num_rows)
+        num_rows = len(dts)
+        time_array = np.array(cftime.date2num(dts, units='seconds since 1970-01-01 00:00:00.0'))
+        fnc.createDimension('UNIX_TIME', num_rows)
+        fnc.createDimension('SME_R_NUM', vars['SMEr_NUM'].shape[1])
+        time = fnc.createVariable('UNIX_TIME', np.float64, ('UNIX_TIME',))
+        time.units = 'seconds since 1970-01-01 00:00:00.0'
+        time[::] = time_array[::]
 
-            fnc.title = "GFZ SN/F10.7 index"
-            time = fnc.createVariable('UNIX_TIME', np.float64, ('UNIX_TIME',))
-            time.units = 'seconds since 1970-01-01 00:00:00.0'
-            f107o = fnc.createVariable('F107_OBS', np.float32, ('UNIX_TIME',))
-            f107a = fnc.createVariable('F107_ADJ', np.float32, ('UNIX_TIME',))
-            sn = fnc.createVariable('SN', np.float32, ('UNIX_TIME',))
-            bsr = fnc.createVariable('BSRN', np.float32, ('UNIX_TIME',))
-            db = fnc.createVariable('BSRN_Days', np.float32, ('UNIX_TIME',))
-            flag = fnc.createVariable('Flag', np.float32, ('UNIX_TIME',))
-            time[::] = time_array[::]
-            f107o[::] = f107o_array[::]
-            f107a[::] = f107a_array[::]
-            sn[::] = sn_array[::]
-            bsr[::] = bsr_array[::]
-            db[::] = db_array[::]
-            flag_1 = np.where(flag_array < 2, 0, 1)
-            flag[::] = flag_1[::]
-            print('From {} to {}.'.format(
-            datetime.datetime.utcfromtimestamp(time_array[0]),
-            datetime.datetime.utcfromtimestamp(time_array[-1]))
-            )
-            mylog.StreamLogger.info(
-                "The requested SN/F10.7 data has been downloaded and saved in the file {}.".format(fp))
-            fnc.close()
-
-            ########## for Kp Ap
-            fp = file_path.parent.resolve() / ("GFZ_Kp_Ap_" + ystr + '.nc')
-            fp.parent.resolve().mkdir(parents=True, exist_ok=True)
-            fnc = nc.Dataset(fp, 'w')
-            fnc.createDimension('UNIX_TIME', num_rows*8)
-
-            fnc.title = "GFZ Kp/Ap index"
-            time = fnc.createVariable('UNIX_TIME', np.float64, ('UNIX_TIME',))
-            time.units = 'seconds since 1970-01-01 00:00:00.0'
-            kp = fnc.createVariable('Kp', np.float32, ('UNIX_TIME',))
-            ap = fnc.createVariable('ap', np.float32, ('UNIX_TIME',))
-            Ap = fnc.createVariable('Ap', np.float32, ('UNIX_TIME',))
-            flag = fnc.createVariable('flag', np.float32, ('UNIX_TIME',))
-            seconds = np.arange(8) * 3600 * 3 + 1800*3
-            time_array = np.tile(time_array, (8, 1)).T
-            for i in range(8):
-                time_array[:, i] = time_array[:, i] + seconds[i]
-            time_array = time_array.flatten()
-            kp_array = kp_array.T.flatten()
-            Ap_array = np.tile(ap_array[-1, :].flatten(), (8, 1)).T.flatten()
-            ap_array = ap_array[:-1, :].T.flatten()
-            flag_array = np.tile(flag_array, (8, 1)).T.flatten()
-            flag_2 = np.where(flag_array == 2, 1, 0)
-            time[::] = time_array[::]
-            kp[::] = kp_array[::]
-            ap[::] = ap_array[::]
-            Ap[::] = Ap_array[::]
-            flag[::] = flag_2[::]
-            print('From {} to {}.'.format(
-            datetime.datetime.utcfromtimestamp(time_array[0]),
-            datetime.datetime.utcfromtimestamp(time_array[-1]))
-            )
-            mylog.StreamLogger.info(
-                "The requested Kp/Ap data has been downloaded and saved in the file {}.".format(fp))
-            fnc.close()
-
-            self.done = True
+        for key in vars.keys():
+            var = vars[key]
+            if var.shape[1] == 1:
+                dim = ('UNIX_TIME', )
+            else:
+                dim = ('UNIX_TIME', 'SME_R_NUM')
+            var_nc = fnc.createVariable(key, var.dtype, dim)
+            var_nc[::] = var[::]
+        mylog.StreamLogger.info(
+            "The requested SuperMAG data has been saved in the file {}.".format(file_path))
+        fnc.close()
+        self.done = True
 
 
 if __name__ == "__main__":
-    dt_fr1 = datetime.datetime(1990, 1, 1)
-    dt_to1 = datetime.datetime(2020, 12, 16)
+    dt_fr1 = datetime.datetime(2012, 1, 1)
+    dt_to1 = datetime.datetime(2012, 1, 16)
     Downloader(dt_fr1, dt_to1)
 
 

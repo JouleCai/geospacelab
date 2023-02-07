@@ -21,7 +21,7 @@ class SuperMAGDatabase(DatabaseModel):
         return obj
 
 
-supermag_database = SuperMAGDatabase('Madrigal')
+supermag_database = SuperMAGDatabase('SuperMAG')
 supermag_database.url = 'https://supermag.jhuapl.edu/'
 supermag_database.category = 'online database'
 
