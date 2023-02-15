@@ -346,14 +346,14 @@ ds_s1 = dashboard.dock(
 dashboard.set_layout(1, 1)
 
 # Get the variables: LBHS emission intensiy, corresponding times and locations
-lbhs = dashboard.assign_variable('GRID_AUR_' + band, dataset_index=1)
-dts = dashboard.assign_variable('DATETIME', dataset_index=1).value.flatten()
-mlat = dashboard.assign_variable('GRID_MLAT', dataset_index=1).value
-mlon = dashboard.assign_variable('GRID_MLON', dataset_index=1).value
-mlt = dashboard.assign_variable(('GRID_MLT'), dataset_index=1).value
+lbhs = dashboard.assign_variable('GRID_AUR_' + band, dataset_index=0)
+dts = dashboard.assign_variable('DATETIME', dataset_index=0).value.flatten()
+mlat = dashboard.assign_variable('GRID_MLAT', dataset_index=0).value
+mlon = dashboard.assign_variable('GRID_MLON', dataset_index=0).value
+mlt = dashboard.assign_variable(('GRID_MLT'), dataset_index=0).value
 
 # Search the index for the time to plot, used as an input to the following polar map
-ind_t = dashboard.datasets[1].get_time_ind(ut=time1)
+ind_t = dashboard.datasets[0].get_time_ind(ut=time1)
 lbhs_ = lbhs.value[ind_t]
 mlat_ = mlat[ind_t]
 mlon_ = mlon[ind_t]
@@ -364,7 +364,7 @@ panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AA
 # Some settings for plotting.
 pcolormesh_config = lbhs.visual.plot_config.pcolormesh
 # Overlay the SSUSI image in the map.
-ipm = panel1.overlay_pcolormesh(data=lbhs_, coords={'lat': mlat_, 'lon': mlon_, 'mlt': mlt_}, cs='AACGM', 
+ipm = panel1.overlay_pcolormesh(data=lbhs_, coords={'lat': mlat_, 'lon': mlon_, 'mlt': mlt_}, cs='AACGM',
                                 regridding=True, **pcolormesh_config)
 # Add a color bar
 panel1.add_colorbar(ipm, c_label=band + " (R)", c_scale=pcolormesh_config['c_scale'], left=1.1, bottom=0.1,
