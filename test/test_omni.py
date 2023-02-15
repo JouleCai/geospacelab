@@ -1,77 +1,38 @@
 import datetime
-import matplotlib.pyplot as plt
 
-import geospacelab.visualization.mpl.geomap.geodashboards as geomap
+from geospacelab.datahub import DataHub
 
-dt_fr = datetime.datetime(2015, 9, 8, 8)
-dt_to = datetime.datetime(2015, 9, 8, 23, 59)
-time1 = datetime.datetime(2015, 9, 8, 20, 21)
-pole = 'N'
-sat_id = 'f16'
-band = 'LBHS'
+# settings
+dt_fr = datetime.datetime.strptime('20210309' + '0000', '%Y%m%d%H%M')   # datetime from
+dt_to = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')   # datetime to
+database_name = 'madrigal'      # built-in sourced database name
+facility_name = 'eiscat'        # facility name
 
-# Create a geodashboard object
-dashboard = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (5, 5)})
+site = 'UHF'                # facility attributes required, check from the eiscat schedule page
+antenna = 'UHF'
+modulation = 'ant'
 
-# If the orbit_id is specified, only one file will be downloaded. This option saves the downloading time.
-# dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole='N', sat_id='f17', orbit_id='46863')
-# If not specified, the data during the whole day will be downloaded.
-dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole=pole, sat_id=sat_id, orbit_id=None)
-ds_s1 = dashboard.dock(
-    datasource_contents=['madrigal', 'satellites', 'dmsp', 's1'],
-    dt_fr=time1 - datetime.timedelta(minutes=45),
-    dt_to=time1 + datetime.timedelta(minutes=45),
-    sat_id=sat_id)
+# create a datahub instance
+dh = DataHub(dt_fr, dt_to)
+# dock a dataset
+ds_1 = dh.dock(datasource_contents=[database_name, 'isr', facility_name],
+                      site=site, antenna=antenna, modulation=modulation, data_file_type='eiscat-hdf5')
+# load data
+ds_1.load_data()
+# assign a variable from its own dataset to the datahub
+n_e = dh.assign_variable('n_e')
+T_i = dh.assign_variable('T_i')
 
-dashboard.set_layout(1, 1)
+# get the variables which have been assigned in the datahub
+n_e = dh.get_variable('n_e')
+T_i = dh.get_variable('T_i')
+# if the variable is not assigned in the datahub, but exists in the its own dataset:
+comp_O_p = dh.get_variable('comp_O_p', dataset=ds_1)     # O+ ratio
+# above line is equivalent to
+comp_O_p = dh.datasets[0]['comp_O_p']
 
-# Get the variables: LBHS emission intensiy, corresponding times and locations
-lbhs = dashboard.assign_variable('GRID_AUR_' + band, dataset_index=0)
-dts = dashboard.assign_variable('DATETIME', dataset_index=0).value.flatten()
-mlat = dashboard.assign_variable('GRID_MLAT', dataset_index=0).value
-mlon = dashboard.assign_variable('GRID_MLON', dataset_index=0).value
-mlt = dashboard.assign_variable(('GRID_MLT'), dataset_index=0).value
-
-# Search the index for the time to plot, used as an input to the following polar map
-ind_t = dashboard.datasets[0].get_time_ind(ut=time1)
-lbhs_ = lbhs.value[ind_t]
-mlat_ = mlat[ind_t]
-mlon_ = mlon[ind_t]
-mlt_ = mlt[ind_t]
-# Add a polar map panel to the dashboard. Currently the style is the fixed MLT at mlt_c=0. See the keywords below:
-panel1 = dashboard.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, boundary_lat=65., mirror_south=True)
-
-# Some settings for plotting.
-pcolormesh_config = lbhs.visual.plot_config.pcolormesh
-# Overlay the SSUSI image in the map.
-ipm = panel1.overlay_pcolormesh(data=lbhs_, coords={'lat': mlat_, 'lon': mlon_, 'mlt': mlt_}, cs='AACGM',
-                                regridding=True, **pcolormesh_config)
-# Add a color bar
-panel1.add_colorbar(ipm, c_label=band + " (R)", c_scale=pcolormesh_config['c_scale'], left=1.1, bottom=0.1,
-                    width=0.05, height=0.7)
-
-# Overlay the gridlines
-panel1.overlay_gridlines(lat_res=5, lon_label_separator=5)
-
-# Overlay the coastlines in the AACGM coordinate
-panel1.overlay_coastlines()
-
-# Overlay cross-track velocity along satellite trajectory
-sc_dt = ds_s1['SC_DATETIME'].value.flatten()
-sc_lat = ds_s1['SC_GEO_LAT'].value.flatten()
-sc_lon = ds_s1['SC_GEO_LON'].value.flatten()
-sc_alt = ds_s1['SC_GEO_ALT'].value.flatten()
-sc_coords = {'lat': sc_lat, 'lon': sc_lon, 'height': sc_alt}
-
-v_H = ds_s1['v_i_H'].value.flatten()
-panel1.overlay_cross_track_vector(vector=v_H, unit_vector=1000, alpha=0.5, color='r', sc_coords=sc_coords, sc_ut=sc_dt, cs='GEOC')
-# Overlay the satellite trajectory with ticks
-panel1.overlay_sc_trajectory(sc_ut=sc_dt, sc_coords=sc_coords, cs='GEOC')
-
-# Add the title and save the figure
-polestr = 'North' if pole == 'N' else 'South'
-panel1.add_title(title='DMSP/SSUSI, ' + band + ', ' + sat_id.upper() + ', ' + polestr + ', ' + time1.strftime('%Y-%m-%d %H%M UT'))
-plt.savefig('DMSP_SSUSI_' + time1.strftime('%Y%m%d-%H%M') + '_' + band + '_' + sat_id.upper() + '_' + pole, dpi=300)
-
-# show the figure
-plt.show()
+# The variables, e.g., n_e and T_i, are the class Variable's instances,
+# which stores the variable values, errors, and many other attributes, e.g., name, label, unit, depends, ....
+# To get the value of the variable, use variable_isntance.value, e.g.,
+print(n_e.value)        # return the variable's value, type: numpy.ndarray, axis 0 is always along the time, check n_e.depends.items{}
+print(n_e.error)

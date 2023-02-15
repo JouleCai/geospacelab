@@ -220,7 +220,7 @@ T_i = dh.get_variable('T_i')
 # if the variable is not assigned in the datahub, but exists in the its own dataset:
 comp_O_p = dh.get_variable('comp_O_p', dataset=ds_1)     # O+ ratio
 # above line is equivalent to
-comp_O_p = dh.datasets[1]['comp_O_p']
+comp_O_p = dh.datasets[0]['comp_O_p']
 
 # The variables, e.g., n_e and T_i, are the class Variable's instances, 
 # which stores the variable values, errors, and many other attributes, e.g., name, label, unit, depends, ....
