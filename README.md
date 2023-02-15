@@ -307,7 +307,7 @@ dashboard.quicklook()
 
 # data can be retrieved in the same way as in Example 1:
 dashboard.list_assigned_variables()
-B_x_gsm = dashboard.get_variable('B_x_GSM', dataset_index=1)
+B_x_gsm = dashboard.get_variable('B_x_GSM', dataset_index=0)
 # save figure
 dashboard.save_figure()
 # show on screen

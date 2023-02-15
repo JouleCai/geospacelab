@@ -52,6 +52,41 @@ default_variable_names = ['DATETIME', 'SC_ID_IMF', 'SC_ID_PLS', 'IMF_PTS', 'PLS_
 default_attrs_required = ['omni_type', 'omni_res']
 
 
+def _validate_IMF_cs(func):
+    @functools.wraps(func)
+    def wrapper(ds_omni, **kwargs):
+        kwargs.setdefault('cs', 'GSM')
+        kwargs.setdefault('to_radian', False)
+        cs = kwargs['cs']
+        if cs == 'GSM':
+            kwargs.setdefault('Bx', ds_omni['B_x_GSM'].flatten())
+            kwargs.setdefault('By', ds_omni['B_y_GSM'].flatten())
+            kwargs.setdefault('Bz', ds_omni['B_z_GSM'].flatten())
+        elif cs == 'GSE':
+            kwargs.setdefault('Bx', ds_omni['B_x_GSE'].flatten())
+            kwargs.setdefault('By', ds_omni['B_y_GSE'].flatten())
+            kwargs.setdefault('Bz', ds_omni['B_z_GSE'].flatten())
+        else:
+            raise NotImplementedError
+        result = func(ds_omni, **kwargs)
+
+        if kwargs['to_radian']:
+            unit = 'degree'
+            unit_label = r'$^\circ$'
+        else:
+            unit = 'radiance'
+            unit_label = r''
+        result.unit = unit
+        result.unit_label = unit_label
+        result.depends = ds_omni['B_x_GSE'].depends
+        if ds_omni.visual == 'on':
+            result.visual.plot_config.style = '1P'
+            result.visual.axis[1].unit = '@v.unit_label'
+        return result
+
+    return wrapper
+
+
 class Dataset(datahub.DatasetSourced):
     def __init__(self, **kwargs):
         kwargs = basic.dict_set_default(kwargs, **default_dataset_attrs)
@@ -168,40 +203,7 @@ class Dataset(datahub.DatasetSourced):
             raise NotImplementedError
         return download_obj.done
 
-    def _validate_IMF_cs(func):
-        @functools.wraps(func)
-        def wrapper(self, **kwargs):
-            kwargs.setdefault('cs', 'GSM')
-            kwargs.setdefault('to_radian', False)
-            cs = kwargs['cs']
-            if cs == 'GSM':
-                kwargs.setdefault('Bx', self['B_x_GSM'].flatten())
-                kwargs.setdefault('By', self['B_y_GSM'].flatten())
-                kwargs.setdefault('Bz', self['B_z_GSM'].flatten())
-            elif cs == 'GSE':
-                kwargs.setdefault('Bx', self['B_x_GSE'].flatten())
-                kwargs.setdefault('By', self['B_y_GSE'].flatten())
-                kwargs.setdefault('Bz', self['B_z_GSE'].flatten())
-            else:
-                raise NotImplementedError
-            result = func(self, **kwargs)
-
-            if kwargs['to_radian']:
-                unit = 'degree'
-                unit_label = r'$^\circ$'
-            else:
-                unit = 'radiance'
-                unit_label = r''
-            result.unit = unit
-            result.unit_label = unit_label
-            result.depends = self['B_x_GSE'].depends
-            if self.visual == 'on':
-                result.visual.plot_config.style = '1P'
-                result.visual.axis[1].unit = '@v.unit_label'
-            return result
-        return wrapper
-
-    _validate_IMF_cs = staticmethod(_validate_IMF_cs)
+    # _validate_IMF_cs = staticmethod(_validate_IMF_cs)
 
     @_validate_IMF_cs
     def add_IMF_CA(self, cs='GSM', to_radian=False,  **kwargs):

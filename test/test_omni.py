@@ -1,44 +1,21 @@
 import datetime
-import matplotlib.pyplot as plt
+import geospacelab.express.omni_dashboard as omni
 
-import geospacelab.visualization.mpl.dashboards as dashboards
+dt_fr = datetime.datetime.strptime('20160314' + '0600', '%Y%m%d%H%M')
+dt_to = datetime.datetime.strptime('20160320' + '0600', '%Y%m%d%H%M')
 
+omni_type = 'OMNI2'
+omni_res = '1min'
+load_mode = 'AUTO'
+dashboard = omni.OMNIDashboard(
+    dt_fr, dt_to, omni_type=omni_type, omni_res=omni_res, load_mode=load_mode
+)
+dashboard.quicklook()
 
-def test():
-    dt_fr = datetime.datetime(2021, 3, 23, 0)
-    dt_to = datetime.datetime(2021, 3, 23, 23)
-    dashboard = dashboards.TSDashboard(dt_fr=dt_fr, dt_to=dt_to)
-    ds1 = dashboard.dock(datasource_contents=['cdaweb', 'omni'])
-    ds1.load_data()
-
-    Bx = dashboard.assign_variable('B_x_GSM')
-    By = dashboard.assign_variable('B_y_GSM')
-    Bz = dashboard.assign_variable('B_z_GSM')
-
-    n_p = dashboard.assign_variable('n_p')
-    v_sw = dashboard.assign_variable('v_sw')
-    p_dyn = dashboard.assign_variable('p_dyn')
-
-    ds2 = dashboard.dock(datasource_contents=['wdc', 'asysym'])
-
-    sym_h = dashboard.assign_variable('SYM_H')
-
-    ds3 = dashboard.dock(datasource_contents=['wdc', 'ae'])
-    ae = dashboard.assign_variable('AE')
-    au = dashboard.assign_variable('AU')
-    al = dashboard.assign_variable('AL')
-
-    ds4 = dashboard.dock(datasource_contents=['gfz', 'kpap'])
-    kp = dashboard.assign_variable('Kp')
-
-    layout = [[Bx, By, Bz], [v_sw], [n_p], [p_dyn], [sym_h], [ae, au, al], [kp]]
-    # layout = [[Bz, By], [v_sw], [n_p], [sym_h]]
-    dashboard.set_layout(panel_layouts=layout, hspace=0.1)
-    dashboard.draw()
-    # dashboard.save_figure(file_name='example_omni_6', append_time=False)
-    pass
-
-
-if __name__ == "__main__":
-    test()
-    plt.show()
+# data can be retrieved in the same way as in Example 1:
+dashboard.list_assigned_variables()
+B_x_gsm = dashboard.get_variable('B_x_GSM', dataset_index=0)
+# save figure
+dashboard.save_figure()
+# show on screen
+dashboard.show()

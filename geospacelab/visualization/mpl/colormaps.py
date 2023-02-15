@@ -164,6 +164,11 @@ def cmap_jet_modified():
     return LinearSegmentedColormap('gist_ncar_like', segmentdata)
 
 
+def cmap_jet_modified_r():
+    cmap = cmap_jet_modified()
+    return cmap.reversed()
+
+
 def cmap_gist_ncar_modified():
     segmentdata = {
        'red': (
@@ -222,3 +227,8 @@ def cmap_gist_ncar_modified():
     }
 
     return LinearSegmentedColormap('gist_ncar_modified', segmentdata)
+
+
+def cmap_gist_ncar_modified_r():
+    cmap = cmap_gist_ncar_modified()
+    return cmap.reversed()

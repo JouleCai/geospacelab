@@ -586,15 +586,18 @@ class TSPanel(Panel):
             try:
                 x_data = depend_0['UT']  # numpy array, type=datetime
             except:
+                mylog.StreamLogger.warning("The dependence on UT is not set!")
                 try:
                     x_data = var.dataset['DATETIME'].value
                 except:
                     try:
                         x_data = var.dataset['SC_DATETIME'].value
                     except:
-                        mylog.StreamLogger.error("Cannot find the datetime array!")
+                        mylog.StreamLogger.warning("Cannot find the datetime array!")
                         x_data = None
-            
+
+        if x_data is None:
+            x_data = np.array([self.dt_fr, self.dt_to])
 
         y_data = var.get_visual_axis_attr(axis=1, attr_name='data')
         if y_data is None:
