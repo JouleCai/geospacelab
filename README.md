@@ -205,11 +205,11 @@ modulation = 'ant'
 
 # create a datahub instance
 dh = DataHub(dt_fr, dt_to)
-# dock a dataset
-ds_1 = dh.dock(datasource_contents=[database_name, 'isr', facility_name],
+# dock the first dataset (dataset index starts from 0)
+ds_isr = dh.dock(datasource_contents=[database_name, 'isr', facility_name],
                       site=site, antenna=antenna, modulation=modulation, data_file_type='eiscat-hdf5')
 # load data
-ds_1.load_data()
+ds_isr.load_data()
 # assign a variable from its own dataset to the datahub
 n_e = dh.assign_variable('n_e')
 T_i = dh.assign_variable('T_i')
@@ -218,7 +218,7 @@ T_i = dh.assign_variable('T_i')
 n_e = dh.get_variable('n_e')
 T_i = dh.get_variable('T_i')
 # if the variable is not assigned in the datahub, but exists in the its own dataset:
-comp_O_p = dh.get_variable('comp_O_p', dataset=ds_1)     # O+ ratio
+comp_O_p = dh.get_variable('comp_O_p', dataset=ds_isr)     # O+ ratio
 # above line is equivalent to
 comp_O_p = dh.datasets[0]['comp_O_p']
 
