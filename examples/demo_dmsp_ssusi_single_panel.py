@@ -41,14 +41,14 @@ def test_ssusi():
     dashboard.set_layout(1, 1)
 
     # Get the variables: LBHS emission intensiy, corresponding times and locations
-    lbhs = dashboard.assign_variable('GRID_AUR_' + band, dataset_index=1)
-    dts = dashboard.assign_variable('DATETIME', dataset_index=1).value.flatten()
-    mlat = dashboard.assign_variable('GRID_MLAT', dataset_index=1).value
-    mlon = dashboard.assign_variable('GRID_MLON', dataset_index=1).value
-    mlt = dashboard.assign_variable(('GRID_MLT'), dataset_index=1).value
+    lbhs = dashboard.assign_variable('GRID_AUR_' + band, dataset_index=0)
+    dts = dashboard.assign_variable('DATETIME', dataset_index=0).value.flatten()
+    mlat = dashboard.assign_variable('GRID_MLAT', dataset_index=0).value
+    mlon = dashboard.assign_variable('GRID_MLON', dataset_index=0).value
+    mlt = dashboard.assign_variable(('GRID_MLT'), dataset_index=0).value
 
     # Search the index for the time to plot, used as an input to the following polar map
-    ind_t = dashboard.datasets[1].get_time_ind(ut=time1)
+    ind_t = dashboard.datasets[0].get_time_ind(ut=time1)
     if (dts[ind_t] - time1).total_seconds()/60 > 60:     # in minutes
         raise ValueError("The time does not match any SSUSI data!")
     lbhs_ = lbhs.value[ind_t]

@@ -598,6 +598,7 @@ class TSPanel(Panel):
 
         if x_data is None:
             x_data = np.array([self.dt_fr, self.dt_to])
+            var.visual.axis[0].mask_gap = False
 
         y_data = var.get_visual_axis_attr(axis=1, attr_name='data')
         if y_data is None:
