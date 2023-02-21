@@ -183,51 +183,11 @@ The core of the data manager is the class Datahub. A Datahub instance will be us
 The "dataset" is a Dataset instance, which is used for loading and downloading 
 the data. 
 
-Here is an example to load the EISCAT data from the online service.  The module will download EISCAT data automatically from 
-[the EISCAT schedule page](https://portal.eiscat.se/schedule/) with the preset loading mode "AUTO" and file type "eiscat-hdf5". 
-In addition, the package can load data by assigning the data file paths.
+Below is an example to load the EISCAT data from the online service.  The module will download EISCAT data automatically from 
+[the EISCAT schedule page](https://portal.eiscat.se/schedule/) with the presetttings of loading mode "AUTO" and file type "eiscat-hdf5". 
 
-In "example1.py":
+Example 1:
 ```python: exmaples/readme_example_1.py
-
-import datetime
-
-from geospacelab.datahub import DataHub
-
-# settings
-dt_fr = datetime.datetime.strptime('20210309' + '0000', '%Y%m%d%H%M')   # datetime from
-dt_to = datetime.datetime.strptime('20210309' + '2359', '%Y%m%d%H%M')   # datetime to
-database_name = 'madrigal'      # built-in sourced database name 
-facility_name = 'eiscat'        # facility name
-
-site = 'UHF'                # facility attributes required, check from the eiscat schedule page
-antenna = 'UHF'
-modulation = 'ant'
-
-# create a datahub instance
-dh = DataHub(dt_fr, dt_to)
-# dock the first dataset (dataset index starts from 0)
-ds_isr = dh.dock(datasource_contents=[database_name, 'isr', facility_name],
-                      site=site, antenna=antenna, modulation=modulation, data_file_type='eiscat-hdf5')
-# load data
-ds_isr.load_data()
-# assign a variable from its own dataset to the datahub
-n_e = dh.assign_variable('n_e')
-T_i = dh.assign_variable('T_i')
-
-# get the variables which have been assigned in the datahub
-n_e = dh.get_variable('n_e')
-T_i = dh.get_variable('T_i')
-# if the variable is not assigned in the datahub, but exists in the its own dataset:
-comp_O_p = dh.get_variable('comp_O_p', dataset=ds_isr)     # O+ ratio
-# above line is equivalent to
-comp_O_p = dh.datasets[0]['comp_O_p']
-
-# The variables, e.g., n_e and T_i, are the class Variable's instances, 
-# which stores the variable values, errors, and many other attributes, e.g., name, label, unit, depends, ....
-# To get the value of the variable, use variable_isntance.value, e.g.,
-print(n_e.value)        # return the variable's value, type: numpy.ndarray, axis 0 is always along the time, check n_e.depends.items{}
-print(n_e.error)
 
 ```
 
