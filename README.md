@@ -188,7 +188,8 @@ Here is an example to load the EISCAT data from the online service.  The module 
 In addition, the package can load data by assigning the data file paths.
 
 In "example1.py":
-```python
+```python: exmaples/readme_example_1.py
+
 import datetime
 
 from geospacelab.datahub import DataHub
