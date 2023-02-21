@@ -187,7 +187,7 @@ Below is an example to load the EISCAT data from the online service.  The module
 [the EISCAT schedule page](https://portal.eiscat.se/schedule/) with the presetttings of loading mode "AUTO" and file type "eiscat-hdf5". 
 
 Example 1:
-```python:exmaples/readme_example_1.py
+```python:examples/readme_example_1.py
 
 ```
 
