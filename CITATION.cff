@@ -5,9 +5,9 @@ authors:
   given-names: "Lei"
   orcid: "https://orcid.org/0000-0003-0127-7303"
 title: "GeospaceLAB"
-version: 0.4.19
+version: 0.5.10
 doi: 10.5281/zenodo.5377318
-date-released: 2022-08-29
+date-released: 2023-02-15
 url: "https://github.com/JouleCai/geospacelab"
 identifiers:
   - type: 'doi'
