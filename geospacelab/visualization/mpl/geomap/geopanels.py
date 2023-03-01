@@ -723,6 +723,11 @@ class PolarMapPanel(GeoPanel):
             edge_marker=None,
             edge_markersize=5,
             edge_alpha=0.8,
+            legend='on',
+            legend_pos_x=0.9,
+            legend_pos_y=0.95,
+            legend_label=None,
+            legend_linewidth=None,
             **kwargs):
 
         if edge_color is None:
@@ -765,18 +770,23 @@ class PolarMapPanel(GeoPanel):
         )
 
         # Add quiverkey
-        quiverkey_config = pybasic.dict_set_default(
-            quiverkey_config, X=0.9, Y=0.95, U=width*unit_vector_scale,
-            width=2 * vector_width * 0.002 * (self._extent[1] - self._extent[0]),
-            label=str(unit_vector) + ' ' + vector_unit, color=color,
-        )
-        X = quiverkey_config.pop('X')
-        Y = quiverkey_config.pop('Y')
-        U = quiverkey_config.pop('U')
-        label = quiverkey_config.pop('label')
-        iqk = self.major_ax.quiverkey(
-            iq, X, Y, U, label, **kwargs
-        )
+        if legend in ['on', True]:
+            if legend_linewidth is None:
+                legend_linewidth = vector_width
+            if legend_label is None:
+                legend_label = str(unit_vector) + ' ' + vector_unit
+            quiverkey_config = pybasic.dict_set_default(
+                quiverkey_config, X=legend_pos_x, Y=legend_pos_y, U=width*unit_vector_scale,
+                width=legend_linewidth * 0.002 * (self._extent[1] - self._extent[0]),
+                label=legend_label, color=color,
+            )
+            X = quiverkey_config.pop('X')
+            Y = quiverkey_config.pop('Y')
+            U = quiverkey_config.pop('U')
+            label = quiverkey_config.pop('label')
+            iqk = self.major_ax.quiverkey(
+                iq, X, Y, U, label, **kwargs
+            )
 
         if edge == 'on':
             xx = iq.X + iq.U

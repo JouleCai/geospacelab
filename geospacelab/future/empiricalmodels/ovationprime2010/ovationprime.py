@@ -1,6 +1,6 @@
 """
 Ovation Prime model modified from Ovation Pyme by lkilcommons: https://github.com/lkilcommons/OvationPyme
-Note: this is a test version. Acknowledgement to the authors will be added after the test.
+Note: this is a new version. Acknowledgement to the authors will be added after the new.
 """
 import os
 import datetime
