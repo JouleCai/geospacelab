@@ -28,8 +28,8 @@ except KeyError:
     pref.set_user_config(user_config=uc, set_as_default=True)
 
 
-plt.rcParams['font.serif'] = 'Ubuntu'
-plt.rcParams['font.monospace'] = 'Ubuntu Mono'
+# plt.rcParams['font.serif'] = 'Ubuntu'
+# plt.rcParams['font.monospace'] = 'Ubuntu Mono'
 plt.rcParams['font.size'] = 10
 plt.rcParams['axes.labelsize'] = 10
 plt.rcParams['axes.labelweight'] = 'book'
@@ -257,6 +257,15 @@ class DashboardBase(object):
         self.extra_axes = {}
         self.gs = None
 
+    def clear(self):
+        keys = list(self.panels.keys())
+        for ind_p in keys:
+            self.remove_panel(ind_p)
+        for ax in self.extra_axes.values():
+            ax.remove()
+        self.extra_axes = {}
+
+
     def set_layout(self, num_rows=None, num_cols=None, **kwargs):
         """
         Set the layout of the dashboard in a canvas using matplotlib GridSpec.
@@ -324,7 +333,7 @@ class DashboardBase(object):
         :type index: int or str.
         """
 
-        self.panels[index].remove()
+        self.panels[index].clear()
         del self.panels[index]
     #
     # def replace_panel(self, index, **kwargs):
@@ -356,7 +365,7 @@ class DashboardBase(object):
 
         self.add_text(x, y, title, **kwargs)
 
-    def add_panel_labels(self, panel_indices=None, style='alphabets', bbox_config=None, **kwargs):
+    def add_panel_labels(self, panel_indices=None, style='alphabets', bbox_config=None, labels=list(), **kwargs):
         if panel_indices is None:
             panel_indices = self.panels.keys()
 
@@ -380,10 +389,14 @@ class DashboardBase(object):
         for ind, p_index in enumerate(panel_indices):
             panel = self.panels[p_index]
             pos_1 = panel.axes['major'].get_position()
-            if panel.label is None:
-                label = "({})".format(label_list[ind])
+            if list(labels) :
+                label = labels[ind]
+            elif panel.label is None:
+                label = "{}".format(label_list[ind])
             else:
                 label = panel.label
+                
+            label = "({})".format(label)
             kwargs.setdefault('fontsize', plt.rcParams['axes.labelsize'])
             kwargs.setdefault('fontweight', 'book')
             if bbox_config is None:
@@ -561,6 +574,12 @@ class PanelBase(object):
             return ax
         else:
             raise AttributeError
+
+    def clear(self):
+        for ax in self.axes.values():
+            ax.remove()
+
+        self.axes = {}
 
     def sca(self, ax):
         """
@@ -776,7 +795,6 @@ class PanelBase(object):
                 (pos_ax.y1 - pos_ax.y0) * cax_position[3],
             ]
             cax = self.add_axes(pos_cax)
-            cax_label_config = {'rotation': 270, 'va': 'bottom', 'size': 'medium'}
 
         icb = self.figure.colorbar(im, cax=cax, **kwargs)
 
@@ -805,6 +823,7 @@ class PanelBase(object):
                 cax.yaxis.set_minor_locator(minorlocator)
                 cax.yaxis.set_minor_formatter(mpl.ticker.NullFormatter())
         cax.yaxis.set_tick_params(labelsize='x-small')
+        return icb
 
     @property
     def major_ax(self):

@@ -33,7 +33,7 @@ class VisualAxis(object):
         self.data_scale = 1.
         self.data_res = None
         self.mask_gap = None
-        self.label = ''
+        self.label = None
         self.label_style = 'double'  # or 'single
         self.label_pos = None  # label position
         self.unit = ''
@@ -43,7 +43,8 @@ class VisualAxis(object):
         self.ticks = None
         self.tick_labels = None
         self.minor_ticks = None
-        self.major_tick_max = 6
+        self.major_tick_min = 6
+        self.major_tick_max = 12
         self.minor_tick_max = None
         self.reverse = False
         self.visible = True
@@ -593,17 +594,13 @@ class VariableBase(object):
     @property
     def unit_label(self):
         label = self._unit_label
-        if not str(label):
-            label = self.unit
-        return label
+        if label is None:
+            return self.unit
+        else:
+            return label
 
     @unit_label.setter
-    def unit_label(self, label):
-        if label is None:
-            self._unit_label = ''
-            return
-        if type(label) is not str:
-            raise TypeError
+    def unit_label(self, label: str or None):
         self._unit_label = label
 
     @property

@@ -221,10 +221,10 @@ class Dataset(datahub.DatasetSourced):
             ca = ca / np.pi * 180
 
         var_name = 'CA_' + cs
-        var = self['B_x_GSM'].clone()
-        var.name = var_name
+        var = self.add_variable(var_name)
         var.value = ca.reshape(ca.size, 1)
         var.label = r'$\theta$'
+        var.unit = 'rad'
         self[var_name] = var
         return self[var_name]
 
@@ -244,10 +244,10 @@ class Dataset(datahub.DatasetSourced):
             az = az / np.pi * 180
 
         var_name = 'AZ_' + cs
-        var = self['B_x_GSM'].clone()
-        var.name = var_name
+        var = self.add_variable(var_name)
         var.value = az.reshape(az.size, 1)
         var.label = r'$\phi$'
+        var.unit = 'rad'
         self[var_name] = var
         return self[var_name]
 
@@ -267,10 +267,10 @@ class Dataset(datahub.DatasetSourced):
             el = el / np.pi * 180
 
         var_name = 'EL_' + cs
-        var = self['B_x_GSM'].clone()
-        var.name = var_name
+        var = self.add_variable(var_name)
         var.value = el.reshape(el.size, 1)
         var.label = r'$\alpha$'
+        var.unit = 'rad'
         self[var_name] = var
         return self[var_name]
 
@@ -288,14 +288,9 @@ class Dataset(datahub.DatasetSourced):
         BT = self['B_T_GSM'].value
         ncf = np.abs(v)**(4/3) * np.abs(BT)**(2/3) * np.abs(np.sin(ca*0.5))**(8/3)
 
-        var = self['CA_GSM'].clone()
-        var.value = ncf
-        var.name = 'NCF'
-        var.label = r'd$\Phi_{MP}/$d$t$'
-        var.unit = ''
-        var.unit_label = ''
-        var.visual.axis[1].lim = [None, None]
-        self['NCF'] = var
+        self['NCF'] = var_config.configured_variables['NCF'].clone()
+        self['NCF'].value = ncf
+
         return self['NCF']
 
     @property

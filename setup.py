@@ -44,6 +44,7 @@ setuptools.setup(
     long_description=long_description,      # Long description read from the readme file
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(exclude=['*.new', '*.new.*', 'new.*', 'new', 'local']),
+    include_package_data=True,
     url='https://github.com/JouleCai/geospacelab',   # Provide either the link to your github or to your website
     # download_url = 'https://github.com/JouleCai/geospacelab/archive/refs/tags/v0.1.tar.gz',    # I explain this later on
     keywords=['Geospace', 'EISCAT', 'DMSP', 'Space weather', 'Ionosphere', 'Space', 'Magnetosphere'],   # Keywords that define your package best

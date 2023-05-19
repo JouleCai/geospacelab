@@ -74,7 +74,7 @@ default_plot_config = {
     },
     'pcolormesh':   {
         'cmap':            default_colormap,
-    }
+    },
 }
 
 configured_variables = {}

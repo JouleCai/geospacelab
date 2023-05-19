@@ -602,7 +602,8 @@ class PolarMapPanel(GeoPanel):
     def overlay_sc_trajectory(self, sc_ut=None, sc_coords=None, cs=None, *, show_trajectory=True, color='#EEEEEE',
                           time_tick=True, time_tick_res=300., time_tick_scale=0.05,
                           time_tick_label=True, time_tick_label_format="%H:%M", time_tick_label_fontsize=8,
-                          time_tick_label_rotation=45., time_tick_label_offset=0.05,
+                          time_tick_label_rotation=45., time_tick_label_offset=0.05, 
+                          time_tick_label_fontweight='normal',
                           time_minor_tick=True, time_minor_tick_res=60,
                           time_tick_width=1, **kwargs):
         kwargs.setdefault('trajectory_config', {
@@ -675,9 +676,9 @@ class PolarMapPanel(GeoPanel):
 
                     self.major_ax.text(
                         x_time_tick, y_time_tick, time.strftime(time_tick_label_format),
-                        fontsize=time_tick_label_fontsize,
+                        fontsize=time_tick_label_fontsize, fontweight=time_tick_label_fontweight,
                         rotation=slope[ind] * 180. / np.pi + time_tick_label_rotation,
-                        ha='center', va='center', color=color,
+                        ha='center', va='center', color=color, 
                         zorder=zorder
                     )
 

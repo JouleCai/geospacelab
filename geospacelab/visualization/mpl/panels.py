@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mpl_colors
 import matplotlib.ticker as mpl_ticker
 import matplotlib.dates as mpl_dates
+from matplotlib import rcParams
 from scipy.interpolate import interp1d
 
 from geospacelab.visualization.mpl.__base__ import PanelBase
@@ -200,8 +201,12 @@ class TSPanel(Panel):
         self.axes_overview[ax]['lines'].extend(il)
         if self.axes_overview[ax]['legend'] is None:
             self.axes_overview[ax]['legend'] = 'on'
-        elif self.axes_overview[ax]['legend'] == 'off':
+        if var.visual.axis[1].label is None:
             var.visual.axis[1].label = '@v.label'
+        if var.visual.axis[1].unit is None:
+            var.visual.axis[1].unit = '@v.unit_label'
+        # elif self.axes_overview[ax]['legend'] == 'off':
+        #    var.visual.axis[1].label = '@v.label'
         return il
 
     @check_panel_ax
@@ -311,7 +316,10 @@ class TSPanel(Panel):
         # use date locators
         # majorlocator, minorlocator, majorformatter = ticktool.set_timeline(self._xlim[0], self._xlim[1])
         from geospacelab.visualization.mpl.axis_ticks import DatetimeMajorFormatter, DatetimeMajorLocator, DatetimeMinorLocator
-        majorlocator = DatetimeMajorLocator()
+
+        maxticks = var_for_config.visual.axis[0].major_tick_max
+        minticks = var_for_config.visual.axis[0].major_tick_min
+        majorlocator = DatetimeMajorLocator(maxticks=maxticks, minticks=minticks)
         majorformatter = DatetimeMajorFormatter(majorlocator)
 
         if not self.bottom_panel:
@@ -415,7 +423,7 @@ class TSPanel(Panel):
                 ax.text(
                     xy_fig[ind_pos][0], xy_fig[ind_pos][1] + yoffset * ind - 0.013,
                     text,
-                    fontsize=plt.rcParams['xtick.labelsize'],
+                    fontsize=plt.rcParams['xtick.labelsize']-2,
                     horizontalalignment='center', verticalalignment='top',
                     transform=self.figure.transFigure
                 )
@@ -546,9 +554,13 @@ class TSPanel(Panel):
             pax_ov = self.axes_overview[pax]
             if list(pax_ov['lines']):
                 il = pax_ov['lines'][0]
-                pax.yaxis.label.set_color(il.get_color())
-                pax.tick_params(axis='y', which='both', colors=il.get_color())
-                pax.spines['right'].set_edgecolor(il.get_color())
+                if isinstance(il, mpl.container.ErrorbarContainer):
+                    il_ = il[0]
+                else:
+                    il_ = il
+                pax.yaxis.label.set_color(il_.get_color())
+                pax.tick_params(axis='y', which='both', colors=il_.get_color())
+                pax.spines['right'].set_edgecolor(il_.get_color())
             else:
                 continue
 
@@ -575,7 +587,7 @@ class TSPanel(Panel):
             cax_position=cax_position
         )
 
-        self.add_colorbar(im, cax='new', **colorbar_config)
+        cb = self.add_colorbar(im, cax='new', **colorbar_config)
 
     def _retrieve_data_1d(self, var):
         x_data = var.get_visual_axis_attr(axis=0, attr_name='data')

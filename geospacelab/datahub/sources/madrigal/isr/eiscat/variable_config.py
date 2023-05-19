@@ -41,7 +41,7 @@ default_axis_dict_2d = {
     2:  {
         'data':     '@v.value',
         'label':    '@v.label',
-        'unit':     '@v.unit',
+        'unit':     '@v.unit_label',
     }
 }
 
@@ -152,7 +152,7 @@ var_name = 'v_i_los'
 var = Var(name=var_name, ndim=2, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'Line-of-sight ion velocity'
-var.label = r'$v_i^{los}$'
+var.label = r'$v_i^{LOS}$'
 var.unit = 'm/s'
 var.error = var_name + '_err'
 var.depends = {0: depend_0, 1: depend_1}

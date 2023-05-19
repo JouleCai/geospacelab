@@ -224,4 +224,26 @@ axis[1].lim = [None, None]
 axis[1].label = '@v.group'
 axis[1].unit = '@v.unit_label'
 
+
+####################################################################################################################
+var_name = 'NCF'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Newell Coupling Function'
+var.label = r'd$\Phi_{MP}/$d$t$'
+var.group = r'SW-M CF'
+var.unit = ''
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [None, None]
+axis[1].label = '@v.label'
+axis[1].unit = '@v.unit'
+
+
 configured_variables[var_name] = var

@@ -359,11 +359,13 @@ class TSDashboard(Dashboard):
                     itpf = interp1d(x0, y0, bounds_error=False, fill_value='extrapolate')
                     y1 = itpf(x1)
             else:
-                y1 = y0[ind_1]
+                y1 = y0
             if type(value) in (int, float):
                 ind_1 = argrelmin(np.abs(y1 - value))
             elif type(value) is list:
                 ind_1 = np.where((y1 > value[0]) & (y1 < value[1]))[0]
+            else:
+                raise NotImplementedError
 
             x1 = x1[ind_1]
             y1 = y1[ind_1]
@@ -429,10 +431,9 @@ class TSDashboard(Dashboard):
             text_config.setdefault('clip_on', False)
             ax.text(x, y, label, transform=ax.transAxes, **text_config)
 
-    def add_top_bar(self, dt_fr, dt_to, bottom=0, top=0.02, **kwargs):
+    def add_top_bar(self, dt_fr, dt_to, bottom=0, top=0.02, facecolor='orange', **kwargs):
         bottom_extend = -1. - bottom
         top_extend = top
         kwargs.setdefault('alpha', 1.)
-        kwargs.setdefault('facecolor', 'orange')
-        self.add_shading(dt_fr, dt_to, bottom_extend=bottom_extend, top_extend=top_extend, **kwargs)
+        self.add_shading(dt_fr, dt_to, bottom_extend=bottom_extend, top_extend=top_extend, facecolor=facecolor, **kwargs)
 

@@ -39,7 +39,7 @@ default_axis_dict_1d = {
     1: {
         'data': '@v.value',
         'label': '@v.group',
-        'unit': '@v.unit',
+        'unit': '@v.unit_label',
         'label_pos': [-0.1, 0.5],
     },
     2: {
@@ -57,7 +57,7 @@ default_axis_dict_2d = {
     2:  {
         'data':     '@v.value',
         'label':    '@v.label',
-        'unit':     '@v.unit',
+        'unit':     '@v.unit_label',
     }
 }
 
@@ -218,7 +218,7 @@ var_config = {
     'fullname': 'Electron density',
     'label': r'$n_e$',
     'group': 'Density',
-    'unit': 'm/-3',
+    'unit': 'm-3',
     'unit_label': r'm$^{-3}$',
     'error': None,
     'depends': {0: depend_0},

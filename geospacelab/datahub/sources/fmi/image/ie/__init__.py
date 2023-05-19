@@ -29,8 +29,8 @@ import geospacelab.datahub.sources.fmi.image.ie.variable_config as var_config
 default_dataset_attrs = {
     'database': fmi_database,
     'product': 'IL',
-    'data_file_ext': 'txt',
-    'data_root_dir': prf.datahub_data_root_dir / 'FMI' / 'Indices',
+    'data_file_ext': 'dat',
+    'data_root_dir': prf.datahub_data_root_dir / 'FMI' / 'IMAGE' / 'IE',
     'allow_load': True,
     'allow_download': True,
     'force_download': False,
@@ -54,13 +54,13 @@ class Dataset(datahub.DatasetSourced):
 
         self.database = kwargs.pop('database', fmi_database)
         self.product = kwargs.pop('product', 'IE')
-        self.load_mode = kwargs.pop('load_mode', 'assigned')
+        self.load_mode = kwargs.pop('load_mode', 'AUTO')
         self.allow_download = kwargs.pop('allow_download', False)
         self.force_download = kwargs.pop('force_download', False)
 
         self.metadata = None
 
-        allow_load = kwargs.pop('allow_load', False)
+        allow_load = kwargs.pop('allow_load', True)
 
         # self.config(**kwargs)
 
@@ -106,50 +106,47 @@ class Dataset(datahub.DatasetSourced):
             self.time_filter_by_range()
 
     def search_data_files(self, **kwargs):
-        raise NotImplementedError
-    #     dt_fr = self.dt_fr
-    #     dt_to = self.dt_to
-    #     diff_years = dt_to.year - dt_fr.year
-    #     dt0 = datetime.datetime(dt_fr.year, 1, 1)
-    #     for i in range(diff_years + 1):
-    #         thisyear = datetime.datetime(dt0.year + i, 1, 1)
-    #         if datetime.date.today().year == thisyear.year:
-    #             self.force_download = True
-    #
-    #         initial_file_dir = kwargs.pop('initial_file_dir', None)
-    #         if initial_file_dir is None:
-    #             initial_file_dir = self.data_root_dir / 'Kp_Ap'
-    #         file_patterns = [thisyear.strftime("%Y")]
-    #         # remove empty str
-    #         file_patterns = [pattern for pattern in file_patterns if str(pattern)]
-    #
-    #         search_pattern = '*' + '*'.join(file_patterns) + '*'
-    #
-    #         if not self.force_download:
-    #             done = super().search_data_files(
-    #                 initial_file_dir=initial_file_dir, search_pattern=search_pattern
-    #             )
-    #         else:
-    #             done = False
-    #
-    #         # Validate file paths
-    #
-    #         if not done and self.allow_download:
-    #             done = self.download_data()
-    #             if done:
-    #                 done = super().search_data_files(
-    #                     initial_file_dir=initial_file_dir, search_pattern=search_pattern)
-    #             else:
-    #                 print('Cannot find files from the online database!')
-    #
-    #     return done
-    #
-    # def download_data(self):
-    #     if self.data_file_ext == 'nc':
-    #         download_obj = self.downloader(self.dt_fr, self.dt_to, data_file_root_dir=self.data_root_dir, force=self.force_download)
-    #     else:
-    #         raise NotImplementedError
-    #     return download_obj.done
+        dt_fr = self.dt_fr
+        dt_to = self.dt_to
+        diff_days = dttool.get_diff_days(dt_fr, dt_to)
+        dt0 = dttool.get_start_of_the_day(dt_fr)
+        for i in range(diff_days + 1):
+            thisday = dt0 + datetime.timedelta(days=i)
+    
+            initial_file_dir = kwargs.pop('initial_file_dir', None)
+            if initial_file_dir is None:
+                initial_file_dir = self.data_root_dir / thisday.strftime('%Y')
+            file_patterns = [thisday.strftime("%Y%m%d")]
+            # remove empty str
+            file_patterns = [pattern for pattern in file_patterns if str(pattern)]
+    
+            search_pattern = '*' + '*'.join(file_patterns) + '*'
+    
+            if not self.force_download:
+                done = super().search_data_files(
+                    initial_file_dir=initial_file_dir, search_pattern=search_pattern
+                )
+            else:
+                done = False
+    
+            # Validate file paths
+    
+            if not done and self.allow_download:
+                done = self.download_data()
+                if done:
+                    done = super().search_data_files(
+                        initial_file_dir=initial_file_dir, search_pattern=search_pattern)
+                else:
+                    print('Cannot find files from the online database!')
+    
+        return done
+    
+    def download_data(self):
+        if self.data_file_ext == 'dat':
+            download_obj = self.downloader(self.dt_fr, self.dt_to, data_file_root_dir=self.data_root_dir, force=self.force_download)
+        else:
+            raise NotImplementedError
+        return download_obj.done
 
     @property
     def database(self):

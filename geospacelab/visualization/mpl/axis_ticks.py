@@ -60,7 +60,7 @@ class DatetimeMinorLocator(mdates.AutoDateLocator):
 
 class DatetimeMajorFormatter(mdates.AutoDateFormatter):
     def __init__(self, locator, scaled: dict or None = None, tz=None, defaultfmt='%Y-%m-%d', *, usetex=True):
-        super().__init__(locator, tz=None, defaultfmt='%Y-%m-%d', usetex=True)
+        super().__init__(locator, tz=None, defaultfmt=defaultfmt, usetex=usetex)
         self.scaled[1 / HOURS_PER_DAY] = formatter_hour_per_day
         self.scaled[1 / MINUTES_PER_DAY] = formatter_minute_per_day
         if scaled is not None:

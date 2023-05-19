@@ -15,8 +15,8 @@ import geospacelab.visualization.mpl.dashboards as dashboards
 
 
 def quicklook_geomag_indices():
-    dt_fr = datetime.datetime(2005, 8, 31, 12)
-    dt_to = datetime.datetime(2005, 9, 2, 12)
+    dt_fr = datetime.datetime(2015, 2, 15, 0)
+    dt_to = datetime.datetime(2015, 2, 16, 12)
     tsdb = dashboards.TSDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (12, 8)})
     ds1 = tsdb.dock(datasource_contents=['wdc', 'asysym'])
     ds2 = tsdb.dock(datasource_contents=['wdc', 'ae'])
@@ -49,4 +49,4 @@ def quicklook_geomag_indices():
 
 if __name__ == "__main__":
     quicklook_geomag_indices()
-    plt.show()
+    plt.savefig('tmp')
