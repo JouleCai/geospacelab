@@ -318,7 +318,11 @@ class TSPanel(Panel):
         from geospacelab.visualization.mpl.axis_ticks import DatetimeMajorFormatter, DatetimeMajorLocator, DatetimeMinorLocator
 
         maxticks = var_for_config.visual.axis[0].major_tick_max
+        if maxticks is None:
+            maxticks = 12
         minticks = var_for_config.visual.axis[0].major_tick_min
+        if minticks is None:
+            minticks = 6
         majorlocator = DatetimeMajorLocator(maxticks=maxticks, minticks=minticks)
         majorformatter = DatetimeMajorFormatter(majorlocator)
 
@@ -486,9 +490,10 @@ class TSPanel(Panel):
             else:
                 major_max = var_for_config.visual.axis[1].major_tick_max
                 if major_max is None:
-                    ax.yaxis.set_minor_locator(mpl_ticker.AutoLocator())
-                else:
-                    ax.yaxis.set_major_locator(mpl_ticker.MaxNLocator(major_max))
+                    # ax.yaxis.set_minor_locator(mpl_ticker.AutoLocator())
+                    major_max = 5
+
+                ax.yaxis.set_major_locator(mpl_ticker.MaxNLocator(major_max))
             minor_max = var_for_config.visual.axis[1].minor_tick_max
             if minor_max is None:
                 ax.yaxis.set_minor_locator(mpl_ticker.AutoMinorLocator())

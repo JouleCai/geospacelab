@@ -40,6 +40,11 @@ class GeoPanel(GeoPanelBase):
         super().__init__(*args, proj_class=proj_class, proj_config=proj_config, **kwargs)
 
 
+class SectorMapHL(GeoPanel):
+
+    def __init__(self, *args, cs='GEO', lat_c=None, lon_c=None, pole='N', ut=None, ):
+        pass
+
 class PolarMapPanel(GeoPanel):
 
     def __init__(self, *args, cs='AACGM', style=None, lon_c=None, pole='N', ut=None, lst_c=None, mlt_c=None,

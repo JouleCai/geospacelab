@@ -43,8 +43,8 @@ class VisualAxis(object):
         self.ticks = None
         self.tick_labels = None
         self.minor_ticks = None
-        self.major_tick_min = 6
-        self.major_tick_max = 12
+        self.major_tick_min = None
+        self.major_tick_max = None
         self.minor_tick_max = None
         self.reverse = False
         self.visible = True
