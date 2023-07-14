@@ -86,16 +86,4 @@ if __name__ == '__main__':
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 # form_dst = {'SCent': 20, 'STens': 1, 'SYear': 1, 'SMonth': '01', 'ECent': 20, 'ETens': 1, 'EYear': 1, 'EMonth': 12, "Image Type": "GIF", "COLOR": "COLOR", "AE Sensitivity": "100", "Dst Sensitivity": "20", "Output": 'DST', "Out format": "IAGA2002", "Email": "lei.cai@oulu.fi"}

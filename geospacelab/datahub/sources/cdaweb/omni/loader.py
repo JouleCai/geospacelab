@@ -51,7 +51,7 @@ class Loader:
         variables['B_TOTAL'] = np.sqrt(variables['B_z_GSM']**2 + variables['B_y_GSM']**2 + variables['B_x_GSM']**2)
 
         self.variables = variables
-        self.metadata.update(f_cdf.globalattsget(expand=False))
+        self.metadata.update(f_cdf.globalattsget())
         self.done = True
 
 

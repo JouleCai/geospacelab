@@ -6,34 +6,34 @@ import geospacelab.visualization.mpl.geomap.geodashboards as geomap
 
 
 def test_ampere():
-    dt_fr = datetime.datetime(2016, 10, 23, 16)
-    dt_to = datetime.datetime(2016, 10, 23, 23, 59)
-    time1 = datetime.datetime(2016, 10, 23, 18, 10)
+    dt_fr = datetime.datetime(2021, 8, 24, 8)
+    dt_to = datetime.datetime(2021, 8, 24, 12, 59)
+    time1 = datetime.datetime(2021, 8, 24, 10, 10)
     pole = 'N'
     load_mode = 'assigned'
     # specify the file full path
-    data_file_paths = ['/home/lei/afys-data/JHUAPL/AMPERE/Fitted/201610/20161023.0000.86400.120.north.grd.ncdf']
+    data_file_paths = ['/home/lei/afys-data/JHUAPL/AMPERE/Fitted/201610/ampere.20110923.k060_m08.north.grd.nc']
 
-    viewer = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)})
+    db = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)})
     # viewer.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole='N', sat_id='f17', orbit_id='46863')
-    viewer.dock(datasource_contents=['jhuapl', 'ampere', 'fitted'], load_mode=load_mode, data_file_paths=data_file_paths)
-    viewer.set_layout(1, 1)
-    dataset_ampere = viewer.datasets[1]
+    db.dock(datasource_contents=['jhuapl', 'ampere', 'fitted'], load_mode=load_mode, data_file_paths=data_file_paths)
+    db.set_layout(1, 1)
+    ds_ampere = db.datasets[0]
 
-    fac = viewer.assign_variable('GRID_Jr', dataset_index=1)
-    dts = viewer.assign_variable('DATETIME', dataset_index=1).value.flatten()
-    mlat = viewer.assign_variable('GRID_MLAT', dataset_index=1).value
-    mlt = viewer.assign_variable(('GRID_MLT'), dataset_index=1).value
+    fac = ds_ampere['GRID_Jr']  # or db.assign_variable('GRID_Jr', dataset_index=0)
+    dts = ds_ampere['DATETIME'].flatten() # db.assign_variable('DATETIME', dataset_index=0).value.flatten()
+    mlat = ds_ampere['GRID_MLAT'].value       # db.assign_variable('GRID_MLAT', dataset_index=0).value
+    mlt = ds_ampere['GRID_MLT'].value         # db.assign_variable(('GRID_MLT'), dataset_index=0).value
 
-    ind_t = dataset_ampere.get_time_ind(ut=time1)
+    ind_t = ds_ampere.get_time_ind(ut=time1)
     # initialize the polar map
-    panel1 = viewer.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, boundary_lat=60, mirror_south=True)
+    panel1 = db.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole=pole, ut=time1, boundary_lat=60, mirror_south=True)
 
     panel1.overlay_coastlines()
 
     fac_ = fac.value[ind_t, :, :]
     # re-grid the original data with higher spatial resolution, default mlt_res = 0.05, mlat_res = 0.5. used for plotting.
-    grid_mlat, grid_mlt, grid_fac = dataset_ampere.grid_fac(fac_, mlt_res=0.05, mlat_res=0.05, interp_method='linear')
+    grid_mlat, grid_mlt, grid_fac = ds_ampere.grid_fac(fac_, mlt_res=0.05, mlat_res=0.05, interp_method='linear')
 
     # remove values less than 0.2
     grid_fac[np.abs(grid_fac)<0.2] = np.nan
