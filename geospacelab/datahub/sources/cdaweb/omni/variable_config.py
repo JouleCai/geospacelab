@@ -224,6 +224,7 @@ axis[1].lim = [None, None]
 axis[1].label = '@v.group'
 axis[1].unit = '@v.unit_label'
 
+configured_variables[var_name] = var
 
 ####################################################################################################################
 var_name = 'NCF'
