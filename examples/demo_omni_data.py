@@ -28,5 +28,7 @@ print(B_x_gsm)
 
 dashboard.quicklook()
 
+dashboard.list_assigned_variables()
+
 # save figure
 dashboard.save_figure()
