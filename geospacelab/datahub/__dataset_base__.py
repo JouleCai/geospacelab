@@ -262,7 +262,7 @@ class DatasetSourced(DatasetBase):
     def search_data_files(
             self,
             initial_file_dir=None, search_pattern='*', recursive=None,
-            direct_append=True, allow_multiple_files=False,
+            direct_append=True, allow_multiple_files=False, include_extension=True,
             **kwargs) -> list:
         """
         Search the data files by the input pattern in the file name. The search method is based on pathlib.glob.
@@ -288,8 +288,9 @@ class DatasetSourced(DatasetBase):
             initial_file_dir = self.data_root_dir
         if recursive is None:
             recursive = self.data_search_recursive
-        if str(self.data_file_ext):
-            search_pattern = search_pattern + '.' + self.data_file_ext
+        if include_extension:   
+            if str(self.data_file_ext):
+                search_pattern = search_pattern + '.' + self.data_file_ext
         if recursive:
             search_pattern = '**/' + search_pattern
         paths = list(initial_file_dir.glob(search_pattern))

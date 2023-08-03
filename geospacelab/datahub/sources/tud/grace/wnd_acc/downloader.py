@@ -24,11 +24,12 @@ class Downloader(DownloaderModel):
     ):
         if version == 'v01':
             raise ValueError
-        elif version == 'v02':
+        elif 'v02' in version:
+            version_ = 'v02'
             v_str = "version_02"
         else:
             raise NotImplementedError
-        data_file_root_dir = prf.datahub_data_root_dir / "TUD" / "GRACE" / product.upper() / version
+        data_file_root_dir = prf.datahub_data_root_dir / "TUD" / "GRACE" / product.upper() / version_
         ftp_data_dir = f'{v_str}/GRACE_data'
 
         file_name_patterns = [sat_id.upper(), product.replace('-', '_')]

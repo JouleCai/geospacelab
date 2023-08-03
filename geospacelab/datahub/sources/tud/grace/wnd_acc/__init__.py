@@ -214,7 +214,8 @@ class Dataset(datahub.DatasetSourced):
             file_patterns = [
                 'G' + self.sat_id.upper(),
                 self.product.upper().replace('-', '_'),
-                this_day.strftime('%Y_%m'),
+                this_day.strftime('%Y_%m'), 
+                self.product_version + '.txt'
             ]
             # remove empty str
             file_patterns = [pattern for pattern in file_patterns if str(pattern)]
@@ -224,6 +225,7 @@ class Dataset(datahub.DatasetSourced):
                 initial_file_dir=initial_file_dir,
                 search_pattern=search_pattern,
                 allow_multiple_files=False,
+                include_extension=False,
             )
             # Validate file paths
 
