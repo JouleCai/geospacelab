@@ -61,7 +61,7 @@ setuptools.setup(
               'madrigalweb>=3.2',
               'aacgmv2>=2.6.2',
               'cdflib>=0.3.20',
-              'geopack>=1.0.8',
+              'geopack>=1.0.10',
               'palettable',
               'toml',
               'sscws',
