@@ -184,7 +184,7 @@ class Dataset(datahub.DatasetSourced):
         az = self['AZ'].value.flatten()
         el = self['EL'].value.flatten()
         if field_aligned:
-            inds = np.where(((np.abs(az - 188.6) <= 1.5) & (np.abs(el-77.7) <= 1.5)))[0]
+            inds = np.where(((np.abs(az - 188.6) <= 2) & (np.abs(el-77.7) <= 2)))[0]
             if not list(inds):
                 mylog.StreamLogger.info("No field-aligned beams found!")
                 return

@@ -109,10 +109,10 @@ class Dataset(datahub.DatasetSourced):
         ind = np.where(np.abs(delta_sectime) == np.min(np.abs(delta_sectime)))[0][0]
         return ind
 
-    def grid_phi(self, mlat_data, mlt_data, phi_data, mlt_res=0.5, mlat_res=2, interp_method='cubic'):
+    def grid_phi(self, mlat_data, mlt_data, phi_data, mlt_res=0.2, mlat_res=0.5, interp_method='cubic'):
         import scipy.interpolate as si
         x = np.arange(0, 24, mlt_res)
-        y = np.arange(40, 89, mlat_res)
+        y = np.arange(50, 90, mlat_res)
         grid_x, grid_y = np.meshgrid(x, y, indexing='ij')
 
         xdata = np.vstack((mlt_data, mlt_data+24.))
@@ -123,7 +123,7 @@ class Dataset(datahub.DatasetSourced):
             zdata.flatten(),
             (grid_x, grid_y),
             method=interp_method,
-            rescale=True
+            rescale=False
         )
         grid_mlat = grid_y
         grid_mlt = grid_x

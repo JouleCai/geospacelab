@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pathlib
-import palettable
+# import palettable
 
 from matplotlib.gridspec import GridSpec, SubplotSpec
 from matplotlib.figure import Figure
@@ -106,7 +106,7 @@ elif mpl_style == 'dark':
         (0.4627450980392157, 0.3058823529411765, 0.6235294117647059),
     ]
     default_cycler = (cycler(color=colors))
-    default_cycler = (cycler(color=palettable.cartocolors.qualitative.Safe_10.mpl_colors))
+    # default_cycler = (cycler(color=palettable.cartocolors.qualitative.Safe_10.mpl_colors))
     plt.rc('axes', prop_cycle=default_cycler)
 else:
     plt.style.use(mpl_style)

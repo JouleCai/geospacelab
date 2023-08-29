@@ -36,19 +36,13 @@ from geospacelab.datahub.__variable_base__ import VariableBase
 class GeoPanel(GeoPanelBase):
 
     def __init__(self, *args, proj_class=None, proj_config: dict = None, **kwargs):
-
         super().__init__(*args, proj_class=proj_class, proj_config=proj_config, **kwargs)
 
 
-class SectorMapHL(GeoPanel):
-
-    def __init__(self, *args, cs='GEO', lat_c=None, lon_c=None, pole='N', ut=None, ):
-        pass
-
 class PolarMapPanel(GeoPanel):
 
-    def __init__(self, *args, cs='AACGM', style=None, lon_c=None, pole='N', ut=None, lst_c=None, mlt_c=None,
-                 mlon_c=None,
+    def __init__(self, *args, cs='AACGM', style=None, pole='N', lon_c=None, lst_c=None, mlt_c=None,
+                 mlon_c=None, ut=None,
                  boundary_lat=30., boundary_style='circle',
                  mirror_south=False,
                  proj_type='Stereographic', **kwargs):
@@ -86,22 +80,27 @@ class PolarMapPanel(GeoPanel):
         # if lon_c is not None and pole == 'S':
         #    lon_c = lon_c + 180.
 
-        self.lat_c = None
+        self.pole = pole
+        self.lat_c = kwargs.pop('lat_c', None)
         self.lon_c = lon_c
         self.ut = ut
         self.boundary_lat = boundary_lat
         self.boundary_style = boundary_style
-        self.pole = pole
         self.lst_c = lst_c
         self.cs = cs
         self.depend_mlt = False
         self.mlt_c = mlt_c
         self.mirror_south = mirror_south
         self._extent = None
+        self._sector = kwargs.pop('sector', 'off')
         proj_class = getattr(ccrs, proj_type)
         proj_config = {'central_latitude': self.lat_c, 'central_longitude': self.lon_c}
         super().__init__(*args, proj_class=proj_class, proj_config=proj_config, **kwargs)
-        self.set_extent()
+
+        if self._sector == 'off':
+            self.set_map_extent()
+            self.set_map_boundary()
+            self._check_mirror_south()
 
     @staticmethod
     def _transform_mlt_to_lon(mlt):
@@ -114,12 +113,6 @@ class PolarMapPanel(GeoPanel):
         lon = lst / 24. * 360.
         lon = np.mod(lon, 360.)
         return lon
-
-    def add_axes(self, *args, major=False, label=None, **kwargs):
-        if major:
-            kwargs.setdefault('projection', self.projection)
-        ax = super().add_axes(*args, major=major, label=label, **kwargs)
-        return ax
 
     # def add_lands(self):
     #     import cartopy.io.shapereader as shpreader
@@ -158,10 +151,10 @@ class PolarMapPanel(GeoPanel):
             cs2.coords.lon = self._transform_mlt_to_lon(cs2.coords.mlt)
         return cs2
 
-    def overlay_coastlines(self, linestyle='-', linewidth=0.5, color='#797A7D', zorder=100, alpha=0.7, **kwargs):
+    def overlay_coastlines(self, linestyle='-', linewidth=0.5, color='#797A7D', zorder=100, alpha=0.7,
+                           resolution='110m', **kwargs):
         import cartopy.io.shapereader as shpreader
 
-        resolution = '110m'
         shpfilename = shpreader.natural_earth(resolution=resolution,
                                               category='physical',
                                               name='coastline')
@@ -174,8 +167,11 @@ class PolarMapPanel(GeoPanel):
             # print(len(c.xy[0]))
             # if ind not in [4013, 4014]:
             #    continue
-            x0 = np.array(c.xy[0])
-            y0 = np.array(c.xy[1])
+            try:
+                x0 = np.array(c.xy[0])
+                y0 = np.array(c.xy[1])
+            except:
+                continue
             # if len(x0) < 20:  # omit small islands, etc.
             #    continue
             x0 = np.mod(x0[::1], 360)
@@ -427,25 +423,28 @@ class PolarMapPanel(GeoPanel):
         #
         #         tx.set_position([30, xy[1]])
 
-    def set_extent(self, boundary_lat=None, boundary_style=None):
-        if boundary_lat is not None:
-            self.boundary_lat = boundary_lat
-        if boundary_style is not None:
-            self.boundary_style = boundary_style
-        x = np.array([270., 90., 180., 0.])
-        y = np.ones(4) * self.boundary_lat
-        x = np.arange(0., 360., 5.)
-        y = np.empty_like(x)
-        y[:] = 1. * self.boundary_lat
-        data = self.projection.transform_points(ccrs.PlateCarree(), x, y)
-        # self.axes.plot(x, y, '.', transform=ccrs.PlateCarree())
-        ext = [np.nanmin(data[:, 0]), np.nanmax(data[:, 0]), np.nanmin(data[:, 1]), np.nanmax(data[:, 1])]
-        self._extent = ext
-        self().set_extent(ext, self.projection)
+    def set_map_extent(self, boundary_latitudes=None, boundary_longitudes=None, **kwargs):
+        if any([a is None for a in [boundary_latitudes, boundary_longitudes]]):
+            boundary_longitudes = np.arange(0., 360., 5.)
+            boundary_latitudes = np.empty_like(boundary_longitudes)
+            boundary_latitudes[:] = 1. * self.boundary_lat
+        super().set_map_extent(boundary_latitudes, boundary_longitudes)
 
-        self._set_boundary_style()
+    def set_map_boundary(self, path=None, transform=None, **kwargs):
+        if any([a is None for a in [path, transform]]):
+            style = self.boundary_style
+            if style == 'square':
+                return
+            elif style == 'circle':
+                theta = np.linspace(0, 2 * np.pi, 100)
+                center, radius = [0.5, 0.5], 0.5
+                verts = np.vstack([np.sin(theta), np.cos(theta)]).T
+                path = mpath.Path(verts * radius + center)
+                transform = self().transAxes
+            else:
+                raise NotImplementedError
 
-        self._check_mirror_south()
+        super().set_map_boundary(path, transform)
 
     def _check_mirror_south(self):
         if self.pole == 'S' and self.mirror_south:
@@ -453,7 +452,10 @@ class PolarMapPanel(GeoPanel):
             self.major_ax.set_xlim([max(xlim), min(xlim)])
 
     def _set_boundary_style(self):
-
+        """
+        Deprecated.
+        :return:
+        """
         style = self.boundary_style
         if style == 'square':
             return
@@ -539,7 +541,7 @@ class PolarMapPanel(GeoPanel):
     def overlay_contour(
             self,
             data, coords=None, cs=None,
-            regridding=True, data_res=1, grid_res=0.1, interp_method='linear',
+            regridding=True, data_res=1, grid_res=0.1, interp_method='linear', sparsely=False,
             **kwargs,
     ):
         levels = kwargs.pop('levels', 10)
@@ -551,7 +553,9 @@ class PolarMapPanel(GeoPanel):
         lon_in = cs_new['lon']
         data_in = data
         if regridding:
-            lon_in, lat_in, data_in = self.grid_data(lon_in, lat_in, data_in, data_res=data_res, grid_res=grid_res, interp_method=interp_method)
+            lon_in, lat_in, data_in = self.grid_data(
+                lon_in, lat_in, data_in, sparsely=sparsely, data_res=data_res, 
+                grid_res=grid_res, interp_method=interp_method)
             transform = None
         else:
             transform = ccrs.PlateCarree()
@@ -559,7 +563,7 @@ class PolarMapPanel(GeoPanel):
         ict = self.major_ax.contour(lon_in, lat_in, data_in, levels, transform=transform, **kwargs)
         return ict
 
-    def grid_data(self, lon_in, lat_in, data_in, grid_res=0.1, data_res=0.5, interp_method='linear'):
+    def grid_data(self, lon_in, lat_in, data_in, grid_res=0.1, sparsely=True, data_res=0.5, interp_method='linear'):
         if self.pole == "N":
             sign_lat = 1.
         else:
@@ -597,10 +601,11 @@ class PolarMapPanel(GeoPanel):
             (pos_x, pos_y), pos_y, (grid_x, grid_y), method='nearest'
         )
 
-        ind_out = np.where(
-            np.sqrt((grid_data_x - grid_x) ** 2 + (grid_data_y - grid_y) ** 2) > data_res / lat_width * width
-        )
-        grid_data[ind_out] = np.nan
+        if sparsely:
+            ind_out = np.where(
+                np.sqrt((grid_data_x - grid_x) ** 2 + (grid_data_y - grid_y) ** 2) > data_res / lat_width * width
+            )
+            grid_data[ind_out] = np.nan
 
         return grid_x, grid_y, grid_data
 
@@ -904,14 +909,40 @@ class PolarMapPanel(GeoPanel):
 
     @pole.setter
     def pole(self, value):
-        if value.upper() in ['N', 'NORTH', 'NORTHERN']:
+        if value in ['N', 'NORTH', 'NORTHERN']:
             self._pole = 'N'
-            self.lat_c = 90.
-            self.boundary_lat = np.abs(self.boundary_lat)
-        elif value.upper() in ['S', 'SOUTH', 'SOUTHERN']:
+        elif value in ['S', 'SOUTH', 'SOUTHERN']:
             self._pole = 'S'
-            self.lat_c = -90.
-            self.boundary_lat = - np.abs(self.boundary_lat)
+        else:
+            raise ValueError
+
+
+    @property
+    def lat_c(self):
+        return self._lat_c
+
+    @lat_c.setter
+    def lat_c(self, value):
+        if value is None:
+            if self.pole == 'N':
+                self._lat_c = 90.
+            elif self.pole == 'S':
+                self._lat_c = -90.
+            else:
+                raise ValueError
+        else:
+            self._lat_c = value
+
+    @property
+    def boundary_lat(self):
+        return self._boundary_lat
+
+    @boundary_lat.setter
+    def boundary_lat(self, value):
+        if self.pole == 'N':
+            self._boundary_lat = np.abs(value)
+        elif self.pole == 'S':
+            self._boundary_lat = - np.abs(value)
         else:
             raise ValueError
 
@@ -943,3 +974,72 @@ class PolarMapPanel(GeoPanel):
             if self.cs == "GEO":
                 raise AttributeError('A magnetic coordinate system must be specified (Set the attribute "cs")!')
         self._mlt_c = mlt
+
+
+class PolarSectorPanel(PolarMapPanel):
+    def __init__(self, *args, cs='GEO', style=None, pole='N', lat_c=None, lon_c=None, lst_c=None, mlt_c=None,
+                 mlon_c=None, ut=None,
+                 boundary_meridional_lim=None,
+                 boundary_zonal_lim=None,
+                 mirror_south=False,
+                 proj_type='Stereographic', **kwargs):
+
+        super().__init__(*args, cs=cs, style=style, pole=pole, lat_c=lat_c, lon_c=lon_c, lst_c=lst_c, mlt_c=mlt_c,
+                         mlon_c=mlon_c, ut=ut,
+                         sector='on',
+                         mirror_south=mirror_south,
+                         proj_type=proj_type, **kwargs)
+
+        self._construct_boundary(boundary_zonal_lim, boundary_meridional_lim)
+        self.set_map_extent(self.boundary_latitudes, self.boundary_longitudes)
+        self.set_map_boundary()
+        self._check_mirror_south()
+
+    def _construct_boundary(self, boundary_zonal_lim, boundary_meridional_lim):
+        import geospacelab.toolbox.utilities.numpymath as mymath
+
+        if boundary_zonal_lim is None:
+            boundary_zonal_lim = np.mod([self.lon_c - 15., self.lon_c + 15.], 360)
+        if boundary_meridional_lim is None:
+            boundary_meridional_lim = [self.lat_c-15, self.lat_c + 15]
+
+        blats = np.empty((0, 1))
+        blons = np.empty((0, 1))
+
+        x = np.array([1, 2])
+        y = np.array(boundary_zonal_lim)
+        xq = np.linspace(1, 2, 100, endpoint=False)
+        yq = mymath.interp_period_data(x, y, xq, period=360.)
+        blats = np.vstack((blats, np.ones_like(yq)[:, np.newaxis] * boundary_meridional_lim[1]))
+        blons = np.vstack((blons, yq[:, np.newaxis]))
+
+        yq = np.linspace(boundary_meridional_lim[1], boundary_meridional_lim[0], 100, endpoint=False)
+        blats = np.vstack((blats, yq[:, np.newaxis]))
+        blons = np.vstack((blons, np.ones_like(yq)[:, np.newaxis] * boundary_zonal_lim[1]))
+
+        x = np.array([1, 2])
+        y = np.array([boundary_zonal_lim[0], boundary_zonal_lim[1]])
+        xq = np.linspace(1, 2, 100, endpoint=False)
+        yq = mymath.interp_period_data(x, y, xq, period=360.)
+        blats = np.vstack((blats, np.ones_like(yq)[:, np.newaxis] * boundary_meridional_lim[0]))
+        blons = np.vstack((blons, np.flipud(yq[:, np.newaxis])))
+
+        yq = np.linspace(boundary_meridional_lim[0], boundary_meridional_lim[1], 100, endpoint=True)
+        blats = np.vstack((blats, yq[:, np.newaxis]))
+        blons = np.vstack((blons, np.ones_like(yq)[:, np.newaxis] * boundary_zonal_lim[0]))
+
+        self.boundary_latitudes = blats.flatten()
+        self.boundary_longitudes = blons.flatten()
+
+    def set_map_boundary(self, path=None, transform=None, **kwargs):
+
+        blats = self.boundary_latitudes
+        blons = self.boundary_longitudes
+
+        data = self.projection.transform_points(ccrs.PlateCarree(), blons, blats)
+        verts = np.hstack((data[:, 0][:, np.newaxis], data[:, 1][:, np.newaxis]))
+        path = mpath.Path(verts)
+
+        super().set_map_boundary(path=path, transform=self.projection)
+
+

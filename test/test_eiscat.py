@@ -52,12 +52,12 @@ def test_UHF_CP2():
 
 
 def test_esr_32m():
-    dt_fr = datetime.datetime.strptime('20001201' + '0400', '%Y%m%d%H%M')
-    dt_to = datetime.datetime.strptime('20001201' + '1200', '%Y%m%d%H%M')
+    dt_fr = datetime.datetime.strptime('20100616' + '1445', '%Y%m%d%H%M')
+    dt_to = datetime.datetime.strptime('20100616' + '1600', '%Y%m%d%H%M')
 
     site = 'ESR'
     antenna = '42m'
-    modulation = '120'
+    modulation = ''
     load_mode = 'AUTO'
     data_file_type = 'madrigal-hdf5'
 
@@ -73,6 +73,8 @@ def test_esr_32m():
     v_i = dashboard.assign_variable('v_i_los')
     az = dashboard.assign_variable('AZ')
     el = dashboard.assign_variable('EL')
+
+    n_e.visual.axis[2].lim = [0.5e11, 0.5e12]
 
     layout = [[n_e], [T_e], [T_i], [v_i], [az, el]]
     dashboard.set_layout(panel_layouts=layout, row_height_scales=[5, 5, 5, 5, 3])
@@ -213,9 +215,9 @@ def test_vhf_lowel():
 if __name__ == "__main__":
     # db = test_vhf_lowel()
 
-    test_uhf_cp3()
+    # test_uhf_cp3()
     # test_UHF_CP2()
-    # test_esr_32m()
+    test_esr_32m()
 
-    plt.savefig('eiscat_example.png')
+    # plt.savefig('eiscat_example.png')
     plt.show()

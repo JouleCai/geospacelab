@@ -362,6 +362,8 @@ class DatasetSourced(DatasetBase):
         """
         if load_mode is not None:
             self.load_mode = load_mode
+        if list(self.data_file_paths):
+            self.load_mode = 'assigned'
         if self.load_mode == 'AUTO':
             self.search_data_files(**kwargs)
         elif self.load_mode == 'dialog':

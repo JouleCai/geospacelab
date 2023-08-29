@@ -186,8 +186,15 @@ class TSPanel(Panel):
 
         plot_config = basic.dict_set_default(kwargs, **var.visual.plot_config.line)
         plot_config = basic.dict_set_default(plot_config, **self._default_plot_config)
-        if self.axes_overview[ax]['twinx'] in ['on', 'self']:
+        # if self.axes_overview[ax]['twinx'] in ['on', 'self']:
+        #     if var.visual.axis[1].label is None:
+        #         var.visual.axis[1].label = '@v.label'
+        #     if var.visual.axis[1].unit is None:
+        #         var.visual.axis[1].unit = '@v.unit' 
+        if var.visual.axis[1].label is None:
             var.visual.axis[1].label = '@v.label'
+        if var.visual.axis[1].unit is None:
+            var.visual.axis[1].unit = '@v.unit_label'
         label = var.get_visual_axis_attr(axis=2, attr_name='label')
         plot_config = basic.dict_set_default(plot_config, label=label)
         if errorbar == 'off':
@@ -201,10 +208,6 @@ class TSPanel(Panel):
         self.axes_overview[ax]['lines'].extend(il)
         if self.axes_overview[ax]['legend'] is None:
             self.axes_overview[ax]['legend'] = 'on'
-        if var.visual.axis[1].label is None:
-            var.visual.axis[1].label = '@v.label'
-        if var.visual.axis[1].unit is None:
-            var.visual.axis[1].unit = '@v.unit_label'
         # elif self.axes_overview[ax]['legend'] == 'off':
         #    var.visual.axis[1].label = '@v.label'
         return il

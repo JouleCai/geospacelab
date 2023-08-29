@@ -26,6 +26,7 @@ class GeoPanelBase(panels.PanelBase):
         self.proj_class = proj_class
         proj_config = proj_config if type(proj_config) is dict or proj_config is None else self._raise_error(TypeError)
         self.projection = self.proj_class(**proj_config)
+        self._extent = None
         kwargs.update(projection=self.projection)
         super().__init__(*args, **kwargs)
 
@@ -34,6 +35,19 @@ class GeoPanelBase(panels.PanelBase):
             kwargs.setdefault('projection', self.projection)
         ax = super().add_axes(*args, major=major, label=label, **kwargs)
         return ax
+
+    def set_map_extent(self, boundary_latitudes, boundary_longitudes, **kwargs):
+        x = boundary_longitudes.flatten()
+        y = boundary_latitudes.flatten()
+
+        data = self.projection.transform_points(ccrs.PlateCarree(), x, y)
+        ext = [np.nanmin(data[:, 0]), np.nanmax(data[:, 0]), np.nanmin(data[:, 1]), np.nanmax(data[:, 1])]
+
+        self._extent = ext
+        self().set_extent(ext, self.projection)
+
+    def set_map_boundary(self, path=None, transform=None, **kwargs):
+        self().set_boundary(path, transform=transform)
 
     def overlay_coastlines(self, *args, **kwargs):
         cl = self().coastlines(**kwargs)
@@ -55,7 +69,7 @@ class GeoPanelBase(panels.PanelBase):
         kwargs.setdefault('ha', 'center')
         kwargs.setdefault('va', 'baseline')
         super().add_title(x=x, y=y, title=title, **kwargs)
-    
+
     @property
     def proj_class(self):
         return self._proj_class

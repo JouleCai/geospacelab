@@ -13,7 +13,7 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 from geospacelab import preferences as pref
-pref.user_config['visualization']['mpl']['style'] = 'dark'
+# pref.user_config['visualization']['mpl']['style'] = 'dark'
 
 import geospacelab.visualization.mpl.geomap.geodashboards as geomap
 
@@ -39,11 +39,11 @@ def test_tec():
 
     # Add the first panel
     # AACGM LAT-MLT in the northern hemisphere
-    panel = db.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=60)
+    panel = db.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=50)
     # AACGM LAT-MLT in the southern hemisphere
     # panel = db.add_polar_map(row_ind=0, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='S', ut=time_c, mirror_south=True)
     # GEO LAT-LST in the northern hemisphere
-    # panel = db.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time_c, boundary_lat=60)
+    # panel = db.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0., pole='N', ut=time_c, boundary_lat=50)
     # GEO LAT-LST in the southern hemisphere
     # panel = db.add_polar_map(row_ind=0, col_ind=0, style='lst-fixed', cs='GEO', lst_c=0, pole='S', ut=time_c, mirror_south=True)
     # GEO LAT-LON in the southern hemisphere
@@ -75,7 +75,7 @@ def test_tec():
     time_c = datetime.datetime(2021, 8, 24, 10, 0)
     ind_t = np.where(dts == time_c)[0]
 
-    panel = db.add_polar_map(row_ind=0, col_ind=1, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=60)
+    panel = db.add_polar_map(row_ind=0, col_ind=1, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=50)
 
     panel.overlay_coastlines()
     panel.overlay_gridlines()
@@ -96,7 +96,7 @@ def test_tec():
     time_c = datetime.datetime(2021, 8, 24, 10, 30)
     ind_t = np.where(dts == time_c)[0]
 
-    panel = db.add_polar_map(row_ind=0, col_ind=2, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=60)
+    panel = db.add_polar_map(row_ind=0, col_ind=2, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=50)
 
     panel.overlay_coastlines()
     panel.overlay_gridlines()
@@ -117,14 +117,14 @@ def test_tec():
     time_c = datetime.datetime(2021, 8, 24, 11, 0)
     ind_t = np.where(dts == time_c)[0]
 
-    panel = db.add_polar_map(row_ind=1, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=60)
+    panel = db.add_polar_map(row_ind=1, col_ind=0, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=50)
 
     panel.overlay_coastlines()
     panel.overlay_gridlines()
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
-    pcolormesh_config.update(c_lim=[5, 15])
+    pcolormesh_config.update(c_lim=[5, 12])
 
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
@@ -138,13 +138,13 @@ def test_tec():
     time_c = datetime.datetime(2021, 8, 24, 11, 30)
     ind_t = np.where(dts == time_c)[0]
 
-    panel = db.add_polar_map(row_ind=1, col_ind=1, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=60)
+    panel = db.add_polar_map(row_ind=1, col_ind=1, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=50)
     panel.overlay_coastlines()
     panel.overlay_gridlines()
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
-    pcolormesh_config.update(c_lim=[5, 15])
+    pcolormesh_config.update(c_lim=[5, 12])
 
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
@@ -158,14 +158,14 @@ def test_tec():
     time_c = datetime.datetime(2021, 8, 24, 12, 0)
     ind_t = np.where(dts == time_c)[0]
 
-    panel = db.add_polar_map(row_ind=1, col_ind=2, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=60)
+    panel = db.add_polar_map(row_ind=1, col_ind=2, style='mlt-fixed', cs='AACGM', mlt_c=0., pole='N', ut=time_c, boundary_lat=50)
 
     panel.overlay_coastlines()
     panel.overlay_gridlines()
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
-    pcolormesh_config.update(c_lim=[5, 15])
+    pcolormesh_config.update(c_lim=[5, 12])
 
     import geospacelab.visualization.mpl.colormaps as cm
     pcolormesh_config.update(cmap='jet')
