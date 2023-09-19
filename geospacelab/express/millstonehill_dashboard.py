@@ -46,11 +46,12 @@ class MillstoneHillISRDashboard(TSDashboard):
     def outlier_mask(self, condition, fill_value=None):
         self.host_dataset.outlier_mask(condition, fill_value=fill_value)
 
-    def select_beams(self, field_aligned=False, az_el_pairs=None):
+    def select_beams(self, field_aligned=False, az_el_pairs=None, error_az=2., error_el=2.):
         if len(az_el_pairs) == 1:
             self.az = az_el_pairs[0][0]
             self.el = az_el_pairs[0][1]
-        self.host_dataset.select_beams(field_aligned=field_aligned, az_el_pairs=az_el_pairs)
+        self.host_dataset.select_beams(field_aligned=field_aligned, az_el_pairs=az_el_pairs,
+                                       error_az=error_az, error_el=error_el)
 
     def list_all_variables(self):
         self.datasets[1].list_all_variables()

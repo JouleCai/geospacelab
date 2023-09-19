@@ -62,7 +62,7 @@ class TSPanel(Panel):
             self, *args, 
             dt_fr=None, dt_to=None, figure=None, from_subplot=True,
             bottom_panel=True, timeline_reverse=False, timeline_extra_labels=None,
-            time_gap=True,
+            time_gap=True, time_res=None,
             **kwargs
     ):
         
@@ -74,6 +74,7 @@ class TSPanel(Panel):
         self._xlim = [dt_fr, dt_to]
         self.timeline_reverse = timeline_reverse
         self.time_gap = time_gap
+        self.time_res = time_res
         if timeline_extra_labels is None:
             timeline_extra_labels = []
         self.timeline_extra_labels = timeline_extra_labels
@@ -631,7 +632,10 @@ class TSPanel(Panel):
         if y_err_data is None:
             y_err_data = var.error
 
-        x_data_res = var.visual.axis[0].data_res
+        if self.time_res is None:
+            x_data_res = var.visual.axis[0].data_res
+        else:
+            x_data_res = self.time_res
         x = x_data
         y = y_data * var.visual.axis[1].data_scale
         if y_err_data is None:
@@ -692,13 +696,18 @@ class TSPanel(Panel):
             raise ValueError
 
         z_data = z_data * var.visual.axis[2].data_scale
-        x_data_res = var.visual.axis[0].data_res
+        
+        if self.time_res is None:
+            x_data_res = var.visual.axis[0].data_res
+        else:
+            x_data_res = self.time_res
         time_gap = var.visual.axis[0].mask_gap
         if time_gap is None:
             time_gap = self.time_gap
         if time_gap:
-            x, y, z = arraytool.data_resample_2d(
-                x=x_data, y=y_data, z=z_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
+            # x, y, z = arraytool.data_resample_2d(
+            #     x=x_data, y=y_data, z=z_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
+            x, y, z = arraytool.regridding_2d_xgaps(x_data, y_data, z_data, xtype='datetime', xres=x_data_res)
         else:
             x = x_data
             y = y_data

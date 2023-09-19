@@ -38,8 +38,9 @@ class EISCATDashboard(TSDashboard):
     def outlier_mask(self, condition, fill_value=None):
         self.host_dataset.outlier_mask(condition, fill_value=fill_value)
 
-    def select_beams(self, field_aligned=False, az_el_pairs=None):
-        self.host_dataset.select_beams(field_aligned=field_aligned, az_el_pairs=az_el_pairs)
+    def select_beams(self, field_aligned=False, az_el_pairs=None, error_az=2., error_el=2.):
+        self.host_dataset.select_beams(field_aligned=field_aligned, az_el_pairs=az_el_pairs,
+                                       error_az=error_az, error_el=error_el)
 
     def list_eiscat_variables(self):
         self.host_dataset.list_all_variables()

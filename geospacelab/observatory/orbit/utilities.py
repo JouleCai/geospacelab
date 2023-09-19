@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.signal import argrelextrema
 import datetime
-from scipy.interpolate import griddata
+from scipy.interpolate import griddata, interp1d
 from scipy.signal import butter, lfilter, freqz
 import scipy.signal as sig
 
@@ -142,6 +142,7 @@ class LEOToolbox(DatasetUser):
                 inds_sector = inds_seg[inds_seg_seg]
                 sector[inds_sector] = num + 1
                 dts_c[inds_sector] = dt_c
+
 
                 lat_seg = np.where(dts_seg < dt_c, lat_seg, 180. - lat_seg)
                 pseudo_lat[inds_sector] = lat_seg[inds_seg_seg]
@@ -286,7 +287,10 @@ class LEOToolbox(DatasetUser):
         else:
             raise NotImplementedError
                 
-    def griddata_by_sector(self, sector_name=None, variable_names=None, x_grid_res=20*60, y_grid_res=0.5):
+    def griddata_by_sector(
+            self, sector_name=None, variable_names=None, x_grid_res=20*60, y_grid_res=0.5, along_track_interp=True,
+            x_data_res = None, y_data_res=None
+            ):
         self.visual = 'on'
         dts_c = self['_'.join(('SECTOR', sector_name, 'DATETIME'))].value.flatten()
         dts = self['SC_DATETIME'].value.flatten()
@@ -295,13 +299,20 @@ class LEOToolbox(DatasetUser):
         boundary_lat = self.sectors[sector_name]['BOUNDARY_LAT']
         lat_range = self.sectors[sector_name]['PSEUDO_LAT_RANGE']
 
-        x_data = dts_c[sector > 0]
+        if along_track_interp:
+            x_data = dts[sector>0]
+        else:
+            x_data = dts_c[sector > 0]
+        
+        x_data_1 = dts_c[sector>0]
         y_data = lat[sector > 0]
         is_finite = np.isfinite(y_data)
         dt0 = dttool.get_start_of_the_day(self.dt_fr)
         sectime = np.array([(dt - dt0).total_seconds() for dt in x_data])
         x = sectime
         y = y_data
+        
+        x_1 = np.array([(dt - dt0).total_seconds() for dt in x_data_1]) 
         # max_x = np.ceil(np.max(x) / self.xgrid_res) * self.xgrid_res
         # min_x = np.floor(np.min(x) / self.xgrid_res) * self.xgrid_res
         total_seconds = (dts[-1] - dt0).total_seconds()
@@ -310,26 +321,64 @@ class LEOToolbox(DatasetUser):
 
         nx = int(np.ceil((max_x - min_x) / x_grid_res) + 1)
         ny = int(np.ceil(np.diff(lat_range) / y_grid_res) + 1)
+        
+        if x_data_res is None:
+            x_unique = np.unique(dts_c[sector > 0])
+            x_unique = [(t - dt0).total_seconds() for t in x_unique]
+            x_data_res = np.median(np.diff(x_unique))
+        if y_data_res is None:
+            y_data_res = np.median(np.diff(y_data[y_data < np.abs(np.diff(lat_range))]/2))
 
         grid_x, grid_y = np.meshgrid(np.linspace(min_x, max_x, nx),
                                     np.linspace(lat_range[0], lat_range[1], ny))
 
-        grid_lat = griddata((x, y), y, (grid_x, grid_y), method='nearest')
+        grid_lat = griddata((x_1, y), y, (grid_x, grid_y), method='nearest')
+        
         if self.sector_cs == 'AACGM':
-            mask = np.abs(grid_y - grid_lat) > 2
+            mask_y = np.abs(grid_y - grid_lat) > y_data_res * 2
             which_lat = 'AACGM_LAT'
         if self.sector_cs == 'APEX':
-            mask = np.abs(grid_y - grid_lat) > 2
+            mask_y = np.abs(grid_y - grid_lat) > y_data_res * 2
             which_lat = 'APEX_LAT' 
         else:
-            mask = np.abs(grid_y - grid_lat) > 1
+            mask_y = np.abs(grid_y - grid_lat) > y_data_res
             which_lat = 'GEO_LAT'
+            
+        grid_sectime = griddata((x_1, y), x_1, (grid_x, grid_y), method='nearest')
+        mask_x = np.abs(grid_x - grid_sectime) > x_data_res * 1.5
 
         method = 'linear'
         for var_name in variable_names:
             vrb = self[var_name].value.flatten()[sector>0]
-            grid_z = griddata((x, y), vrb, (grid_x, grid_y), method=method)
-            grid_z[mask] = np.nan
+            if along_track_interp:
+                sector_1 = sector[sector>0]
+                n_tracks = int(np.max(sector))
+                n_lats = ny
+                xx_1 = np.empty((n_tracks, n_lats))
+                zz_1 = np.empty((n_tracks, n_lats))
+                yy_1 = grid_y[:, 0].flatten()
+                grid_z = np.empty_like(grid_x)
+                for ii in np.arange(1, n_tracks+1):
+                    xd = x[sector_1 == ii]
+                    yd = y[sector_1 == ii]
+                    zd = vrb[sector_1 == ii]
+
+                    f = interp1d(yd, xd, bounds_error=False, fill_value= 'extrapolate')
+                    x_i = f(yy_1)
+                    xx_1[ii-1, :] = x_i
+                    f = interp1d(yd, zd, bounds_error=False, fill_value='extrapolate')
+                    z_i = f(yy_1)
+                    zz_1[ii-1, :] = z_i 
+                for ii in range(grid_x.shape[0]):
+                    xd = xx_1[:, ii].flatten()
+                    zd = zz_1[:, ii].flatten()
+                    f = interp1d(xd, zd, bounds_error=False, fill_value='extrapolate') 
+                    z_i = f(grid_x[0])
+                    grid_z[ii, :] = z_i
+            else:
+                grid_z = griddata((x, y), vrb, (grid_x, grid_y), method=method)
+            grid_z[mask_y] = np.nan
+            grid_z[mask_x] = np.nan
             var_name_in = '_'.join(('SECTOR', sector_name, 'GRID', var_name))
             self.sectors[sector_name]['VARIABLE_NAMES'].append(var_name_in) 
             

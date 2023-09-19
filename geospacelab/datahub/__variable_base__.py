@@ -347,7 +347,8 @@ class VariableBase(object):
             if key in omit_attrs:
                 continue
             if key == 'visual':
-                kwargs['visual'] = self.visual.clone()
+                if self.visual is not None:
+                    kwargs['visual'] = self.visual.clone()
             elif key == 'dataset':
                 kwargs['dataset'] = self.dataset
             else:

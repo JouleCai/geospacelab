@@ -136,15 +136,19 @@ class TSDashboard(Dashboard):
             panel_config.update(bottom_panel=bottom_panel)
             self.add_panel(**panel_config)
 
-    def draw(self, dt_fr=None, dt_to=None, auto_grid=True):
+    def draw(self, dt_fr=None, dt_to=None, auto_grid=True, time_res=None):
         if dt_fr is not None:
             self._xlim[0] = dt_fr
         if dt_to is not None:
             self._xlim[1] = dt_to
 
+        if not isinstance(time_res,list):
+            time_res = [time_res] * len(self.panels.keys())
+
         npanel = 0
         for ind, panel in self.panels.items():
             panel._xlim = self._xlim
+            panel.time_res = time_res[ind]
             plot_layout = self.panel_layouts[npanel]
             plot_layout = self._validate_plot_layout(plot_layout)
             panel.draw(plot_layout)

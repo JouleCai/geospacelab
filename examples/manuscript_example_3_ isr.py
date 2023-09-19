@@ -33,7 +33,7 @@ dashboard = MillstoneHillISRDashboard(
     )
 # Select one or multiple beams shown in the quicklook plot.
 # if commented, all beams will shown following the time sequence.
-# dashboard.select_beams(az_el_pairs=[[0, 45]])
+dashboard.select_beams(az_el_pairs=[[0, 45]], error_az=5., error_el=2.) # beams with az +/- error_az and el +/- error_el 
 # Make quicklook plot
 dashboard.quicklook(depend_MLAT=False)
 # Save the figure

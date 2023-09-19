@@ -174,17 +174,17 @@ class Dataset(datahub.DatasetSourced):
         condition = self['RESIDUAL'].value > residual_lim
         self.outlier_mask(condition)
 
-    def select_beams(self, field_aligned=False, az_el_pairs=None):
+    def select_beams(self, field_aligned=False, az_el_pairs=None, error_az=2, error_el=2):
         if field_aligned:
             if az_el_pairs is not None:
                 raise AttributeError("The parameters field_aligned and az_el_pairs cannot be set at the same time!")
             if self.site != 'UHF':
                 raise AttributeError("Only UHF can be applied.")
 
-        az = self['AZ'].value.flatten()
+        az = self['AZ'].value.flatten() % 360.
         el = self['EL'].value.flatten()
         if field_aligned:
-            inds = np.where(((np.abs(az - 188.6) <= 2) & (np.abs(el-77.7) <= 2)))[0]
+            inds = np.where(((np.abs(az - 188.6) <= error_az) & (np.abs(el-77.7) <= error_el)))[0]
             if not list(inds):
                 mylog.StreamLogger.info("No field-aligned beams found!")
                 return
@@ -192,8 +192,14 @@ class Dataset(datahub.DatasetSourced):
             inds = []
             for az1, el1 in az_el_pairs:
                 az1 = az1 % 360.
-                inds.extend(np.where(((np.abs(az - az1) <= 0.5) & (np.abs(el-el1) <= 0.5)))[0])
-            inds.sort()
+                ind_1 = np.where(((np.abs(az - az1) <= error_az) & (np.abs(el-el1) <= error_el)))[0]
+                ind_2 = np.where(((np.abs(az - 360. - az1) <= error_az) & (np.abs(el-el1) <= error_el)))[0] 
+                ind_1 = np.append(ind_1, ind_2)
+                if not list(ind_1):
+                    mylog.StreamLogger.warning("Cannot find the beam with az={:f} and el={:f}".format(az1, el1))
+                    continue
+                inds.extend(ind_1)
+            inds = np.sort(np.unique(np.array(inds))).tolist()
         else:
             raise ValueError
         self.time_filter_by_inds(inds)

@@ -125,7 +125,7 @@ class OrbitPosition_SSCWS(DatasetSourced):
             # Validate file paths
 
             if (not done and self.allow_download) or self.force_download:
-                done = self.download_data()
+                done = self.download_data(thismonth=thismonth)
                 if done:
                     done = super().search_data_files(
                         initial_file_dir=initial_file_dir,
@@ -135,56 +135,101 @@ class OrbitPosition_SSCWS(DatasetSourced):
 
         return done
 
-    def download_data(self):
+    def download_data(self, thismonth=None):
         done = False
-        diff_months = (self.dt_to.year - self.dt_fr.year) * 12 + (self.dt_to.month - self.dt_fr.month) % 12
+        # diff_months = (self.dt_to.year - self.dt_fr.year) * 12 + (self.dt_to.month - self.dt_fr.month) % 12
+        # mylog.simpleinfo.info("Searching the orbit data from NASA/SscWs ...")
+        # for nm in range(diff_months + 1):
+        #     thismonth = dttool.get_next_n_months(self.dt_fr, nm)
+        #     thismonthend = dttool.get_last_day_of_month(thismonth, end=True)
+        #     dt_fr_str = thismonth.strftime('%Y-%m-%dT%H:%M:%SZ')
+        #     dt_to_str = thismonthend.strftime('%Y-%m-%dT%H:%M:%SZ')
+        #
+        #     result = self.ssc.get_locations(
+        #         [self.sat_id],
+        #         [dt_fr_str, dt_to_str], [CoordinateSystem.GEO, CoordinateSystem.GSE]
+        #     )
+        #
+        #     if not list(result['Data']):
+        #         return None
+        #
+        #     data = result['Data'][0]
+        #     coords = data['Coordinates'][0]
+        #     coords_gse = data['Coordinates'][1]
+        #     dts = data['Time']
+        #
+        #     coords_in = {'x': coords['X'] / 6371.2, 'y': coords['Y'] / 6371.2, 'z': coords['Z'] / 6371.2}
+        #     cs_car = gsl_cs.GEOCCartesian(coords=coords_in, ut=dts)
+        #     cs_sph = cs_car.to_spherical()
+        #     orbits = {
+        #         'SC_GEO_LAT': cs_sph['lat'],
+        #         'SC_GEO_LON': cs_sph['lon'],
+        #         'SC_GEO_ALT': cs_sph['height'],
+        #         'SC_GEO_X': coords['X'],
+        #         'SC_GEO_Y': coords['Y'],
+        #         'SC_GEO_Z': coords['Z'],
+        #         'SC_GSE_X': coords_gse['X'],
+        #         'SC_GSE_Y': coords_gse['Y'],
+        #         'SC_GSE_Z': coords_gse['Z'],
+        #         'SC_DATETIME': dts,
+        #     }
+        #     if self.to_AACGM:
+        #         cs_aacgm = cs_sph.to_AACGM(append_mlt=True)
+        #         orbits.update(
+        #             **{
+        #                 'SC_AACGM_LAT': cs_aacgm['lat'],
+        #                 'SC_AACGM_LON': cs_aacgm['lon'],
+        #                 'SC_AACGM_MLT': cs_aacgm['mlt'],
+        #             }
+        #         )
+        #     if self.to_netcdf:
+        #         self.save_to_netcdf(orbits, dt_fr=thismonth, dt_to=thismonthend)
+        #     done = True
         mylog.simpleinfo.info("Searching the orbit data from NASA/SscWs ...")
-        for nm in range(diff_months + 1):
-            thismonth = dttool.get_next_n_months(self.dt_fr, nm)
-            thismonthend = dttool.get_last_day_of_month(thismonth, end=True)
-            dt_fr_str = thismonth.strftime('%Y-%m-%dT%H:%M:%SZ')
-            dt_to_str = thismonthend.strftime('%Y-%m-%dT%H:%M:%SZ')
+        thismonthend = dttool.get_last_day_of_month(thismonth, end=True)
+        dt_fr_str = thismonth.strftime('%Y-%m-%dT%H:%M:%SZ')
+        dt_to_str = thismonthend.strftime('%Y-%m-%dT%H:%M:%SZ')
 
-            result = self.ssc.get_locations(
-                [self.sat_id],
-                [dt_fr_str, dt_to_str], [CoordinateSystem.GEO, CoordinateSystem.GSE]
+        result = self.ssc.get_locations(
+            [self.sat_id],
+            [dt_fr_str, dt_to_str], [CoordinateSystem.GEO, CoordinateSystem.GSE]
+        )
+
+        if not list(result['Data']):
+            return False
+
+        data = result['Data'][0]
+        coords = data['Coordinates'][0]
+        coords_gse = data['Coordinates'][1]
+        dts = data['Time']
+
+        coords_in = {'x': coords['X'] / 6371.2, 'y': coords['Y'] / 6371.2, 'z': coords['Z'] / 6371.2}
+        cs_car = gsl_cs.GEOCCartesian(coords=coords_in, ut=dts)
+        cs_sph = cs_car.to_spherical()
+        orbits = {
+            'SC_GEO_LAT': cs_sph['lat'],
+            'SC_GEO_LON': cs_sph['lon'],
+            'SC_GEO_ALT': cs_sph['height'],
+            'SC_GEO_X': coords['X'],
+            'SC_GEO_Y': coords['Y'],
+            'SC_GEO_Z': coords['Z'],
+            'SC_GSE_X': coords_gse['X'],
+            'SC_GSE_Y': coords_gse['Y'],
+            'SC_GSE_Z': coords_gse['Z'],
+            'SC_DATETIME': dts,
+        }
+        if self.to_AACGM:
+            cs_aacgm = cs_sph.to_AACGM(append_mlt=True)
+            orbits.update(
+                **{
+                    'SC_AACGM_LAT': cs_aacgm['lat'],
+                    'SC_AACGM_LON': cs_aacgm['lon'],
+                    'SC_AACGM_MLT': cs_aacgm['mlt'],
+                }
             )
-
-            if not list(result['Data']):
-                return None
-
-            data = result['Data'][0]
-            coords = data['Coordinates'][0]
-            coords_gse = data['Coordinates'][1]
-            dts = data['Time']
-
-            coords_in = {'x': coords['X'] / 6371.2, 'y': coords['Y'] / 6371.2, 'z': coords['Z'] / 6371.2}
-            cs_car = gsl_cs.GEOCCartesian(coords=coords_in, ut=dts)
-            cs_sph = cs_car.to_spherical()
-            orbits = {
-                'SC_GEO_LAT': cs_sph['lat'],
-                'SC_GEO_LON': cs_sph['lon'],
-                'SC_GEO_ALT': cs_sph['height'],
-                'SC_GEO_X': coords['X'],
-                'SC_GEO_Y': coords['Y'],
-                'SC_GEO_Z': coords['Z'],
-                'SC_GSE_X': coords_gse['X'],
-                'SC_GSE_Y': coords_gse['Y'],
-                'SC_GSE_Z': coords_gse['Z'],
-                'SC_DATETIME': dts,
-            }
-            if self.to_AACGM:
-                cs_aacgm = cs_sph.to_AACGM(append_mlt=True)
-                orbits.update(
-                    **{
-                        'SC_AACGM_LAT': cs_aacgm['lat'],
-                        'SC_AACGM_LON': cs_aacgm['lon'],
-                        'SC_AACGM_MLT': cs_aacgm['mlt'],
-                    }
-                )
-            if self.to_netcdf:
-                self.save_to_netcdf(orbits, dt_fr=thismonth, dt_to=thismonthend)
-            done = True
+        if self.to_netcdf:
+            self.save_to_netcdf(orbits, dt_fr=thismonth, dt_to=thismonthend)
+        done = True
         return done
 
     def save_to_netcdf(self, orbits, dt_fr=None, dt_to=None):
@@ -337,7 +382,18 @@ class OrbitPosition_SSCWS(DatasetSourced):
         cs_geo = gsl_cs.GEOCSpherical(coords={'lat': lat, 'lon': lon, 'height':height})
         
         cs_geo = cs_geo.to_cartesian()
-        
+
+    def add_GEO_LST(self):
+        lons = self['SC_GEO_LON'].flatten()
+        uts = self['SC_DATETIME'].flatten()
+        lsts = [ut + datetime.timedelta(hours=lon/15.) for ut, lon in zip(uts, lons)]
+        lsts = [lst.hour + lst.minute/60. + lst.second/3600. for lst in lsts]
+        var = self.add_variable(var_name='SC_GEO_LST')
+        var.value = np.array(lsts)[:, np.newaxis]
+        var.label = 'LST'
+        var.unit = 'h'
+        var.depends = self['SC_GEO_LON'].depends
+        return var
 
 if __name__ == "__main__":
     dt_fr = datetime.datetime(2016, 1, 1,)

@@ -541,7 +541,7 @@ class PolarMapPanel(GeoPanel):
     def overlay_contour(
             self,
             data, coords=None, cs=None,
-            regridding=True, data_res=1, grid_res=0.1, interp_method='linear', sparsely=False,
+            regridding=True, grid_res=0.1, interp_method='linear', sparsely=False,
             **kwargs,
     ):
         levels = kwargs.pop('levels', 10)
@@ -554,7 +554,7 @@ class PolarMapPanel(GeoPanel):
         data_in = data
         if regridding:
             lon_in, lat_in, data_in = self.grid_data(
-                lon_in, lat_in, data_in, sparsely=sparsely, data_res=data_res, 
+                lon_in, lat_in, data_in, sparsely=sparsely,
                 grid_res=grid_res, interp_method=interp_method)
             transform = None
         else:
@@ -608,6 +608,20 @@ class PolarMapPanel(GeoPanel):
             grid_data[ind_out] = np.nan
 
         return grid_x, grid_y, grid_data
+
+    def overlay_line(self, ut=None, coords=None, cs=None, *, color='#EEEEEE', linewidth=1., linestyle='--', **kwargs):
+
+        cs_new = self.cs_transform(cs_fr=cs, coords=coords, ut=ut)
+
+        if self.pole == 'N':
+            ind_lat = np.where(cs_new['lat'] > self.boundary_lat)[0]
+        else:
+            ind_lat = np.where(cs_new['lat'] < self.boundary_lat)[0]
+
+        lat_in = cs_new['lat'][ind_lat]
+        lon_in = cs_new['lon'][ind_lat]
+
+        self.major_ax.plot(lon_in, lat_in, transform=ccrs.Geodetic(), color=color, linewidth=linewidth, linestyle=linestyle, **kwargs)
 
     def overlay_sc_trajectory(self, sc_ut=None, sc_coords=None, cs=None, *, show_trajectory=True, color='#EEEEEE',
                           time_tick=True, time_tick_res=300., time_tick_scale=0.05,
@@ -739,6 +753,7 @@ class PolarMapPanel(GeoPanel):
             legend_pos_y=0.95,
             legend_label=None,
             legend_linewidth=None,
+            legend_fontsize=10,
             **kwargs):
 
         if edge_color is None:
@@ -795,8 +810,10 @@ class PolarMapPanel(GeoPanel):
             Y = quiverkey_config.pop('Y')
             U = quiverkey_config.pop('U')
             label = quiverkey_config.pop('label')
+            fontproperties = kwargs.pop('fontproperties', {})
+            fontproperties.update(size=legend_fontsize)
             iqk = self.major_ax.quiverkey(
-                iq, X, Y, U, label, **kwargs
+                iq, X, Y, U, label, fontproperties=fontproperties, **kwargs
             )
 
         if edge == 'on':

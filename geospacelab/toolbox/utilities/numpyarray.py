@@ -12,6 +12,7 @@ __docformat__ = "reStructureText"
 import numpy
 from scipy.interpolate import interp1d
 import geospacelab.toolbox.utilities.pydatetime as dttool
+import geospacelab.toolbox.utilities.pybasic as basic
 import datetime
 
 
@@ -132,6 +133,40 @@ def data_resample(
 
     return xnew, ynew
 
+
+def regridding_2d_xgaps(
+    x, y, z,
+    xtype=None, xres=None):
+    
+    x1 = x.flatten()
+    if xtype == 'datetime':
+        # dt0 = datetime.datetime(1970, 1, 1)
+        sectime, dt0 = dttool.convert_datetime_to_sectime(x1)
+        x1 = sectime
+    
+    diff_x = numpy.diff(x1)
+    if xres is None:
+        xres = numpy.median(diff_x)
+        
+    if xtype == 'datetime' and basic.isnumeric(xres):
+        xres = datetime.timedelta(seconds=xres)
+        
+    xx = numpy.hstack(((x.flatten() - xres / 2)[:, numpy.newaxis], (x.flatten() + xres / 2)[:, numpy.newaxis]))
+    xnew = xx.flatten()
+    
+    if len(y.shape) == 1 or 1 in y.shape:
+        ynew = y
+    else:
+        yy = numpy.hstack((y, y))
+        ynew = yy.reshape((xnew.shape[0], y.shape[1]))
+    
+    zz = numpy.hstack((z, z))
+    znew = zz.reshape((xnew.shape[0], z.shape[1]))
+    znew[1::2, :] = numpy.nan
+    znew = znew[:-1, :]
+    
+    return xnew, ynew, znew
+         
 
 def data_resample_2d(
         x=None, y=None, z=None, xtype=None, xres=None, xresscale=3,
