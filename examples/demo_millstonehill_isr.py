@@ -18,8 +18,8 @@ from geospacelab.express.millstonehill_dashboard import MillstoneHillISRDashboar
 def example_basic_quicklook():
 
     # Set the starting and stopping times
-    dt_fr = datetime.datetime.strptime('20160314' + '1900', '%Y%m%d%H%M')
-    dt_to = datetime.datetime.strptime('20160315' + '0100', '%Y%m%d%H%M')
+    dt_fr = datetime.datetime.strptime('20150317' + '1500', '%Y%m%d%H%M')
+    dt_to = datetime.datetime.strptime('20150319' + '2000', '%Y%m%d%H%M')
 
     # Set the radar parameters
     antenna = 'misa'    # antenna name: 'zenith', or 'misa'
@@ -37,7 +37,7 @@ def example_basic_quicklook():
     )
     # Select one or multiple beams shown in the quicklook plot.
     # if commented, all beams will shown following the time sequence.
-    dashboard.select_beams(az_el_pairs=[[13.5, 45]])
+    dashboard.select_beams(az_el_pairs=[[0, 45]])
     # Make quicklook plot
     dashboard.quicklook(depend_MLAT=False)
     # Save the figure

@@ -196,8 +196,8 @@ class Dataset(datahub.DatasetSourced):
                 ind_2 = np.where(((np.abs(az - 360. - az1) <= error_az) & (np.abs(el-el1) <= error_el)))[0] 
                 ind_1 = np.append(ind_1, ind_2)
                 if not list(ind_1):
-                    mylog.StreamLogger.warning("Cannot find the beam with az={:f} and el={:f}".format(az1, el1))
-                    continue
+                    mylog.StreamLogger.error("Cannot find the beam with az={:f} and el={:f}".format(az1, el1))
+                    raise ValueError
                 inds.extend(ind_1)
             inds = np.sort(np.unique(np.array(inds))).tolist()
         else:

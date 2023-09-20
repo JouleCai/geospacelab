@@ -238,7 +238,7 @@ class VariableBase(object):
     def __init__(
             self, value=None, error=None, data_type=None,
             name='', fullname='', label='', group='',
-            unit=None, unit_label=None, quantity=None,
+            unit='', unit_label=None, quantity=None,
             variable_type='scalar',
             ndim=None, depends=None, dataset=None, visual=None,
             **kwargs):

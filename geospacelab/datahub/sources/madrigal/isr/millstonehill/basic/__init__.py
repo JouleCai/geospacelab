@@ -200,8 +200,9 @@ class Dataset(datahub.DatasetSourced):
         if field_aligned:
             inds = np.where(((np.abs(az - 188.6) <= error_az) & (np.abs(el-77.7) <= error_el)))[0]
             if not list(inds):
-                mylog.StreamLogger.info("No field-aligned beams found!")
-                return
+                mylog.StreamLogger.error("No field-aligned beams found!")
+                raise ValueError
+
         elif isinstance(az_el_pairs, list):
             inds = []
             for az1, el1 in az_el_pairs:
@@ -210,8 +211,8 @@ class Dataset(datahub.DatasetSourced):
                 ind_2 = np.where(((np.abs(az - 360. - az1) <= error_az) & (np.abs(el-el1) <= error_el)))[0] 
                 ind_1 = np.append(ind_1, ind_2)
                 if not list(ind_1):
-                    mylog.StreamLogger.warning("Cannot find the beam with az={:f} and el={:f}".format(az1, el1))
-                    continue
+                    mylog.StreamLogger.error("Cannot find the beam with az={:f} and el={:f}".format(az1, el1))
+                    raise ValueError
                 inds.extend(ind_1)
             inds = np.sort(np.unique(np.array(inds))).tolist()
         else:

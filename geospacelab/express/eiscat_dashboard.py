@@ -20,7 +20,7 @@ class EISCATDashboard(TSDashboard):
         kwargs.setdefault('load_mode', 'AUTO')
 
         figure = kwargs.pop('figure', 'new')
-        figure_config = kwargs.pop('figure_config', {})
+        figure_config = kwargs.pop('figure_config', {'figsize': (10, 10)})
         super().__init__(dt_fr=dt_fr, dt_to=dt_to, figure=figure, figure_config=figure_config)
         self.dock(datasource_contents=['madrigal', 'isr', 'eiscat'], **kwargs)
         self.host_dataset.load_data(load_mode=kwargs['load_mode'])
@@ -121,9 +121,17 @@ class EISCATDashboard(TSDashboard):
         T_e = self.assign_variable('T_e')
         v_i = self.assign_variable('v_i_los')
         az = self.assign_variable('AZ')
+        az.visual.axis[1].label = '@v.label'
+        az.visual.axis[1].unit = '@v.unit_label'
         el = self.assign_variable('EL')
+        el.visual.axis[1].label = '@v.label'
+        el.visual.axis[1].unit = '@v.unit_label'
         ptx = self.assign_variable('P_Tx')
+        ptx.visual.axis[1].label = '@v.label'
+        ptx.visual.axis[1].unit = '@v.unit_label'
         tsys = self.assign_variable('T_SYS_1')
+        tsys.visual.axis[1].label = '@v.label'
+        tsys.visual.axis[1].unit = '@v.unit_label'
         self.list_assigned_variables()
         self.list_datasets()
         self.check_beams()
