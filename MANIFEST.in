@@ -6,7 +6,7 @@ geospacelab/__init__.py
 prune test
 prune local
 recursive-exclude test *
-recursive-exclude local *
+recursive-exclude local **/*
 include LICENSE
 include geospacelab/wrapper/geopack/LICENSE
 recursive-include geospacelab/wrapper/geopack *.md *.txt
