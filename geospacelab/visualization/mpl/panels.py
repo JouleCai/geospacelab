@@ -18,6 +18,7 @@ import matplotlib.ticker as mpl_ticker
 import matplotlib.dates as mpl_dates
 from matplotlib import rcParams
 from scipy.interpolate import interp1d
+from cycler import cycler
 
 from geospacelab.visualization.mpl.__base__ import PanelBase
 from geospacelab.datahub.__variable_base__ import VariableBase as VariableModel
@@ -91,11 +92,15 @@ class TSPanel(Panel):
 
         if level == 0 and not list(layout_in):
             raise TypeError
-        elif level == 0:
+
+        if level == 0:
             if type(layout_in[0]) is list:
                 raise ValueError("The first element in the plot layout cannot be a list!")
             if any(type(i) is list for i in layout_in):
+                shared_cycler = cycler(color=plt.rcParams["axes.prop_cycle"])
                 self.axes_overview[ax]['twinx'] = 'on'
+                self.axes_overview[ax]['shared']['prop_cycle_iter'] = shared_cycler.__iter__()
+                ax.set_prop_cycle(color=[next(self.axes_overview[ax]['shared']['prop_cycle_iter'])['color']])
             if len(layout_in) == 1:
                 self.axes_overview[ax]['legend'] = 'off'
 
@@ -115,7 +120,10 @@ class TSPanel(Panel):
                     offset=50*(len(self.axes_overview[ax]['twinx_axes']))
                 )
                 self.axes_overview[ax_in]['twinx'] = 'self'
-                ax_in._get_lines.prop_cycler = ax._get_lines.prop_cycler
+                self.axes_overview[ax_in]['shared']['prop_cycle_iter'] = \
+                    self.axes_overview[ax]['shared']['prop_cycle_iter']
+                ax_in.set_prop_cycle(color=[next(self.axes_overview[ax_in]['shared']['prop_cycle_iter'])['color']])
+                # ax_in._get_lines.prop_cycler = ax._get_lines.prop_cycler
                 iplts_add = self.overlay_from_variables(elem, ax=ax_in, level=level+1)
             else:
                 raise NotImplementedError

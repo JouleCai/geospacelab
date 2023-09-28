@@ -522,6 +522,7 @@ class PanelBase(object):
         'twinx': 'off',
         'twinx_axes': [],
         'twiny_axes': [],
+        'shared': {},
         'lines': [],
         'collections': [],
         'legend': None,
