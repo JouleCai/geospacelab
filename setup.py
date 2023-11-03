@@ -43,8 +43,7 @@ setuptools.setup(
     author_email='lei.cai@oulu.fi',      # Type in your E-Mail
     long_description=long_description,      # Long description read from the readme file
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(exclude=['*.new', '*.new.*', 'new.*', 'new', 'local']),
-    include_package_data=True,
+    # packages=setuptools.find_packages(exclude=['*.new', '*.new.*', 'new.*', 'new', 'local']),
     url='https://github.com/JouleCai/geospacelab',   # Provide either the link to your github or to your website
     # download_url = 'https://github.com/JouleCai/geospacelab/archive/refs/tags/v0.1.tar.gz',    # I explain this later on
     keywords=['Geospace', 'EISCAT', 'DMSP', 'Space weather', 'Ionosphere', 'Space', 'Magnetosphere'],   # Keywords that define your package best
@@ -60,7 +59,7 @@ setuptools.setup(
               'matplotlib>=3.5',
               'madrigalweb>=3.2',
               'aacgmv2>=2.6.2',
-              'cdflib>=0.3.20',
+              'cdflib>=1.2.3',
               'geopack>=1.0.10',
               'palettable',
               'toml',

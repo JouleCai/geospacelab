@@ -28,15 +28,15 @@ class VisualAxis(object):
     """
 
     def __init__(self):
-        self.data = None
-        self.data_err = None
+        self.data = None # "@v.value"
+        self.data_err = None 
         self.data_scale = 1.
         self.data_res = None
         self.mask_gap = None
-        self.label = None
+        self.label = None # "@v.label"
         self.label_style = 'double'  # or 'single
         self.label_pos = None  # label position
-        self.unit = ''
+        self.unit = '' 
         self.lim = None
         self.scale = 'linear'
         self.invert = False
@@ -73,7 +73,7 @@ class VisualPlotConfig(object):
         self.bar = {}
         self.scatter = {}
         self.fill_between = {}
-        self.style = None
+        self.style = None # "1E", "1P" or "1noE", "1S", "1B", "2P"
 
     def config(self, logging=True, **kwargs):
         pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)

@@ -13,7 +13,7 @@ def test_swarm():
 
     db = dashboards.TSDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)})
 
-    db.dock(datasource_contents=['esa_eo', 'swarm', 'advanced', 'efi_lp_hm'], product='LP_HM', sat_id='C', quality_control=False)
+    db.dock(datasource_contents=['esa_eo', 'swarm', 'advanced', 'mag_hr'], product='LP_HM', sat_id='C', quality_control=False)
 
     n_e = db.assign_variable('n_e')
     T_e = db.assign_variable('T_e')

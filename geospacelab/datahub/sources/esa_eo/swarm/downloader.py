@@ -74,8 +74,10 @@ class Downloader(DownloaderBase):
                 rm = dt_regex.findall(file_name)
                 this_day = datetime.datetime.strptime(rm[0][0], '%Y%m%dT%H%M%S')
                 file_path = file_dir / rm[0][2] / file_name
-                file_path_cdf = file_path.parent.resolve() / ((file_path.stem.split('.')[0] + self.file_extension))
-                if file_path_cdf.is_file():
+                local_files = file_path.parent.resolve().glob(file_path.stem.split('.')[0] + '*' + self.file_extension)
+                # file_path_cdf = file_path.parent.resolve() / ((file_path.stem.split('.')[0] + self.file_extension))
+                # if file_path_cdf.is_file():
+                if list(local_files):
                     mylog.simpleinfo.info(
                         "The file {} exists in the directory {}.".format(
                             file_path.name, file_path.parent.resolve()

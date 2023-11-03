@@ -29,11 +29,13 @@ class LoaderModel(object):
     :param direct_load: call the method :meth:`~.LoadModel.load_data` directly or not
     :type direct_load: bool
     """
-    def __init__(self, file_path, file_type='cdf', variable_name_dict=None, direct_load=True, **kwargs):
+    def __init__(self, file_path, file_type='cdf', variable_name_dict=None, direct_load=True, dt_fr=None, dt_to=None, **kwargs):
 
         self.file_path = pathlib.Path(file_path)
         self.file_type = file_type
         self.variables = {}
+        self.dt_fr = dt_fr
+        self.dt_to = dt_to
 
         if variable_name_dict is None:
             variable_name_dict = default_variable_name_dict
@@ -53,24 +55,42 @@ class LoaderModel(object):
         """
         cdf_file = cdflib.CDF(self.file_path)
         cdf_info = cdf_file.cdf_info()
-        variables = cdf_info['zVariables']
+        variables = cdf_info.zVariables
 
         if dict(self.variable_name_dict):
             new_dict = {vn: vn for vn in variables}
             self.variable_name_dict = pybasic.dict_set_default(self.variable_name_dict, **new_dict)
 
+        epochs = cdf_file.varget(variable='Timestamp')
+        if self.dt_fr is not None:
+            t = self.dt_fr
+            epoch_fr = cdflib.cdfepoch.compute_epoch([t.year, t.month, t.day, t.hour, t.minute, t.second])
+        else:
+            epoch_fr = epochs[0]
+        if self.dt_to is not None:
+            t = self.dt_to
+            epoch_to = cdflib.cdfepoch.compute_epoch([t.year, t.month, t.day, t.hour, t.minute, t.second])
+        else:
+            epoch_to = epochs[-1]
+        ind_t = np.where((epochs >= epoch_fr) & (epochs <= epoch_to))[0]
+
         for var_name, cdf_var_name in self.variable_name_dict.items():
             if var_name == 'CDF_EPOCH':
-                epochs = cdf_file.varget(variable=cdf_var_name)
+                epochs = epochs[ind_t]
                 epochs = cdflib.cdfepoch.unixtime(epochs)
                 dts = [datetime.timedelta(seconds=epoch) + datetime.datetime(1970, 1, 1, 0, 0, 0) for epoch in epochs]
                 self.variables['SC_DATETIME'] = np.array(dts).reshape((len(dts), 1))
                 continue
+            # if var_name == 'CDF_EPOCH':
+            #     epochs = epochs[ind_t]
+            #     dts = cdflib.cdfepoch.to_datetime(epochs)
+            #     self.variables['SC_DATETIME'] = np.array(dts).reshape((len(dts), 1))
+            #     continue
             var = cdf_file.varget(variable=cdf_var_name)
             var = np.array(var)
             vshape = var.shape
             if len(vshape) == 1:
-                var = var.reshape(vshape[0], 1)
-            self.variables[var_name] = var
+                var = var[:, np.newaxis]
+            self.variables[var_name] = var[ind_t, ::]
 
 

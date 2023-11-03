@@ -256,11 +256,11 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
         product='TCT02', sat_id=swarm_sat_id, quality_control=False, add_AACGM=True
         )
     ds_swarm_lp = db_swarm.dock(
-        datasource_contents=['esa_eo', 'swarm', 'advanced', 'efi_lp_hm'], 
+        datasource_contents=['esa_eo', 'swarm', 'advanced', 'mag_hr'],
         product='LP_HM', sat_id='A', quality_control=False, add_AACGM=True
         )
     ds_swarm_lp_c = db_swarm.dock(
-        datasource_contents=['esa_eo', 'swarm', 'advanced', 'efi_lp_hm'],
+        datasource_contents=['esa_eo', 'swarm', 'advanced', 'mag_hr'],
         product='LP_HM', sat_id='C', quality_control=False, add_AACGM=True
         )
 

@@ -470,6 +470,9 @@ class TSPanel(Panel):
         self._set_ylim(ax=ax)
 
         # set y labels and alignment two methods: fig.align_ylabels(axs[:, 1]) or yaxis.set_label_coords
+        if self.axes_overview[ax]['twinx'] != 'off':
+            if var_for_config.visual.axis[1].label in ['@v.group', None]:
+                var_for_config.visual.axis[1].label = '@v.label'
         ylabel = var_for_config.get_visual_axis_attr('label', axis=1)
         yunit = var_for_config.get_visual_axis_attr('unit', axis=1)
         ylabel_style = var_for_config.get_visual_axis_attr('label_style', axis=1)
