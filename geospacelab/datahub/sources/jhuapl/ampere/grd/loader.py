@@ -24,46 +24,31 @@ class Loader(object):
         dataset = netCDF4.Dataset(self.file_path)
         variables = {}
 
-        dts = np.array(
-            datetime.datetime(yy, mm, dd) + datetime.timedelta(hours=np.round)
-        )
-
-
-        time_1 = np.array([
-            datetime.datetime(yy, mm, dd, HH, MM, SS)
-            for yy, mm, dd, HH, MM, SS in zip(
-                dataset.variables['start_yr'][::],
-                dataset.variables['start_mo'][::],
-                dataset.variables['start_dy'][::],
-                dataset.variables['start_hr'][::],
-                dataset.variables['start_mt'][::],
-                dataset.variables['start_sc'][::],
-            )
-        ])
-        time_2 = np.array([
-            datetime.datetime(yy, mm, dd, HH, MM, SS)
-            for yy, mm, dd, HH, MM, SS in zip(
-                dataset.variables['end_yr'][::],
-                dataset.variables['end_mo'][::],
-                dataset.variables['end_dy'][::],
-                dataset.variables['end_hr'][::],
-                dataset.variables['end_mt'][::],
-                dataset.variables['end_sc'][::],
+        year = dataset.variables['year'][::][0]
+        start_of_year = datetime.datetime(year, 1, 1) 
+        hhs = [int(np.floor(t)) for t in dataset.variables['time'][::]]
+        mms = [int(np.round((t-hh)*60)) for t, hh in zip(dataset.variables['time'][::], hhs)] 
+        sss = [int(np.round((t-hh - mm/60)*60)) for t, hh, mm in zip(dataset.variables['time'][::], hhs, mms)]  
+        dts = np.array([
+            start_of_year + datetime.timedelta(days=int(doy)-1, hours=hh, minutes=mm, seconds=ss)
+            for doy, hh, mm, ss in zip(
+                dataset.variables['doy'][::],
+                hhs,
+                mms,
+                sss,
             )
         ])
 
-        ntime = time_1.shape[0]
-        nlon = dataset.variables['nlon'][0]
-        nlat = dataset.variables['nlat'][0]
-        colat = dataset.variables['colat'][::].reshape((ntime, nlon, nlat))
+        ntime = dts.shape[0]
+        nlon = dataset.variables['nLonGrid'][::][0]
+        nlat = dataset.variables['nLatGrid'][::][0]
+        colat = dataset.variables['cLat_deg'][::].reshape((ntime, nlon, nlat))
 
-        mlt = dataset.variables['mlt'][::].reshape((ntime, nlon, nlat))
+        mlt = dataset.variables['mlt_hr'][::].reshape((ntime, nlon, nlat))
 
-        Jr = dataset.variables['Jr'][::].reshape(ntime, nlon, nlat)
+        Jr = dataset.variables['jPar'][::].reshape(ntime, nlon, nlat)
 
-        variables['DATETIME'] = np.reshape(time_1 + (time_2 - time_1) / 2, (ntime, 1))
-        variables['DATETIME_1'] = np.reshape(time_1, (ntime, 1))
-        variables['DATETIME_2'] = np.reshape(time_2, (ntime, 1))
+        variables['DATETIME'] = dts[:, np.newaxis]
 
         variables['GRID_MLAT'] = np.array(90. - colat)
         variables['GRID_MLT'] = np.array(mlt)
@@ -75,10 +60,26 @@ class Loader(object):
         self.variables = variables
 
 
+cdf_var_names = [
+    'npnt', 'year', 'doy', 'time', 'avgint',
+    'kmax', 'mmax', 'res_deg', 'nLatGrid', 'nLonGrid',
+    'cLat_deg', 'mlt_hr', 'geo_cLat_deg', 'geo_lon_deg', 'R',
+    'pos_geo', 'db_R', 'db_T', 'db_P', 'db_geo',
+    'jPar', 'db_Th_Th', 'db_Ph_Th', 'db_Th_Ph', 'db_Ph_Ph',
+    'del_db_R', 'del_db_T', 'del_db_P', 'del_db_geo', 'del_jPar',
+    'del_db_Th_Th', 'del_db_Ph_Th', 'del_db_Th_Ph', 'del_db_Ph_Ph'
+]
+
+
+
+
 if __name__ == "__main__":
     import pathlib
-    fp = pathlib.Path('/home/lei/afys-data/JHUAPL/AMPERE/Fitted/201603/AMPERE_fitted_20160314.0000.86400.600.north.grd.ncdf')
+    fp = pathlib.Path('/home/lei/git-repos/geospacelab/geospacelab/datahub/sources/jhuapl/ampere/20160314/AMPERE_GRD_20160314T0000_20160314T0100_N.nc')
+    # fp = "/home/lei/north.nc"
     loader = Loader(file_path=fp)
+
+
 
 
     # if hasattr(readObj, 'pole'):

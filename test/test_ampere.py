@@ -10,13 +10,9 @@ def test_ampere():
     dt_to = datetime.datetime(2021, 8, 24, 12, 59)
     time1 = datetime.datetime(2021, 8, 24, 10, 10)
     pole = 'N'
-    load_mode = 'assigned'
-    # specify the file full path
-    data_file_paths = ['/home/lei/afys-data/JHUAPL/AMPERE/Fitted/201610/ampere.20110923.k060_m08.north.grd.nc']
-
+    
     db = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)})
-    # viewer.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole='N', sat_id='f17', orbit_id='46863')
-    db.dock(datasource_contents=['jhuapl', 'ampere', 'fitted'], load_mode=load_mode, data_file_paths=data_file_paths)
+    db.dock(datasource_contents=['jhuapl', 'ampere', 'grd'])
     db.set_layout(1, 1)
     ds_ampere = db.datasets[0]
 
@@ -54,9 +50,8 @@ def test_ampere():
     panel1.overlay_gridlines(lat_res=5, lon_label_separator=5)
 
     polestr = 'North' if pole == 'N' else 'South'
-    plt.savefig('ampere_example', dpi=300)
+    # plt.savefig('ampere_example', dpi=300)
     plt.show()
-
 
 if __name__ == "__main__":
     test_ampere()

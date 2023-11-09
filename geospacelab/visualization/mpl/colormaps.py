@@ -38,7 +38,7 @@ def get_discrete_colors(num, colormap='Set1'):
 def get_colormap(colormap=None):
     if colormap is None:
         # return 'nipy_spectral'
-        return cmap_jhuapl_ssj_like()
+        return cmap_jet_modified()
     # self-defined colormaps will be added
     return colormap
 
@@ -47,7 +47,7 @@ def cmap_jhuapl_ssj_like():
     c1 = ['#FFFFFF', '#0000FF', '#00FF00', '#FFFF00', '#FF0000', '#330000']
     c1 = ['#DFDFDF', '#7F7FFF',
           '#0000FF', '#1E90FF',
-          '#00FF00', '#7FFF00',
+          '#00FF00', '#EFFF00',
           '#FFFF00', '#FF0000',
           '#7F0000', '#330000']
     mycmap = colors.LinearSegmentedColormap.from_list("jhuapl_ssj_like", c1, N=500)
@@ -107,8 +107,8 @@ def cmap_jet_modified():
             (10/36, 0.2, 0.2),
             (15/36, 0.2, 0.2),
             (16/36, 0.4, 0.4),
-            (17/36, 0.6, 0.6),
-            (18/36, 0.8, 0.8),
+            (17/36, 0.65, 0.65),
+            (18/36, 0.85, 0.85),
             (19/36, 0.97, 0.97),
             (20/36, 1.0, 1.0),
             (25/36, 1.0, 1.0),
@@ -124,7 +124,7 @@ def cmap_jet_modified():
             (5/36, 0.2, 0.2),
             (6/36, 0.4, 0.4),
             (7/36, 0.6, 0.6),
-            (8/36, 0.8, 0.8),
+            (8/36, 0.9, 0.9),
             (9/36, 1.0, 1.0),
             (19/36, 1.0, 1.0),
             (20/36, 0.97, 0.97),

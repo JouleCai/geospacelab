@@ -264,7 +264,8 @@ class TSPanel(Panel):
                 x[:-1, :],
                 np.array(x[-1, 0] + delta_x[-1, 0] / 2).reshape((1, 1))
             ))
-
+        if len(y.shape) == 1:
+            y = y[np.newaxis, :]
         if y.shape[1] == z.shape[1]:
             delta_y = np.diff(y, axis=1)
             y[:, :-1] = y[:, :-1] + delta_y/2
@@ -331,10 +332,10 @@ class TSPanel(Panel):
 
         maxticks = var_for_config.visual.axis[0].major_tick_max
         if maxticks is None:
-            maxticks = 12
+            maxticks = 9
         minticks = var_for_config.visual.axis[0].major_tick_min
         if minticks is None:
-            minticks = 6
+            minticks = 4
         majorlocator = DatetimeMajorLocator(maxticks=maxticks, minticks=minticks)
         majorformatter = DatetimeMajorFormatter(majorlocator)
 
@@ -369,7 +370,7 @@ class TSPanel(Panel):
 
         if self._default_xtick_params['extral_labels_y_offset'] is None:             
             figheight = self.figure.get_size_inches()[1]*2.54
-            yoffset = - 0.01 - 0.03 * 10/figheight * ax_pos.height
+            yoffset = - 0.013 - 0.031 * 10/figheight * ax_pos.height
         else:
             yoffset = self._default_xtick_params['extral_labels_y_offset']
         
