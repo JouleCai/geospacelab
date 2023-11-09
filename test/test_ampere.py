@@ -29,7 +29,7 @@ def test_ampere():
 
     fac_ = fac.value[ind_t, :, :]
     # re-grid the original data with higher spatial resolution, default mlt_res = 0.05, mlat_res = 0.5. used for plotting.
-    grid_mlat, grid_mlt, grid_fac = ds_ampere.grid_fac(fac_, mlt_res=0.05, mlat_res=0.05, interp_method='linear')
+    grid_mlat, grid_mlt, grid_fac = ds_ampere.grid_fac(fac_, mlt_res=0.01, mlat_res=0.01, interp_method='linear')
 
     # remove values less than 0.2
     grid_fac[np.abs(grid_fac)<0.2] = np.nan
@@ -43,7 +43,7 @@ def test_ampere():
     cmap = 'jet'
     pcolormesh_config.update(cmap=cmap)
     # ipc = panel1.add_pcolor(fac_, coords={'lat': mlat[ind_t, ::], 'lon': None, 'mlt': mlt[ind_t, ::], 'height': 250.}, cs='AACGM', **pcolormesh_config)
-    ipm = panel1.overlay_pcolormesh(grid_fac, coords={'lat': grid_mlat, 'lon': None, 'mlt': grid_mlt, 'height': 250.}, cs='AACGM', **pcolormesh_config)
+    ipm = panel1.overlay_pcolormesh(grid_fac, coords={'lat': grid_mlat, 'lon': None, 'mlt': grid_mlt, 'height': 250.}, cs='AACGM', **pcolormesh_config, regridding=False)
     panel1.add_colorbar(ipm, c_label=r'FAC ($\mu$A/m$^2$)', c_scale=pcolormesh_config['c_scale'], left=1.1, bottom=0.1,
                         width=0.05, height=0.7)
 
