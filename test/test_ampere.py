@@ -29,7 +29,7 @@ def test_ampere():
 
     fac_ = fac.value[ind_t, :, :]
     # re-grid the original data with higher spatial resolution, default mlt_res = 0.05, mlat_res = 0.5. used for plotting.
-    grid_mlat, grid_mlt, grid_fac = ds_ampere.grid_fac(fac_, mlt_res=0.01, mlat_res=0.01, interp_method='linear')
+    grid_mlat, grid_mlt, grid_fac = ds_ampere.grid_fac(fac_, mlt_res=0.05, mlat_res=0.05, interp_method='linear')
 
     # remove values less than 0.2
     grid_fac[np.abs(grid_fac)<0.2] = np.nan
