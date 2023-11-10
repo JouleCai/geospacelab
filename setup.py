@@ -62,6 +62,7 @@ setuptools.setup(
               'cdflib>=1.2.3',
               'geopack>=1.0.10',
               'palettable',
+              'tqdm',
               'toml',
               'sscws',
               'pandas>=1.5.3',
