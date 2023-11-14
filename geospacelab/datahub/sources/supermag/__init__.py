@@ -45,8 +45,8 @@ except KeyError:
     if save.lower() in ['', 'y', 'yes']:
         uc = preferences.user_config
         uc.setdefault('datahub', {})
-        uc['datahub'].setdefault('madrigal', {})
-        uc['datahub']['madrigal']['user_fullname'] = default_username
+        uc['datahub'].setdefault('supermag', {})
+        uc['datahub']['supermag']['user_fullname'] = default_username
         # uc['datahub']['madrigal']['user_email'] = default_user_email
         # uc['datahub']['madrigal']['user_affiliation'] = default_user_affiliation
         preferences.set_user_config(user_config=uc, set_as_default=True)

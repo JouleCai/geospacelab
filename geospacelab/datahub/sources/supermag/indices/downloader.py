@@ -94,7 +94,7 @@ class Downloader(object):
             dt_to: datetime.datetime,
             user_id: str = None,
             products: str = None, # 'indicesall', 'swiall', 'imfall'
-            force_download=True,
+            force_download=False,
             **kwargs
     ):
         if products is None:
@@ -131,7 +131,7 @@ class Downloader(object):
                 mylog.StreamLogger.info(f'The requested data file already exists! See "{file_path}".')
                 self.done = True
                 continue
-
+            
             (status, idxdata) = smapi.SuperMAGGetIndices(
              self.user_id,
              this_day,

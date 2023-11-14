@@ -26,7 +26,7 @@ class Downloader(object):
         self.data_file_root_dir = data_file_root_dir
         self.data_file_paths = []
         if self.data_file_root_dir is None:
-            self.data_file_root_dir = pfr.datahub_data_root_dir / 'JHUAPL' / 'AMPERE' / product.upper()
+            self.data_file_root_dir = pfr.datahub_data_root_dir / 'JHUAPL' / 'AMPERE' / data_product.upper()
 
         if direct_download:
             self.download()
