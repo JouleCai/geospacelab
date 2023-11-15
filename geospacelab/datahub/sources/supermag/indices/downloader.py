@@ -145,6 +145,7 @@ class Downloader(object):
                 self.done = False
                 mylog.StreamLogger.error(f'The requested data cannot be downloaded!')
                 return
+            self.download = True
     def save_to_nc(self, idxdata, file_path):
         def sm_t_to_datetime(tval):
             jd = (tval / 86400.0) + 2440587.5

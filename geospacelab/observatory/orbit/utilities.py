@@ -448,7 +448,7 @@ class LEOToolbox(DatasetUser):
 
             elif sector_name == 'S':
                 lat = 180. - pseudo_lat if pseudo_lat <= 270. else pseudo_lat - 360.
-                if lat == -90:
+                if lat == -90.:
                     n3 = ind
 
             elif sector_name == 'ASC':
