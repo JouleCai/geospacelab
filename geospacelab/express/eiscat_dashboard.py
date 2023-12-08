@@ -21,7 +21,8 @@ class EISCATDashboard(TSDashboard):
 
         figure = kwargs.pop('figure', 'new')
         figure_config = kwargs.pop('figure_config', {'figsize': (10, 10)})
-        super().__init__(dt_fr=dt_fr, dt_to=dt_to, figure=figure, figure_config=figure_config)
+        timeline_extra_labels = kwargs.pop('timeline_extra_labels', None)
+        super().__init__(dt_fr=dt_fr, dt_to=dt_to, figure=figure, figure_config=figure_config, timeline_extra_labels=timeline_extra_labels)
         self.dock(datasource_contents=['madrigal', 'isr', 'eiscat'], **kwargs)
         self.host_dataset.load_data(load_mode=kwargs['load_mode'])
         # ds_1.list_all_variables()

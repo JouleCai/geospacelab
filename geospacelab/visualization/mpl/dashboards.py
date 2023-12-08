@@ -51,6 +51,7 @@ class TSDashboard(Dashboard):
             time_gap=True,
             timeline_major='UT',
             timeline_extra_labels=None,
+            timeline_same_format=False,
             **kwargs
     ):
         self.panel_layouts = []
@@ -60,6 +61,7 @@ class TSDashboard(Dashboard):
         figure_config = self._default_figure_config if figure_config is None else figure_config
         self.time_gap = time_gap
         self.timeline_major = timeline_major
+        self.timeline_same_format = timeline_same_format
         self.timeline_extra_labels = timeline_extra_labels
         kwargs.update(visual='on')
 
@@ -130,7 +132,7 @@ class TSDashboard(Dashboard):
                 panel_config.update(sharex=self.panels[0]())
             if ind == len(self._panels_configs.keys())-1:
                 bottom_panel = True
-                panel_config.update(timeline_extra_labels=self.timeline_extra_labels)
+                panel_config.update(timeline_extra_labels=self.timeline_extra_labels, timeline_same_format=self.timeline_same_format)
             else:
                 bottom_panel = False
             panel_config.update(bottom_panel=bottom_panel)

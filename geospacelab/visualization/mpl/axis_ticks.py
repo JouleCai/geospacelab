@@ -59,10 +59,15 @@ class DatetimeMinorLocator(mdates.AutoDateLocator):
 
 
 class DatetimeMajorFormatter(mdates.AutoDateFormatter):
-    def __init__(self, locator, scaled: dict or None = None, tz=None, defaultfmt='%Y-%m-%d', *, usetex=True):
+    def __init__(self, locator, scaled: dict or None = None, tz=None, defaultfmt='%Y-%m-%d', *, usetex=True, same_format=False):
         super().__init__(locator, tz=None, defaultfmt=defaultfmt, usetex=usetex)
-        self.scaled[1 / HOURS_PER_DAY] = formatter_hour_per_day
-        self.scaled[1 / MINUTES_PER_DAY] = formatter_minute_per_day
+
+        if not same_format:
+            self.scaled[1 / HOURS_PER_DAY] = formatter_hour_per_day
+            self.scaled[1 / MINUTES_PER_DAY] = formatter_minute_per_day
+        else:
+            self.scaled[1 / HOURS_PER_DAY] = formatter_hour_per_day_1
+            self.scaled[1 / MINUTES_PER_DAY] = formatter_minute_per_day_1
         if scaled is not None:
            self.scaled.update(**scaled)
 
@@ -86,6 +91,22 @@ def formatter_minute_per_day(x, pos):
         fmt1 = "%b %d"
     else:
         fmt1 = "%H:%M"
+    return dtx.strftime(fmt1)
+
+
+def formatter_hour_per_day_1(x, pos):
+    dtx = mpl.dates.num2date(x)
+    dtx = dtx.replace(tzinfo=None)
+    delta = dtx - dt.datetime(dtx.year, dtx.month, dtx.day)
+    fmt1 = "%H:%M"
+    return dtx.strftime(fmt1)
+
+
+def formatter_minute_per_day_1(x, pos):
+    dtx = mpl.dates.num2date(x)
+    dtx = dtx.replace(tzinfo=None)
+    delta = dtx - dt.datetime(dtx.year, dtx.month, dtx.day)
+    fmt1 = "%H:%M"
     return dtx.strftime(fmt1)
 
 

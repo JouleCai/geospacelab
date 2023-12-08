@@ -63,7 +63,7 @@ class TSPanel(Panel):
             self, *args, 
             dt_fr=None, dt_to=None, figure=None, from_subplot=True,
             bottom_panel=True, timeline_reverse=False, timeline_extra_labels=None,
-            time_gap=True, time_res=None,
+            time_gap=True, time_res=None, timeline_same_format=False,
             **kwargs
     ):
         
@@ -74,6 +74,7 @@ class TSPanel(Panel):
 
         self._xlim = [dt_fr, dt_to]
         self.timeline_reverse = timeline_reverse
+        self.timeline_same_format=timeline_same_format
         self.time_gap = time_gap
         self.time_res = time_res
         if timeline_extra_labels is None:
@@ -337,7 +338,7 @@ class TSPanel(Panel):
         if minticks is None:
             minticks = 4
         majorlocator = DatetimeMajorLocator(maxticks=maxticks, minticks=minticks)
-        majorformatter = DatetimeMajorFormatter(majorlocator)
+        majorformatter = DatetimeMajorFormatter(majorlocator, same_format=self.timeline_same_format)
 
         if not self.bottom_panel:
             majorformatter = mpl_ticker.NullFormatter()

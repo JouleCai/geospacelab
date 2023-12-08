@@ -213,8 +213,10 @@ class Dataset(datahub.DatasetSourced):
         """
         Bz = kwargs['Bz']
         By = kwargs['By']
-        Bt = np.sqrt(By**2+Bz**2);
-        ca = np.sign(By) * (np.pi/2 - np.arcsin(Bz / Bt))
+        Bt = np.sqrt(By**2+Bz**2)
+        sign_By = np.sign(By)
+        sign_By[sign_By == 0] = 1.
+        ca = sign_By * (np.pi/2 - np.arcsin(Bz / Bt))
         ca = np.mod(ca, 2 * np.pi)
 
         if not to_radian:
@@ -236,8 +238,10 @@ class Dataset(datahub.DatasetSourced):
         """
         By = kwargs['By']
         Bx = kwargs['Bx']
-        Bt = np.sqrt(By**2+Bx**2);
-        az = np.sign(Bx) * (np.pi/2 - np.arcsin(By / Bt))
+        Bt = np.sqrt(By**2+Bx**2)
+        sign_Bx = np.sign(Bx)
+        sign_Bx[sign_Bx == 0] = 1.
+        az = sign_Bx * (np.pi/2 - np.arcsin(By / Bt))
         az = np.mod(az, 2 * np.pi)
 
         if not to_radian:
@@ -259,8 +263,10 @@ class Dataset(datahub.DatasetSourced):
         """
         Bx = kwargs['Bx']
         Bz = kwargs['Bz']
-        Bt = np.sqrt(Bx ** 2 + Bz ** 2);
-        el = np.sign(Bz) * (np.pi / 2 - np.arcsin(Bx / Bt))
+        Bt = np.sqrt(Bx ** 2 + Bz ** 2)
+        sign_Bz = np.sign(Bz)
+        sign_Bz[sign_Bz == 0] = 1.
+        el = sign_Bz * (np.pi / 2 - np.arcsin(Bx / Bt))
         el = np.mod(el, 2 * np.pi)
 
         if not to_radian:
