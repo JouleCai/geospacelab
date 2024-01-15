@@ -28,7 +28,7 @@ import numpy as np
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pybasic as pybasic
 import geospacelab.toolbox.utilities.pyclass as pyclass
-from geospacelab import preferences as pref
+from geospacelab.config import pref
 
 
 class DatasetBase(object):

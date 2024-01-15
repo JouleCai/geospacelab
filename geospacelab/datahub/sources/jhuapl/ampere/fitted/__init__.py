@@ -7,7 +7,7 @@ import numpy as np
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, InstrumentModel, ProductModel
 from geospacelab.datahub.sources.jhuapl import jhuapl_database
-from geospacelab import preferences as prf
+from geospacelab.config import prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 from geospacelab.datahub.sources.jhuapl.ampere.fitted.loader import Loader as default_Loader

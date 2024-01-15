@@ -7,7 +7,6 @@ __copyright__ = "Copyright 2021, GeospaceLab"
 __license__ = "BSD-3-Clause License"
 __email__ = "lei.cai@oulu.fi"
 
-from geospacelab import preferences
 import geospacelab.datahub.sources.madrigal.utilities as utilities
 
 from geospacelab.datahub import DatabaseModel

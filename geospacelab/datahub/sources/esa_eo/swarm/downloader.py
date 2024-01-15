@@ -22,8 +22,6 @@ from contextlib import closing
 from geospacelab.datahub.__dataset_base__ import DownloaderBase
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as mylog
-import geospacelab.datahub.sources.wdc as wdc
-from geospacelab import preferences as prf
 
 
 class Downloader(DownloaderBase):

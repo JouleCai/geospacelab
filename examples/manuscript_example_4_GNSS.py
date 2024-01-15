@@ -12,7 +12,7 @@ __docformat__ = "reStructureText"
 import datetime
 import numpy as np
 import matplotlib.pyplot as plt
-from geospacelab import preferences as pref
+# from geospacelab.config import pref
 # pref.user_config['visualization']['mpl']['style'] = 'dark'
 
 import geospacelab.visualization.mpl.geomap.geodashboards as geomap

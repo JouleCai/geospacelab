@@ -19,7 +19,7 @@ import bs4
 import os
 import pathlib
 
-from geospacelab import preferences as pfr
+from geospacelab.config import prf
 import geospacelab.datahub.sources.madrigal as madrigal
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
@@ -71,7 +71,7 @@ class Downloader(object):
         self.force = force
 
         if data_file_root_dir is None:
-            self.data_file_root_dir = pfr.datahub_data_root_dir / 'Madrigal' / 'DMSP'
+            self.data_file_root_dir = prf.datahub_data_root_dir / 'Madrigal' / 'DMSP'
         else:
             self.data_file_root_dir = data_file_root_dir
         self.done = False

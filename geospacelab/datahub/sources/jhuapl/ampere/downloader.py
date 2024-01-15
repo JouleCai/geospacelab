@@ -7,7 +7,8 @@ import tqdm
 
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as mylog
-from geospacelab import preferences as pfr
+from geospacelab.config import prf
+
 
 class Downloader(object):
 
@@ -26,7 +27,7 @@ class Downloader(object):
         self.data_file_root_dir = data_file_root_dir
         self.data_file_paths = []
         if self.data_file_root_dir is None:
-            self.data_file_root_dir = pfr.datahub_data_root_dir / 'JHUAPL' / 'AMPERE' / data_product.upper()
+            self.data_file_root_dir = prf.datahub_data_root_dir / 'JHUAPL' / 'AMPERE' / data_product.upper()
 
         if direct_download:
             self.download()

@@ -9,7 +9,7 @@ import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, InstrumentModel, ProductModel
 from geospacelab.datahub.sources.tud import tud_database
 from geospacelab.datahub.sources.tud.grace_fo import grace_facility
-from geospacelab import preferences as prf
+from geospacelab.config import prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool

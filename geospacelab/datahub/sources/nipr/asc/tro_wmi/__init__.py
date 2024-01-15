@@ -15,7 +15,7 @@ import numpy as np
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, SiteModel
 from geospacelab.datahub.sources.nipr import nipr_database
-from geospacelab import preferences as prf
+from geospacelab.config import prf
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pybasic as basic
 from geospacelab.datahub.sources.nipr.asc.tro_wmi.loader import Loader as default_Loader

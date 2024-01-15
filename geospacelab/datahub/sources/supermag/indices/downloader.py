@@ -23,9 +23,7 @@ from contextlib import closing
 
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as mylog
-import geospacelab.datahub.sources.gfz.downloader as downloader
-import geospacelab.datahub.sources.wdc as wdc
-from geospacelab import preferences as prf
+from geospacelab.config import prf
 import geospacelab.datahub.sources.supermag.supermag_api as smapi
 
 basekeys = ["sme", "sml", "smu", "mlat", "mlt", "glat", "glon", "stid", "num"]

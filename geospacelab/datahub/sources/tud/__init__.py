@@ -2,7 +2,6 @@
 # Copyright (C) 2021 GeospaceLab (geospacelab)
 # Author: Lei Cai, Space Physics and Astronomy, University of Oulu
 
-from geospacelab import preferences
 
 from geospacelab.datahub import DatabaseModel
 

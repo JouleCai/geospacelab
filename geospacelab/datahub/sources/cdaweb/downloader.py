@@ -16,7 +16,6 @@ import re
 
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as mylog
-from geospacelab import preferences as prf
 
 
 class Downloader(object):

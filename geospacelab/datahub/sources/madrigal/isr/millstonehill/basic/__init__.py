@@ -15,7 +15,7 @@ from geospacelab.datahub.sources.madrigal.isr.millstonehill.basic.loader import 
 from geospacelab.datahub.sources.madrigal.isr.millstonehill.downloader import Downloader as default_Downloader
 import geospacelab.datahub.sources.madrigal.isr.millstonehill.basic.variable_config as var_config
 from geospacelab.datahub.sources.madrigal import madrigal_database
-from geospacelab import preferences as prf
+from geospacelab.config import prf
 from geospacelab import datahub
 from geospacelab.datahub import SiteModel, DatabaseModel, FacilityModel
 import geospacelab.toolbox.utilities.pybasic as basic

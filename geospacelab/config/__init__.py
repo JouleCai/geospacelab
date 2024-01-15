@@ -11,7 +11,7 @@ __docformat__ = "reStructureText"
 
 from geospacelab.config._preferences import Preferences
 
-pref = Preferences()
+prf = pref = Preferences()
 
 try:
     opt = pref.user_config['visualization']
@@ -20,6 +20,3 @@ except KeyError:
     uc['visualization'] = dict()
     uc['visualization']['mpl'] = dict()
     pref.set_user_config(user_config=uc, set_as_default=True)
-
-
-

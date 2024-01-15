@@ -630,13 +630,24 @@ class PolarMapPanel(GeoPanel):
                           time_tick_label_fontweight='normal',
                           time_minor_tick=True, time_minor_tick_res=60,
                           time_tick_width=1, **kwargs):
-        kwargs.setdefault('trajectory_config', {
+        default_trajectory_config = {
             'linewidth': 1,
             'linestyle': '-',
             'color': 'k',
             'zorder': max([_.zorder for _ in self.major_ax.get_children()])
-        })
-        kwargs['trajectory_config'].update(color=color)
+        }
+        default_trajectory_config.update(**kwargs.setdefault('trajectory_config', {}))
+        default_trajectory_config.update(color=color)
+        kwargs['trajectory_config'] = default_trajectory_config
+
+        #
+        # kwargs.setdefault('trajectory_config', {
+        #     'linewidth': 1,
+        #     'linestyle': '-',
+        #     'color': 'k',
+        #     'zorder': max([_.zorder for _ in self.major_ax.get_children()])
+        # })
+        # kwargs['trajectory_config'].update(color=color)
 
         cs_new = self.cs_transform(cs_fr=cs, coords=sc_coords, ut=sc_ut)
 

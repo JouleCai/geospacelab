@@ -10,7 +10,7 @@ __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
 
-from geospacelab import preferences
+from geospacelab.config import pref
 import geospacelab.datahub.sources.madrigal.utilities as utilities
 
 from geospacelab.datahub import DatabaseModel
@@ -28,18 +28,18 @@ ampere_database.category = 'online database'
 
 
 try:
-    default_user_name = preferences.user_config['datahub']['ampere']['user_name']
+    default_user_name = pref.user_config['datahub']['ampere']['user_name']
 except KeyError:
     print("Inputs for accessing the JHUAPL/AMPERE database.")
-    if preferences._on_rtd:
+    if pref._on_rtd:
         default_user_name = 'GeospaceLAB'
         save = 'y'
     else:
         default_user_name = input("Set the username: ")
         save = input("Save as default? [y]/n: ")
     if save.lower() in ['', 'y', 'yes']:
-        uc = preferences.user_config
+        uc = pref.user_config
         uc.setdefault('datahub', {})
         uc['datahub'].setdefault('ampere', {})
         uc['datahub']['ampere']['user_name'] = default_user_name
-        preferences.set_user_config(user_config=uc, set_as_default=True)
+        pref.set_user_config(user_config=uc, set_as_default=True)

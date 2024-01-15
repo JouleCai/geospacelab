@@ -1,4 +1,4 @@
-from geospacelab import preferences
+from geospacelab.config import pref
 import geospacelab.datahub.sources.madrigal.utilities as utilities
 
 from geospacelab.datahub import DatabaseModel

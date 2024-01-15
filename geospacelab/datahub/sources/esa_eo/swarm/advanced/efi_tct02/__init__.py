@@ -10,7 +10,7 @@ import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, InstrumentModel, ProductModel
 from geospacelab.datahub.sources.esa_eo import esaeo_database
 from geospacelab.datahub.sources.esa_eo.swarm import swarm_facility
-from geospacelab import preferences as prf
+from geospacelab.config import prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool

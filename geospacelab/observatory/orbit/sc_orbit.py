@@ -10,13 +10,13 @@ from sscws.coordinates import CoordinateComponent, CoordinateSystem, \
     SurfaceGeographicCoordinates
 
 import geospacelab.cs as gsl_cs
-from geospacelab import preferences as pfr
+from geospacelab.config import prf
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as mylog
 from geospacelab.datahub.__dataset_base__ import DatasetSourced
 
 default_dataset_attrs = {
-    'data_root_dir': pfr.datahub_data_root_dir / 'SSCWS',
+    'data_root_dir': prf.datahub_data_root_dir / 'SSCWS',
 }
 
 default_variable_names = [
@@ -283,7 +283,7 @@ class OrbitPosition_SSCWS(DatasetSourced):
 
     @staticmethod
     def list_satellites(reload=False, logging=True):
-        file_path = pfr.datahub_data_root_dir / 'SSCWS' / 'SSCWS_info_satellites.pkl'
+        file_path = prf.datahub_data_root_dir / 'SSCWS' / 'SSCWS_info_satellites.pkl'
         if not file_path.is_file():
             file_path.parent.resolve().mkdir(exist_ok=True)
             reload = True
@@ -332,7 +332,7 @@ class OrbitPosition_SSCWS(DatasetSourced):
 
     @staticmethod
     def list_stations(reload=False, logging=True):
-        file_path = pfr.datahub_data_root_dir / 'SSCWS' / 'SSCWS_info_ground_stations.pkl'
+        file_path = prf.datahub_data_root_dir / 'SSCWS' / 'SSCWS_info_ground_stations.pkl'
         if not file_path.is_file():
             file_path.parent.resolve().mkdir(exist_ok=True)
             reload = True

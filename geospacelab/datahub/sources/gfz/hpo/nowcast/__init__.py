@@ -15,7 +15,7 @@ import numpy as np
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, ProductModel
 
-from geospacelab import preferences as prf
+from geospacelab.config import prf
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog

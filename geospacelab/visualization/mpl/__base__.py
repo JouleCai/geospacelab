@@ -12,7 +12,7 @@ from matplotlib.figure import Figure
 
 from cycler import cycler
 
-from geospacelab import preferences as pref
+from geospacelab.config import pref
 from geospacelab.toolbox.utilities.pyclass import StrBase
 import geospacelab.toolbox.utilities.pybasic as pybasic
 from geospacelab.visualization.mpl._helpers import check_panel_ax
@@ -368,19 +368,16 @@ class DashboardBase(object):
     def add_panel_labels(self, panel_indices=None, style='alphabets', bbox_config=None, labels=list(), **kwargs):
         if panel_indices is None:
             panel_indices = self.panels.keys()
+        default_bbox_config = {'facecolor': 'yellow', 'alpha': 0.3, 'edgecolor': 'none'}
 
         if style == 'alphabets':
             label_list = string.ascii_lowercase
         else:
             raise NotImplemented
 
-        if 'position' in kwargs.keys():
-            pos = kwargs['position']
-            x = pos[0]
-            y = pos[1]
-        else:
-            x = 0.02
-            y = 0.9
+        pos = kwargs.pop('position', [0.02, 0.9])
+        x = pos[0]
+        y = pos[1]
 
         kwargs.setdefault('ha', 'left')  # horizontal alignment
         kwargs.setdefault('va', 'center')  # vertical alignment
@@ -400,7 +397,10 @@ class DashboardBase(object):
             kwargs.setdefault('fontsize', plt.rcParams['axes.labelsize'])
             kwargs.setdefault('fontweight', 'book')
             if bbox_config is None:
-                bbox_config = {'facecolor': 'yellow', 'alpha': 0.3, 'edgecolor': 'none'}
+                bbox_config = default_bbox_config
+            else:
+                default_bbox_config.update(**bbox_config)
+                bbox_config = default_bbox_config
             kwargs.setdefault('bbox', bbox_config)
             y_new = 1 - pos_0.height / pos_1.height + y * pos_0.height / pos_1.height
             panel.add_label(x, y_new, label, **kwargs)

@@ -24,7 +24,6 @@ import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.datahub.sources.gfz.downloader as downloader
 import geospacelab.datahub.sources.wdc as wdc
-from geospacelab import preferences as prf
 
 
 class Downloader(downloader.Downloader):

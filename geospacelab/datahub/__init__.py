@@ -32,7 +32,7 @@ from geospacelab.datahub.__metadata_base__ \
 from geospacelab.datahub.__dataset_base__ import DatasetBase, DatasetUser, DatasetSourced
 from geospacelab.datahub.__variable_base__ import Visual
 from geospacelab.datahub.__variable_base__ import VariableBase as VariableModel
-from geospacelab import preferences as pfr
+from geospacelab.config import pref as pfr
 
 
 def example():

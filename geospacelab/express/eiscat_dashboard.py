@@ -116,7 +116,7 @@ class EISCATDashboard(TSDashboard):
             title = self.title
         super().add_title(x=x, y=y, title=title, append_time=append_time, **kwargs)
 
-    def quicklook(self):
+    def quicklook(self, time_res=None):
         n_e = self.assign_variable('n_e')
         T_i = self.assign_variable('T_i')
         T_e = self.assign_variable('T_e')
@@ -143,7 +143,7 @@ class EISCATDashboard(TSDashboard):
         # dt_fr_1 = datetime.datetime.strptime('20201209' + '1300', '%Y%m%d%H%M')
         # dt_to_1 = datetime.datetime.strptime('20201210' + '1200', '%Y%m%d%H%M')
 
-        self.draw()
+        self.draw(time_res=time_res)
         self.add_title()
         self.add_panel_labels()
 

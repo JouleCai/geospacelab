@@ -14,7 +14,7 @@ import numpy as np
 import pathlib
 import re
 
-from geospacelab import preferences as prf
+from geospacelab.config import pref as prf
 
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.datahub.sources.madrigal.isr.eiscat as eiscat

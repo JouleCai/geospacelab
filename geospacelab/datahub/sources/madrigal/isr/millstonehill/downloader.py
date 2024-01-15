@@ -20,7 +20,7 @@ import bs4
 import os
 import pathlib
 
-from geospacelab import preferences as pfr
+from geospacelab.config import prf
 import geospacelab.datahub.sources.madrigal as madrigal
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
@@ -86,7 +86,7 @@ class Downloader(object):
             raise TypeError("The file type cannot be identified!")
 
         if data_file_root_dir is None:
-            self.data_file_root_dir = pfr.datahub_data_root_dir / 'Madrigal' / 'Millstone_ISR'
+            self.data_file_root_dir = prf.datahub_data_root_dir / 'Madrigal' / 'Millstone_ISR'
         else:
             self.data_file_root_dir = pathlib.Path(data_file_root_dir)
         self.done = False

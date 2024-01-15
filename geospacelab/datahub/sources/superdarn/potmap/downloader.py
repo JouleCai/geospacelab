@@ -23,7 +23,7 @@ from contextlib import closing
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.datahub.sources.wdc as wdc
-from geospacelab import preferences as prf
+from geospacelab.config import prf
 
 
 class Downloader(object):

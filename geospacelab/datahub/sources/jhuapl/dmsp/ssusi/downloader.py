@@ -10,7 +10,7 @@ import zlib
 
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as mylog
-from geospacelab import preferences as pfr
+from geospacelab.config import prf
 
 
 class Downloader(object):
@@ -32,7 +32,7 @@ class Downloader(object):
         self.orbit_id = orbit_id
 
         if data_file_root_dir is None:
-            self.data_file_root_dir = pfr.datahub_data_root_dir / 'JHUAPL' / 'DMSP' / 'SSUSI'
+            self.data_file_root_dir = prf.datahub_data_root_dir / 'JHUAPL' / 'DMSP' / 'SSUSI'
         else:
             self.data_file_root_dir = data_file_root_dir
         self.done = False

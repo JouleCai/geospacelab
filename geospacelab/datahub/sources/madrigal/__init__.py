@@ -9,7 +9,7 @@ __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
 
-from geospacelab import preferences
+from geospacelab.config import pref
 import geospacelab.datahub.sources.madrigal.utilities as utilities
 
 from geospacelab.datahub import DatabaseModel
@@ -27,12 +27,12 @@ madrigal_database.category = 'online database'
 
 
 try:
-    default_user_fullname = preferences.user_config['datahub']['madrigal']['user_fullname']
-    default_user_email = preferences.user_config['datahub']['madrigal']['user_email']
-    default_user_affiliation = preferences.user_config['datahub']['madrigal']['user_email']
+    default_user_fullname = pref.user_config['datahub']['madrigal']['user_fullname']
+    default_user_email = pref.user_config['datahub']['madrigal']['user_email']
+    default_user_affiliation = pref.user_config['datahub']['madrigal']['user_email']
 except KeyError:
     print("Inputs for accessing the Madrigal database.")
-    if preferences._on_rtd:
+    if pref._on_rtd:
         default_user_fullname = 'GeospaceLab'
         default_user_email = 'geospacelab@gmail.com'
         default_user_affiliation = 'GeospaceLab'
@@ -43,12 +43,12 @@ except KeyError:
         default_user_affiliation = input("User's affiliation: ")
         save = input("Save as default? [y]/n: ")
     if save.lower() in ['', 'y', 'yes']:
-        uc = preferences.user_config
+        uc = pref.user_config
         uc.setdefault('datahub', {})
         uc['datahub'].setdefault('madrigal', {})
         uc['datahub']['madrigal']['user_fullname'] = default_user_fullname
         uc['datahub']['madrigal']['user_email'] = default_user_email
         uc['datahub']['madrigal']['user_affiliation'] = default_user_affiliation
-        preferences.set_user_config(user_config=uc, set_as_default=True)
+        pref.set_user_config(user_config=uc, set_as_default=True)
 
 

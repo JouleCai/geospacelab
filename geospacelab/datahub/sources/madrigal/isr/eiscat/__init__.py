@@ -15,7 +15,7 @@ import numpy as np
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, SiteModel
 from geospacelab.datahub.sources.madrigal import madrigal_database
-from geospacelab import preferences as prf
+from geospacelab.config import pref as prf
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pybasic as basic
 from geospacelab.datahub.sources.madrigal.isr.eiscat.loader import Loader as default_Loader

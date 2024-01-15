@@ -8,7 +8,7 @@ __license__ = "BSD-3-Clause License"
 __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
-from geospacelab import preferences as prf
+from geospacelab.config import prf
 
 from geospacelab.datahub.sources.tud.downloader import Downloader as DownloaderModel
 
