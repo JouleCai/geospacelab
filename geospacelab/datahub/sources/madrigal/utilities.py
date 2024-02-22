@@ -35,7 +35,7 @@ def list_all_instruments(madrigal_url=default_madrigal_url, database=None):
         mylog.simpleinfo.info("%s: %s", str(inst.code), inst.name)
 
 
-def list_experiments(instrument_code, dt_fr, dt_to, madrigal_url=default_madrigal_url, database=None):
+def list_experiments(instrument_code, dt_fr, dt_to, madrigal_url=default_madrigal_url, database=None, relocate=True):
     if database is None:
         database = madrigalweb.MadrigalData(madrigal_url)
 
@@ -49,7 +49,7 @@ def list_experiments(instrument_code, dt_fr, dt_to, madrigal_url=default_madriga
     if not list(exp_list):
         raise ValueError('Cannot find the experiments for the database! Check the input values!')
 
-    if exp_list[0].id == -1:
+    if exp_list[0].id == -1 and relocate:
         madrigal_url = exp_list[0].madrigalUrl
         mylog.simpleinfo.info("Madrigal sources has been relocated to %s", madrigal_url)
         database = madrigalweb.MadrigalData(madrigal_url)
@@ -60,6 +60,8 @@ def list_experiments(instrument_code, dt_fr, dt_to, madrigal_url=default_madriga
             local=0
         )
     return exp_list, madrigal_url, database
+
+
 
 
 """
