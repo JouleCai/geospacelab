@@ -84,24 +84,21 @@ class Downloader(DownloaderBase):
 
     def download(self, **kwargs):
 
-        try:
-            exps, database = self.get_exp_list(
-                dt_fr=self.dt_fr,
-                dt_to=self.dt_to,
-                include_exp_name_patterns=self.include_exp_name_patterns,
-                exclude_exp_name_patterns=self.exclude_exp_name_patterns, 
-                include_exp_ids=self.include_exp_ids,
-                exclude_exp_ids=self.exclude_exp_ids,
-                icodes=self.icodes,
-                madrigal_url=self.madrigal_url,
-                display=True)
-            self.exp_list = exps
-            self.database = database
-        except Exception as e:
-            mylog.StreamLogger.error(e)
+        exps, database = self.get_exp_list(
+            dt_fr=self.dt_fr,
+            dt_to=self.dt_to,
+            include_exp_name_patterns=self.include_exp_name_patterns,
+            exclude_exp_name_patterns=self.exclude_exp_name_patterns,
+            include_exp_ids=self.include_exp_ids,
+            exclude_exp_ids=self.exclude_exp_ids,
+            icodes=self.icodes,
+            madrigal_url=self.madrigal_url,
+            display=True)
+        self.exp_list = exps
+        self.database = database
 
         exps = self.get_online_file_list(
-            exp_list=self.exp_list, database=self.database,
+            exp_list=self.exp_list, database=database,
             include_file_name_patterns=self.include_file_name_patterns,
             exclude_file_name_patterns=self.exclude_file_name_patterns,
             include_file_type_patterns=self.include_file_type_patterns,
@@ -139,6 +136,7 @@ class Downloader(DownloaderBase):
                     file_format='hdf5')
                 file_paths.append(file_path_local)
         return file_paths
+
 
 if __name__ == "__main__":
     test()

@@ -325,7 +325,7 @@ class PolarMapPanel(GeoPanel):
         if lat_label:
             pybasic.dict_set_default(lat_label_config, fontsize=plt.rcParams['font.size'] - 2, fontweight='roman',
                     ha='center', va='center',
-                    family='fantasy', alpha=0.9
+                    family=plt.rcParams['font.family'], alpha=0.9
                 )
             if self.pole == 'S':
                 clock = lat_label_clock / 12 * 360
@@ -357,7 +357,7 @@ class PolarMapPanel(GeoPanel):
             pybasic.dict_set_default(
                 lon_label_config,
                 va='center', ha='center',
-                family='fantasy', fontweight='ultralight')
+                family=plt.rcParams['font.family'], fontweight='ultralight')
             lb_lons = np.arange(0, 360., lon_res)
             if self.pole == 'S':
                 lon_shift_south = 180.

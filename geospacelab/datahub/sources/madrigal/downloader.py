@@ -136,14 +136,16 @@ class Downloader(object):
             include_file_type_patterns=None,
             exclude_file_type_patterns=None,
             database=None, display=False):
-        exps = [] if exp_list is None else exp_list
+
         include_file_name_patterns = [] if include_file_name_patterns is None else include_file_name_patterns
         exclude_file_name_patterns = [] if exclude_file_name_patterns is None else exclude_file_name_patterns
         include_file_type_patterns = [] if include_file_type_patterns is None else include_file_type_patterns
         exclude_file_type_patterns = [] if exclude_file_type_patterns is None else exclude_file_type_patterns
 
         exps_new = []
+        mylog.simpleinfo.info("Searching files ...")
         for exp in exp_list:
+            mylog.simpleinfo.info(f"Checking the experiment: {exp.name} (ID: {exp.id})")
             files = database.getExperimentFiles(exp.id)
 
             if list(include_file_name_patterns):
@@ -227,12 +229,18 @@ class Downloader(object):
             exp.files = files
             exps_new.append(exp)
 
+            mylog.simpleinfo.info('Listing matched files ...')
+            for file in files:
+                mylog.simpleinfo.info(file.name)
+
         if not list(exps_new):
             mylog.StreamLogger.warning(f"No experiments have the matched files!")
             return
         exps = np.array(exps_new)
+
+
         if display:
-            mylog.simpleinfo.info("Listing matched experiments and files...")
+            mylog.simpleinfo.info("Listing matched experiments and files ...")
             exp_info = Downloader.get_exp_info(exps, include_file_info=True)
             mylog.simpleinfo.info("{:>10s}\t{:<24s}\t{:<24s}\t{:<16s}\t{:<15s}\t{:<40.40s}\t{:<30.30s}\t{:<80.80s}".format(
                 'EXP NUM', 'START TIME', 'END TIME', 'DURATION (hour)', 'EXP ID', 'EXP Name', 'File Name', 'File Type'
@@ -277,15 +285,15 @@ class Downloader(object):
         exclude_exp_ids = [] if exclude_exp_ids is None else exclude_exp_ids
         
         exps = []
-        mylog.simpleinfo.info("Contacting the Madrigal databaase...")
+        mylog.simpleinfo.info(f"Contacting the Madrigal database (URL: {madrigal_url}) ...")
         database = madrigalweb.MadrigalData(madrigal_url)
         for icode in icodes:
-            mylog.simpleinfo.info("Checking experiments...")
+            mylog.simpleinfo.info("Searching experiments ...")
             exps_o = database.getExperiments(
                 icode,
                 dt_fr.year, dt_fr.month, dt_fr.day, dt_fr.hour, dt_fr.minute, dt_fr.second,
                 dt_to.year, dt_to.month, dt_to.day, dt_to.hour, dt_to.minute, dt_to.second,
-                local=0
+                local=1
             )
             exps.extend(exps_o)
         exps = np.array(exps)
@@ -332,12 +340,23 @@ class Downloader(object):
         eids = np.array([exp.id for exp in exps])
 
         if list(include_exp_ids):
-            inds_o = np.array(eids).argsort()
-            inds = inds_o[np.searchsorted(eids[inds_o], include_exp_ids)]
-            if not list(inds):
-                mylog.StreamLogger.error("Cannot find available experiments for the input experiment IDs!")
-                raise AttributeError
-            exps = exps[inds]
+            exps_new = []
+            for exp_id in include_exp_ids:
+                ind = np.where(eids == exp_id)[0]
+
+                if list(ind):
+                    exps_new.append(exps[ind[0]])
+                else:
+                    mylog.StreamLogger.warning(
+                        f'The requested experiment (ID: {exp_id}) cannot be found!'
+                    )
+            exps = np.array(exps_new)
+            # inds_o = np.array(eids).argsort()
+            # inds = inds_o[np.searchsorted(eids[inds_o], include_exp_ids)]
+            # if not list(inds):
+            #     mylog.StreamLogger.error("Cannot find available experiments for the input experiment IDs!")
+            #     raise AttributeError
+            # exps = exps[inds]
 
         else:
             ind_dt_no = np.where(
@@ -390,7 +409,7 @@ class Downloader(object):
                 raise AttributeError
 
         if display:
-            mylog.simpleinfo.info("Listing matched experiments...")
+            mylog.simpleinfo.info("Listing matched experiments ...")
             exp_info = Downloader.get_exp_info(exps)
             mylog.simpleinfo.info(
                 "{:>10s}\t{:<24s}\t{:<24s}\t{:<16s}\t{:<15s}\t{:<40.40s}\t{:<s}".format(

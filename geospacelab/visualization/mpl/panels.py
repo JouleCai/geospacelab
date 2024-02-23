@@ -741,7 +741,6 @@ class TSPanel(Panel):
                 raise NotImplementedError
         return label
 
-
 def check_panel_ax(func):
     def wrapper(*args, **kwargs):
         obj = args[-1]
