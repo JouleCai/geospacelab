@@ -128,8 +128,19 @@ class Downloader(object):
             mylog.simpleinfo.info("File saved in {}.".format(file_path_local))
             self.done = True
         except Exception as e:
-            print(e)
-            mylog.StreamLogger.warning(f"Failed to download the file: {file_path_remote}")
+            try:
+                time.sleep(3)
+                database.downloadFile(
+                    file_path_remote, file_path_local,
+                    self.user_fullname, self.user_email, self.user_affiliation,
+                    file_format
+                )
+
+                mylog.simpleinfo.info("File saved in {}.".format(file_path_local))
+                self.done = True 
+            except:
+                print(e)
+                mylog.StreamLogger.warning(f"Failed to download the file: {file_path_remote}")
         return
     
     @staticmethod
@@ -141,6 +152,19 @@ class Downloader(object):
             exclude_file_type_patterns=None,
             database=None, display=False):
 
+        def try_to_get_experiment_files(max=3, interval=10):
+            for m in range(max):
+                try: 
+                    files = database.getExperimentFiles(exp.id)
+                    return files
+                except Exception as e:
+                    if m < max - 1:
+                        time.sleep(interval)
+                    continue
+            print(e)
+            mylog.StreamLogger.warning(f"Failed to get experiment files with {max} connection(s)!")
+            return -1
+        
         include_file_name_patterns = [] if include_file_name_patterns is None else include_file_name_patterns
         exclude_file_name_patterns = [] if exclude_file_name_patterns is None else exclude_file_name_patterns
         include_file_type_patterns = [] if include_file_type_patterns is None else include_file_type_patterns
@@ -152,16 +176,14 @@ class Downloader(object):
         for exp in exp_list:
             time.sleep(1)
             mylog.simpleinfo.info(f"Checking the experiment: {exp.name} (ID: {exp.id})")
-            files = database.getExperimentFiles(int(exp.id))
-
-            try:
-                files = database.getExperimentFiles(exp.id)
-            except Exception as e:
-                print(e)
+            
+            files = try_to_get_experiment_files(max=3, interval=10)
+            
+            if files == -1:
                 mylog.StreamLogger.warning(
                     "Error when querying files: {} (ID: {}) in {}".format(exp.name, exp.id, exp.url)
                 )
-                exps_error.append()
+                exps_error.append(exp)
                 continue
 
             if list(include_file_name_patterns):
@@ -292,7 +314,38 @@ class Downloader(object):
             include_exp_ids=None,
             exclude_exp_ids=None,
             icodes=None, madrigal_url=None, display=True,
-    ):
+    ): 
+        
+        def try_to_get_database(max=3, interval=30):
+            for m in range(max):
+                try: 
+                    database = madrigalweb.MadrigalData(madrigal_url)
+                    return database
+                except Exception as e:
+                    if m < max - 1:
+                        time.sleep(interval)
+                    continue
+            
+            print(e)
+            raise ImportError(f"Failed to connect the Madrigal database with {max} connection(s)!")
+        
+        def try_to_get_experiments(max=3, interval=30):
+            for m in range(max):
+                try: 
+                    exps_o = database.getExperiments(
+                        icode,
+                        dt_fr.year, dt_fr.month, dt_fr.day, dt_fr.hour, dt_fr.minute, dt_fr.second,
+                        dt_to.year, dt_to.month, dt_to.day, dt_to.hour, dt_to.minute, dt_to.second,
+                        local=0
+                    )
+                    return exps_o
+                except Exception as e:
+                    if m < max - 1:
+                        time.sleep(interval)
+                    continue
+            
+            print(e)
+            raise ImportError(f"Failed to get the experiments from the database with {max} connection(s)!") 
         
         include_exp_name_patterns = [] if include_exp_name_patterns is None else include_exp_name_patterns
         include_exp_ids = [] if include_exp_ids is None else include_exp_ids
@@ -302,15 +355,11 @@ class Downloader(object):
         
         exps = []
         mylog.simpleinfo.info(f"Contacting the Madrigal database (URL: {madrigal_url}) ...")
-        database = madrigalweb.MadrigalData(madrigal_url)
+        database = try_to_get_database(max=3, interval=30) 
+            
         for icode in icodes:
             mylog.simpleinfo.info("Searching experiments ...")
-            exps_o = database.getExperiments(
-                icode,
-                dt_fr.year, dt_fr.month, dt_fr.day, dt_fr.hour, dt_fr.minute, dt_fr.second,
-                dt_to.year, dt_to.month, dt_to.day, dt_to.hour, dt_to.minute, dt_to.second,
-                local=0
-            )
+            exps_o = try_to_get_experiments(max=3, interval=30)
             exps.extend(exps_o)
         exps = np.array(exps, dtype=object)
 
