@@ -9,7 +9,7 @@ __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
 
-
+import time
 import datetime
 import re
 import pathlib
@@ -90,6 +90,7 @@ class Downloader(object):
             self.data_file_root_dir = pathlib.Path().absolute()
         
         self.exp_list = []
+        self.exp_list_error = []
         self.database = None
         
         self.data_file_paths = []
@@ -116,16 +117,19 @@ class Downloader(object):
             mylog.simpleinfo.info("The file {} has been downloaded.".format(file_path_local.name))
             if not self.force_download:
                 return
+        files_error = []
+        try:
+            database.downloadFile(
+                file_path_remote, file_path_local,
+                self.user_fullname, self.user_email, self.user_affiliation,
+                file_format
+            )
 
-        database.downloadFile(
-            file_path_remote, file_path_local,
-            self.user_fullname, self.user_email, self.user_affiliation,
-            file_format
-        )
-
-        mylog.simpleinfo.info("File saved in {}.".format(file_path_local))
-        self.done = True
-
+            mylog.simpleinfo.info("File saved in {}.".format(file_path_local))
+            self.done = True
+        except Exception as e:
+            print(e)
+            mylog.StreamLogger.warning(f"Failed to download the file: {file_path_remote}")
         return
     
     @staticmethod
@@ -143,10 +147,22 @@ class Downloader(object):
         exclude_file_type_patterns = [] if exclude_file_type_patterns is None else exclude_file_type_patterns
 
         exps_new = []
+        exps_error = []
         mylog.simpleinfo.info("Searching files ...")
         for exp in exp_list:
+            time.sleep(1)
             mylog.simpleinfo.info(f"Checking the experiment: {exp.name} (ID: {exp.id})")
-            files = database.getExperimentFiles(exp.id)
+            files = database.getExperimentFiles(int(exp.id))
+
+            try:
+                files = database.getExperimentFiles(exp.id)
+            except Exception as e:
+                print(e)
+                mylog.StreamLogger.warning(
+                    "Error when querying files: {} (ID: {}) in {}".format(exp.name, exp.id, exp.url)
+                )
+                exps_error.append()
+                continue
 
             if list(include_file_name_patterns):
                 files_new = []
@@ -266,7 +282,7 @@ class Downloader(object):
                     )
                     mylog.simpleinfo.info(line_str)
             mylog.simpleinfo.info("")
-        return exps
+        return exps, exps_error
 
     @staticmethod
     def get_exp_list(
@@ -293,10 +309,10 @@ class Downloader(object):
                 icode,
                 dt_fr.year, dt_fr.month, dt_fr.day, dt_fr.hour, dt_fr.minute, dt_fr.second,
                 dt_to.year, dt_to.month, dt_to.day, dt_to.hour, dt_to.minute, dt_to.second,
-                local=1
+                local=0
             )
             exps.extend(exps_o)
-        exps = np.array(exps)
+        exps = np.array(exps, dtype=object)
 
         exps_new = []
         another_madrigal_url = ''
@@ -315,7 +331,7 @@ class Downloader(object):
                 continue
             exps_new.append(exp)
   
-        exps = np.array(exps_new)
+        exps = np.array(exps_new, dtype=object)
 
         if not list(exps):
             raise ValueError('Cannot find available experiments from the current database! Check the input values!')
@@ -350,7 +366,7 @@ class Downloader(object):
                     mylog.StreamLogger.warning(
                         f'The requested experiment (ID: {exp_id}) cannot be found!'
                     )
-            exps = np.array(exps_new)
+            exps = np.array(exps_new, dtype=object)
             # inds_o = np.array(eids).argsort()
             # inds = inds_o[np.searchsorted(eids[inds_o], include_exp_ids)]
             # if not list(inds):
@@ -383,7 +399,7 @@ class Downloader(object):
                     mylog.StreamLogger.warning(
                         f"No experiments matching the exp name patterns!")
                     raise AttributeError
-                exps = np.array(exps_new)
+                exps = np.array(exps_new, dtype=object)
 
             if list(exclude_exp_name_patterns):
                 exps_new = []
@@ -402,7 +418,7 @@ class Downloader(object):
                     mylog.StreamLogger.warning(
                         f"All experiments are excluded with the exp name patterns!")
                     raise AttributeError
-                exps = np.array(exps_new)
+                exps = np.array(exps_new, dtype=object)
 
             if not list(exps):
                 mylog.StreamLogger.error("Cannot find available experiments for the input experiment name patterns!")

@@ -35,7 +35,8 @@ def test():
         data_product='vi',
         include_file_name_patterns= [['pfa']],
         include_file_type_patterns=[['velocity']],
-        exclude_file_type_patterns=['.*uncorrected.*'],
+        exclude_file_type_patterns=['.*uncorrected.*', '.*power.*'],
+        force_download=True,
         dry_run=False)
 
 
@@ -47,7 +48,7 @@ class Downloader(DownloaderBase):
             include_exp_name_patterns: list=None,
             exclude_exp_name_patterns: list=None,
             include_exp_ids: list = None,
-            exclude_exp_ids: list= [100213840, ],
+            exclude_exp_ids: list=[100213840, ],
             include_file_name_patterns: list = None,
             exclude_file_name_patterns: list = None,
             include_file_type_patterns=None,
@@ -94,10 +95,10 @@ class Downloader(DownloaderBase):
             icodes=self.icodes,
             madrigal_url=self.madrigal_url,
             display=True)
-        self.exp_list = exps
+        self.exp_list = list(exps)
         self.database = database
 
-        exps = self.get_online_file_list(
+        exps, exps_error = self.get_online_file_list(
             exp_list=self.exp_list, database=database,
             include_file_name_patterns=self.include_file_name_patterns,
             exclude_file_name_patterns=self.exclude_file_name_patterns,
@@ -105,6 +106,8 @@ class Downloader(DownloaderBase):
             exclude_file_type_patterns=self.exclude_file_type_patterns,
             display=True
         )
+        self.exp_list_error = list(exps_error)
+
         file_paths = [] 
         for exp in exps:
             for file in list(exp.files):
