@@ -179,7 +179,7 @@ class Loader:
                 variables[var_name] = vars_fh5[var_name_fh5]
 
             variables['comp_O_p'] = 1. - variables['comp_mix'] - variables['comp_H_p']
-            variables['comp_O_p'] = np.sqrt(variables['comp_mix_err']**2 + variables['comp_H_p_err']**2)
+            variables['comp_O_p_err'] = np.sqrt(variables['comp_mix_err']**2 + variables['comp_H_p_err']**2)
 
             # need to be check when AZ close to 0.
             variables['AZ'] = variables['AZ1'] % 360.

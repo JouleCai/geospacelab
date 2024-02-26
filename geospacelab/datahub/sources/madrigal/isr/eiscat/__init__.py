@@ -34,7 +34,8 @@ default_dataset_attrs = {
     'status_control': False,
     'rasidual_contorl': False,
     'data_search_recursive': True,
-    'beam_location': True,
+    'add_AACGM': True,
+    'add_APEX': False,
     'label_fields': ['database', 'facility', 'site', 'antenna', 'experiment'],
 }
 
@@ -69,7 +70,8 @@ class Dataset(datahub.DatasetSourced):
         self.affiliation = kwargs.pop('affiliation', '')
         self.allow_download = kwargs.pop('allow_download', True)
         self.metadata = None
-        self.beam_location = kwargs.pop('beam_location', True)
+        self.add_AACGM = kwargs.pop('add_AACGM', True)
+        self.add_APEX = kwargs.pop('add_APEX', False)
 
         allow_load = kwargs.pop('allow_load', False)
         self.status_control = kwargs.pop('status_control', False)
@@ -123,7 +125,7 @@ class Dataset(datahub.DatasetSourced):
             self.experiment = rawdata_path.split('/')[-1].split('@')[0]
             self.affiliation = load_obj.metadata['affiliation']
             self.metadata = load_obj.metadata
-        if self.beam_location:
+        if self.add_AACGM or self.add_APEX:
             self.calc_lat_lon()
             # self.select_beams(field_aligned=True)
         if self.time_clip:
@@ -204,7 +206,7 @@ class Dataset(datahub.DatasetSourced):
             raise ValueError
         self.time_filter_by_inds(inds)
 
-    def calc_lat_lon(self, AACGM=True, APEX=False):
+    def calc_lat_lon(self, ):
         from geospacelab.cs import LENUSpherical
         az = self['AZ'].value
         el = self['EL'].value
@@ -229,7 +231,7 @@ class Dataset(datahub.DatasetSourced):
         var = self.add_variable(var_name='GEO_ALT', value=cs_geo['height'],
                                 configured_variables=configured_variables)
 
-        if AACGM:
+        if self.add_AACGM:
             cs_geo.ut = self['DATETIME'].value
             cs_aacgm = cs_geo.to_AACGM()
             var = self.add_variable(var_name='AACGM_LAT', value=cs_aacgm['lat'],
@@ -238,7 +240,7 @@ class Dataset(datahub.DatasetSourced):
                                     configured_variables=configured_variables)
         # var = self.add_variable(var_name='AACGM_ALT', value=cs_new['height'])
 
-        if APEX:
+        if self.add_APEX:
             cs_geo.ut = self['DATETIME'].value
             cs_apex = cs_geo.to_APEX()
             var = self.add_variable(var_name='APEX_LAT', value=cs_apex['lat'],

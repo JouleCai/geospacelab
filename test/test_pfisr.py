@@ -5,6 +5,42 @@ import pathlib
 from geospacelab.visualization.mpl.dashboards import TSDashboard
 
 
+def test_pfisr_fitted():
+    dt_fr = datetime.datetime(2022, 2, 1, 18)
+    dt_to = datetime.datetime(2022, 2, 1, 23, 59)
+
+    exp_name_pattern = ['plasma', 'line', 'calibration']
+    exp_ids = [100278402]
+    pulse_code = 'long pulse'
+    integration_time = 60.  # in [s]
+    beam_id = None
+    beam_az = 205.70
+    beam_el = 84.5
+
+    db = TSDashboard(dt_fr=dt_fr, dt_to=dt_to)
+    ds_pfisr = db.dock(
+        datasource_contents=['madrigal', 'isr', 'pfisr', 'fitted'],
+        exp_ids=exp_ids,
+        exp_name_pattern=exp_name_pattern,
+        integration_time=integration_time,
+        pulse_code='long pulse',
+        beam_id=beam_id,
+        beam_az=beam_az,
+        beam_el=beam_el
+    )
+
+    n_e = ds_pfisr['n_e']
+    T_e = ds_pfisr['T_e']
+    T_i = ds_pfisr['T_i']
+    v_i_los = ds_pfisr['v_i_los']
+
+    panel_layouts = [[n_e], [T_e], [T_i], [v_i_los]]
+    db.set_layout(panel_layouts=panel_layouts)
+
+    db.draw()
+    db.show()
+
+
 def test_pfisr_vi():
     
     dt_fr = datetime.datetime(2022, 2, 1, 18)
@@ -52,4 +88,4 @@ def test_pfisr_vi():
 
 
 if __name__ == "__main__":
-    test_pfisr_vi()
+    test_pfisr_fitted()

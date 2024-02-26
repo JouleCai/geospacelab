@@ -12,9 +12,9 @@ import datetime
 import numpy as np
 import h5py
 
-from geospacelab.datahub.sources.madrigal.isr.pfisr.vi.loader import Loader as default_Loader
-from geospacelab.datahub.sources.madrigal.isr.pfisr.vi.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.madrigal.isr.pfisr.vi.variable_config as var_config
+from geospacelab.datahub.sources.madrigal.isr.pfisr.fitted.loader import Loader as default_Loader
+from geospacelab.datahub.sources.madrigal.isr.pfisr.fitted.downloader import Downloader as default_Downloader
+import geospacelab.datahub.sources.madrigal.isr.pfisr.fitted.variable_config as var_config
 from geospacelab.datahub.sources.madrigal import madrigal_database
 from geospacelab.config import prf
 from geospacelab import datahub
@@ -29,26 +29,32 @@ default_dataset_attrs = {
     'facility': 'PFISR',
     'exp_name_pattern': [],
     'exp_check': False,
-    'data_file_type': 'vi',
     'data_file_ext': 'h5',
     'data_root_dir': prf.datahub_data_root_dir / 'Madrigal' / 'PFISR',
     'allow_download': True,
     'status_control': False,
     'residual_control': False,
-    'beam_location': True,
+    'add_AACGM': True,
+    'add_APEX': False,
     'data_search_recursive': True,
     'label_fields': ['database', 'facility', 'site', 'data_file_type'],
 }
 
 default_variable_names = [
-    'DATETIME', 'CGM_LAT', 'v_i_N', 'v_i_N_err', 'v_i_E', 'v_i_E_err', 'v_i_Z', 'v_i_Z_err', 'E_N', 'E_N_err', 'E_E',
-    'E_E_err', 'GEO_ALT_MAX', 'GEO_ALT_MIN', 'INT_TIME',     'EF_MAG', 'EF_MAG_err', 'EF_ANGLE',  'EF_ANGLE_err',
-    'v_i_MAG', 'v_i_MAG_err', 'v_i_ANGLE', 'v_i_ANGLE_err'
+    'DATETIME', 'AZ', 'EL', 'PULSE_LENGTH',
+    'P_Tx', 'n_e', 'n_e_err', 'T_i', 'T_i_err', 'T_e', 'T_e_err',
+    'v_i_los', 'v_i_los_err', 'comp_mix', 'comp_mix_err',
+    'HEIGHT', 'RANGE', 'CGM_LAT', 'CGM_LON'
 ]
 
 # default_data_search_recursive = True
 
 default_attrs_required = []
+
+pulse_code_dict = {
+    'alternating code': 'AC',
+    'long pulse': 'PL',
+}
 
 
 class Dataset(datahub.DatasetSourced):
@@ -65,10 +71,17 @@ class Dataset(datahub.DatasetSourced):
         self.exp_name_pattern = kwargs.pop('exp_name_pattern', [])
         self.integration_time = kwargs.pop('integration_time', None)
         self.exp_check = kwargs.pop('exp_check', False)
-        self.data_file_type = kwargs.pop('data_file_type', 'vi')
         self.affiliation = kwargs.pop('affiliation', '')
+        self.pulse_code = kwargs.pop('pulse_code', 'alternating code')
         self.allow_download = kwargs.pop('allow_download', True)
+        self.beam_id = kwargs.pop('beam_id', None)
+        self.beam_az = kwargs.pop('beam_az', None)
+        self.beam_el = kwargs.pop('beam_el', None)
+        self.add_AACGM = kwargs.pop('add_AACGM', True)
+        self.add_APEX = kwargs.pop('add_APEX', False)
         self.metadata = None
+
+        self.data_file_type = pulse_code_dict[self.pulse_code.lower()] + '_fitted'
 
         allow_load = kwargs.pop('allow_load', True)
         self.status_control = kwargs.pop('status_control', False)
@@ -108,14 +121,68 @@ class Dataset(datahub.DatasetSourced):
         self.check_data_files(**kwargs)
 
         for file_path in self.data_file_paths:
-            load_obj = self.loader(file_path, )
+            load_obj = self.loader(file_path, beam_az=self.beam_az, beam_el=self.beam_el, beam_id=self.beam_id)
 
             for var_name in self._variables.keys():
                 self._variables[var_name].join(load_obj.variables[var_name])
             self.metadata = load_obj.metadata
 
+        self.beam_id = load_obj.beam_id
+        self.beam_az = load_obj.beam_az
+        self.beam_el = load_obj.beam_el
+
+        if self.add_APEX or self.add_AACGM:
+            self.calc_lat_lon()
+
+        if self['HEIGHT'].value is None:
+            self['HEIGHT'] = self['GEO_ALT']
+
         if self.time_clip:
             self.time_filter_by_range()
+
+    def calc_lat_lon(self):
+        from geospacelab.cs import LENUSpherical
+        az = self['AZ'].value
+        el = self['EL'].value
+        range = self['RANGE'].value
+        az = np.tile(az, (1, range.shape[1]))  # make az, el, range in the same shape
+        el = np.tile(el, (1, range.shape[1]))
+
+        # az = np.array([0, 90, 180, 270])
+        # el = np.array([0, 45, 90, 45])
+        # range = np.array([0, 100, 200, 100])
+        cs_LENU = LENUSpherical(coords={'az': az, 'el': el, 'range': range},
+                                lat_0=self.site.location['GEO_LAT'],
+                                lon_0=self.site.location['GEO_LON'],
+                                height_0=self.site.location['GEO_ALT'])
+        cs_geo = cs_LENU.to_GEO()
+        configured_variables = var_config.configured_variables
+
+        var = self.add_variable(var_name='GEO_LAT', value=cs_geo['lat'],
+                                configured_variables=configured_variables)
+        var = self.add_variable(var_name='GEO_LON', value=cs_geo['lon'],
+                                configured_variables=configured_variables)
+        var = self.add_variable(var_name='GEO_ALT', value=cs_geo['height'],
+                                configured_variables=configured_variables)
+
+        if self.add_AACGM:
+            cs_geo.ut = self['DATETIME'].value
+            cs_aacgm = cs_geo.to_AACGM()
+            var = self.add_variable(var_name='AACGM_LAT', value=cs_aacgm['lat'],
+                                    configured_variables=configured_variables)
+            var = self.add_variable(var_name='AACGM_LON', value=cs_aacgm['lon'],
+                                    configured_variables=configured_variables)
+        # var = self.add_variable(var_name='AACGM_ALT', value=cs_new['height'])
+
+        if self.add_APEX:
+            cs_geo.ut = self['DATETIME'].value
+            cs_apex = cs_geo.to_APEX()
+            var = self.add_variable(var_name='APEX_LAT', value=cs_apex['lat'],
+                                    configured_variables=configured_variables)
+            var = self.add_variable(var_name='APEX_LON', value=cs_apex['lon'],
+                                    configured_variables=configured_variables)
+        # var = self.add_variable(var_name='AACGM_ALT', value=cs_new['height'])
+        pass
 
     def search_data_files(self, recursive=True, **kwargs):
         dt_fr = self.dt_fr
@@ -205,8 +272,10 @@ class Dataset(datahub.DatasetSourced):
         file_paths = self.data_file_paths
         itg_times = []
         for file_path in file_paths:
-            with h5py.File(file_path, 'r') as fh5:
-                itg_time = np.array(fh5['Data']['Array Layout']['1D Parameters']['inttms']).astype(np.float32)
+            with (h5py.File(file_path, 'r') as fh5):
+                beam_str = list(fh5['Data']['Array Layout'].keys())[0]
+                diff_t = np.nanmedian(np.diff(fh5['Data']['Array Layout'][beam_str]['timestamps'][::]))
+                itg_time = np.floor(diff_t/60) * 60
                 itg_times.append(np.median(itg_time))
 
         if self.integration_time is None:
@@ -232,6 +301,7 @@ class Dataset(datahub.DatasetSourced):
         include_exp_name_patterns = [self.exp_name_pattern] if isinstance(self.exp_name_pattern, list) else []
         download_obj = self.downloader(
             dt_fr=self.dt_fr, dt_to=self.dt_to,
+            pulse_code=self.pulse_code,
             dry_run=dry_run,
             data_file_root_dir=self.data_root_dir,
             include_exp_ids=self.exp_ids,
