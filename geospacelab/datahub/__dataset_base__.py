@@ -288,12 +288,26 @@ class DatasetSourced(DatasetBase):
             initial_file_dir = self.data_root_dir
         if recursive is None:
             recursive = self.data_search_recursive
-        if include_extension:   
-            if str(self.data_file_ext):
-                search_pattern = search_pattern + '.' + self.data_file_ext
+
         if recursive:
             search_pattern = '**/' + search_pattern
-        paths = list(initial_file_dir.glob(search_pattern))
+
+        if include_extension:
+            if isinstance(self.data_file_ext, str):
+                exts = [self.data_file_ext]
+            elif isinstance(self.data_file_ext, (list, tuple)):
+                exts = self.data_file_ext
+            else:
+                raise TypeError
+            for i, ext in enumerate(exts):
+                if ext[0] != '.':
+                    exts[i] = '.' + ext
+            paths = [p.resolve() for p in initial_file_dir.glob(search_pattern) if p.suffix in exts]
+            #
+            # if str(self.data_file_ext):
+            #     search_pattern = search_pattern + '.' + self.data_file_ext
+        else:
+            paths = list(initial_file_dir.glob(search_pattern))
 
         import natsort
         paths = natsort.natsorted(paths, reverse=False)

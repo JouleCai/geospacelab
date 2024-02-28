@@ -45,36 +45,36 @@ on [readthedocs.io](https://geospacelab.readthedocs.io/en/latest/).
   - Basic toolboxes for numpy array, datetime, logging, python dict, list, and class.
 
 ## Built-in data sources:
-| Data Source                 | Variables                          | File Format           | Downloadable  | Express                       | Status | 
-|-----------------------------|------------------------------------|-----------------------|---------------|-------------------------------|--------|
-| CDAWeb/OMNI                 | Solar wind and IMF                 |*cdf*                 | *True*        | __OMNIDashboard__             | stable |
-| Madrigal/EISCAT             | Ionospheric Ne, Te, Ti, ...        | *EISCAT-hdf5*, *Madrigal-hdf5* | *True* | __EISCATDashboard__           | stable |
-| Madrigal/GNSS/TECMAP        | Ionospheric GPS TEC map            | *hdf5*                | *True*        | -                             | beta   |
-| Madrigal/DMSP/s1            | DMSP SSM, SSIES, etc               | *hdf5*                | *True*        | __DMSPTSDashboard__           | stable |
-| Madrigal/DMSP/s4            | DMSP SSIES                         | *hdf5*                | *True*        | __DMSPTSDashboard__           | stable |
-| Madrigal/DMSP/e             | DMSP SSJ                           | *hdf5*                | *True*        | __DMSPTSDashboard__           | stable |
-| Madrigal/Millstone Hill ISR | Millstone Hill ISR                 | *hdf5*                | *True*        | __MillstoneHillISRDashboard__ | stable |
-| Madrigal/Poker Flat ISR     | Poker Flat ISR                     | *hdf5*                | *True*        | __-_                          | stable |
-| JHUAPL/DMSP/SSUSI           | DMSP SSUSI                         | *netcdf*              | *True*        | __DMSPSSUSIDashboard__        | stable |
-| JHUAPL/AMPERE/fitted        | AMPERE FAC                         | *netcdf*              | *False*        | __AMPEREDashboard__           | stable |
-| SuperDARN/POTMAP            | SuperDARN potential map            | *ascii*             | *False*       | -                             | stable |                  
-| WDC/Dst                     | Dst index                          | *IAGA2002-ASCII*      | *True*        | -                             | stable |
-| WDC/ASYSYM                  | ASY/SYM indices                    | *IAGA2002-ASCII*      | *True*        | __OMNIDashboard__             | stable |
-| WDC/AE                      | AE indices                         | *IAGA2002-ASCII*      | *True*        | __OMNIDashboard__             | stable |
-| GFZ/Kp                      | Kp/Ap indices                      | *ASCII*               | *True*        | -                             | stable |
-| GFZ/Hpo                     | Hp30 or Hp60 indices               | *ASCII*               | *True*        | -                             | stable |
-| GFZ/SNF107                  | SN, F107                           | *ASCII*               | *True*        | -                             | stable |
-| ESA/SWARM/EFI_LP_HM         | SWARM Ne, Te, etc.                 | *netcdf*              | *True*        | -                             | stable |
-| ESA/SWARM/EFI_TCT02         | SWARM cross track vi               | *netcdf*              | *True*        | -                             | stable |
-| ESA/SWARM/AOB_FAC_2F        | SWARM FAC, auroral oval boundary   | *netcdf*              | *True*        | -                             | beta   |
-| TUDelft/SWARM/DNS_POD       | Swarm $\rho_n$ (GPS derived)       | *ASCII*               | *True*       | -                             | stable |
-| TUDelft/SWARM/DNS_ACC       | Swarm $\rho_n$ (GPS+Accelerometer) | *ASCII*               | *True*       | -                             | stable |
-| TUDelft/GOCE/WIND_ACC       | GOCE neutral wind                  | *ASCII*               | *True*       | -                             | stable |
-| TUDelft/GRACE/WIND_ACC      | GRACE neutral wind                 | *ASCII*               | *True*       | -                             | stable |
-| TUDelft/GRACE/DNS_ACC       | Grace $\rho_n$                     | *ASCII*               | *True*       | -                             | stable |
-| TUDelft/CHAMP/DNS_ACC       | CHAMP $\rho_n$                     | *ASCII*               | *True*       | -                             | stable |
- | UTA/GITM/2DALL              | GITM 2D output                     | *binary*, *IDL-sav*   | *False*       | -                             | beta   |
- | UTA/GITM/3DALL              | GITM 3D output                     | *binary*, *IDL-sav*   | *False*       | -                             | beta   |
+| Data Source                  | Variables                          | File Format           | Downloadable  | Express                       | Status | 
+|------------------------------|------------------------------------|-----------------------|---------------|-------------------------------|--------|
+| CDAWeb/OMNI                  | Solar wind and IMF                 |*cdf*                 | *True*        | __OMNIDashboard__             | stable |
+| Madrigal/EISCAT              | Ionospheric Ne, Te, Ti, ...        | *EISCAT-hdf5*, *Madrigal-hdf5* | *True* | __EISCATDashboard__           | stable |
+| Madrigal/GNSS/TECMAP         | Ionospheric GPS TEC map            | *hdf5*                | *True*        | -                             | beta   |
+| Madrigal/DMSP/s1             | DMSP SSM, SSIES, etc               | *hdf5*                | *True*        | __DMSPTSDashboard__           | stable |
+| Madrigal/DMSP/s4             | DMSP SSIES                         | *hdf5*                | *True*        | __DMSPTSDashboard__           | stable |
+| Madrigal/DMSP/e              | DMSP SSJ                           | *hdf5*                | *True*        | __DMSPTSDashboard__           | stable |
+| Madrigal/Millstone Hill ISR+ | Millstone Hill ISR                 | *hdf5*                | *True*        | __MillstoneHillISRDashboard__ | stable |
+| Madrigal/Poker Flat ISR      | Poker Flat ISR                     | *hdf5*                | *True*        | __-_                          | stable |
+| JHUAPL/DMSP/SSUSI            | DMSP SSUSI                         | *netcdf*              | *True*        | __DMSPSSUSIDashboard__        | stable |
+| JHUAPL/AMPERE/fitted         | AMPERE FAC                         | *netcdf*              | *False*        | __AMPEREDashboard__           | stable |
+| SuperDARN/POTMAP             | SuperDARN potential map            | *ascii*             | *False*       | -                             | stable |                  
+| WDC/Dst                      | Dst index                          | *IAGA2002-ASCII*      | *True*        | -                             | stable |
+| WDC/ASYSYM                   | ASY/SYM indices                    | *IAGA2002-ASCII*      | *True*        | __OMNIDashboard__             | stable |
+| WDC/AE                       | AE indices                         | *IAGA2002-ASCII*      | *True*        | __OMNIDashboard__             | stable |
+| GFZ/Kp                       | Kp/Ap indices                      | *ASCII*               | *True*        | -                             | stable |
+| GFZ/Hpo                      | Hp30 or Hp60 indices               | *ASCII*               | *True*        | -                             | stable |
+| GFZ/SNF107                   | SN, F107                           | *ASCII*               | *True*        | -                             | stable |
+| ESA/SWARM/EFI_LP_HM          | SWARM Ne, Te, etc.                 | *netcdf*              | *True*        | -                             | stable |
+| ESA/SWARM/EFI_TCT02          | SWARM cross track vi               | *netcdf*              | *True*        | -                             | stable |
+| ESA/SWARM/AOB_FAC_2F         | SWARM FAC, auroral oval boundary   | *netcdf*              | *True*        | -                             | beta   |
+| TUDelft/SWARM/DNS_POD        | Swarm $\rho_n$ (GPS derived)       | *ASCII*               | *True*       | -                             | stable |
+| TUDelft/SWARM/DNS_ACC        | Swarm $\rho_n$ (GPS+Accelerometer) | *ASCII*               | *True*       | -                             | stable |
+| TUDelft/GOCE/WIND_ACC        | GOCE neutral wind                  | *ASCII*               | *True*       | -                             | stable |
+| TUDelft/GRACE/WIND_ACC       | GRACE neutral wind                 | *ASCII*               | *True*       | -                             | stable |
+| TUDelft/GRACE/DNS_ACC        | Grace $\rho_n$                     | *ASCII*               | *True*       | -                             | stable |
+| TUDelft/CHAMP/DNS_ACC        | CHAMP $\rho_n$                     | *ASCII*               | *True*       | -                             | stable |
+ | UTA/GITM/2DALL               | GITM 2D output                     | *binary*, *IDL-sav*   | *False*       | -                             | beta   |
+ | UTA/GITM/3DALL               | GITM 3D output                     | *binary*, *IDL-sav*   | *False*       | -                             | beta   |
 
 
 

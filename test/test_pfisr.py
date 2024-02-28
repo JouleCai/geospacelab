@@ -43,18 +43,19 @@ def test_pfisr_fitted():
 
 def test_pfisr_vi():
     
-    dt_fr = datetime.datetime(2022, 2, 1, 18)
-    dt_to = datetime.datetime(2022, 2, 1, 23, 59)
+    dt_fr = datetime.datetime(2018, 4, 23, 6)
+    dt_to = datetime.datetime(2018, 4, 23, 17, 59)
     
-    exp_name_pattern = ['plasma', 'line', 'calibration']
-    exp_ids = [100278402]
-    integration_time = 300.  # in [s]
+    # exp_name_pattern = ['plasma', 'line', 'calibration']
+    exp_ids = [100153185]
+    integration_time = 60.  # in [s]
     
     db = TSDashboard(dt_fr=dt_fr, dt_to=dt_to)
     ds_pfisr = db.dock(
         datasource_contents=['madrigal', 'isr', 'pfisr', 'vi'],
         exp_ids = exp_ids,
-        exp_name_pattern=exp_name_pattern,
+        # exp_name_pattern=exp_name_pattern,
+        # data_file_ext='hdf5',
         integration_time=integration_time,
         )
 
@@ -88,4 +89,4 @@ def test_pfisr_vi():
 
 
 if __name__ == "__main__":
-    test_pfisr_fitted()
+    test_pfisr_vi()
