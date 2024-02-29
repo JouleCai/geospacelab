@@ -29,7 +29,7 @@ default_dataset_attrs = {
     'facility': 'PFISR',
     'exp_name_pattern': [],
     'exp_check': False,
-    'data_file_ext': 'h5',
+    'data_file_ext': ['h5', 'hdf5'],
     'data_root_dir': prf.datahub_data_root_dir / 'Madrigal' / 'PFISR',
     'allow_download': True,
     'status_control': False,

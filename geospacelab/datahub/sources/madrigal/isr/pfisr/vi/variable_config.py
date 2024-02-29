@@ -34,13 +34,13 @@ default_axis_dict_2d = {
     1:     {
         'data':     '@d.CGM_LAT.value',
         'lim':      [90, 200],
-        'label':    'h',
-        'unit':     'km',
+        'label':    'MLAT',
+        'unit':     '@d.CGM_LAT.unit_label',
     },
     2:  {
         'data':     '@v.value',
         'label':    '@v.label',
-        'unit':     '@v.unit',
+        'unit':     '@v.unit_label',
     }
 }
 
@@ -76,8 +76,9 @@ axis = var.visual.axis
 axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [-1500, 1500]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -102,8 +103,9 @@ axis = var.visual.axis
 axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [0, 750]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -128,8 +130,9 @@ axis = var.visual.axis
 axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [-1500, 1500]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -154,8 +157,9 @@ axis = var.visual.axis
 axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [0, 750]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -180,8 +184,9 @@ axis = var.visual.axis
 axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [-1500, 1500]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -206,8 +211,9 @@ axis = var.visual.axis
 axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [0, 750]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -232,8 +238,9 @@ axis = var.visual.axis
 axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [0, 1500]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -258,8 +265,9 @@ axis = var.visual.axis
 axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [0, 750]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -286,8 +294,9 @@ axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 axis[2].data_scale = 1000
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [-180, 180]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -314,8 +323,9 @@ axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 axis[2].data_scale = 1000
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [0, 180]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -341,8 +351,9 @@ axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 axis[2].data_scale = 1000
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [-80, 80]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -368,8 +379,9 @@ axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 axis[2].data_scale = 1000
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [0, 40]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -395,8 +407,9 @@ axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 axis[2].data_scale = 1000
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [-80, 80]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -422,8 +435,9 @@ axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 axis[2].data_scale = 1000
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [0, 40]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -449,8 +463,9 @@ axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 axis[2].data_scale = 1000
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [0, 80]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -477,8 +492,9 @@ axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 axis[2].data_scale = 1000
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [0, 40]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -505,8 +521,9 @@ axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 axis[2].data_scale = 1000
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [-180, 180]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
@@ -533,8 +550,9 @@ axis[1].data = "@d.CGM_LAT.value"
 axis[2].data = "@v.value"
 axis[2].data_scale = 1000
 # axis[1].lim = [90, 500]
-axis[1].label = 'h'
-axis[1].unit = 'km'
+axis[1].label = 'MLAT'
+axis[1].unit = r'$^\circ$'
+
 axis[2].lim = [0, 180]
 axis[2].scale = 'linear'
 axis[2].label = '@v.label'
