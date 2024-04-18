@@ -64,7 +64,7 @@ class Loader(object):
         sectime = pybasic.str_join('TIME', pp_key_1, pp_key_2, separator='_', uppercase=True)
         sectime = np.array(dataset.variables[sectime])
         cdfepoch = pybasic.str_join('TIME', 'EPOCH', pp_key_1, pp_key_2, separator='_', uppercase=True)
-        dts = cdflib.cdfepoch.unixtime(np.array(dataset.variables[cdfepoch]), to_np=True)
+        dts = cdflib.cdfepoch.unixtime(np.array(dataset.variables[cdfepoch]))
         dts = dttool.convert_unix_time_to_datetime_cftime(dts)
 
         var_name_nc = pybasic.str_join('ORBIT', pp_key_1, pp_key_2, separator='_', uppercase=True)

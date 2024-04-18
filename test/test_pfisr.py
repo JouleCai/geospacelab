@@ -6,16 +6,18 @@ from geospacelab.visualization.mpl.dashboards import TSDashboard
 
 
 def test_pfisr_fitted():
-    dt_fr = datetime.datetime(2022, 2, 1, 18)
-    dt_to = datetime.datetime(2022, 2, 1, 23, 59)
+    dt_fr = datetime.datetime(2021, 1, 6, 2)
+    dt_to = datetime.datetime(2021, 1, 6, 20, 59)
 
-    exp_name_pattern = ['plasma', 'line', 'calibration']
+    exp_name_pattern = ['auroral', 'convection']
+    # exp_name_pattern = None
     exp_ids = [100278402]
-    pulse_code = 'long pulse'
+    exp_ids = [100253437]
+    pulse_code = 'alternating code'
     integration_time = 60.  # in [s]
     beam_id = None
     beam_az = 205.70
-    beam_el = 84.5
+    beam_el = 77.5
 
     db = TSDashboard(dt_fr=dt_fr, dt_to=dt_to)
     ds_pfisr = db.dock(
@@ -23,7 +25,7 @@ def test_pfisr_fitted():
         exp_ids=exp_ids,
         exp_name_pattern=exp_name_pattern,
         integration_time=integration_time,
-        pulse_code='long pulse',
+        pulse_code=pulse_code,
         beam_id=beam_id,
         beam_az=beam_az,
         beam_el=beam_el
@@ -89,4 +91,4 @@ def test_pfisr_vi():
 
 
 if __name__ == "__main__":
-    test_pfisr_vi()
+    test_pfisr_fitted()

@@ -26,7 +26,7 @@ default_dataset_attrs = {
     'product': 'HR_1B',
     'data_file_ext': 'cdf',
     'product_version': 'latest',
-    'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Level1b',
+    'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Level1b' / 'MAG_HR',
     'allow_load': True,
     'allow_download': True,
     'force_download': False,
@@ -67,8 +67,8 @@ class Dataset(datahub.DatasetSourced):
 
         self.database = kwargs.pop('database', 'ESA/EarthOnline')
         self.facility = kwargs.pop('facility', 'SWARM')
-        self.instrument = kwargs.pop('instrument', 'EFI-LP')
-        self.product = kwargs.pop('product', 'HM02')
+        self.instrument = kwargs.pop('instrument', 'MAG')
+        self.product = kwargs.pop('product', 'MAG_HR')
         self.product_version = kwargs.pop('product_version', '')
         self.local_latest_version = ''
         self.allow_download = kwargs.pop('allow_download', False)
@@ -104,7 +104,7 @@ class Dataset(datahub.DatasetSourced):
             if not list(attr):
                 mylog.StreamLogger.warning("The parameter {} is required before loading data!".format(attr_name))
 
-        self.data_root_dir = self.data_root_dir / self.instrument / self.product
+        # self.data_root_dir = self.data_root_dir / self.product
 
         if str(self.product_version) and self.product_version != 'latest':
             self.data_root_dir = self.data_root_dir / self.product_version

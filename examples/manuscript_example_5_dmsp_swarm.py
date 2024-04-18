@@ -42,19 +42,25 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
         dt_fr=time_c - datetime.timedelta(minutes=45),
         dt_to=time_c + datetime.timedelta(minutes=45),
         sat_id=sat_id, replace_orbit=True)
-    
-    ds_swarm = dashboard.dock(datasource_contents=['tud', 'swarm', 'dns_pod'], sat_id=swarm_sat_id, add_AACGM=True)
+
+    dt_fr_swarm = swarm_dn - datetime.timedelta(minutes=20)
+    dt_to_swarm = swarm_dn + datetime.timedelta(minutes=20)
+    ds_swarm = dashboard.dock(
+        datasource_contents=['tud', 'swarm', 'dns_pod'],
+        dt_fr=dt_fr_swarm,
+        dt_to=dt_to_swarm,
+        sat_id=swarm_sat_id, add_AACGM=True)
 
     dashboard.set_layout(1, 2, left=0.0, right=1.0, top=0.9, bottom=0.55, wspace=0)
     
     # Add the first polar map
     # Get the variables: LBHS emission intensiy, corresponding times and locations
-    lbhs = dashboard.assign_variable('GRID_AUR_' + band, dataset=ds_dmsp_ssusi_edr)
-    dts = dashboard.assign_variable('DATETIME', dataset=ds_dmsp_ssusi_edr)
+    lbhs = ds_dmsp_ssusi_edr['GRID_AUR_' + band]
+    dts = ds_dmsp_ssusi_edr['DATETIME']
     dts = dts.value.flatten()
-    mlat = dashboard.assign_variable('GRID_MLAT', dataset=ds_dmsp_ssusi_edr)
-    mlon = dashboard.assign_variable('GRID_MLON', dataset=ds_dmsp_ssusi_edr)
-    mlt = dashboard.assign_variable(('GRID_MLT'), dataset=ds_dmsp_ssusi_edr)
+    mlat = ds_dmsp_ssusi_edr['GRID_MLAT']
+    mlon = ds_dmsp_ssusi_edr['GRID_MLON']
+    mlt = ds_dmsp_ssusi_edr['GRID_MLT']
 
     # Search the index for the time to plot, used as an input to the following polar map
     ind_t = dashboard.datasets[1].get_time_ind(ut=time_c)
@@ -119,12 +125,12 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
 
     # Add the second polar map on the right side
     # Get the variables: LBHS emission intensiy, corresponding times and locations
-    lbhs = dashboard.assign_variable('DISK_R_RECT_' + band, dataset=ds_dmsp_ssusi_disk)
-    dts = dashboard.assign_variable('DATETIME', dataset=ds_dmsp_ssusi_disk)
-    scdt = dashboard.assign_variable('SC_DATETIME', dataset=ds_dmsp_ssusi_disk)
-    glat = dashboard.assign_variable('DISK_GEO_LAT', dataset=ds_dmsp_ssusi_disk)
-    glon = dashboard.assign_variable('DISK_GEO_LON', dataset=ds_dmsp_ssusi_disk)
-    alt = dashboard.assign_variable('DISK_GEO_ALT', dataset=ds_dmsp_ssusi_disk)
+    lbhs = ds_dmsp_ssusi_disk['DISK_R_RECT_' + band]
+    dts = ds_dmsp_ssusi_disk['DATETIME']
+    scdt = ds_dmsp_ssusi_disk['SC_DATETIME']
+    glat = ds_dmsp_ssusi_disk['DISK_GEO_LAT']
+    glon = ds_dmsp_ssusi_disk['DISK_GEO_LON']
+    alt = ds_dmsp_ssusi_disk['DISK_GEO_ALT']
     # mlt = dashboard.assign_variable(('GRID_MLT'), dataset_index=1).value
 
     # Search the index for the time to plot, used as an input to the following polar map
@@ -207,23 +213,23 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
     dataset_s4 = db_dmsp.dock(datasource_contents=['madrigal', 'satellites', 'dmsp', 's4'], sat_id=sat_id)
     dataset_e = db_dmsp.dock(datasource_contents=['madrigal', 'satellites', 'dmsp', 'e'], sat_id=sat_id)
 
-    n_e = db_dmsp.assign_variable('n_e', dataset=dataset_s1)
-    v_i_H = db_dmsp.assign_variable('v_i_H', dataset=dataset_s1)
-    v_i_V = db_dmsp.assign_variable('v_i_V', dataset=dataset_s1)
-    d_B_D = db_dmsp.assign_variable('d_B_D', dataset=dataset_s1)
-    d_B_P = db_dmsp.assign_variable('d_B_P', dataset=dataset_s1)
-    d_B_F = db_dmsp.assign_variable('d_B_F', dataset=dataset_s1)
+    n_e = dataset_s1['n_e']
+    v_i_H = dataset_s1['v_i_H']
+    v_i_V = dataset_s1['v_i_V']
+    d_B_D = dataset_s1['d_B_D']
+    d_B_P = dataset_s1['d_B_P']
+    d_B_F = dataset_s1['d_B_F']
 
-    JE_e = db_dmsp.assign_variable('JE_e', dataset=dataset_e)
-    JE_i = db_dmsp.assign_variable('JE_i', dataset=dataset_e)
-    jE_e = db_dmsp.assign_variable('jE_e', dataset=dataset_e)
-    jE_i = db_dmsp.assign_variable('jE_i', dataset=dataset_e)
-    E_e_MEAN = db_dmsp.assign_variable('E_e_MEAN', dataset=dataset_e)
-    E_i_MEAN = db_dmsp.assign_variable('E_i_MEAN', dataset=dataset_e)
+    JE_e = dataset_e['JE_e']
+    JE_i = dataset_e['JE_i']
+    jE_e = dataset_e['jE_e']
+    jE_i = dataset_e['jE_i']
+    E_e_MEAN = dataset_e['E_e_MEAN']
+    E_i_MEAN = dataset_e['E_i_MEAN']
 
-    T_i = db_dmsp.assign_variable('T_i', dataset=dataset_s4)
-    T_e = db_dmsp.assign_variable('T_e', dataset=dataset_s4)
-    c_O_p = db_dmsp.assign_variable('COMP_O_p', dataset=dataset_s4)
+    T_i = dataset_s4['T_i']
+    T_e = dataset_s4['T_e']
+    c_O_p = dataset_s4['COMP_O_p']
 
     layout = [
         [v_i_H, v_i_V],
@@ -256,28 +262,28 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
         product='TCT02', sat_id=swarm_sat_id, quality_control=False, add_AACGM=True
         )
     ds_swarm_lp = db_swarm.dock(
-        datasource_contents=['esa_eo', 'swarm', 'advanced', 'mag_hr'],
+        datasource_contents=['esa_eo', 'swarm', 'advanced', 'efi_lp_hm'],
         product='LP_HM', sat_id='A', quality_control=False, add_AACGM=True
         )
     ds_swarm_lp_c = db_swarm.dock(
-        datasource_contents=['esa_eo', 'swarm', 'advanced', 'mag_hr'],
+        datasource_contents=['esa_eo', 'swarm', 'advanced', 'efi_lp_hm'],
         product='LP_HM', sat_id='C', quality_control=False, add_AACGM=True
         )
 
 
-    n_e = db_swarm.assign_variable('n_e', dataset=ds_swarm_lp)
-    n_e_c = db_swarm.assign_variable('n_e', dataset=ds_swarm_lp_c)
+    n_e = ds_swarm_lp['n_e']
+    n_e_c = ds_swarm_lp_c['n_e']
     n_e.label = 'Swarm-A'
     n_e_c.label = 'Swarm-C'
-    T_e = db_swarm.assign_variable('T_e', dataset=ds_swarm_lp)
-    T_e_c = db_swarm.assign_variable('T_e', dataset=ds_swarm_lp_c)
+    T_e = ds_swarm_lp['T_e']
+    T_e_c = ds_swarm_lp_c['T_e']
     T_e.label = 'Swarm-A'
     T_e_c.label = 'Swarm-C'
 
-    v_i_H_x = db_swarm.assign_variable('v_i_H_x', dataset=ds_swarm_tii)
-    v_i_H_y = db_swarm.assign_variable('v_i_H_y', dataset=ds_swarm_tii)
-    v_i_V_x = db_swarm.assign_variable('v_i_V_x', dataset=ds_swarm_tii)
-    v_i_V_z = db_swarm.assign_variable('v_i_V_z', dataset=ds_swarm_tii)
+    v_i_H_x = ds_swarm_tii['v_i_H_x']
+    v_i_H_y = ds_swarm_tii['v_i_H_y']
+    v_i_V_x = ds_swarm_tii['v_i_V_x']
+    v_i_V_z = ds_swarm_tii['v_i_V_z']
      
     db_swarm.set_layout([[v_i_H_x, v_i_H_y, v_i_V_x, v_i_V_z], [n_e, n_e_c], [T_e, T_e_c], ],
                        left=0.58, right=0.93, top=0.5, hspace=0)
@@ -296,7 +302,7 @@ def event_1_1():
     swarm_sat_id = 'A'
     
     visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_id, pole='N')
-    
+
 
 if __name__ == '__main__':
     event_1_1()

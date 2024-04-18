@@ -83,7 +83,10 @@ class DatasetBase(object):
 
         self.label_fields = label_fields
 
-    def add_variable(self, var_name: str, configured_variables=None, variable_class=None, **kwargs) -> __variable_model__:
+    def add_variable(
+            self, var_name: str,
+            configured_variables=None, configured_variable_name=None,
+            variable_class=None, **kwargs) -> __variable_model__:
         """
         Add a variable to the dataset.
 
@@ -97,8 +100,12 @@ class DatasetBase(object):
             variable_class = self.__variable_model__
         if configured_variables is None:
             configured_variables = {}
-        if var_name in configured_variables.keys():
-            configured_variable = configured_variables[var_name]
+        if var_name in configured_variables.keys() or configured_variable_name is not None:
+            if configured_variable_name is None:
+                vn = var_name
+            else:
+                vn = configured_variable_name
+            configured_variable = configured_variables[vn]
             if type(configured_variable) is dict:
                 self[var_name] = variable_class(**configured_variable)
             elif issubclass(configured_variable.__class__, self.__variable_model__):
@@ -292,7 +299,7 @@ class DatasetSourced(DatasetBase):
         if recursive:
             search_pattern = '**/' + search_pattern
 
-        if include_extension:
+        if include_extension and (self.data_file_ext not in ['*', '.*']):
             if isinstance(self.data_file_ext, str):
                 exts = [self.data_file_ext]
             elif isinstance(self.data_file_ext, (list, tuple)):
@@ -459,6 +466,7 @@ class DatasetSourced(DatasetBase):
     @data_root_dir.setter
     def data_root_dir(self, path):
         self._data_root_dir = pathlib.Path(path)
+
 
 class LoaderBase(object):
     """

@@ -48,6 +48,7 @@ class VisualAxis(object):
         self.minor_tick_max = None
         self.reverse = False
         self.visible = True
+        self.shift = None
 
     def config(self, logging=True, **kwargs):
         pyclass.set_object_attributes(self, append=False, logging=logging, **kwargs)

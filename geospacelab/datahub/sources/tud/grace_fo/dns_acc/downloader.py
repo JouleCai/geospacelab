@@ -24,7 +24,7 @@ class Downloader(DownloaderModel):
     ):
         if version == 'v01':
             raise ValueError
-        elif version == 'v02':
+        elif 'v02' in version:
             v_str = "version_02"
         else:
             raise NotImplementedError

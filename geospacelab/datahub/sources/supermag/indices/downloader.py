@@ -105,8 +105,8 @@ class Downloader(object):
         self.products = products
 
         self.force_download = force_download
-        self.download()
         self.done = False
+        self.download()
 
     def download(self):
         num_days = dttool.get_diff_days(self.dt_fr, self.dt_to)
@@ -143,7 +143,8 @@ class Downloader(object):
                 self.done = False
                 mylog.StreamLogger.error(f'The requested data cannot be downloaded!')
                 return
-            self.download = True
+            self.done = True
+
     def save_to_nc(self, idxdata, file_path):
         def sm_t_to_datetime(tval):
             jd = (tval / 86400.0) + 2440587.5

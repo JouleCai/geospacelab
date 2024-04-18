@@ -23,13 +23,13 @@ def test_tec():
     dt_fr = datetime.datetime(2015, 3, 17, 1)
     dt_to = datetime.datetime(2015, 3, 17, 23)
     db = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (15, 5)})
-    db.dock(datasource_contents=['madrigal', 'gnss', 'tecmap'])
+    ds_tec = db.dock(datasource_contents=['madrigal', 'gnss', 'tecmap'])
     db.set_layout(1, 3, left=0.05, right=0.9, wspace=0.5)
 
-    tec = db.assign_variable('TEC_MAP', dataset_index=0)
-    dts = db.assign_variable('DATETIME', dataset_index=0).value.flatten()
-    glat = db.assign_variable('GEO_LAT', dataset_index=0).value
-    glon = db.assign_variable('GEO_LON', dataset_index=0).value
+    tec = ds_tec['TEC_MAP']
+    dts = ds_tec['DATETIME'].value.flatten()
+    glat = ds_tec['GEO_LAT'].value
+    glon = ds_tec['GEO_LON'].value
 
     """
     Add the first panel showing the TEC map in GEO LAT-LON coordinates

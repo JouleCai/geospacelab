@@ -118,6 +118,7 @@ class Downloader(object):
             if not self.force_download:
                 return
         files_error = []
+        mylog.simpleinfo.info("Downloading {} ...".format(file_path_remote))
         try:
             database.downloadFile(
                 file_path_remote, file_path_local,
@@ -125,7 +126,7 @@ class Downloader(object):
                 file_format
             )
 
-            mylog.simpleinfo.info("File saved in {}.".format(file_path_local))
+            mylog.simpleinfo.info("--> Saved as {}.".format(file_path_local))
             self.done = True
         except Exception as e:
             try:
@@ -136,7 +137,7 @@ class Downloader(object):
                     file_format
                 )
 
-                mylog.simpleinfo.info("File saved in {}.".format(file_path_local))
+                mylog.simpleinfo.info("--> Saved as {}.".format(file_path_local))
                 self.done = True 
             except:
                 print(e)

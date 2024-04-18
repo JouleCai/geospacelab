@@ -20,7 +20,6 @@ class Downloader(DownloaderModel):
     def __init__(
             self, dt_fr, dt_to,
             sat_id=None,
-            data_type='HR_1B',
             file_version=None,
             file_extension='.cdf',
             data_file_root_dir=None,
@@ -34,7 +33,7 @@ class Downloader(DownloaderModel):
             ftp_data_dir = f'Level1b/Latest_baselines/MAGx_HR/Sat_{sat_id.upper()}'
 
         if data_file_root_dir is None:
-            data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Level1b" / "MAG" / data_type
+            data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Level1b" / "MAG_HR"
         file_name_patterns = list(self._default_file_name_patterns)
         file_name_patterns.extend(['MAG' + sat_id.upper(), dt_fr.strftime("%Y%m")])
         super(Downloader, self).__init__(
@@ -42,7 +41,7 @@ class Downloader(DownloaderModel):
             data_file_root_dir=data_file_root_dir,
             ftp_data_dir=ftp_data_dir,
             file_version=file_version,
-            file_extension = file_extension,
+            file_extension=file_extension,
             force=force, direct_download=direct_download,
             file_name_patterns=file_name_patterns, **kwargs
         )

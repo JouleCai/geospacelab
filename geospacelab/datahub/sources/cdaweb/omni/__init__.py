@@ -223,10 +223,11 @@ class Dataset(datahub.DatasetSourced):
             ca = ca / np.pi * 180
 
         var_name = 'CA_' + cs
-        var = self.add_variable(var_name)
+        var = self.add_variable(var_name, configured_variables=var_config.configured_variables, configured_variable_name='CA')
         var.value = ca.reshape(ca.size, 1)
         var.label = r'$\theta$'
-        var.unit = 'rad'
+        var.unit = 'degree'
+        var.unit_label = r'($^\circ$)'
         self[var_name] = var
         return self[var_name]
 
@@ -248,10 +249,11 @@ class Dataset(datahub.DatasetSourced):
             az = az / np.pi * 180
 
         var_name = 'AZ_' + cs
-        var = self.add_variable(var_name)
+        var = self.add_variable(var_name, configured_variables=var_config.configured_variables, configured_variable_name='CA')
         var.value = az.reshape(az.size, 1)
         var.label = r'$\phi$'
-        var.unit = 'rad'
+        var.unit = 'degree'
+        var.unit_label = r'($^\circ$)'
         self[var_name] = var
         return self[var_name]
 
@@ -273,10 +275,11 @@ class Dataset(datahub.DatasetSourced):
             el = el / np.pi * 180
 
         var_name = 'EL_' + cs
-        var = self.add_variable(var_name)
+        var = self.add_variable(var_name, configured_variables=var_config.configured_variables, configured_variable_name='CA')
         var.value = el.reshape(el.size, 1)
         var.label = r'$\alpha$'
-        var.unit = 'rad'
+        var.unit = 'degree'
+        var.unit_label = r'($^\circ$)'
         self[var_name] = var
         return self[var_name]
 

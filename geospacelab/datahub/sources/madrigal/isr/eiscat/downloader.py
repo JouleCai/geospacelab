@@ -143,7 +143,7 @@ class Downloader(object):
                 if any(href.endswith(s) for s in ['.png', '.tar.gz', '.hdf5']):
                     filename = href.split('/')[-1]
 
-                    match = re.search('\d{4}-\d{2}-\d{2}', filename)
+                    match = re.search(r'\d{4}-\d{2}-\d{2}', filename)
                     thisday = datetime.datetime.strptime(match.group(), '%Y-%m-%d')
                     if thisday < self.dt_fr or thisday > self.dt_to:
                         continue
@@ -152,7 +152,7 @@ class Downloader(object):
                             site = key
 
                     #site1 = re.search("[@|_][a-zA-Z0-9]*[.]", filename).group(0)[1:-1]
-                    search_pattern = re.search("\d{4}-\d{2}-\d{2}_[a-zA-Z0-9]*", filename).group(0)
+                    search_pattern = re.search(r"\d{4}-\d{2}-\d{2}_[a-zA-Z0-9]*", filename).group(0)
                     sub_dir = search_pattern + '@' + site
                     data_file_dir = self.data_file_root_dir / site / thisday.strftime('%Y') / sub_dir
                     data_file_dir.mkdir(parents=True, exist_ok=True)
@@ -188,14 +188,14 @@ class Downloader(object):
                     if '32' in site or '42' in site:
                         site = 'ESR'
 
-                    match = re.search('\d{4}-\d{2}-\d{2}', file_path.name)
+                    match = re.search(r'\d{4}-\d{2}-\d{2}', file_path.name)
                     dt_str = match.group(0)
                     thisday = datetime.datetime.strptime(dt_str, "%Y-%m-%d")
                     if thisday < self.dt_fr or thisday > self.dt_to:
                         continue
 
                     # sub_dir = file_path.name.split('_', maxsplit=1)[1]
-                    search_pattern = re.search("\d{4}-\d{2}-\d{2}_[a-zA-Z0-9]*", file_path.name).group(0)
+                    search_pattern = re.search(r"\d{4}-\d{2}-\d{2}_[a-zA-Z0-9]*", file_path.name).group(0)
                     sub_dir = search_pattern + '@' + site
                     data_file_dir = self.data_file_root_dir / site / dt_str[0:4] / sub_dir
                     data_file_dir.mkdir(parents=True, exist_ok=True)
@@ -389,7 +389,7 @@ class EISCATSchedule(object):
 
         with open(os.path.join(file_path, file_name), 'w') as out_file:
             for line in self.experiments:
-                line_str = "{0:<17s}{1:<7s}{2:<5s}{3:<6s}{4:<20s}{5:<25s}{6:<20s}{7:<30s}{8:<65s}".format(
+                line_str = "{0:<17s}{1:<7s}{2:<5s}{3:<8s}{4:<30s}{5:<40s}{6:<40s}{7:<80s}{8:<65s}".format(
                     line[0].strftime('%Y-%m-%d %H:%M'), line[1].strftime('%H:%M'),
                     line[7], line[2], line[3], line[4], line[5], line[6], line[8]) + '\n'
                 out_file.write(line_str)

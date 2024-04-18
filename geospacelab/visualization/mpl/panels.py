@@ -212,6 +212,10 @@ class TSPanel(Panel):
         elif errorbar == 'on':
             errorbar_config = dict(plot_config)
             errorbar_config.update(var.visual.plot_config.errorbar)
+            y_err = y_err.flatten()
+            if any(y_err < 0):
+                mylog.StreamLogger.warning("Negative values of error detected in {}".format(var))
+                y_err[y_err < 0] = np.nan
             il = ax.errorbar(x.flatten(), y.flatten(), yerr=y_err.flatten(), **errorbar_config)
         if type(il) is not list:
             il = [il]
@@ -633,7 +637,10 @@ class TSPanel(Panel):
         if x_data is None:
             x_data = np.array([self.dt_fr, self.dt_to])
             var.visual.axis[0].mask_gap = False
-
+        x_shift = var.get_visual_axis_attr(axis=0, attr_name='shift')
+        if x_shift is not None:
+            data = x_data.flatten() - datetime.timedelta(seconds=x_shift)
+            x_data = np.reshape(data, x_data.shape)
         y_data = var.get_visual_axis_attr(axis=1, attr_name='data')
         if y_data is None:
             y_data = var.value
@@ -686,7 +693,10 @@ class TSPanel(Panel):
             if x_data is None:
                 x_data = np.array([self._xlim[0], self._xlim[1]]).reshape(2, 1)
                 var.visual.axis[0].mask_gap = False
-
+        x_shift = var.get_visual_axis_attr(axis=0, attr_name='shift')
+        if x_shift is not None:
+            data = x_data.flatten() - datetime.timedelta(seconds=x_shift)
+            x_data = np.reshape(data, x_data.shape)
         y_data = var.get_visual_axis_attr(axis=1, attr_name='data')
         if type(y_data) == list:
             y_data = y_data[0]

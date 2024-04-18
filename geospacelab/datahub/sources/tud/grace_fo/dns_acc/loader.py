@@ -29,7 +29,7 @@ class Loader(object):
 
         if self.version == 'v01':
             raise ValueError
-        elif self.version == 'v02':
+        elif self.version in ['v02', 'v02b']:
             self.load_v02()
         else:
             raise NotImplementedError
@@ -58,4 +58,4 @@ class Loader(object):
             self.variables['rho_n'] = np.array(results[7]).astype(np.float32).reshape(num_rec, 1)
             self.variables['rho_n_MEAN'] = np.array(results[8]).astype(np.float32).reshape(num_rec, 1) 
             self.variables['FLAG'] = np.array(results[9]).astype(np.float32).reshape(num_rec, 1) 
-            self.variables['FLAG_MEAN'] = np.array(results[10]).astype(np.float32).reshape(num_rec, 1)  
+            self.variables['FLAG_MEAN'] = np.array(results[10]).reshape(num_rec, 1)

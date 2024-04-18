@@ -99,7 +99,10 @@ class Dataset(datahub.DatasetSourced):
             if not attr:
                 mylog.StreamLogger.warning("The parameter {} is required before loading data!".format(attr_name))
 
-        self.data_root_dir = self.data_root_dir / self.product.upper() / self.product_version
+        if self.product_version == 'v02b':
+            self.data_root_dir = self.data_root_dir / self.product.upper() / self.product_version[:-1]
+        else:
+            self.data_root_dir = self.data_root_dir / self.product.upper() / self.product_version
 
     def label(self, **kwargs):
         label = super().label()
@@ -191,7 +194,7 @@ class Dataset(datahub.DatasetSourced):
             file_patterns = [
                 'G' + sat_id,
                 self.product.upper().replace('-', '_'),
-                this_day.strftime('%Y_%m'),
+                this_day.strftime('%Y_%m'), self.product_version + '.'
             ]
             # remove empty str
             file_patterns = [pattern for pattern in file_patterns if str(pattern)]
@@ -230,6 +233,58 @@ class Dataset(datahub.DatasetSourced):
         )
 
         return download_obj.done
+
+    def interp_evenly(self, time_res=10, time_res_o=10, dt_fr=None, dt_to=None):
+        from scipy.interpolate import interp1d
+        import geospacelab.toolbox.utilities.numpymath as nm
+
+        ds_new = datahub.DatasetUser(dt_fr=self.dt_fr, dt_to=self.dt_to, visual=self.visual)
+        ds_new.clone_variables(self)
+        dts = ds_new['SC_DATETIME'].value.flatten()
+        dt0 = dttool.get_start_of_the_day(dts[0])
+        x_0 = np.array([(dt - dt0).total_seconds() for dt in dts])
+        if dt_fr is None:
+            dt_fr = dts[0] - datetime.timedelta(
+                seconds=np.floor(((dts[0] - ds_new.dt_fr).total_seconds() / time_res)) * time_res
+            )
+        if dt_to is None:
+            dt_to = dts[-1] + datetime.timedelta(
+                seconds=np.floor(((ds_new.dt_to - dts[-1]).total_seconds() / time_res)) * time_res
+            )
+        sec_fr = (dt_fr - dt0).total_seconds()
+        sec_to = (dt_to - dt0).total_seconds()
+        x_1 = np.arange(sec_fr, sec_to + time_res / 2, time_res)
+
+        f = interp1d(x_0, x_0, kind='nearest', bounds_error=False, fill_value=(x_0[0], x_0[-1]))
+        pseudo_x = f(x_1)
+        mask = np.abs(pseudo_x-x_1) > time_res_o/1.5
+
+        dts_new = np.array([dt0 + datetime.timedelta(seconds=sec) for sec in x_1])
+        ds_new['SC_DATETIME'].value = dts_new.reshape((dts_new.size, 1))
+
+        period_var_dict = {'SC_GEO_LON': 360.,
+                           'SC_AACGM_LON': 360.,
+                           'SC_APEX_LON': 360.,
+                           'SC_GEO_LST': 24.,
+                           'SC_AACGM_MLT': 24.,
+                           'SC_APEX_MLT': 24}
+
+        for var_name in ds_new.keys():
+            if var_name in ['SC_DATETIME']:
+                continue
+            if var_name in period_var_dict.keys():
+                var = ds_new[var_name].value.flatten()
+                var_new = nm.interp_period_data(x_0, var, x_1, period=period_var_dict[var_name], method='linear', bounds_error=False)
+                var_new[mask] = np.nan
+                ds_new[var_name].value = var_new.reshape((dts_new.size, 1))
+            else:
+                method = 'linear' if 'FLAG' not in var_name else 'nearest'
+                var = ds_new[var_name].value.flatten()
+                f = interp1d(x_0, var, kind=method, bounds_error=False)
+                var_new = f(x_1)
+                var_new[mask] = np.nan
+                ds_new[var_name].value = var_new.reshape((dts_new.size, 1))
+        return ds_new
 
     @property
     def database(self):

@@ -403,7 +403,7 @@ class TSDashboard(Dashboard):
         else:
             ax = self.panels[panel_index].axes['major']
 
-        xlim = self.panels[1].axes['major'].get_xlim()
+        xlim = self.panels[0].axes['major'].get_xlim()
         ylim = ax.get_ylim()
         diff_xlim = xlim[1] - xlim[0]
         diff_ylim = ylim[1] - ylim[0]

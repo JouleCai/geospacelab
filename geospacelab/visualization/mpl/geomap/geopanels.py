@@ -541,7 +541,7 @@ class PolarMapPanel(GeoPanel):
     def overlay_contour(
             self,
             data, coords=None, cs=None,
-            regridding=True, grid_res=0.1, interp_method='linear', sparsely=False,
+            regridding=True, grid_res=0.1, interp_method='linear', sparsely=False, data_res=0.5,
             **kwargs,
     ):
         levels = kwargs.pop('levels', 10)
@@ -555,7 +555,7 @@ class PolarMapPanel(GeoPanel):
         if regridding:
             lon_in, lat_in, data_in = self.grid_data(
                 lon_in, lat_in, data_in, sparsely=sparsely,
-                grid_res=grid_res, interp_method=interp_method)
+                grid_res=grid_res, data_res=data_res, interp_method=interp_method)
             transform = None
         else:
             transform = ccrs.PlateCarree()
