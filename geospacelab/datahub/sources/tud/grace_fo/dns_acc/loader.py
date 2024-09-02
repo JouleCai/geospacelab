@@ -29,7 +29,7 @@ class Loader(object):
 
         if self.version == 'v01':
             raise ValueError
-        elif self.version in ['v02', 'v02b']:
+        elif 'v02' in self.version:
             self.load_v02()
         else:
             raise NotImplementedError

@@ -8,3 +8,15 @@ __license__ = "BSD-3-Clause License"
 __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
+from geospacelab.datahub import DatabaseModel
+
+
+class NCEIDatabase(DatabaseModel):
+    def __new__(cls, str_in, **kwargs):
+        obj = super().__new__(cls, str_in, **kwargs)
+        return obj
+
+
+ncei_database = NCEIDatabase('NCEI')
+ncei_database.url = 'https://www.ncei.noaa.gov/data/'
+ncei_database.category = 'online database'

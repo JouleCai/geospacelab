@@ -15,25 +15,25 @@ from geospacelab.datahub.sources.esa_eo.swarm.downloader import Downloader as Do
 
 class Downloader(DownloaderModel):
 
-    _default_file_name_patterns = ['SW_EXTD']
+    _default_file_name_patterns = ['SW_OPER']
+
     def __init__(
             self, dt_fr, dt_to,
             sat_id=None,
-            data_type='LP_HM',
             file_version=None,
-            file_extension = '.cdf',
+            file_extension='.cdf',
             data_file_root_dir=None,
             ftp_data_dir=None,
             force=True, direct_download=True, **kwargs
     ):
 
         if ftp_data_dir is None:
-            ftp_data_dir = f'Advanced/Plasma_Data/2_Hz_Langmuir_Probe_Extended_Dataset/Sat_{sat_id.upper()}'
+            ftp_data_dir = f'Level1b/Latest_baselines/MAGx_LR/Sat_{sat_id.upper()}'
 
         if data_file_root_dir is None:
-            data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Advanced" / "EFI-LP" / data_type
+            data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Level1b" / "MAG_LR"
         file_name_patterns = list(self._default_file_name_patterns)
-        file_name_patterns.extend(['EFI' + sat_id.upper()])
+        file_name_patterns.extend(['MAG' + sat_id.upper(), ])
         super(Downloader, self).__init__(
             dt_fr, dt_to,
             sat_id=sat_id,

@@ -385,8 +385,6 @@ class TSDashboard(Dashboard):
 
     def add_shading(self, dt_fr, dt_to, panel_index=0,
                     label=None, label_position=None, top_extend=0., bottom_extend=0., **kwargs):
-        if type(dt_fr) is not datetime.datetime:
-            return
 
         if label_position is None:
             label_position = 'top'

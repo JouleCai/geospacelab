@@ -334,7 +334,7 @@ class VariableBase(object):
         self._attrs_registered.extend(kwargs.keys())
         pyclass.set_object_attributes(self, append=True, logging=logging, **kwargs)
 
-    def clone(self, omit_attrs=None):
+    def clone(self, omit_attrs=None, var_name=None):
         """
         Clone a variable and return a new instance.
 
@@ -354,7 +354,10 @@ class VariableBase(object):
                 kwargs['dataset'] = self.dataset
             else:
                 kwargs[key] = copy.deepcopy(getattr(self, key))
-        return self.__class__(**kwargs)
+        var_new = self.__class__(**kwargs)
+        if var_name is not None:
+            self.dataset[var_name] = var_new
+        return var_new
 
     def get_depend(self, axis=None, retrieve_data=True):
         """

@@ -64,10 +64,10 @@ class Downloader(DownloaderBase):
             file_list = ftp.nlst()
 
             file_names = self.search_files(file_list=file_list, file_name_patterns=self.file_name_patterns)
-            file_dir = self.data_file_root_dir
+            file_dir_root = self.data_file_root_dir
             for ind_f, file_name in enumerate(file_names):
 
-                file_path = file_dir / file_name
+                file_path = file_dir_root / file_name
 
                 if file_path.is_file():
                     mylog.simpleinfo.info(

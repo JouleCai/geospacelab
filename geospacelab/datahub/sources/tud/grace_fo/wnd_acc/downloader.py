@@ -18,7 +18,7 @@ class Downloader(DownloaderModel):
     def __init__(
             self, dt_fr, dt_to,
             sat_id=None,
-            product='DNS-ACC',
+            product='WND-ACC',
             version='v02',
             force=True, direct_download=True, **kwargs
     ):
@@ -28,14 +28,16 @@ class Downloader(DownloaderModel):
             v_str = "version_02"
         else:
             raise NotImplementedError
+
         if sat_id == 'FO1':
             sat_id = 'C'
         else:
             raise NotImplementedError
-        
+
         data_file_root_dir = prf.datahub_data_root_dir / "TUD" / "GRACE-FO" / product.upper() / version
         ftp_data_dir = f'{v_str}/GRACE-FO_data'
-        file_name_patterns = [sat_id.upper(), product.replace('-', '_')]
+
+        file_name_patterns = ['G'+sat_id.upper(), product.replace('-', '_')]
         super(Downloader, self).__init__(
             dt_fr, dt_to,
             data_file_root_dir=data_file_root_dir, ftp_data_dir=ftp_data_dir, force=force,

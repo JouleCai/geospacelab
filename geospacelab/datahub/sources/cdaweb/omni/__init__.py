@@ -45,7 +45,8 @@ default_variable_names = ['DATETIME', 'SC_ID_IMF', 'SC_ID_PLS', 'IMF_PTS', 'PLS_
                           'B_x_GSM', 'B_y_GSM', 'B_z_GSM', 'B_T_GSM', 'B_TOTAL',
                           'v_sw', 'v_x', 'v_y', 'v_z',
                           'n_p', 'T', 'p_dyn', 'E', 'beta', 'Ma_A', 'Ma_MSP',
-                          'BSN_x', 'BSN_y', 'BSN_z']
+                          'BSN_x', 'BSN_y', 'BSN_z',
+                          'AE', 'AL', 'AU', 'SYM_H', 'SYM_D', 'ASY_H', 'ASY_D']
 
 # default_data_search_recursive = True
 

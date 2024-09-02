@@ -58,6 +58,7 @@ class OrbitPosition_SSCWS(DatasetSourced):
 
     def load_data(self, **kwargs):
         self.check_data_files(load_mode='AUTO', **kwargs)
+
         self._set_default_variables(
             default_variable_names,
             configured_variables={}
@@ -73,8 +74,13 @@ class OrbitPosition_SSCWS(DatasetSourced):
                 'SC_AACGM_LAT', 'SC_AACGM_LON', 'SC_AACGM_MLT',
                 'UNIX_TIME'
             ]
+            omit_variables = []
             for var_name in variable_names:
-                variables[var_name] = np.array(fnc[var_name]).reshape((fnc[var_name].shape[0], 1))
+                try:
+                    variables[var_name] = np.array(fnc[var_name]).reshape((fnc[var_name].shape[0], 1))
+                except:
+                    mylog.StreamLogger.warning("The variable {} does not exist!".format(var_name))
+                    omit_variables.append(var_name)
 
             time_units = fnc['UNIX_TIME'].units
 
@@ -87,6 +93,8 @@ class OrbitPosition_SSCWS(DatasetSourced):
             fnc.close()
 
             for var_name in self._variables.keys():
+                if var_name in omit_variables:
+                    continue
                 value = variables[var_name]
                 self._variables[var_name].join(value)
 
@@ -104,6 +112,17 @@ class OrbitPosition_SSCWS(DatasetSourced):
         for nm in range(diff_months + 1):
 
             thismonth = dttool.get_next_n_months(self.dt_fr, nm)
+            
+            sat_info = self.get_sat_info(self.sat_id)
+            time_c = datetime.datetime.now(datetime.timezone.utc)
+            
+            if dttool.get_diff_months(thismonth, sat_info['EndTime']) < 2:
+                if dttool.get_diff_months(sat_info['EndTime'], time_c) < 4:
+                    # self.force_download = True
+                    # done = self.download_data(thismonth=thismonth,)
+                    # if done:
+                    #     self.force_download = False
+                    mylog.StreamLogger.warning("The SC orbit data may need to be updated!")
 
             initial_file_dir = kwargs.pop(
                 'initial_file_dir', self.data_root_dir / self.sat_id.upper()
@@ -135,56 +154,8 @@ class OrbitPosition_SSCWS(DatasetSourced):
 
         return done
 
-    def download_data(self, thismonth=None):
+    def download_data(self, thismonth=None, ):
         done = False
-        # diff_months = (self.dt_to.year - self.dt_fr.year) * 12 + (self.dt_to.month - self.dt_fr.month) % 12
-        # mylog.simpleinfo.info("Searching the orbit data from NASA/SscWs ...")
-        # for nm in range(diff_months + 1):
-        #     thismonth = dttool.get_next_n_months(self.dt_fr, nm)
-        #     thismonthend = dttool.get_last_day_of_month(thismonth, end=True)
-        #     dt_fr_str = thismonth.strftime('%Y-%m-%dT%H:%M:%SZ')
-        #     dt_to_str = thismonthend.strftime('%Y-%m-%dT%H:%M:%SZ')
-        #
-        #     result = self.ssc.get_locations(
-        #         [self.sat_id],
-        #         [dt_fr_str, dt_to_str], [CoordinateSystem.GEO, CoordinateSystem.GSE]
-        #     )
-        #
-        #     if not list(result['Data']):
-        #         return None
-        #
-        #     data = result['Data'][0]
-        #     coords = data['Coordinates'][0]
-        #     coords_gse = data['Coordinates'][1]
-        #     dts = data['Time']
-        #
-        #     coords_in = {'x': coords['X'] / 6371.2, 'y': coords['Y'] / 6371.2, 'z': coords['Z'] / 6371.2}
-        #     cs_car = gsl_cs.GEOCCartesian(coords=coords_in, ut=dts)
-        #     cs_sph = cs_car.to_spherical()
-        #     orbits = {
-        #         'SC_GEO_LAT': cs_sph['lat'],
-        #         'SC_GEO_LON': cs_sph['lon'],
-        #         'SC_GEO_ALT': cs_sph['height'],
-        #         'SC_GEO_X': coords['X'],
-        #         'SC_GEO_Y': coords['Y'],
-        #         'SC_GEO_Z': coords['Z'],
-        #         'SC_GSE_X': coords_gse['X'],
-        #         'SC_GSE_Y': coords_gse['Y'],
-        #         'SC_GSE_Z': coords_gse['Z'],
-        #         'SC_DATETIME': dts,
-        #     }
-        #     if self.to_AACGM:
-        #         cs_aacgm = cs_sph.to_AACGM(append_mlt=True)
-        #         orbits.update(
-        #             **{
-        #                 'SC_AACGM_LAT': cs_aacgm['lat'],
-        #                 'SC_AACGM_LON': cs_aacgm['lon'],
-        #                 'SC_AACGM_MLT': cs_aacgm['mlt'],
-        #             }
-        #         )
-        #     if self.to_netcdf:
-        #         self.save_to_netcdf(orbits, dt_fr=thismonth, dt_to=thismonthend)
-        #     done = True
         mylog.simpleinfo.info("Searching the orbit data from NASA/SscWs ...")
         thismonthend = dttool.get_last_day_of_month(thismonth, end=True)
         dt_fr_str = thismonth.strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -284,6 +255,12 @@ class OrbitPosition_SSCWS(DatasetSourced):
     @staticmethod
     def list_satellites(reload=False, logging=True):
         file_path = prf.datahub_data_root_dir / 'SSCWS' / 'SSCWS_info_satellites.pkl'
+        mtime = datetime.datetime.fromtimestamp(file_path.stat().st_mtime, tz=datetime.timezone.utc)
+        time_c = datetime.datetime.now(datetime.timezone.utc)
+        diff_month = dttool.get_diff_months(mtime, time_c)
+        if diff_month >= 1:
+            reload = True
+            
         if not file_path.is_file():
             file_path.parent.resolve().mkdir(exist_ok=True)
             reload = True
@@ -299,25 +276,29 @@ class OrbitPosition_SSCWS(DatasetSourced):
             sat_list = pickle.load(fobj)
 
         if logging:
-            mylog.simpleinfo.info(
+            OrbitPosition_SSCWS._print_sat_info(sat_list)
+        return sat_list
+    
+    @staticmethod
+    def _print_sat_info(sat_list):
+        mylog.simpleinfo.info(
                 '{:<20s}{:<30s}{:<20s}{:<25s}{:<25s}{:80s}'.format(
                     'ID', 'NAME', 'RESOLUTION (s)', 'FROM', 'TO', 'RESOURCE'
                 )
             )
-            for sat_info in sat_list:
-                id = sat_info['Id']
-                name = sat_info['Name']
-                res = sat_info['Resolution']
-                dt_fr = sat_info['StartTime']
-                dt_to = sat_info['EndTime']
-                resource = sat_info['ResourceId']
+        for sat_info in sat_list:
+            id = sat_info['Id']
+            name = sat_info['Name']
+            res = sat_info['Resolution']
+            dt_fr = sat_info['StartTime']
+            dt_to = sat_info['EndTime']
+            resource = sat_info['ResourceId']
 
-                mylog.simpleinfo.info(
-                    '{:<20s}{:30s}{:<20d}{:<25s}{:<25s}{:50s}'.format(
-                        id, name, res, dt_fr.strftime('%Y-%m-%d'), dt_to.strftime('%Y-%m-%d'), str(resource)
-                    )
+            mylog.simpleinfo.info(
+                '{:<20s}{:30s}{:<20d}{:<25s}{:<25s}{:50s}'.format(
+                    id, name, res, dt_fr.strftime('%Y-%m-%d'), dt_to.strftime('%Y-%m-%d'), str(resource)
                 )
-        return sat_list
+            )
 
     @staticmethod
     def get_sat_info(sat_id):
@@ -326,6 +307,13 @@ class OrbitPosition_SSCWS(DatasetSourced):
         try:
             ind = sat_ids.index(sat_id)
         except ValueError:
+            multi_sats = []
+            for sat_info in sat_list:
+                if sat_id in sat_info['Id']:
+                    multi_sats.append(sat_info)
+            if list(multi_sats):
+                mylog.StreamLogger.warning("Multiple satellites found! Select one of the following satellite ids:")
+                OrbitPosition_SSCWS._print_sat_info(multi_sats)
             raise KeyError('The satellite ID does not exist!')
 
         return sat_list[ind]
@@ -333,6 +321,12 @@ class OrbitPosition_SSCWS(DatasetSourced):
     @staticmethod
     def list_stations(reload=False, logging=True):
         file_path = prf.datahub_data_root_dir / 'SSCWS' / 'SSCWS_info_ground_stations.pkl'
+        mtime = datetime.datetime.fromtimestamp(file_path.stat().st_mtime, tz=datetime.timezone.utc)
+        time_c = datetime.now(datetime.timezone.utc)
+        diff_month = dttool.get_diff_months(mtime, time_c)
+        if diff_month >= 1:
+            reload = True
+            
         if not file_path.is_file():
             file_path.parent.resolve().mkdir(exist_ok=True)
             reload = True
@@ -377,11 +371,11 @@ class OrbitPosition_SSCWS(DatasetSourced):
 
         return station_list[ind]
 
-    @staticmethod
-    def calc_orbit_az_el(lat, lon, height):
-        cs_geo = gsl_cs.GEOCSpherical(coords={'lat': lat, 'lon': lon, 'height':height})
+    # @staticmethod
+    # def calc_orbit_az_el(lat, lon, height):
+    #     cs_geo = gsl_cs.GEOCSpherical(coords={'lat': lat, 'lon': lon, 'height':height})
         
-        cs_geo = cs_geo.to_cartesian()
+    #     cs_geo = cs_geo.to_cartesian()
 
     def add_GEO_LST(self):
         lons = self['SC_GEO_LON'].flatten()
@@ -394,6 +388,7 @@ class OrbitPosition_SSCWS(DatasetSourced):
         var.unit = 'h'
         var.depends = self['SC_GEO_LON'].depends
         return var
+
 
 if __name__ == "__main__":
     dt_fr = datetime.datetime(2016, 1, 1,)

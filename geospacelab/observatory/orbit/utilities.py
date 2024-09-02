@@ -33,14 +33,18 @@ class LEOToolbox(DatasetUser):
         self.sector_cs = 'GEO'
         self.sectors = {}
 
-    def search_orbit_nodes(self):
+    def search_orbit_nodes(self, data_interval=1):
         glat = self['SC_GEO_LAT'].value.flatten()
+        glat_ = glat[0::data_interval]
         glon = self['SC_GEO_LON'].value.flatten()
         lst = self['SC_GEO_LST'].value.flatten()
         dts = self['SC_DATETIME'].value.flatten()
-        ind_1 = argrelextrema(np.abs(glat), np.less)[0]
-        ind_2 = argrelextrema(glat, np.greater)[0]
-        ind_3 = argrelextrema(glat, np.less)[0]
+        ind_1 = argrelextrema(np.abs(glat_), np.less, )[0]
+        ind_1 = ind_1 * data_interval
+        ind_2 = argrelextrema(glat_, np.greater, )[0]
+        ind_2 = ind_2 * data_interval
+        ind_3 = argrelextrema(glat_, np.less)[0]
+        ind_3 = ind_3 * data_interval
         inds_asc = []
         inds_dsc = []
         for ind_N in ind_2:
@@ -59,7 +63,7 @@ class LEOToolbox(DatasetUser):
         self.descending_nodes['INDEX']= inds_dsc
         self.descending_nodes['GEO_LON'] = glon[inds_dsc]
         self.descending_nodes['GEO_LST'] = lst[inds_dsc]
-        self.descending_nodes['DATETIME'] = dts[inds_asc]
+        self.descending_nodes['DATETIME'] = dts[inds_dsc]
 
         self.northern_nodes['INDEX'] = ind_2
         self.northern_nodes['GEO_LON'] = glon[ind_2]
@@ -69,7 +73,6 @@ class LEOToolbox(DatasetUser):
         self.southern_nodes['GEO_LON'] = glon[ind_3]
         self.southern_nodes['GEO_LST'] = lst[ind_3]
         self.southern_nodes['DATETIME'] = dts[ind_3]
-
 
     def group_by_sector(self, sector_name, boundary_lat, sector_cs='GEO'):
         self.sector_cs = sector_cs
@@ -106,10 +109,16 @@ class LEOToolbox(DatasetUser):
         else:
             raise NotImplementedError
 
-        inds_center_N = argrelextrema(lat, np.greater)[0]
+        # inds_center_N = argrelextrema(lat, np.greater)[0]
+        inds_center_N = self.northern_nodes['INDEX']
+        iii = np.where(lat[inds_center_N] > (np.max(lat[inds_center_N]))/1.5)[0]
+        inds_center_N = inds_center_N[iii]
         # inds_center_N = inds_center_N[np.where(lat[inds_center_N] > boundary_lat)[0]]
 
-        inds_center_S = argrelextrema(lat, np.less)[0]
+        # inds_center_S = argrelextrema(lat, np.less)[0]
+        inds_center_S = self.southern_nodes['INDEX']
+        iii = np.where(lat[inds_center_S] < (np.min(lat[inds_center_S]))/1.5)[0]
+        inds_center_S = inds_center_S[iii]
         # inds_center_S = inds_center_S[np.where(lat[inds_center_S] < -np.abs(boundary_lat))[0]]
 
         # Sector centered at the northern pole from the ascending node towards the descending node.
@@ -289,7 +298,7 @@ class LEOToolbox(DatasetUser):
                 
     def griddata_by_sector(
             self, sector_name=None, variable_names=None, x_grid_res=20*60, y_grid_res=0.5, along_track_interp=True,
-            x_data_res = None, y_data_res=None
+            x_data_res=None, y_data_res=None
             ):
         self.visual = 'on'
         dts_c = self['_'.join(('SECTOR', sector_name, 'DATETIME'))].value.flatten()
@@ -300,7 +309,7 @@ class LEOToolbox(DatasetUser):
         lat_range = self.sectors[sector_name]['PSEUDO_LAT_RANGE']
 
         if along_track_interp:
-            x_data = dts[sector>0]
+            x_data = dts[sector > 0]
         else:
             x_data = dts_c[sector > 0]
         
@@ -318,22 +327,25 @@ class LEOToolbox(DatasetUser):
         total_seconds = (dts[-1] - dt0).total_seconds()
         min_x = 0
         max_x = total_seconds
-
-        nx = int(np.ceil((max_x - min_x) / x_grid_res) + 1)
-        ny = int(np.ceil(np.diff(lat_range) / y_grid_res) + 1)
-        
+        x_unique = np.unique(dts_c[sector > 0])
+        x_unique = [(t - dt0).total_seconds() for t in x_unique]
         if x_data_res is None:
-            x_unique = np.unique(dts_c[sector > 0])
-            x_unique = [(t - dt0).total_seconds() for t in x_unique]
             x_data_res = np.median(np.diff(x_unique))
         if y_data_res is None:
             y_data_res = np.median(np.diff(y_data[y_data < np.abs(np.diff(lat_range))]/2))
+            if y_grid_res > y_data_res:
+                y_data_res = y_grid_res
 
-        grid_x, grid_y = np.meshgrid(np.linspace(min_x, max_x, nx),
-                                    np.linspace(lat_range[0], lat_range[1], ny))
+        ny = int(np.ceil(np.diff(lat_range) / y_grid_res) + 1)
+        if x_grid_res is None:
+            grid_x, grid_y = np.meshgrid(x_unique, np.linspace(lat_range[0], lat_range[1], ny))
+        else:
+            nx = int(np.ceil((max_x - min_x) / x_grid_res) + 1)
+            grid_x, grid_y = np.meshgrid(np.linspace(min_x, max_x, nx),
+                                        np.linspace(lat_range[0], lat_range[1], ny))
 
         grid_lat = griddata((x_1, y), y, (grid_x, grid_y), method='nearest')
-        
+
         if self.sector_cs == 'AACGM':
             mask_y = np.abs(grid_y - grid_lat) > y_data_res * 2
             which_lat = 'AACGM_LAT'
@@ -341,7 +353,7 @@ class LEOToolbox(DatasetUser):
             mask_y = np.abs(grid_y - grid_lat) > y_data_res * 2
             which_lat = 'APEX_LAT' 
         else:
-            mask_y = np.abs(grid_y - grid_lat) > y_data_res
+            mask_y = np.abs(grid_y - grid_lat) > y_data_res * 1.2
             which_lat = 'GEO_LAT'
             
         grid_sectime = griddata((x_1, y), x_1, (grid_x, grid_y), method='nearest')
@@ -417,17 +429,34 @@ class LEOToolbox(DatasetUser):
 
 
         return
-
+    
+    def add_GEO_LST(self):
+        lons = self['SC_GEO_LON'].flatten()
+        uts = self['SC_DATETIME'].flatten()
+        lsts = [ut + datetime.timedelta(hours=lon / 15.) for ut, lon in zip(uts, lons)]
+        lsts = [lst.hour + lst.minute / 60. + lst.second / 3600. for lst in lsts]
+        var = self.add_variable(var_name='SC_GEO_LST')
+        var.value = np.array(lsts)[:, np.newaxis]
+        var.label = 'LST'
+        var.unit = 'h'
+        var.depends = self['SC_GEO_LON'].depends
+        return var
+    
     @staticmethod
-    def format_pseudo_lat_label(ax, sector_name, is_integer=True):
+    def format_pseudo_lat_label(ax, sector_name, is_integer=True, y_tick_res=15.):
         if is_integer:
             lat_format = '{:4.0f}'
         else:
             lat_format = '{:5.1f}'
+    
         y_lim = ax.get_ylim()
         y_max = np.max(y_lim)
         y_min = np.min(y_lim)
-        yticks = ax.get_yticks()
+        
+        yticks_ref = np.arange(-360, 720 + y_tick_res, y_tick_res)
+        iii = np.where((yticks_ref>=y_min) & (yticks_ref<=y_max))[0]
+        # yticks = ax.get_yticks()
+        yticks = yticks_ref[iii]
         ylabels = []
         n1 = 0
         n2 = len(yticks) - 1
@@ -532,16 +561,15 @@ class LEOToolbox(DatasetUser):
                 self[var_name_in].visual.axis[1].data_scale = 100.
 
     @staticmethod
-    def smooth_savgol(dts, data, box_pts, t_res):
+    def smooth_savgol(dts, data, box_pts, t_res, poly_order=1):
         delta_sectime = 1
         sectime, _ = dttool.convert_datetime_to_sectime(dts)
         ind_nan = np.isnan(data)
         sectime_i = np.arange(0, sectime[-1], delta_sectime)
         data_i = np.interp(sectime_i, sectime[~ind_nan], data[~ind_nan])
 
-        order = 1
         window_size = int(np.floor(t_res / delta_sectime * box_pts / 2) * 2 + 1)
-        y = sig.savgol_filter(data_i, window_size, order)
+        y = sig.savgol_filter(data_i, window_size, poly_order)
         data_new = np.interp(sectime, sectime_i, y)
         data_new[ind_nan] = np.nan
         return data_new
@@ -611,6 +639,5 @@ class LEOToolbox(DatasetUser):
         v_unit[:, 2] = - v_new[:, 2] / norm
         
         return v_unit
-        
-        
+
          

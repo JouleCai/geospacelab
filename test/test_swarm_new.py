@@ -1,9 +1,11 @@
 import datetime
 import matplotlib.pyplot as plt
 import numpy as np
+import pathlib
 
 import geospacelab.visualization.mpl.dashboards as dashboards
 
+cwd = pathlib.Path(__file__).parent.resolve()
 
 def test_swarm():
     dt_fr = datetime.datetime(2015, 2, 15, 20, 5)
@@ -22,8 +24,8 @@ def test_swarm():
     db.set_layout(panel_layouts=[[n_e], [T_e], [flag]])
     db.draw()
     plt.savefig('swarm_example', dpi=300)
-    plt.show()
+    # plt.show()
 
 
 if __name__ == "__main__":
-    test_swarm()
+    test_swarm_fac()

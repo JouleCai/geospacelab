@@ -8,18 +8,17 @@ __license__ = "BSD-3-Clause License"
 __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
-
-import copy
-import numpy as np
 from geospacelab.datahub import VariableModel as Var
+import geospacelab.visualization.mpl.colormaps as cm
 
-database = 'SuperMAG'
+import numpy as np
+
+database = 'ESA/EarthOnline'
 
 timestamps = {
-    'DATETIME': 'DATETIME',
+    'SC_DATETIME': 'SC_DATETIME',
 }
 
-depend_0 = {'UT': 'DATETIME'}
 
 default_colormap = "gist_ncar"
 
@@ -38,15 +37,21 @@ default_plot_config = {
 configured_variables = {}
 visual = 'on'
 
+depend_0 = {'UT': 'SC_DATETIME',
+            'GEO_LAT': 'SC_GEO_LAT', 'GEO_LON': 'SC_GEO_LON',
+            'AACGM_LAT': 'SC_AACGM_LAT', 'AACGM_LON': 'SC_AACGM_LON', 'AACGM_MLT': 'SC_AACGM_MLT'}
+# depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
 
 ####################################################################################################################
-var_name = 'SME'
+var_name = 'u_CROSS'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
-var.fullname = 'SME index'
-var.label = r'SME'
-var.group = r'SME indices'
-var.unit = 'nT'
+var.fullname = 'Cross neutral wind'
+var.label = r'$u_{cross}$'
+var.unit = 'm/s'
+var.unit_label = r'm/s'
+var.group = r'$u$'
+# var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
@@ -55,22 +60,23 @@ plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-np.inf, np.inf]
-axis[1].label = '@v.group'
-axis[1].unit = '@v.unit_label'
+# axis[1].lim = [np.nan, np.nan]
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
+axis[1].label = '@v.label'
+axis[1].unit = '@v.unit_label'
 
 configured_variables[var_name] = var
 
 ####################################################################################################################
-var_name = 'SMU'
+var_name = 'SC_GEO_LAT'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
-var.fullname = 'SMU index'
-var.label = r'SMU'
-var.group = r'SME indices'
-var.unit = 'nT'
+var.fullname = 'S/C geographic latitude'
+var.label = r'GLAT'
+var.unit = 'degree'
+var.unit_label = r'$^\circ$'
+var.group = r'GEO'
+# var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
@@ -79,23 +85,22 @@ plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-np.inf, np.inf]
-axis[1].label = '@v.group'
+# axis[1].lim = [-2000, 2000]
+axis[1].label = '@v.label'
 axis[1].unit = '@v.unit_label'
-axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
 
 configured_variables[var_name] = var
 
-
 ####################################################################################################################
-var_name = 'SML'
+var_name = 'SC_GEO_LON'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
-var.fullname = 'SML index'
-var.label = r'SML'
-var.group = r'SME indices'
-var.unit = 'nT'
+var.fullname = 'S/C geographic latitude'
+var.label = r'GLON'
+var.unit = 'degree'
+var.unit_label = r'$^\circ$'
+var.group = r'GEO'
+# var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
@@ -104,36 +109,8 @@ plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-np.inf, np.inf]
-axis[1].label = '@v.group'
+# axis[1].lim = [-2000, 2000]
+axis[1].label = '@v.label'
 axis[1].unit = '@v.unit_label'
-axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
 
 configured_variables[var_name] = var
-
-
-####################################################################################################################
-var_name = 'SMR'
-var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var.fullname = 'SMR index'
-var.label = r'SMR'
-var.group = r'SMR indices'
-var.unit = 'nT'
-var.depends = {0: depend_0}
-# set plot attrs
-plot_config = var.visual.plot_config
-plot_config.config(**default_plot_config)
-plot_config.style = '1noE'
-# set axis attrs
-axis = var.visual.axis
-axis[1].data = "@v.value"
-axis[1].lim = [None, None]
-axis[1].label = '@v.group'
-axis[1].unit = '@v.unit_label'
-axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
-
-configured_variables[var_name] = var
-

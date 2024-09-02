@@ -48,7 +48,7 @@ class LoaderModel(object):
         if self.file_type == 'cdf':
             self.load_cdf_data()
 
-    def load_cdf_data(self):
+    def load_cdf_data(self,):
         """
         load the data from the cdf file
         :return:
@@ -61,7 +61,7 @@ class LoaderModel(object):
             new_dict = {vn: vn for vn in variables}
             self.variable_name_dict = pybasic.dict_set_default(self.variable_name_dict, **new_dict)
 
-        epochs = cdf_file.varget(variable='Timestamp')
+        epochs = cdf_file.varget(variable=self.variable_name_dict['CDF_EPOCH'])
         if self.dt_fr is not None:
             t = self.dt_fr
             epoch_fr = cdflib.cdfepoch.compute_epoch([t.year, t.month, t.day, t.hour, t.minute, t.second])
@@ -74,6 +74,7 @@ class LoaderModel(object):
             epoch_to = epochs[-1]
         ind_t = np.where((epochs >= epoch_fr) & (epochs <= epoch_to))[0]
 
+        num_data = len(epochs)
         for var_name, cdf_var_name in self.variable_name_dict.items():
             if var_name == 'CDF_EPOCH':
                 epochs = epochs[ind_t]
@@ -89,6 +90,11 @@ class LoaderModel(object):
             var = cdf_file.varget(variable=cdf_var_name)
             var = np.array(var)
             vshape = var.shape
+
+            if num_data not in vshape:
+                self.variables[var_name] = var
+                continue
+
             if len(vshape) == 1:
                 var = var[:, np.newaxis]
             self.variables[var_name] = var[ind_t, ::]

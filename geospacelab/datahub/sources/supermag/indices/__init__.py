@@ -97,22 +97,25 @@ class Dataset(datahub.DatasetSourced):
 
             for var_name in load_obj.variables.keys():
                 if var_name not in self.keys():
-                    if var_name in ['SME', 'SMEs', 'SMEd', 'SMR']:
+                    if var_name in ['SME', 'SMEs', 'SMEd', 'SMEr']:
                         self[var_name] = var_config.configured_variables['SME'].clone()
                         self[var_name].name = var_name
                         self[var_name].fullname = self[var_name].fullname.replace('SME', var_name)
                         
-                    elif var_name in ['SMU', 'SMUs', 'SMUd']:
+                    elif var_name in ['SMU', 'SMUs', 'SMUd', 'SMUr']:
                         self[var_name] = var_config.configured_variables['SMU'].clone()
                         self[var_name].name = var_name
                         self[var_name].fullname = self[var_name].fullname.replace('SMU', var_name)
-                    elif var_name in ['SML', 'SMLs', 'SMLd']:
+                    elif var_name in ['SML', 'SMLs', 'SMLd', 'SMLr']:
                         self[var_name] = var_config.configured_variables['SML'].clone() 
                         self[var_name].name = var_name
                         self[var_name].fullname = self[var_name].fullname.replace('SML', var_name)
+                    elif var_name in ['SMR', 'SMR00', 'SMR06', 'SMR12', 'SMR18']:
+                        self[var_name] = var_config.configured_variables['SMR'].clone()
+                        self[var_name].name = var_name
+                        self[var_name].fullname = self[var_name].fullname.replace('SMR', var_name)
                     else:
                         self.add_variable(var_name=var_name)
-                    
                 self._variables[var_name].join(load_obj.variables[var_name])
 
             # self.select_beams(field_aligned=True)

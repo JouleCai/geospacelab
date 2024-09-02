@@ -38,11 +38,13 @@ class Downloader(DownloaderBase):
 
     def __init__(self,
                  dt_fr, dt_to,
+                 sat_id=None,
                  data_file_root_dir=None, ftp_data_dir=None, force=True, direct_download=True, file_version=None,
                  file_extension = '.cdf',
                  **kwargs):
         self.ftp_host = "swarm-diss.eo.esa.int"
         self.ftp_port = 21
+        self.sat_id = sat_id.upper()
         if ftp_data_dir is None:
             raise ValueError
 
@@ -58,63 +60,72 @@ class Downloader(DownloaderBase):
 
     def download(self, **kwargs):
         done = False
-        try:
-            ftp = ftplib.FTP()
-            ftp.connect(self.ftp_host, self.ftp_port, 30)  # 30 timeout
-            ftp.login()
-            ftp.cwd(self.ftp_data_dir)
-            file_list = ftp.nlst()
-            kwargs.setdefault("file_name_patterns", [])
-            file_names, versions = self.search_files(file_list=file_list, file_name_patterns=kwargs['file_name_patterns'])
-            file_dir = self.data_file_root_dir
-            for ind_f, file_name in enumerate(file_names):
-                dt_regex = re.compile(r'(\d{8}T\d{6})_(\d{8}T\d{6})_(\d{4})')
-                rm = dt_regex.findall(file_name)
-                this_day = datetime.datetime.strptime(rm[0][0], '%Y%m%dT%H%M%S')
-                file_path = file_dir / rm[0][2] / file_name
-                local_files = file_path.parent.resolve().glob(file_path.stem.split('.')[0] + '*' + self.file_extension)
-                # file_path_cdf = file_path.parent.resolve() / ((file_path.stem.split('.')[0] + self.file_extension))
-                # if file_path_cdf.is_file():
-                if list(local_files):
-                    mylog.simpleinfo.info(
-                        "The file {} exists in the directory {}.".format(
-                            file_path.name, file_path.parent.resolve()
+        diff_month = dttool.get_diff_months(self.dt_fr, self.dt_to)
+        for nm in range(diff_month+1):
+            this_month = dttool.get_next_n_months(self.dt_fr, nm)
+            file_name_patterns = kwargs['file_name_patterns']
+            file_name_patterns.append(this_month.strftime("%Y%m"))
+            try:
+                ftp = ftplib.FTP()
+                ftp.connect(self.ftp_host, self.ftp_port, 30)  # 30 timeout
+                ftp.login()
+                ftp.cwd(self.ftp_data_dir)
+                file_list = ftp.nlst()
+               
+                file_names, versions = self.search_files(file_list=file_list, file_name_patterns=file_name_patterns)
+                file_dir_root = self.data_file_root_dir
+                for ind_f, file_name in enumerate(file_names):
+                    dt_regex = re.compile(r'(\d{8}T\d{6})_(\d{8}T\d{6})_(\d{4})')
+                    rm = dt_regex.findall(file_name)
+                    this_day = datetime.datetime.strptime(rm[0][0], '%Y%m%dT%H%M%S')
+                    file_dir = file_dir_root / rm[0][2] / 'Sat_{}'.format(self.sat_id) / this_day.strftime("%Y")
+                    file_dir.mkdir(parents=True, exist_ok=True)
+                    file_path = file_dir / file_name
+                    local_files = file_path.parent.resolve().glob(file_path.stem.split('.')[0] + '*' + self.file_extension)
+                    # file_path_cdf = file_path.parent.resolve() / ((file_path.stem.split('.')[0] + self.file_extension))
+                    # if file_path_cdf.is_file():
+                    if list(local_files):
+                        mylog.simpleinfo.info(
+                            "The file {} exists in the directory {}.".format(
+                                file_path.name, file_path.parent.resolve()
+                            )
                         )
+                        if not self.force:
+                            done = True
+                            continue
+                    else:
+                        file_path.parent.resolve().mkdir(parents=True, exist_ok=True)
+                    mylog.simpleinfo.info(
+                        f"Downloading the file {file_name} from the FTP ..."
                     )
-                    if not self.force:
-                        done = True
-                        continue
-                else:
-                    file_path.parent.resolve().mkdir(parents=True, exist_ok=True)
-                mylog.simpleinfo.info(
-                    f"Downloading the file {file_name} from the FTP ..."
-                )
-                try:
-                    with open(file_path, 'w+b') as f:
-                        done = False
-                        res = ftp.retrbinary('RETR ' + file_name, f.write)
-                        print(res)
-                        if not res.startswith('226'):
-                            mylog.StreamLogger.warning('Downloaded of file {0} is not compile.'.format(file_name))
-                            pathlib.Path.unlink(file_path)
+                    try:
+                        with open(file_path, 'w+b') as f:
                             done = False
-                            return done
-                        mylog.simpleinfo.info("Done.")
-                except:
-                    pathlib.Path.unlink(file_path)
-                    mylog.StreamLogger.warning('Downloaded of file {0} is not compile.'.format(file_name))
-                    return False
-                mylog.simpleinfo.info("Uncompressing the file ...")
-                with zipfile.ZipFile(file_path, 'r') as zip_ref:
-                    zip_ref.extractall(file_path.parent.resolve())
-                    file_path.unlink()
-                mylog.simpleinfo.info("Done. The zip file has been removed.")
+                            res = ftp.retrbinary('RETR ' + file_name, f.write)
+                            print(res)
+                            if not res.startswith('226'):
+                                mylog.StreamLogger.warning('The file {0} downloaded is not compile.'.format(file_name))
+                                pathlib.Path.unlink(file_path)
+                                done = False
+                                ftp.quit()
+                                return done
+                            mylog.simpleinfo.info("Done.")
+                    except:
+                        pathlib.Path.unlink(file_path)
+                        mylog.StreamLogger.warning('The file {0} downloaded is not compile.'.format(file_name))
+                        ftp.quit()
+                        return False
+                    mylog.simpleinfo.info("Uncompressing the file ...")
+                    with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                        zip_ref.extractall(file_path.parent.resolve())
+                        file_path.unlink()
+                    mylog.simpleinfo.info("Done. The zip file has been removed.")
 
-            done = True
-            ftp.quit()
-        except:
-            print('Error during download from FTP')
-            done = False
+                done = True
+                ftp.quit()
+            except:
+                print('Error during download from FTP')
+                done = False
         return done
 
     def search_files(self, file_list=None, file_name_patterns=None):

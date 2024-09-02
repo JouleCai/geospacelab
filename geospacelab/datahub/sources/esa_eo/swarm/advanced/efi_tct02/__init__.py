@@ -164,6 +164,20 @@ class Dataset(datahub.DatasetSourced):
 
         if self.add_APEX:
             self.convert_to_APEX()
+
+        self.add_GEO_LST()
+
+    def add_GEO_LST(self):
+        lons = self['SC_GEO_LON'].flatten()
+        uts = self['SC_DATETIME'].flatten()
+        lsts = [ut + datetime.timedelta(hours=lon / 15.) for ut, lon in zip(uts, lons)]
+        lsts = [lst.hour + lst.minute / 60. + lst.second / 3600. for lst in lsts]
+        var = self.add_variable(var_name='SC_GEO_LST')
+        var.value = np.array(lsts)[:, np.newaxis]
+        var.label = 'LST'
+        var.unit = 'h'
+        var.depends = self['SC_GEO_LON'].depends
+        return var
             
     
     def convert_to_APEX(self):
@@ -236,7 +250,7 @@ class Dataset(datahub.DatasetSourced):
             initial_file_dir = kwargs.pop(
                 'initial_file_dir', self.data_root_dir
             )
-
+            initial_file_dir = initial_file_dir / 'Sat_{}'.format(self.sat_id) / this_day.strftime("%Y")
             file_patterns = [
                 'EFI' + self.sat_id.upper(),
                 self.product.upper(),

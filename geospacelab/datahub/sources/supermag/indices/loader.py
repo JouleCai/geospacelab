@@ -26,10 +26,14 @@ class Loader:
 
     def load(self):
         fnc = netCDF4.Dataset(self.file_path)
-        var_names = fnc.variables.keys()
+        var_names_nc = fnc.variables.keys()
         variables = {}
-        for var_name in var_names:
-            variables[var_name] = np.array(fnc[var_name])
+        for var_name_nc in var_names_nc:
+            if 'smr_' in var_name_nc:
+                var_name = var_name_nc.upper()
+            else:
+                var_name = var_name_nc
+            variables[var_name] = np.array(fnc[var_name_nc]) 
             if len(variables[var_name].shape) == 1:
                 variables[var_name] = variables[var_name][:, np.newaxis]
 

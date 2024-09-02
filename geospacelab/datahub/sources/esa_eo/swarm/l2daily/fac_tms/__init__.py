@@ -14,19 +14,19 @@ from geospacelab.config import prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
-from geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_lp_hm.loader import Loader as default_Loader
-from geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_lp_hm.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_lp_hm.variable_config as var_config
+from geospacelab.datahub.sources.esa_eo.swarm.l2daily.fac_tms.loader import Loader as default_Loader
+from geospacelab.datahub.sources.esa_eo.swarm.l2daily.fac_tms.downloader import Downloader as default_Downloader
+import geospacelab.datahub.sources.esa_eo.swarm.l2daily.fac_tms.variable_config as var_config
 
 
 default_dataset_attrs = {
     'database': esaeo_database,
     'facility': swarm_facility,
-    'instrument': 'EFI-LP',
-    'product': 'LP_HM',
+    'instrument': 'MAG',
+    'product': 'FAC_TMS',
     'data_file_ext': 'cdf',
     'product_version': 'latest',
-    'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Advanced',
+    'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Level2daily' / 'FAC_TMS',
     'allow_load': True,
     'allow_download': True,
     'force_download': False,
@@ -44,25 +44,12 @@ default_variable_names = [
     'SC_DATETIME',
     'SC_GEO_LAT',
     'SC_GEO_LON',
-    'SC_GEO_ALT',
     'SC_GEO_r',
-    'SC_SZA',
-    'SC_SAz',
-    'SC_ST',
-    'SC_DIP_LAT',
-    'SC_DIP_LON',
-    'SC_QD_MLT',
-    'SC_QD_LAT',
-    'SC_AACGM_LAT',
-    'SC_AACGM_LON',
-    'n_e',
-    'T_e_HGN',
-    'T_e_LGN',
-    'T_e',
-    'V_s_HGN',
-    'V_s_LGN',
-    'SC_U',
-    'FLAG'
+    'J_r', 'J_r_err',
+    'J_FA', 'J_FA_err',
+    'FLAG_B',
+    'FLAG_q',
+    'FLAG',
     ]
 
 # default_data_search_recursive = True
@@ -78,8 +65,8 @@ class Dataset(datahub.DatasetSourced):
 
         self.database = kwargs.pop('database', 'ESA/EarthOnline')
         self.facility = kwargs.pop('facility', 'SWARM')
-        self.instrument = kwargs.pop('instrument', 'EFI-LP')
-        self.product = kwargs.pop('product', 'HM02')
+        self.instrument = kwargs.pop('instrument', 'MAG')
+        self.product = kwargs.pop('product', 'FAC_TMS')
         self.product_version = kwargs.pop('product_version', '')
         self.local_latest_version = ''
         self.allow_download = kwargs.pop('allow_download', False)
@@ -115,7 +102,7 @@ class Dataset(datahub.DatasetSourced):
             if not list(attr):
                 mylog.StreamLogger.warning("The parameter {} is required before loading data!".format(attr_name))
 
-        self.data_root_dir = self.data_root_dir / self.instrument / self.product
+        # self.data_root_dir = self.data_root_dir / self.product
 
         if str(self.product_version) and self.product_version != 'latest':
             self.data_root_dir = self.data_root_dir / self.product_version
@@ -144,7 +131,6 @@ class Dataset(datahub.DatasetSourced):
             #             "Keep an eye on the latest baselines online!"
             #         )
 
-
     def label(self, **kwargs):
         label = super().label()
         return label
@@ -157,7 +143,7 @@ class Dataset(datahub.DatasetSourced):
             configured_variables=var_config.configured_variables
         )
         for file_path in self.data_file_paths:
-            load_obj = self.loader(file_path, file_type='cdf')
+            load_obj = self.loader(file_path, file_type='cdf', dt_fr=self.dt_fr, dt_to=self.dt_to)
 
             for var_name in self._variables.keys():
                 value = load_obj.variables[var_name]
@@ -227,14 +213,14 @@ class Dataset(datahub.DatasetSourced):
         self['SC_AACGM_LON'].value = cs_aacgm['lon'].reshape(self['SC_DATETIME'].value.shape)
         self['SC_AACGM_MLT'].value = cs_aacgm['mlt'].reshape(self['SC_DATETIME'].value.shape)
 
-    def time_filter_by_quality(self, quality_flags=None):
-        if quality_flags is None:
-            quality_flags = np.array([1])
+    def time_filter_by_quality(self, quality_lim=None):
+        if quality_lim is None:
+            quality_lim = 0
 
-        for qf in quality_flags:
-            inds = np.where(self['QUALITY_FLAG'].value.flatten() == qf)[0]
-            for key in self.keys():
-                self._variables[key].value = self._variables[key].value[inds, ::]
+        variable_names = ['J_r', 'J_r_err', 'J_FA', 'J_FA_err']
+        inds = np.where(self['FLAG'].value.flatten() > quality_lim)[0]
+        for key in variable_names:
+            self._variables[key].value[inds, 0] = np.nan
 
     def time_filter_by_calib(self, calib_flags=None):
 
@@ -261,13 +247,15 @@ class Dataset(datahub.DatasetSourced):
             initial_file_dir = kwargs.pop(
                 'initial_file_dir', self.data_root_dir
             )
-
-            initial_file_dir = initial_file_dir / 'Sat_{}'.format(self.sat_id) / this_day.strftime("%Y")
-
+            initial_file_dir = initial_file_dir / "Sat_{}".format(self.sat_id) / this_day.strftime("%Y")
+            if self.sat_id == 'AC':
+                sat_id = '_'
+            else:
+                sat_id = self.sat_id
             file_patterns = [
-                'EFI' + self.sat_id.upper(),
-                self.product.upper(),
-                this_day.strftime('%Y%m%d') + 'T',
+                'FAC' + sat_id.upper(),
+                'TMS_2F',
+                this_day.strftime('%Y%m%d') + 'T'
             ]
             # remove empty str
             file_patterns = [pattern for pattern in file_patterns if str(pattern)]
@@ -276,7 +264,7 @@ class Dataset(datahub.DatasetSourced):
             done = super().search_data_files(
                 initial_file_dir=initial_file_dir,
                 search_pattern=search_pattern,
-                allow_multiple_files=True,
+                allow_multiple_files=False,
             )
             # Validate file paths
 

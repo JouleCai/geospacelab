@@ -2,42 +2,47 @@
 # Copyright (C) 2021 GeospaceLab (geospacelab)
 # Author: Lei Cai, Space Physics and Astronomy, University of Oulu
 
+__author__ = "Lei Cai"
+__copyright__ = "Copyright 2021, GeospaceLab"
+__license__ = "BSD-3-Clause License"
+__email__ = "lei.cai@oulu.fi"
+__docformat__ = "reStructureText"
+
 import numpy as np
 import datetime
-import copy
 
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, InstrumentModel, ProductModel
-from geospacelab.datahub.sources.esa_eo import esaeo_database
-from geospacelab.datahub.sources.esa_eo.swarm import swarm_facility
+from geospacelab.datahub.sources.ncei import ncei_database
+from geospacelab.datahub.sources.ncei.dmsp import dmsp_facility
 from geospacelab.config import prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
-from geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_lp_hm.loader import Loader as default_Loader
-from geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_lp_hm.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_lp_hm.variable_config as var_config
-
+# from geospacelab.datahub.sources.madrigal.satellites.dmsp.s1.loader import Loader as default_Loader
+from geospacelab.datahub.sources.ncei.dmsp.ssm_mfr.downloader import Downloader as default_Downloader
+# import geospacelab.datahub.sources.madrigal.satellites.dmsp.s1.variable_config as var_config
+from geospacelab.datahub.sources.ncei.dmsp.ssm_mfr.loader import Loader as default_Loader
+import geospacelab.datahub.sources.ncei.dmsp.ssm_mfr.variable_config as var_config 
 
 default_dataset_attrs = {
-    'database': esaeo_database,
-    'facility': swarm_facility,
-    'instrument': 'EFI-LP',
-    'product': 'LP_HM',
-    'data_file_ext': 'cdf',
-    'product_version': 'latest',
-    'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Advanced',
+    'database': ncei_database,
+    'facility': dmsp_facility,
+    'instrument': 'SSM',
+    'product': 'SSM_MFR',
+    'data_file_ext': '.MFR',
+    'data_root_dir': prf.datahub_data_root_dir / 'NCEI' / 'DMSP' / 'SSM_MFR',
     'allow_load': True,
     'allow_download': True,
     'force_download': False,
     'data_search_recursive': False,
-    'add_AACGM': False,
-    'add_APEX': False,
-    'quality_control': False,
-    'calib_control': False,
     'label_fields': ['database', 'facility', 'instrument', 'product'],
     'load_mode': 'AUTO',
     'time_clip': True,
+    'add_AACGM': True,
+    'add_APEX': False,
+    'calib_orbit': False,
+    'replace_orbit': True,
 }
 
 default_variable_names = [
@@ -45,29 +50,12 @@ default_variable_names = [
     'SC_GEO_LAT',
     'SC_GEO_LON',
     'SC_GEO_ALT',
-    'SC_GEO_r',
-    'SC_SZA',
-    'SC_SAz',
-    'SC_ST',
-    'SC_DIP_LAT',
-    'SC_DIP_LON',
-    'SC_QD_MLT',
-    'SC_QD_LAT',
-    'SC_AACGM_LAT',
-    'SC_AACGM_LON',
-    'n_e',
-    'T_e_HGN',
-    'T_e_LGN',
-    'T_e',
-    'V_s_HGN',
-    'V_s_LGN',
-    'SC_U',
-    'FLAG'
+    'B_D', 'B_P', 'B_F', 'd_B_D', 'd_B_P', 'd_B_F'
     ]
 
 # default_data_search_recursive = True
 
-default_attrs_required = []
+default_attrs_required = ['sat_id', ]
 
 
 class Dataset(datahub.DatasetSourced):
@@ -76,21 +64,18 @@ class Dataset(datahub.DatasetSourced):
 
         super().__init__(**kwargs)
 
-        self.database = kwargs.pop('database', 'ESA/EarthOnline')
-        self.facility = kwargs.pop('facility', 'SWARM')
-        self.instrument = kwargs.pop('instrument', 'EFI-LP')
-        self.product = kwargs.pop('product', 'HM02')
-        self.product_version = kwargs.pop('product_version', '')
-        self.local_latest_version = ''
+        self.database = kwargs.pop('database', 'NCEI')
+        self.facility = kwargs.pop('facility', 'DMSP')
+        self.instrument = kwargs.pop('instrument', 'SSM')
+        self.product = kwargs.pop('product', 'SSM_MFR')
         self.allow_download = kwargs.pop('allow_download', False)
         self.force_download = kwargs.pop('force_download', False)
-        self.quality_control = kwargs.pop('quality_control', False)
-        self.calib_control = kwargs.pop('calib_control', False)
         self.add_AACGM = kwargs.pop('add_AACGM', False)
         self.add_APEX = kwargs.pop('add_APEX', False)
-        self._data_root_dir_init = copy.deepcopy(self.data_root_dir)   # Record the initial root dir
+        self.calib_orbit = kwargs.pop('calib_orbit', False)
+        self.replace_orbit = kwargs.pop('replace_orbit', False)
 
-        self.sat_id = kwargs.pop('sat_id', 'A')
+        self.sat_id = kwargs.pop('sat_id', None)
 
         self.metadata = None
 
@@ -115,36 +100,6 @@ class Dataset(datahub.DatasetSourced):
             if not list(attr):
                 mylog.StreamLogger.warning("The parameter {} is required before loading data!".format(attr_name))
 
-        self.data_root_dir = self.data_root_dir / self.instrument / self.product
-
-        if str(self.product_version) and self.product_version != 'latest':
-            self.data_root_dir = self.data_root_dir / self.product_version
-        else:
-            self.product_version = 'latest'
-            self.force_download = False
-            mylog.simpleinfo.info(f'Checking the latest version of the data file ...')
-            self.download_data()
-            
-            # try:
-            #     dirs_product_version = [f.name for f in self.data_root_dir.iterdir() if f.is_dir()]
-            # except FileNotFoundError:
-            #     dirs_product_version = []
-            #     self.force_download = True
-            # else:
-            #     if not list(dirs_product_version):
-            #         self.force_download = True
-
-            # if list(dirs_product_version):
-            #     self.local_latest_version = max(dirs_product_version)
-            #     self.data_root_dir = self.data_root_dir / self.local_latest_version
-            #     if not self.force_download:
-            #         mylog.simpleinfo.info(
-            #             "Note: Loading the local files " +
-            #             "with the latest version {} ".format(self.local_latest_version) +
-            #             "Keep an eye on the latest baselines online!"
-            #         )
-
-
     def label(self, **kwargs):
         label = super().label()
         return label
@@ -157,7 +112,7 @@ class Dataset(datahub.DatasetSourced):
             configured_variables=var_config.configured_variables
         )
         for file_path in self.data_file_paths:
-            load_obj = self.loader(file_path, file_type='cdf')
+            load_obj = self.loader(file_path)
 
             for var_name in self._variables.keys():
                 value = load_obj.variables[var_name]
@@ -166,38 +121,23 @@ class Dataset(datahub.DatasetSourced):
             # self.select_beams(field_aligned=True)
         if self.time_clip:
             self.time_filter_by_range(var_datetime_name='SC_DATETIME')
-        if self.quality_control:
-            self.time_filter_by_quality()
-        if self.calib_control:
-            self.time_filter_by_calib()
-            
+
+        if self.calib_orbit:
+            self.fix_geo_lon()
+
         if self.add_AACGM:
             self.convert_to_AACGM()
 
         if self.add_APEX:
             self.convert_to_APEX()
 
-        self.add_GEO_LST()
-
-    def add_GEO_LST(self):
-        lons = self['SC_GEO_LON'].flatten()
-        uts = self['SC_DATETIME'].flatten()
-        lsts = [ut + datetime.timedelta(hours=lon / 15.) for ut, lon in zip(uts, lons)]
-        lsts = [lst.hour + lst.minute / 60. + lst.second / 3600. for lst in lsts]
-        var = self.add_variable(var_name='SC_GEO_LST')
-        var.value = np.array(lsts)[:, np.newaxis]
-        var.label = 'LST'
-        var.unit = 'h'
-        var.depends = self['SC_GEO_LON'].depends
-        return var
-    
     def convert_to_APEX(self):
         import geospacelab.cs as gsl_cs
 
         coords_in = {
             'lat': self['SC_GEO_LAT'].value.flatten(),
             'lon': self['SC_GEO_LON'].value.flatten(),
-            'r': self['SC_GEO_r'].value.flatten() / 6371.2
+            'height': self['SC_GEO_ALT'].value.flatten()
         }
         dts = self['SC_DATETIME'].value.flatten()
         cs_sph = gsl_cs.GEOCSpherical(coords=coords_in, ut=dts)
@@ -215,7 +155,7 @@ class Dataset(datahub.DatasetSourced):
         coords_in = {
             'lat': self['SC_GEO_LAT'].value.flatten(),
             'lon': self['SC_GEO_LON'].value.flatten(),
-            'r': self['SC_GEO_r'].value.flatten() / 6371.2
+            'height': self['SC_GEO_ALT'].value.flatten()
         }
         dts = self['SC_DATETIME'].value.flatten()
         cs_sph = gsl_cs.GEOCSpherical(coords=coords_in, ut=dts)
@@ -227,24 +167,55 @@ class Dataset(datahub.DatasetSourced):
         self['SC_AACGM_LON'].value = cs_aacgm['lon'].reshape(self['SC_DATETIME'].value.shape)
         self['SC_AACGM_MLT'].value = cs_aacgm['mlt'].reshape(self['SC_DATETIME'].value.shape)
 
-    def time_filter_by_quality(self, quality_flags=None):
-        if quality_flags is None:
-            quality_flags = np.array([1])
+    def fix_geo_lon(self):
+        from geospacelab.observatory.orbit.sc_orbit import OrbitPosition_SSCWS
+        from scipy.interpolate import interp1d
+        # check outliers
+        orbit_obj = OrbitPosition_SSCWS(
+            dt_fr=self.dt_fr - datetime.timedelta(minutes=30),
+            dt_to=self.dt_to + datetime.timedelta(minutes=30),
+            sat_id='dmsp' + self.sat_id.lower()
+        )
 
-        for qf in quality_flags:
-            inds = np.where(self['QUALITY_FLAG'].value.flatten() == qf)[0]
-            for key in self.keys():
-                self._variables[key].value = self._variables[key].value[inds, ::]
+        glat_1 = self['SC_GEO_LAT'].value.flatten()
+        glon_1 = self['SC_GEO_LON'].value.flatten()
+        if glat_1.size < 2:
+            return
 
-    def time_filter_by_calib(self, calib_flags=None):
+        dts_1 = self['SC_DATETIME'].value.flatten()
+        dt0 = dttool.get_start_of_the_day(self.dt_fr)
+        sectime_1 = [(dt - dt0).total_seconds() for dt in dts_1]
 
-        if calib_flags is None:
-            calib_flags = np.array([0])
+        glat_2 = orbit_obj['SC_GEO_LAT'].value.flatten()
+        glon_2 = orbit_obj['SC_GEO_LON'].value.flatten()
+        dts_2 = orbit_obj['SC_DATETIME'].value.flatten()
+        sectime_2 = [(dt - dt0).total_seconds() for dt in dts_2]
 
-        for cf in calib_flags:
-            inds = np.where(self['CALIB_FLAG'].value.flatten() == cf)[0]
-            for key in self.keys():
-                self._variables[key].value = self._variables[key].value[inds, ::]
+        factor = np.pi / 180.
+        sin_glon_1 = np.sin(glon_1 * factor)
+        sin_glon_2 = np.sin(glon_2 * factor)
+        cos_glon_2 = np.cos(glon_2 * factor)
+        itpf_sin = interp1d(sectime_2, sin_glon_2, kind='cubic', bounds_error=False, fill_value='extrapolate')
+        itpf_cos = interp1d(sectime_2, cos_glon_2, kind='cubic', bounds_error=False, fill_value='extrapolate')
+        sin_glon_2_i = itpf_sin(sectime_1)
+        sin_glon_2_i = np.where(sin_glon_2_i > 1., 1., sin_glon_2_i)
+        sin_glon_2_i = np.where(sin_glon_2_i < -1., -1., sin_glon_2_i)
+        
+        cos_glon_2_i = itpf_cos(sectime_1)
+        cos_glon_2_i = np.where(cos_glon_2_i > 1., 1., cos_glon_2_i)
+        cos_glon_2_i = np.where(cos_glon_2_i < -1., -1., cos_glon_2_i)
+        
+        rad = np.sign(sin_glon_2_i) * (np.pi / 2 - np.arcsin(cos_glon_2_i))
+        glon_new = rad / factor
+        # rad = np.where((rad >= 0), rad, rad + 2 * numpy.pi)
+
+        ind_outliers = np.where(np.abs(sin_glon_1 - sin_glon_2_i) > 0.03)[0]
+
+        if self.replace_orbit:
+            glon_1 = glon_new
+        else:
+            glon_1[ind_outliers] = glon_new[ind_outliers]
+        self['SC_GEO_LON'].value = glon_1.reshape((glon_1.size, 1))
 
     def search_data_files(self, **kwargs):
 
@@ -259,15 +230,13 @@ class Dataset(datahub.DatasetSourced):
             this_day = dt0 + datetime.timedelta(days=i)
 
             initial_file_dir = kwargs.pop(
-                'initial_file_dir', self.data_root_dir
+                'initial_file_dir', self.data_root_dir / self.sat_id.upper() / \
+                                    this_day.strftime('%Y') / this_day.strftime('%m')
             )
 
-            initial_file_dir = initial_file_dir / 'Sat_{}'.format(self.sat_id) / this_day.strftime("%Y")
-
             file_patterns = [
-                'EFI' + self.sat_id.upper(),
-                self.product.upper(),
-                this_day.strftime('%Y%m%d') + 'T',
+                'SSM',
+                this_day.strftime('%Y%m%d'),
             ]
             # remove empty str
             file_patterns = [pattern for pattern in file_patterns if str(pattern)]
@@ -276,14 +245,13 @@ class Dataset(datahub.DatasetSourced):
             done = super().search_data_files(
                 initial_file_dir=initial_file_dir,
                 search_pattern=search_pattern,
-                allow_multiple_files=True,
+                allow_multiple_files=False,
             )
             # Validate file paths
 
             if (not done and self.allow_download) or self.force_download:
                 done = self.download_data()
                 if done:
-                    initial_file_dir = self.data_root_dir
                     done = super().search_data_files(
                         initial_file_dir=initial_file_dir,
                         search_pattern=search_pattern,
@@ -291,6 +259,60 @@ class Dataset(datahub.DatasetSourced):
                     )
 
         return done
+
+    def interp_evenly(self, time_res=1, time_res_o=1, dt_fr=None, dt_to=None):
+        from scipy.interpolate import interp1d
+        import geospacelab.toolbox.utilities.numpymath as nm
+
+        ds_new = datahub.DatasetUser(dt_fr=self.dt_fr, dt_to=self.dt_to, visual=self.visual)
+        ds_new.clone_variables(self)
+        dts = ds_new['SC_DATETIME'].value.flatten()
+        dt0 = dttool.get_start_of_the_day(dts[0])
+        x_0 = np.array([(dt - dt0).total_seconds() for dt in dts])
+        if dt_fr is None:
+            dt_fr = dts[0] - datetime.timedelta(
+                seconds=np.floor(((dts[0] - ds_new.dt_fr).total_seconds() / time_res)) * time_res
+            )
+            dt_fr = datetime.datetime(dt_fr.year, dt_fr.month, dt_fr.day, dt_fr.hour, dt_fr.minute, dt_fr.second)
+        if dt_to is None:
+            dt_to = dts[-1] + datetime.timedelta(
+                seconds=np.floor(((ds_new.dt_to - dts[-1]).total_seconds() / time_res)) * time_res
+            )
+            dt_to = datetime.datetime(dt_to.year, dt_to.month, dt_to.day, dt_to.hour, dt_to.minute, dt_to.second)
+        sec_fr = (dt_fr - dt0).total_seconds()
+        sec_to = (dt_to - dt0).total_seconds()
+        x_1 = np.arange(sec_fr, sec_to + time_res / 2, time_res)
+
+        f = interp1d(x_0, x_0, kind='nearest', bounds_error=False, fill_value=(x_0[0], x_0[-1]))
+        pseudo_x = f(x_1)
+        mask = np.abs(pseudo_x-x_1) > time_res_o/1.5
+
+        dts_new = np.array([dt0 + datetime.timedelta(seconds=sec) for sec in x_1])
+        ds_new['SC_DATETIME'].value = dts_new.reshape((dts_new.size, 1))
+
+        period_var_dict = {'SC_GEO_LON': 360.,
+                           'SC_AACGM_LON': 360.,
+                           'SC_APEX_LON': 360.,
+                           'SC_GEO_LST': 24.,
+                           'SC_AACGM_MLT': 24.,
+                           'SC_APEX_MLT': 24}
+
+        for var_name in ds_new.keys():
+            if var_name in ['SC_DATETIME']:
+                continue
+            if var_name in period_var_dict.keys():
+                var = ds_new[var_name].value.flatten()
+                var_new = nm.interp_period_data(x_0, var, x_1, period=period_var_dict[var_name], method='linear', bounds_error=False)
+                var_new[mask] = np.nan
+                ds_new[var_name].value = var_new.reshape((dts_new.size, 1))
+            else:
+                method = 'linear' if 'FLAG' not in var_name else 'nearest'
+                var = ds_new[var_name].value.flatten()
+                f = interp1d(x_0, var, kind=method, bounds_error=False)
+                var_new = f(x_1)
+                var_new[mask] = np.nan
+                ds_new[var_name].value = var_new.reshape((dts_new.size, 1))
+        return ds_new
 
     def download_data(self, dt_fr=None, dt_to=None):
         if dt_fr is None:
@@ -300,20 +322,8 @@ class Dataset(datahub.DatasetSourced):
         download_obj = self.downloader(
             dt_fr, dt_to,
             sat_id=self.sat_id,
-            data_type=self.product,
-            file_version=self.product_version,
-            force=self.force_download
+            force_download=self.force_download
         )
-        if download_obj.done:
-            self.force_download = False
-
-            if download_obj.file_version != self.local_latest_version and self.product_version == 'latest':
-                mylog.simpleinfo.warning(
-                    f"NOTE: The data with the latest version ({download_obj.file_version}) have been downloaded"
-                )
-            self.product_version = download_obj.file_version
-            self.data_root_dir = copy.deepcopy(self._data_root_dir_init)
-            self._validate_attrs()
 
         return download_obj.done
 

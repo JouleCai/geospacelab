@@ -25,8 +25,6 @@ class Downloader(DownloaderModel):
             force=True, direct_download=True, **kwargs
     ):
 
-        self.sat_id = sat_id
-
         if data_type == 'TCT02':
             frq_str = '2Hz'
         elif data_type == 'TCT16':
@@ -39,13 +37,17 @@ class Downloader(DownloaderModel):
 
         if data_file_root_dir is None:
             data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Advanced" / "EFI-TII" / data_type
-
+        file_name_patterns = []
+        file_name_patterns.extend(['EFI' + sat_id.upper()])
         super(Downloader, self).__init__(
             dt_fr, dt_to,
+            sat_id=sat_id,
             data_file_root_dir=data_file_root_dir,
             ftp_data_dir=ftp_data_dir,
             file_version=file_version,
-            force=force, direct_download=direct_download, **kwargs
+            force=force, direct_download=direct_download,
+            file_name_patterns=file_name_patterns,
+            **kwargs
         )
 
     def download(self, **kwargs):

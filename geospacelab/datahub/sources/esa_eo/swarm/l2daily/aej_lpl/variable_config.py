@@ -8,18 +8,17 @@ __license__ = "BSD-3-Clause License"
 __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
-
-import copy
-import numpy as np
 from geospacelab.datahub import VariableModel as Var
+import geospacelab.visualization.mpl.colormaps as cm
 
-database = 'SuperMAG'
+import numpy as np
+
+database = 'ESA/EarthOnline'
 
 timestamps = {
     'DATETIME': 'DATETIME',
 }
 
-depend_0 = {'UT': 'DATETIME'}
 
 default_colormap = "gist_ncar"
 
@@ -38,15 +37,21 @@ default_plot_config = {
 configured_variables = {}
 visual = 'on'
 
+depend_0 = {'UT': 'SC_DATETIME',
+            'GEO_LAT': 'GEO_LAT', 'GEO_LON': 'GEO_LON', 'GEO_ALT': 'GEO_ALT',
+            'AACGM_LAT': 'AACGM_LAT', 'AACGM_LON': 'AACGM_LON', 'AACGM_MLT': 'AACGM_MLT'}
+# depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
 
 ####################################################################################################################
-var_name = 'SME'
+var_name = 'J_N'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
-var.fullname = 'SME index'
-var.label = r'SME'
-var.group = r'SME indices'
-var.unit = 'nT'
+var.fullname = 'Northward current'
+var.label = r'$J_N$'
+var.unit = 'A/km'
+var.unit_label = r'A/km'
+var.group = r'$J$'
+# var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
@@ -55,22 +60,23 @@ plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-np.inf, np.inf]
+# axis[1].lim = [np.nan, np.nan]
 axis[1].label = '@v.group'
-axis[1].unit = '@v.unit_label'
+axis[1].unit = ''
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
-
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ####################################################################################################################
-var_name = 'SMU'
+var_name = 'J_E'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
-var.fullname = 'SMU index'
-var.label = r'SMU'
-var.group = r'SME indices'
-var.unit = 'nT'
+var.fullname = 'Easthward current'
+var.label = r'$J_N$'
+var.unit = 'A/km'
+var.unit_label = r'A/km'
+var.group = r'$J$'
+# var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
@@ -79,23 +85,25 @@ plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-np.inf, np.inf]
+# axis[1].lim = [np.nan, np.nan]
 axis[1].label = '@v.group'
-axis[1].unit = '@v.unit_label'
+axis[1].unit = ''
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
-
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 
+
 ####################################################################################################################
-var_name = 'SML'
+var_name = 'J_E_QD'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
-var.fullname = 'SML index'
-var.label = r'SML'
-var.group = r'SME indices'
-var.unit = 'nT'
+var.fullname = 'Easthward current in QD'
+var.label = r'$J_N$'
+var.unit = 'A/km'
+var.unit_label = r'A/km'
+var.group = r'$J$'
+# var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
@@ -104,23 +112,23 @@ plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-np.inf, np.inf]
+# axis[1].lim = [np.nan, np.nan]
 axis[1].label = '@v.group'
-axis[1].unit = '@v.unit_label'
+axis[1].unit = ''
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
-
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 
 ####################################################################################################################
-var_name = 'SMR'
+var_name = 't_Q'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
-var.fullname = 'SMR index'
-var.label = r'SMR'
-var.group = r'SMR indices'
-var.unit = 'nT'
+var.fullname = 'Flag bits indicating data quality or properties'
+var.label = r't$_Q$'
+var.unit = 's'
+var.group = r''
+# var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
@@ -129,11 +137,55 @@ plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [None, None]
+# axis[1].lim = [-2000, 2000]
 axis[1].label = '@v.group'
-axis[1].unit = '@v.unit_label'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
 
 configured_variables[var_name] = var
 
+var_name = 'RMS_MISFIT'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Flag bits indicating data quality or properties'
+var.label = 'RMS_MISFIT'
+var.unit = 'nT'
+var.group = r''
+# var.error = var_name + '_err'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+# axis[1].lim = [-2000, 2000]
+axis[1].label = '@v.group'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
+
+configured_variables[var_name] = var
+
+var_name = 'CONFIDENCE'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Flag bits indicating data quality or properties'
+var.label = r'Confidence'
+var.unit = ''
+var.group = r''
+# var.error = var_name + '_err'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+# axis[1].lim = [-2000, 2000]
+axis[1].label = '@v.group'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
+
+configured_variables[var_name] = var

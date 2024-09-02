@@ -216,10 +216,5 @@ class Downloader(object):
         self.done = True
 
 
-if __name__ == "__main__":
-    dt_fr1 = datetime.datetime(2012, 1, 1)
-    dt_to1 = datetime.datetime(2012, 1, 16)
-    Downloader(dt_fr1, dt_to1)
-
 
 

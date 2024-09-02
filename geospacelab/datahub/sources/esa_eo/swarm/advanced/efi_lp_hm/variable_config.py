@@ -134,14 +134,14 @@ plot_config.style = '1noE'
 axis = var.visual.axis
 axis[1].data = "@v.value"
 axis[1].lim = [0, 10000]
-axis[1].label = '@v.group'
+axis[1].label = '@v.label'
 axis[2].label = '@v.label'
 axis[1].unit = '@v.unit_label'
 
 configured_variables[var_name] = var
 
 ####################################################################################################################
-var_name = 'QUALITY_FLAG'
+var_name = 'FLAG'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'Flag bits indicating data quality or properties'
@@ -157,7 +157,7 @@ plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-# axis[1].lim = [-2000, 2000]
+axis[1].lim = [0, 16]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'

@@ -20,6 +20,7 @@ import matplotlib.ticker as mticker
 import matplotlib.path as mpath
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import matplotlib.cm as mcm
 from scipy.interpolate import interp1d, griddata
 import matplotlib.cm as cm
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
@@ -93,6 +94,8 @@ class PolarMapPanel(GeoPanel):
         self.mirror_south = mirror_south
         self._extent = None
         self._sector = kwargs.pop('sector', 'off')
+        self.boundary_latitudes = None
+        self.boundary_longitudes = None
         proj_class = getattr(ccrs, proj_type)
         proj_config = {'central_latitude': self.lat_c, 'central_longitude': self.lon_c}
         super().__init__(*args, proj_class=proj_class, proj_config=proj_config, **kwargs)
@@ -107,11 +110,12 @@ class PolarMapPanel(GeoPanel):
         lon = mlt / 24. * 360.
         lon = np.mod(lon, 360.)
         return lon
-    
-    @staticmethod
-    def _transform_lst_to_lon(lst):
-        lon = lst / 24. * 360.
-        lon = np.mod(lon, 360.)
+
+    def _transform_lst_to_lon(self, lst):
+        if self.pole == 'N':
+            lon = np.mod((lst - (self.ut.hour + self.ut.minute / 60)) * 15., 360.)
+        elif self.pole == 'S':
+            lon = np.mod((lst - (self.ut.hour + self.ut.minute / 60)) * 15. + 180., 360.)
         return lon
 
     # def add_lands(self):
@@ -144,6 +148,11 @@ class PolarMapPanel(GeoPanel):
             cs2 = cs1
         if self.style == 'lst-fixed':
             try:
+                if cs2.coords.lst is None:
+                    ts = np.array([
+                        t.hour + t.minute/60 + t.second/3600 for t in ut
+                    ])
+                    cs2.coords.lst = (cs2.coords.lon / 15. + ts) % 24.
                 cs2.coords.lon = self._transform_lst_to_lon(cs2.coords.lst)
             except:
                 mylog.StreamLogger.warning("LST is not specified!")
@@ -240,7 +249,10 @@ class PolarMapPanel(GeoPanel):
         }
 
         def label_formatter(value, fmt=''):
-            ms = re.findall(r"(%[0-9]*[a-zA-Z])", fmt)
+            """
+            This will be deprecated in V1.0. Use the python string format instead.
+            """
+            ms = re.findall(r"(%[.0-9]*[a-zA-Z])", fmt)
             fmt_new = copy.deepcopy(fmt)
             patterns = []
             if "%N" in ms:
@@ -274,6 +286,10 @@ class PolarMapPanel(GeoPanel):
                 else:
                     if 'd' in m:
                         value = int(value)
+                    elif 'f' in m:
+                        value = value
+                    else:
+                        raise NotImplementedError
                     fmt_new = fmt_new.replace(m, '{:' + m[1:] + '}')
                     patterns.append(value)
             string_new = fmt_new.format(*patterns)
@@ -337,7 +353,15 @@ class PolarMapPanel(GeoPanel):
                 clock = np.mod(180. - lat_label_clock / 12 * 360, 360)
                 rotation = clock
             label_lon = self.lon_c + clock
+
+            lat_lim = [np.min(np.abs(self.boundary_latitudes)), np.max(np.abs(self.boundary_latitudes))]
+            if lat_lim[0] == lat_lim[1]:
+                lat_lim[1] = 90
             for ind, lat in enumerate(lats):
+                if abs(lat) < lat_lim[0]:
+                    continue
+                if abs(lat) > lat_lim[1]:
+                    continue
                 if np.mod(ind, lat_label_separator+1) != 0:
                     continue
                 # if lat > 0:
@@ -346,7 +370,10 @@ class PolarMapPanel(GeoPanel):
                 #     label = r'' + '{:d}'.format(int(-lat)) + r'$^{\circ}$S'
                 # else:
                 #     label = r'' + '{:d}'.format(int(0)) + r'$^{\circ}$S'
-                label = label_formatter(lat, fmt=lat_label_format)
+                if '%' in lat_label_format:
+                    label = label_formatter(lat, fmt=lat_label_format)
+                else:
+                    label = lat_label_format.format(lat)
                 self().text(
                     label_lon, lat, label, transform=ccrs.PlateCarree(),
                     rotation=rotation,
@@ -428,6 +455,8 @@ class PolarMapPanel(GeoPanel):
             boundary_longitudes = np.arange(0., 360., 5.)
             boundary_latitudes = np.empty_like(boundary_longitudes)
             boundary_latitudes[:] = 1. * self.boundary_lat
+        self.boundary_latitudes = boundary_latitudes
+        self.boundary_longitudes = boundary_longitudes
         super().set_map_extent(boundary_latitudes, boundary_longitudes)
 
     def set_map_boundary(self, path=None, transform=None, **kwargs):
@@ -610,7 +639,7 @@ class PolarMapPanel(GeoPanel):
         return grid_x, grid_y, grid_data
 
     def overlay_line(self, ut=None, coords=None, cs=None, *, color='#EEEEEE', linewidth=1., linestyle='--', **kwargs):
-
+        transform = kwargs.pop('transform', ccrs.Geodetic())
         cs_new = self.cs_transform(cs_fr=cs, coords=coords, ut=ut)
 
         if self.pole == 'N':
@@ -622,6 +651,114 @@ class PolarMapPanel(GeoPanel):
         lon_in = cs_new['lon'][ind_lat]
 
         self.major_ax.plot(lon_in, lat_in, transform=ccrs.Geodetic(), color=color, linewidth=linewidth, linestyle=linestyle, **kwargs)
+
+    def overlay_vectors(
+            self, vectors, coords=None, cs=None, *, ut=None, unit_vector=None,
+            unit_vector_scale=0.1, vector_unit='',
+            color='r', alpha=0.9, quiverkey_config={},
+            vector_width=1,
+            shading='on',
+            edge='off',
+            edge_color=None,
+            edge_linestyle='-',
+            edge_linewidth=1.,
+            edge_marker=None,
+            edge_markersize=5,
+            edge_alpha=0.8,
+            legend='on',
+            legend_pos_x=0.9,
+            legend_pos_y=0.95,
+            legend_label=None,
+            legend_linewidth=None,
+            legend_fontsize=10,
+            **kwargs):
+        if ut is None:
+            ut = self.ut
+
+        cmap = kwargs.pop('cmap', None)
+
+        cs_new = self.cs_transform(cs_fr=cs, coords=coords, ut=ut)
+
+        if self.pole == 'N':
+            ind_lat = np.where(cs_new['lat'] > self.boundary_lat)[0]
+        else:
+            ind_lat = np.where(cs_new['lat'] < self.boundary_lat)[0]
+
+        lat_in = cs_new['lat'][ind_lat]
+        lon_in = cs_new['lon'][ind_lat]
+        data = self.projection.transform_points(ccrs.PlateCarree(), lon_in, lat_in)
+        xdata = np.float32(data[:, 0])
+        ydata = np.float32(data[:, 1])
+        # sign = np.sign(xdata[1] - xdata[0])
+
+        v_N_in = vectors[0][ind_lat]
+        v_E_in = vectors[1][ind_lat]
+        # v_mag_in = np.sqrt(v_N_in ** 2 + v_E_in ** 2)
+
+        width = np.float32(self._extent[1] - self._extent[0])
+        data_scale = 1 / unit_vector * width * unit_vector_scale
+        v_N_in = v_N_in * data_scale
+        v_E_in = v_E_in * data_scale
+
+
+        pseudo_lons = (lon_in - self.lon_c) * np.pi / 180.
+        xq = xdata
+        yq = ydata
+        uq = - v_N_in * np.sin(pseudo_lons) + v_E_in * np.cos(pseudo_lons)
+        vq = v_N_in * np.cos(pseudo_lons) + v_E_in * np.sin(pseudo_lons)
+
+        kwargs.update(visible=True)
+        self.major_ax.plot(xq, yq, linestyle='', marker='o', markersize=0.2, color='k', markerfacecolor='k')
+
+        mag = np.hypot(uq, vq)
+
+        if cmap is not None:
+            if isinstance(cmap, str):
+                cmap = mcm.get_cmap(cmap)
+            clim = kwargs.pop('clim', None)
+
+            if clim is None:
+                norm = mcolors.Normalize()
+                norm.autoscale(mag)
+            else:
+                clim = np.array(clim) / unit_vector * width * unit_vector_scale
+                norm = mcolors.Normalize(vmin=clim[0], vmax=clim[1])
+            colors = cmap(norm(mag))
+            args = (xq, yq, uq, vq)
+        else:
+            colors = color
+            args = (xq, yq, uq, vq)
+
+        iq = self.major_ax.quiver(
+            *args,
+            units='xy', angles='xy', scale=1., scale_units='xy',
+            width=vector_width * 0.002 * (self._extent[1] - self._extent[0]),
+            headlength=0, headaxislength=0, pivot='tail', color=colors, alpha=alpha, cmap=cmap, **kwargs
+        )
+        iq.data_scale = data_scale
+        # Add quiverkey
+        if legend in ['on', True]:
+            if legend_linewidth is None:
+                legend_linewidth = vector_width
+            if legend_label is None:
+                legend_label = str(unit_vector) + ' ' + vector_unit
+            quiverkey_config = pybasic.dict_set_default(
+                quiverkey_config, X=legend_pos_x, Y=legend_pos_y, U=width*unit_vector_scale,
+                width=legend_linewidth * 0.002 * (self._extent[1] - self._extent[0]),
+                label=legend_label, color=color,
+            )
+            X = quiverkey_config.pop('X')
+            Y = quiverkey_config.pop('Y')
+            U = quiverkey_config.pop('U')
+            label = quiverkey_config.pop('label')
+            fontproperties = kwargs.pop('fontproperties', {})
+            fontproperties.update(size=legend_fontsize)
+            kwargs.update(visible='on')
+            iqk = self.major_ax.quiverkey(
+                iq, X, Y, U, label, fontproperties=fontproperties, **kwargs
+            )
+
+        return iq
 
     def overlay_sc_trajectory(self, sc_ut=None, sc_coords=None, cs=None, *, show_trajectory=True, color='#EEEEEE',
                           time_tick=True, time_tick_res=300., time_tick_scale=0.05,
@@ -655,103 +792,117 @@ class PolarMapPanel(GeoPanel):
             ind_lat = np.where(cs_new['lat'] > self.boundary_lat)[0]
         else:
             ind_lat = np.where(cs_new['lat'] < self.boundary_lat)[0]
+        
+        inds_gaps = np.where(np.diff(ind_lat) > 1)[0]
 
-        lat_in = cs_new['lat'][ind_lat]
-        lon_in = cs_new['lon'][ind_lat]
-        dts_in = sc_ut[ind_lat]
+        if not list(inds_gaps):
+            ind_lat_segments = [[ind_lat[0], ind_lat[-1]]]
+        else:
+            ngaps = len(inds_gaps)
 
-        if self.ut is None:
-            self.ut = sc_ut[0]
-        if show_trajectory:
-            self.major_ax.plot(lon_in, lat_in, transform=ccrs.Geodetic(), **kwargs['trajectory_config'])
+            ind_lat_segments = [[ind_lat[0], ind_lat[inds_gaps[0]]]]
+            seg_body = [[ind_lat[inds_gaps[i - 1] + 1], ind_lat[inds_gaps[i]]] for i in np.arange(1, ngaps)]
+            ind_lat_segments.extend(seg_body)
+            ind_lat_segments.extend([[ind_lat[inds_gaps[-1] + 1], ind_lat[-1]]])
 
-        if time_tick:
-            data = self.projection.transform_points(ccrs.PlateCarree(), lon_in, lat_in)
-            xdata = data[:, 0]
-            ydata = data[:, 1]
+        for i_st, i_ed in ind_lat_segments:
+            lat_in = cs_new['lat'][i_st:i_ed+1]
+            lon_in = cs_new['lon'][i_st:i_ed+1]
+            dts_in = sc_ut[i_st:i_ed+1]
 
-            sectime, dt0 = dttool.convert_datetime_to_sectime(
-                dts_in, datetime.datetime(self.ut.year, self.ut.month, self.ut.day)
-            )
+            if self.ut is None:
+                self.ut = sc_ut[0]
+            if show_trajectory:
+                self.major_ax.plot(lon_in, lat_in, transform=ccrs.Geodetic(), **kwargs['trajectory_config'])
 
-            time_ticks = np.arange(np.ceil(sectime[0] / time_tick_res) * time_tick_res,
-                                   np.ceil(sectime[-1] / time_tick_res) * time_tick_res, time_tick_res)
+            if time_tick:
+                data = self.projection.transform_points(ccrs.PlateCarree(), lon_in, lat_in)
+                xdata = data[:, 0]
+                ydata = data[:, 1]
 
-            f = interp1d(sectime, xdata, fill_value='extrapolate')
-            x_i = f(time_ticks)
-            f = interp1d(sectime, ydata, fill_value='extrapolate')
-            y_i = f(time_ticks)
+                sectime, dt0 = dttool.convert_datetime_to_sectime(
+                    dts_in, datetime.datetime(self.ut.year, self.ut.month, self.ut.day)
+                )
 
-            slope = mathtool.calc_curve_tangent_slope(xdata, ydata)
-            f = interp1d(sectime, slope, fill_value='extrapolate')
-            slope_i = f(time_ticks)
-            l = np.empty_like(x_i)
-            l[:] = (self._extent[1] - self._extent[0]) * time_tick_scale
-
-            xq = x_i
-            yq = y_i
-            uq1 = - l * np.sin(slope_i)
-            vq1 = l * np.cos(slope_i)
-
-            zorder = kwargs['trajectory_config']['zorder']
-            self.major_ax.quiver(
-                xq, yq, uq1, vq1,
-                units='xy', angles='xy', scale=1., scale_units='xy',
-                width=time_tick_width*0.003 * (self._extent[1] - self._extent[0]),
-                headlength=0, headaxislength=0, pivot='middle', color=color,
-                zorder=zorder
-            )
-
-            if time_tick_label:
-                offset = time_tick_label_offset * (self._extent[1] - self._extent[0])
-                for ind, time_tick in enumerate(time_ticks):
-                    time = dt0 + datetime.timedelta(seconds=time_tick)
-                    x_time_tick = x_i[ind] - offset * np.sin(slope_i[ind])
-                    y_time_tick = y_i[ind] + offset * np.cos(slope_i[ind])
-
-                    self.major_ax.text(
-                        x_time_tick, y_time_tick, time.strftime(time_tick_label_format),
-                        fontsize=time_tick_label_fontsize, fontweight=time_tick_label_fontweight,
-                        rotation=slope[ind] * 180. / np.pi + time_tick_label_rotation,
-                        ha='center', va='center', color=color, 
-                        zorder=zorder
-                    )
-
-            # self.major_ax.plot(x_time_ticks, y_time_ticks, **kwargs['time_tick_config'])
-
-            if time_minor_tick:
-
-                time_ticks = np.arange(np.ceil(sectime[0] / time_minor_tick_res) * time_minor_tick_res,
-                                       np.ceil(sectime[-1] / time_minor_tick_res) * time_minor_tick_res, time_minor_tick_res)
+                time_ticks = np.arange(np.ceil(sectime[0] / time_tick_res) * time_tick_res,
+                                    np.ceil(sectime[-1] / time_tick_res) * time_tick_res, time_tick_res)
 
                 f = interp1d(sectime, xdata, fill_value='extrapolate')
                 x_i = f(time_ticks)
                 f = interp1d(sectime, ydata, fill_value='extrapolate')
                 y_i = f(time_ticks)
 
+                slope = mathtool.calc_curve_tangent_slope(xdata, ydata)
                 f = interp1d(sectime, slope, fill_value='extrapolate')
                 slope_i = f(time_ticks)
                 l = np.empty_like(x_i)
-                l[:] = (self._extent[1] - self._extent[0]) * time_tick_scale / 2.5
+                l[:] = (self._extent[1] - self._extent[0]) * time_tick_scale
 
                 xq = x_i
                 yq = y_i
                 uq1 = - l * np.sin(slope_i)
                 vq1 = l * np.cos(slope_i)
 
+                zorder = kwargs['trajectory_config']['zorder']
                 self.major_ax.quiver(
                     xq, yq, uq1, vq1,
                     units='xy', angles='xy', scale=1., scale_units='xy',
-                    width=time_tick_width*0.002*(self._extent[1] - self._extent[0]),
+                    width=time_tick_width*0.003 * (self._extent[1] - self._extent[0]),
                     headlength=0, headaxislength=0, pivot='middle', color=color,
                     zorder=zorder
                 )
+
+                if time_tick_label:
+                    offset = time_tick_label_offset * (self._extent[1] - self._extent[0])
+                    for ind, time_tick in enumerate(time_ticks):
+                        time = dt0 + datetime.timedelta(seconds=int(time_tick))
+                        x_time_tick = x_i[ind] - offset * np.sin(slope_i[ind])
+                        y_time_tick = y_i[ind] + offset * np.cos(slope_i[ind])
+
+                        self.major_ax.text(
+                            x_time_tick, y_time_tick, time.strftime(time_tick_label_format),
+                            fontsize=time_tick_label_fontsize, fontweight=time_tick_label_fontweight,
+                            rotation=slope_i[ind] * 180. / np.pi + time_tick_label_rotation,
+                            ha='center', va='center', color=color, 
+                            zorder=zorder
+                        )
+
+                # self.major_ax.plot(x_time_ticks, y_time_ticks, **kwargs['time_tick_config'])
+
+                if time_minor_tick:
+
+                    time_ticks = np.arange(np.ceil(sectime[0] / time_minor_tick_res) * time_minor_tick_res,
+                                        np.ceil(sectime[-1] / time_minor_tick_res) * time_minor_tick_res, time_minor_tick_res)
+
+                    f = interp1d(sectime, xdata, fill_value='extrapolate')
+                    x_i = f(time_ticks)
+                    f = interp1d(sectime, ydata, fill_value='extrapolate')
+                    y_i = f(time_ticks)
+
+                    f = interp1d(sectime, slope, fill_value='extrapolate')
+                    slope_i = f(time_ticks)
+                    l = np.empty_like(x_i)
+                    l[:] = (self._extent[1] - self._extent[0]) * time_tick_scale / 2.5
+
+                    xq = x_i
+                    yq = y_i
+                    uq1 = - l * np.sin(slope_i)
+                    vq1 = l * np.cos(slope_i)
+
+                    self.major_ax.quiver(
+                        xq, yq, uq1, vq1,
+                        units='xy', angles='xy', scale=1., scale_units='xy',
+                        width=time_tick_width*0.002*(self._extent[1] - self._extent[0]),
+                        headlength=0, headaxislength=0, pivot='middle', color=color,
+                        zorder=zorder
+                    )
 
     def overlay_cross_track_vector(
             self, vector, unit_vector, sc_ut=None, sc_coords=None, cs=None, *,
             unit_vector_scale=0.1, vector_unit='',
             color='r', alpha=0.8, quiverkey_config={},
             vector_width=0.5,
+            shading='on',
             edge='off',
             edge_color=None,
             edge_linestyle='-',
@@ -799,12 +950,22 @@ class PolarMapPanel(GeoPanel):
         uq1 = - sign * vector * np.sin(slope)
         vq1 = sign * vector * np.cos(slope)
 
+        if shading == 'off':
+            kwargs.update(visible=True)
+        else:
+            kwargs.update(visible=False)
         iq = self.major_ax.quiver(
             xq, yq, uq1, vq1,
             units='xy', angles='xy', scale=1., scale_units='xy',
             width=vector_width*0.002 * (self._extent[1] - self._extent[0]),
             headlength=0, headaxislength=0, pivot='tail', color=color, alpha=alpha, **kwargs
         )
+        if shading == 'on':
+            xx = iq.X + iq.U
+            yy = iq.Y + iq.V
+            xx = np.concatenate((xx, np.flipud(xq)))
+            yy = np.concatenate((yy, np.flipud(yq)))
+            ishading = self.major_ax.fill(xx, yy, edgecolor=None, facecolor=color, alpha=alpha)
 
         # Add quiverkey
         if legend in ['on', True]:
@@ -823,6 +984,7 @@ class PolarMapPanel(GeoPanel):
             label = quiverkey_config.pop('label')
             fontproperties = kwargs.pop('fontproperties', {})
             fontproperties.update(size=legend_fontsize)
+            kwargs.update(visible='on')
             iqk = self.major_ax.quiverkey(
                 iq, X, Y, U, label, fontproperties=fontproperties, **kwargs
             )
@@ -877,6 +1039,7 @@ class PolarMapPanel(GeoPanel):
         lc = LineCollection(segments, norm=norm, cmap=c_map, **kwargs)
         lc.set_array(z)
         lc.set_linewidth(line_width)
+        lc.set_alpha(1)
         self().add_collection(lc)
         return lc
         # clabel = label + ' (' + unit + ')'
@@ -928,6 +1091,44 @@ class PolarMapPanel(GeoPanel):
                                                      numticks=12)
                 cax.yaxis.set_minor_locator(minorlocator)
                 cax.yaxis.set_minor_formatter(mticker.NullFormatter())
+        cax.yaxis.set_tick_params(labelsize='x-small')
+        return [cax, cb]
+
+    def add_colorbar_vectors(self, iq, ax=None, figure=None,
+                     c_scale='linear', c_label=None,
+                     c_ticks=None, c_tick_labels=None, c_tick_label_step=1,
+                     left=1.1, bottom=0.1, width=0.05, height=0.7, **kwargs
+                     ):
+        if figure is None:
+            figure = plt.gcf()
+        if ax is None:
+            ax = self()
+        pos = ax.get_position()
+        ax_width = pos.x1 - pos.x0
+        ax_height = pos.y1 - pos.y0
+        ca_left = pos.x0 + ax_width * left
+        ca_bottom = pos.y0 + ax_height * bottom
+        ca_width = ax_width * width
+        ca_height = ax_height * height
+        cax = self.add_axes([ca_left, ca_bottom, ca_width, ca_height], major=False, label=c_label)
+        cb = figure.colorbar(iq, cax=cax, **kwargs)
+        ylim = cax.get_ylim()
+
+        cb.set_label(c_label, rotation=270, va='bottom', size='medium')
+        try:
+            data_scale = iq.data_scale
+        except:
+            data_scale = 1
+        if c_ticks is not None:
+            cb.ax.yaxis.set_ticks(c_ticks)
+
+        if c_tick_labels is not None:
+            cb.ax.yaxis.set_ticklabels(c_tick_labels)
+        else:
+            c_ticks = cb.ax.yaxis.get_ticklocs()
+            c_tick_labels = [str(tick / data_scale) for tick in c_ticks]
+            cb.ax.yaxis.set_ticklabels(c_tick_labels)
+
         cax.yaxis.set_tick_params(labelsize='x-small')
         return [cax, cb]
 
@@ -988,6 +1189,7 @@ class PolarMapPanel(GeoPanel):
         elif self.pole == 'S':
             self.lon_c = np.mod((self.lst_c - (self.ut.hour + self.ut.minute / 60)) * 15. + 180., 360.)
 
+
     @property
     def mlt_c(self):
         return self._mlt_c
@@ -1018,8 +1220,8 @@ class PolarSectorPanel(PolarMapPanel):
                          mirror_south=mirror_south,
                          proj_type=proj_type, **kwargs)
 
-        self._construct_boundary(boundary_zonal_lim, boundary_meridional_lim)
-        self.set_map_extent(self.boundary_latitudes, self.boundary_longitudes)
+        blats, blons = self._construct_boundary(boundary_zonal_lim, boundary_meridional_lim)
+        self.set_map_extent(blats, blons)
         self.set_map_boundary()
         self._check_mirror_south()
 
@@ -1047,17 +1249,16 @@ class PolarSectorPanel(PolarMapPanel):
 
         x = np.array([1, 2])
         y = np.array([boundary_zonal_lim[0], boundary_zonal_lim[1]])
-        xq = np.linspace(1, 2, 100, endpoint=False)
+        xq = np.linspace(1, 2, 500, endpoint=False)
         yq = mymath.interp_period_data(x, y, xq, period=360.)
         blats = np.vstack((blats, np.ones_like(yq)[:, np.newaxis] * boundary_meridional_lim[0]))
         blons = np.vstack((blons, np.flipud(yq[:, np.newaxis])))
 
-        yq = np.linspace(boundary_meridional_lim[0], boundary_meridional_lim[1], 100, endpoint=True)
+        yq = np.linspace(boundary_meridional_lim[0], boundary_meridional_lim[1], 500, endpoint=True)
         blats = np.vstack((blats, yq[:, np.newaxis]))
         blons = np.vstack((blons, np.ones_like(yq)[:, np.newaxis] * boundary_zonal_lim[0]))
 
-        self.boundary_latitudes = blats.flatten()
-        self.boundary_longitudes = blons.flatten()
+        return blats.flatten(), blons.flatten()
 
     def set_map_boundary(self, path=None, transform=None, **kwargs):
 

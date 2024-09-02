@@ -154,6 +154,7 @@ class DataHub(object):
         self.datasets = {}
         self.variables = {}
         self._current_dataset = None
+        self.done = False
 
         super().__init__(**kwargs)
 

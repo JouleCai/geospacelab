@@ -173,6 +173,34 @@ axis[2].unit = '@v.unit_label'
 
 configured_variables[var_name] = var
 
+
+####################################################################################################################
+var_name = 'comp_O_p'
+var = Var(name=var_name, ndim=2, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'O plus composition'
+var.label = r'$n_{O^+}/n_e$'
+var.unit = '%'
+var.error = var_name + '_err'
+var.depends = {0: depend_0, 1: depend_1}
+# set plot attrs
+var.visual.plot_config.config(**default_plot_config)
+var.visual.plot_config.style = '2P'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@d.HEIGHT.value"
+axis[2].data = "@v.value"
+axis[1].lim = [80, 500]
+axis[1].label = 'h'
+axis[1].unit = 'km'
+axis[2].lim = [0, 100]
+axis[2].data_scale = 100
+axis[2].scale = 'linear'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
+
+configured_variables[var_name] = var
+
 ####################################################################################################################
 var_name = 'AZ'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)

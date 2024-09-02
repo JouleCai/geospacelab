@@ -272,6 +272,153 @@ axis[1].label = '@v.label'
 axis[1].unit = '@v.unit'
 axis[1].ticks = [0, 90, 180, 270, 360]
 
+configured_variables[var_name] = var
+
+
+####################################################################################################################
+var_name = 'AE'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'AE index'
+var.label = r'AE'
+var.group = r'AE indices'
+var.unit = 'nT'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [-np.inf, np.inf]
+axis[1].label = '@v.group'
+axis[1].unit = '@v.unit_label'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
 
 configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'AU'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'AU index'
+var.label = r'AU'
+var.group = r'AE indices'
+var.unit = 'nT'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [-np.inf, np.inf]
+axis[1].label = '@v.group'
+axis[1].unit = '@v.unit_label'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
+
+configured_variables[var_name] = var
+
+
+####################################################################################################################
+var_name = 'ASY_D'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'ASY-D index'
+var.label = r'ASY-D'
+var.group = r'ASY/SYM'
+var.unit = 'nT'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [-np.inf, np.inf]
+axis[1].label = '@v.group'
+axis[1].unit = '@v.unit_label'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'ASY_H'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'ASY-H index'
+var.label = r'ASY-H'
+var.group = r'ASY/SYM'
+var.unit = 'nT'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [-np.inf, np.inf]
+axis[1].label = '@v.group'
+axis[1].unit = '@v.unit_label'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'SYM_D'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'SYM-D index'
+var.label = r'SYM-D'
+var.group = r'ASY/SYM'
+var.unit = 'nT'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [-np.inf, np.inf]
+axis[1].label = '@v.group'
+axis[1].unit = '@v.unit_label'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
+
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'SYM_H'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'SYM-H index'
+var.label = r'SYM-H'
+var.group = r'ASY/SYM'
+var.unit = 'nT'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [None, None]
+axis[1].label = '@v.label'
+axis[1].unit = '@v.unit_label'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
+
+configured_variables[var_name] = var
+
+
 

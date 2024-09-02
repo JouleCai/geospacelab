@@ -232,7 +232,7 @@ class LENUSpherical(SpaceSphericalCS):
     def convert_rphitheta_to_rangeazel(self):
         if self.coords.phi_unit == 'deg':
             factor = 1
-        elif self.coords.az_unit == 'rad':
+        elif self.coords.phi_unit == 'rad':
             factor = 180. / np.pi
         else:
             raise NotImplemented
@@ -510,7 +510,7 @@ class GEOCCartesian(SpaceCartesianCS):
         x_new = np.reshape(v_new[:, 0], shape_x)
         y_new = np.reshape(v_new[:, 1], shape_x)
         z_new = np.reshape(v_new[:, 2], shape_x)
-        cs_new = LENUCartesian(coords={'x': x_new, 'y': y_new, 'z': z_new}, lat_0=lat_0, lon_0=lon_0, kind='car')
+        cs_new = LENUCartesian(coords={'x': x_new, 'y': y_new, 'z': z_new}, lat_0=lat_0, lon_0=lon_0)
 
         if kind == 'sph':
             cs_new = cs_new.to_spherical()

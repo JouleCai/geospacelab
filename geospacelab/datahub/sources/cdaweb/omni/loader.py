@@ -87,4 +87,11 @@ cdf_variable_name_dict = {
     'BSN_x':        'BSN_x',
     'BSN_y':        'BSN_y',
     'BSN_z':        'BSN_z',
+    'AE':           'AE_INDEX',
+    'AL':           'AL_INDEX',
+    'AU':           'AU_INDEX',
+    'SYM_H':        'SYM_H',
+    'SYM_D':        'SYM_D',
+    'ASY_D':        'ASY_D',
+    'ASY_H':        'ASY_H',
 }

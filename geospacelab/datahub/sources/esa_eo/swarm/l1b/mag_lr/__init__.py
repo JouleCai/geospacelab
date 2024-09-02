@@ -14,19 +14,19 @@ from geospacelab.config import prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
-from geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_lp_hm.loader import Loader as default_Loader
-from geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_lp_hm.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.esa_eo.swarm.advanced.efi_lp_hm.variable_config as var_config
+from geospacelab.datahub.sources.esa_eo.swarm.l1b.mag_lr.loader import Loader as default_Loader
+from geospacelab.datahub.sources.esa_eo.swarm.l1b.mag_lr.downloader import Downloader as default_Downloader
+import geospacelab.datahub.sources.esa_eo.swarm.l1b.mag_lr.variable_config as var_config
 
 
 default_dataset_attrs = {
     'database': esaeo_database,
     'facility': swarm_facility,
-    'instrument': 'EFI-LP',
-    'product': 'LP_HM',
+    'instrument': 'MAG',
+    'product': 'LR_1B',
     'data_file_ext': 'cdf',
     'product_version': 'latest',
-    'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Advanced',
+    'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Level1b' / 'MAG_LR',
     'allow_load': True,
     'allow_download': True,
     'force_download': False,
@@ -44,25 +44,14 @@ default_variable_names = [
     'SC_DATETIME',
     'SC_GEO_LAT',
     'SC_GEO_LON',
-    'SC_GEO_ALT',
     'SC_GEO_r',
-    'SC_SZA',
-    'SC_SAz',
-    'SC_ST',
-    'SC_DIP_LAT',
-    'SC_DIP_LON',
-    'SC_QD_MLT',
-    'SC_QD_LAT',
-    'SC_AACGM_LAT',
-    'SC_AACGM_LON',
-    'n_e',
-    'T_e_HGN',
-    'T_e_LGN',
-    'T_e',
-    'V_s_HGN',
-    'V_s_LGN',
-    'SC_U',
-    'FLAG'
+    'B_NEC',
+    'B_N',
+    'B_E',
+    'B_C',
+    'FLAG_B',
+    'FLAG_q',
+    'FLAG_Platform',
     ]
 
 # default_data_search_recursive = True
@@ -78,8 +67,8 @@ class Dataset(datahub.DatasetSourced):
 
         self.database = kwargs.pop('database', 'ESA/EarthOnline')
         self.facility = kwargs.pop('facility', 'SWARM')
-        self.instrument = kwargs.pop('instrument', 'EFI-LP')
-        self.product = kwargs.pop('product', 'HM02')
+        self.instrument = kwargs.pop('instrument', 'MAG')
+        self.product = kwargs.pop('product', 'MAG_LR')
         self.product_version = kwargs.pop('product_version', '')
         self.local_latest_version = ''
         self.allow_download = kwargs.pop('allow_download', False)
@@ -115,7 +104,7 @@ class Dataset(datahub.DatasetSourced):
             if not list(attr):
                 mylog.StreamLogger.warning("The parameter {} is required before loading data!".format(attr_name))
 
-        self.data_root_dir = self.data_root_dir / self.instrument / self.product
+        # self.data_root_dir = self.data_root_dir / self.product
 
         if str(self.product_version) and self.product_version != 'latest':
             self.data_root_dir = self.data_root_dir / self.product_version
@@ -144,7 +133,6 @@ class Dataset(datahub.DatasetSourced):
             #             "Keep an eye on the latest baselines online!"
             #         )
 
-
     def label(self, **kwargs):
         label = super().label()
         return label
@@ -157,7 +145,7 @@ class Dataset(datahub.DatasetSourced):
             configured_variables=var_config.configured_variables
         )
         for file_path in self.data_file_paths:
-            load_obj = self.loader(file_path, file_type='cdf')
+            load_obj = self.loader(file_path, file_type='cdf', dt_fr=self.dt_fr, dt_to=self.dt_to)
 
             for var_name in self._variables.keys():
                 value = load_obj.variables[var_name]
@@ -261,13 +249,12 @@ class Dataset(datahub.DatasetSourced):
             initial_file_dir = kwargs.pop(
                 'initial_file_dir', self.data_root_dir
             )
-
-            initial_file_dir = initial_file_dir / 'Sat_{}'.format(self.sat_id) / this_day.strftime("%Y")
-
+            initial_file_dir = initial_file_dir / "Sat_{}".format(self.sat_id) / this_day.strftime("%Y")
             file_patterns = [
-                'EFI' + self.sat_id.upper(),
+                'MAG' + self.sat_id.upper(),
                 self.product.upper(),
                 this_day.strftime('%Y%m%d') + 'T',
+                'MAG_LR'
             ]
             # remove empty str
             file_patterns = [pattern for pattern in file_patterns if str(pattern)]
@@ -276,7 +263,7 @@ class Dataset(datahub.DatasetSourced):
             done = super().search_data_files(
                 initial_file_dir=initial_file_dir,
                 search_pattern=search_pattern,
-                allow_multiple_files=True,
+                allow_multiple_files=False,
             )
             # Validate file paths
 

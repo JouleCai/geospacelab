@@ -43,7 +43,7 @@ def test_ampere():
     cmap = 'jet'
     pcolormesh_config.update(cmap=cmap)
     # ipc = panel1.add_pcolor(fac_, coords={'lat': mlat[ind_t, ::], 'lon': None, 'mlt': mlt[ind_t, ::], 'height': 250.}, cs='AACGM', **pcolormesh_config)
-    ipm = panel1.overlay_pcolormesh(grid_fac, coords={'lat': grid_mlat, 'lon': None, 'mlt': grid_mlt, 'height': 250.}, cs='AACGM', **pcolormesh_config, regridding=False)
+    ipm = panel1.overlay_pcolormesh(grid_fac, coords={'lat': grid_mlat, 'lon': None, 'mlt': grid_mlt, 'height': 780.}, cs='AACGM', **pcolormesh_config, regridding=False)
     panel1.add_colorbar(ipm, c_label=r'FAC ($\mu$A/m$^2$)', c_scale=pcolormesh_config['c_scale'], left=1.1, bottom=0.1,
                         width=0.05, height=0.7)
 

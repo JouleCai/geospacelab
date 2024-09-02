@@ -27,17 +27,16 @@ class Downloader(DownloaderModel):
             force=True, direct_download=True, **kwargs
     ):
 
-        self.sat_id = sat_id
-
         if ftp_data_dir is None:
             ftp_data_dir = f'Level1b/Latest_baselines/MAGx_HR/Sat_{sat_id.upper()}'
 
         if data_file_root_dir is None:
             data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Level1b" / "MAG_HR"
         file_name_patterns = list(self._default_file_name_patterns)
-        file_name_patterns.extend(['MAG' + sat_id.upper(), dt_fr.strftime("%Y%m")])
+        file_name_patterns.extend(['MAG' + sat_id.upper(),])
         super(Downloader, self).__init__(
             dt_fr, dt_to,
+            sat_id=sat_id,
             data_file_root_dir=data_file_root_dir,
             ftp_data_dir=ftp_data_dir,
             file_version=file_version,
