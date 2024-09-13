@@ -374,7 +374,8 @@ class LEOToolbox(DatasetUser):
                     xd = x[sector_1 == ii]
                     yd = y[sector_1 == ii]
                     zd = vrb[sector_1 == ii]
-
+                    if (not list(xd)) or (not list(yd)):
+                        continue
                     f = interp1d(yd, xd, bounds_error=False, fill_value= 'extrapolate')
                     x_i = f(yy_1)
                     xx_1[ii-1, :] = x_i

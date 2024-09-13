@@ -166,6 +166,7 @@ class Dataset(datahub.DatasetSourced):
         from scipy.interpolate import interp1d
         import geospacelab.toolbox.utilities.numpymath as nm
 
+        data_time_res = 30
         ds_new = datahub.DatasetUser(dt_fr=self.dt_fr, dt_to=self.dt_to, visual=self.visual)
         ds_new.clone_variables(self)
         dts = ds_new['SC_DATETIME'].value.flatten()
@@ -185,7 +186,7 @@ class Dataset(datahub.DatasetSourced):
 
         f = interp1d(x_0, x_0, kind='nearest', bounds_error=False, fill_value=(x_0[0], x_0[-1]))
         pseudo_x = f(x_1)
-        mask = np.abs(pseudo_x - x_1) > time_res / 1.5
+        mask = np.abs(pseudo_x - x_1) > data_time_res / 1.5
 
         dts_new = np.array([dt0 + datetime.timedelta(seconds=sec) for sec in x_1])
         ds_new['SC_DATETIME'].value = dts_new.reshape((dts_new.size, 1))

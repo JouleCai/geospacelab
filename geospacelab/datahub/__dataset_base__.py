@@ -416,6 +416,7 @@ class DatasetSourced(DatasetBase):
         if inds is None:
             return
         if not list(inds):
+            mylog.StreamLogger.warning("Data within the requested time range are not available!")
             return
         if var_datetime is None:
             var_datetime = self['DATETIME']

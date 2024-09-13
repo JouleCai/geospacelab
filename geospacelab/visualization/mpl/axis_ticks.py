@@ -48,7 +48,7 @@ class DatetimeMajorLocator(mdates.AutoDateLocator):
 
 class DatetimeMinorLocator(mdates.AutoDateLocator):
 
-    def __init__(self, ax=None, majorlocator=None, tz=None, minticks=12, maxticks=50, interval_multiples=True):
+    def __init__(self, ax=None, majorlocator=None, tz=None, minticks=12, maxticks=100, interval_multiples=True):
 
         if majorlocator is not None:
             tz = majorlocator.tz
