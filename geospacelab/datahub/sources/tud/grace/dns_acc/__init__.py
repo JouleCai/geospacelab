@@ -182,10 +182,11 @@ class Dataset(datahub.DatasetSourced):
         self['SC_AACGM_LON'].value = cs_aacgm['lon'].reshape(self['SC_DATETIME'].value.shape)
         self['SC_AACGM_MLT'].value = cs_aacgm['mlt'].reshape(self['SC_DATETIME'].value.shape)
 
-    def interp_evenly(self, time_res=10, time_res_o=10, dt_fr=None, dt_to=None):
+    def interp_evenly(self, time_res=None, time_res_o=10, dt_fr=None, dt_to=None, masked=False):
         from scipy.interpolate import interp1d
         import geospacelab.toolbox.utilities.numpymath as nm
-
+        if time_res is None:
+            time_res = time_res_o
         ds_new = datahub.DatasetUser(dt_fr=self.dt_fr, dt_to=self.dt_to, visual=self.visual)
         ds_new.clone_variables(self)
         dts = ds_new['SC_DATETIME'].value.flatten()
@@ -223,15 +224,16 @@ class Dataset(datahub.DatasetSourced):
             if var_name in period_var_dict.keys():
                 var = ds_new[var_name].value.flatten()
                 var_new = nm.interp_period_data(x_0, var, x_1, period=period_var_dict[var_name], method='linear', bounds_error=False)
-                var_new[mask] = np.nan
-                ds_new[var_name].value = var_new.reshape((dts_new.size, 1))
             else:
                 method = 'linear' if 'FLAG' not in var_name else 'nearest'
                 var = ds_new[var_name].value.flatten()
                 f = interp1d(x_0, var, kind=method, bounds_error=False)
                 var_new = f(x_1)
+            if masked:
+                var_new = np.ma.array(var_new, mask=mask, fill_value=np.nan)
+            else:
                 var_new[mask] = np.nan
-                ds_new[var_name].value = var_new.reshape((dts_new.size, 1))
+            ds_new[var_name].value = var_new.reshape((dts_new.size, 1))
         return ds_new
 
     def search_data_files(self, **kwargs):

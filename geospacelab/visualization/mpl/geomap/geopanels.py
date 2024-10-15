@@ -765,13 +765,15 @@ class PolarMapPanel(GeoPanel):
                           time_tick_label=True, time_tick_label_format="%H:%M", time_tick_label_fontsize=8,
                           time_tick_label_rotation=45., time_tick_label_offset=0.05, 
                           time_tick_label_fontweight='normal',
+                          time_major_ticks=None,
                           time_minor_tick=True, time_minor_tick_res=60,
                           time_tick_width=1, **kwargs):
         default_trajectory_config = {
             'linewidth': 1,
             'linestyle': '-',
             'color': 'k',
-            'zorder': max([_.zorder for _ in self.major_ax.get_children()])
+            'zorder': max([_.zorder for _ in self.major_ax.get_children()]),
+            'alpha': 1,
         }
         default_trajectory_config.update(**kwargs.setdefault('trajectory_config', {}))
         default_trajectory_config.update(color=color)
@@ -819,13 +821,16 @@ class PolarMapPanel(GeoPanel):
                 data = self.projection.transform_points(ccrs.PlateCarree(), lon_in, lat_in)
                 xdata = data[:, 0]
                 ydata = data[:, 1]
-
                 sectime, dt0 = dttool.convert_datetime_to_sectime(
                     dts_in, datetime.datetime(self.ut.year, self.ut.month, self.ut.day)
                 )
-
-                time_ticks = np.arange(np.ceil(sectime[0] / time_tick_res) * time_tick_res,
-                                    np.ceil(sectime[-1] / time_tick_res) * time_tick_res, time_tick_res)
+                if type(time_major_ticks) in [list, np.ndarray]:
+                    time_ticks, dt0 = dttool.convert_datetime_to_sectime(
+                        np.array(time_major_ticks), datetime.datetime(self.ut.year, self.ut.month, self.ut.day)
+                    )
+                else:
+                    time_ticks = np.arange(np.ceil(sectime[0] / time_tick_res) * time_tick_res,
+                                        np.ceil(sectime[-1] / time_tick_res) * time_tick_res, time_tick_res)
 
                 f = interp1d(sectime, xdata, fill_value='extrapolate')
                 x_i = f(time_ticks)
@@ -844,11 +849,12 @@ class PolarMapPanel(GeoPanel):
                 vq1 = l * np.cos(slope_i)
 
                 zorder = kwargs['trajectory_config']['zorder']
+                alpha = kwargs['trajectory_config']['alpha']
                 self.major_ax.quiver(
                     xq, yq, uq1, vq1,
                     units='xy', angles='xy', scale=1., scale_units='xy',
                     width=time_tick_width*0.003 * (self._extent[1] - self._extent[0]),
-                    headlength=0, headaxislength=0, pivot='middle', color=color,
+                    headlength=0, headaxislength=0, pivot='middle', color=color, alpha=alpha,
                     zorder=zorder
                 )
 
@@ -863,7 +869,7 @@ class PolarMapPanel(GeoPanel):
                             x_time_tick, y_time_tick, time.strftime(time_tick_label_format),
                             fontsize=time_tick_label_fontsize, fontweight=time_tick_label_fontweight,
                             rotation=slope_i[ind] * 180. / np.pi + time_tick_label_rotation,
-                            ha='center', va='center', color=color, 
+                            ha='center', va='center', color=color, alpha=alpha,
                             zorder=zorder
                         )
 

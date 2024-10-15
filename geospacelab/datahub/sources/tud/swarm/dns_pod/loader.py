@@ -35,7 +35,7 @@ class Loader(object):
         with open(self.file_path, 'r') as f:
             text = f.read()
             results = re.findall(
-            r"^(\d{4}-\d{2}-\d{2}\s*\d{2}\:\d{2}\:\d{2}\.\d{3})\s*\w{3}\s*([\-\d.]+)\s*([\-\d.]+)\s*([\-\d.]+)\s*([\-\d.]+)\s*([\-\d.]+)\s*([+\-\d.Ee]+)\s*",
+            r"^(\d{4}-\d{2}-\d{2}\s*\d{2}\:\d{2}\:\d{2}\.\d{3})\s*\w{3}\s*([\-\d.]+)\s*([\-\d.]+)\s*([\-\d.]+)\s*([\-\d.]+)\s*([\-\d.]+)\s*([+\-\d.Ee]{3,})\s*",
             text,
             re.M)
             results = list(zip(*results))

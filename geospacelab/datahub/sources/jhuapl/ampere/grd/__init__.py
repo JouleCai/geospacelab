@@ -110,7 +110,11 @@ class Dataset(datahub.DatasetSourced):
     def grid_fac(self, fac_data, mlat_data=None, mlt_data=None, mlt_res=0.05, mlat_res=0.05, interp_method='cubic'):
         import scipy.interpolate as si
         x = np.arange(0, 24, mlt_res)
-        y = np.arange(40, 89, mlat_res)
+        if self.pole == 'S':
+            y = np.arange(-90, -40, mlat_res)
+        else:
+            y = np.arange(40, 90, mlat_res)
+
         grid_x, grid_y = np.meshgrid(x, y, indexing='ij')
 
         if mlt_data is None:
@@ -155,7 +159,8 @@ class Dataset(datahub.DatasetSourced):
                 file_patterns = [
                     self.product.upper(),
                     start_hour.strftime("%Y%m%dT%H%M"),
-                    end_hour.strftime("%Y%m%dT%H%M")
+                    end_hour.strftime("%Y%m%dT%H%M"),
+                    self.pole
                 ]
                 # remove empty str
                 file_patterns = [pattern for pattern in file_patterns if str(pattern)]
@@ -188,7 +193,7 @@ class Dataset(datahub.DatasetSourced):
         download_obj = self.downloader(
             dt_fr, dt_to,
             data_product=self.product.lower(),
-            data_file_root_dir=self.data_root_dir, force_download=self.force_download)
+            data_file_root_dir=self.data_root_dir, force_download=self.force_download, pole=self.pole)
         return download_obj.done
 
     @property

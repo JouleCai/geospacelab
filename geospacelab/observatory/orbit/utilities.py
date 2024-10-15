@@ -7,13 +7,14 @@ import scipy.signal as sig
 
 from geospacelab.datahub import DatasetUser
 from geospacelab.toolbox.utilities import pydatetime as dttool
+import geospacelab.toolbox.utilities.numpymath as npmath
 from geospacelab.cs import GEOCSpherical
 
 
 class LEOToolbox(DatasetUser):
 
-    def __init__(self, dt_fr=None, dt_to=None):
-        super().__init__(dt_fr, dt_to)
+    def __init__(self, dt_fr=None, dt_to=None, visual='on'):
+        super().__init__(dt_fr, dt_to, visual=visual)
 
         self.add_variable(var_name='SC_GEO_LAT')
         self.add_variable(var_name='SC_GEO_LON')
@@ -331,6 +332,7 @@ class LEOToolbox(DatasetUser):
         x_unique = [(t - dt0).total_seconds() for t in x_unique]
         if x_data_res is None:
             x_data_res = np.median(np.diff(x_unique))
+
         if y_data_res is None:
             y_data_res = np.median(np.diff(y_data[y_data < np.abs(np.diff(lat_range))]/2))
             if y_grid_res > y_data_res:
@@ -339,10 +341,12 @@ class LEOToolbox(DatasetUser):
         ny = int(np.ceil(np.diff(lat_range) / y_grid_res) + 1)
         if x_grid_res is None:
             grid_x, grid_y = np.meshgrid(x_unique, np.linspace(lat_range[0], lat_range[1], ny))
+            x_interp = False
         else:
             nx = int(np.ceil((max_x - min_x) / x_grid_res) + 1)
             grid_x, grid_y = np.meshgrid(np.linspace(min_x, max_x, nx),
                                         np.linspace(lat_range[0], lat_range[1], ny))
+            x_interp = True
 
         grid_lat = griddata((x_1, y), y, (grid_x, grid_y), method='nearest')
 
@@ -376,18 +380,33 @@ class LEOToolbox(DatasetUser):
                     zd = vrb[sector_1 == ii]
                     if (not list(xd)) or (not list(yd)):
                         continue
+
                     f = interp1d(yd, xd, bounds_error=False, fill_value= 'extrapolate')
                     x_i = f(yy_1)
                     xx_1[ii-1, :] = x_i
-                    f = interp1d(yd, zd, bounds_error=False, fill_value='extrapolate')
-                    z_i = f(yy_1)
+
+                    if 'LON' in var_name:
+                        z_i = npmath.interp_period_data(yd, zd, yy_1,  period=360., method='linear', bounds_error=False)
+                    elif 'LST' in var_name:
+                        z_i = npmath.interp_period_data(yd, zd, yy_1,  period=24., method='linear', bounds_error=False)
+                    else:
+                        f = interp1d(yd, zd, bounds_error=False, fill_value='extrapolate')
+                        z_i = f(yy_1)
                     zz_1[ii-1, :] = z_i 
                 for ii in range(grid_x.shape[0]):
                     xd = xx_1[:, ii].flatten()
                     zd = zz_1[:, ii].flatten()
-                    f = interp1d(xd, zd, bounds_error=False, fill_value='extrapolate') 
-                    z_i = f(grid_x[0])
-                    grid_z[ii, :] = z_i
+                    if x_interp:
+                        if 'LON' in var_name:
+                            z_i = npmath.interp_period_data(xd, zd, grid_x[0],  period=360., method='linear', bounds_error=False)
+                        elif 'LST' in var_name:
+                            z_i = npmath.interp_period_data(xd, zd, grid_x[0],  period=24., method='linear', bounds_error=False)
+                        else:
+                            f = interp1d(xd, zd, bounds_error=False, fill_value='extrapolate')
+                            z_i = f(grid_x[0])
+                        grid_z[ii, :] = z_i
+                    else:
+                        grid_z[ii, :] = zd
             else:
                 grid_z = griddata((x, y), vrb, (grid_x, grid_y), method=method)
             grid_z[mask_y] = np.nan
@@ -434,7 +453,7 @@ class LEOToolbox(DatasetUser):
     def add_GEO_LST(self):
         lons = self['SC_GEO_LON'].flatten()
         uts = self['SC_DATETIME'].flatten()
-        lsts = [ut + datetime.timedelta(hours=lon / 15.) for ut, lon in zip(uts, lons)]
+        lsts = [ut + datetime.timedelta(seconds=int(lon / 15. * 3600)) for ut, lon in zip(uts, lons)]
         lsts = [lst.hour + lst.minute / 60. + lst.second / 3600. for lst in lsts]
         var = self.add_variable(var_name='SC_GEO_LST')
         var.value = np.array(lsts)[:, np.newaxis]

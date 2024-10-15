@@ -38,6 +38,7 @@ class Loader:
                                                 only_use_python_datetimes=True)
 
         variables['DATETIME'] = np.reshape(variables['DATETIME'], (fnc['UNIX_TIME'].shape[0], 1))
+        variables['DATETIME'] = variables['DATETIME'] + datetime.timedelta(hours=12)
         self.variables = variables
         self.done = True
         fnc.close()
