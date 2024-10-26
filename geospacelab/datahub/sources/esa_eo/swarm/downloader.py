@@ -110,7 +110,8 @@ class Downloader(DownloaderBase):
                                 ftp.quit()
                                 return done
                             mylog.simpleinfo.info("Done.")
-                    except:
+                    except Exception as e:
+                        print(e)
                         pathlib.Path.unlink(file_path)
                         mylog.StreamLogger.warning('The file {0} downloaded is not compile.'.format(file_name))
                         ftp.quit()

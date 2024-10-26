@@ -350,7 +350,13 @@ class TSPanel(Panel):
         ax.xaxis.set_major_locator(majorlocator)
         ax.xaxis.set_major_formatter(majorformatter)
         # minor locator must be set up after setting the major locator
-        minorlocator = DatetimeMinorLocator(ax=ax, majorlocator=majorlocator)
+        maxticks = var_for_config.visual.axis[0].minor_tick_max
+        if maxticks is None:
+            maxticks = 100
+        minticks = var_for_config.visual.axis[0].minor_tick_min
+        if minticks is None:
+            minticks = 12
+        minorlocator = DatetimeMinorLocator(ax=ax, majorlocator=majorlocator, maxticks=maxticks, minticks=minticks)
         ax.xaxis.set_minor_locator(minorlocator)
         if self.bottom_panel:
             self._set_xaxis_ticklabels(ax, majorformatter=majorformatter)
