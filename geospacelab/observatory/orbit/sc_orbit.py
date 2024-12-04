@@ -262,7 +262,7 @@ class OrbitPosition_SSCWS(DatasetSourced):
             reload = True
             
         if not file_path.is_file():
-            file_path.parent.resolve().mkdir(exist_ok=True)
+            file_path.parent.resolve().mkdir(exist_ok=True, parents=True)
             reload = True
 
         if reload:
