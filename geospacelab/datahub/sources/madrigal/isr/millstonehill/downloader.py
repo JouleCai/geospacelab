@@ -177,7 +177,7 @@ class Downloader(object):
 
                     mylog.simpleinfo.info("Downloading  {} from the Madrigal database ...".format(file_name))
                     database.downloadFile(
-                        file_path_remote, data_file_path,
+                        file.name, data_file_path,
                         self.user_fullname, self.user_email, self.user_affiliation,
                         "hdf5"
                     )

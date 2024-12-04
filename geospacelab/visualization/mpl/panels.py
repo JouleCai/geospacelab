@@ -265,10 +265,13 @@ class TSPanel(Panel):
             delta_x = np.diff(x, axis=0)
             x[:-1, :] = x[:-1, :] + delta_x/2
             x = np.vstack((
-                np.array(x[0, 0] - delta_x[0, 0] / 2).reshape((1, 1)),
+                np.array(x[0, :] - delta_x[0, :] / 2)[np.newaxis, :],
                 x[:-1, :],
-                np.array(x[-1, 0] + delta_x[-1, 0] / 2).reshape((1, 1))
+                np.array(x[-1, :] + delta_x[-1, :] / 2)[np.newaxis, :]
             ))
+        if len(x.shape) == 2:
+            if x.shape[1] == z.shape[1]:
+                x = np.hstack((x, x[:, -1].reshape((x.shape[0], 1))))
         if len(y.shape) == 1:
             y = y[np.newaxis, :]
         if y.shape[1] == z.shape[1]:
@@ -350,13 +353,13 @@ class TSPanel(Panel):
         ax.xaxis.set_major_locator(majorlocator)
         ax.xaxis.set_major_formatter(majorformatter)
         # minor locator must be set up after setting the major locator
-        maxticks = var_for_config.visual.axis[0].minor_tick_max
-        if maxticks is None:
-            maxticks = 100
-        minticks = var_for_config.visual.axis[0].minor_tick_min
-        if minticks is None:
-            minticks = 12
-        minorlocator = DatetimeMinorLocator(ax=ax, majorlocator=majorlocator, maxticks=maxticks, minticks=minticks)
+        minormaxticks = var_for_config.visual.axis[0].minor_tick_max
+        if minormaxticks is None:
+            minormaxticks = maxticks * 10 + 1
+        minorminticks = var_for_config.visual.axis[0].minor_tick_min
+        if minorminticks is None:
+            minorminticks = minticks * 3 -1
+        minorlocator = DatetimeMinorLocator(ax=ax, majorlocator=majorlocator, maxticks=minormaxticks, minticks=minorminticks)
         ax.xaxis.set_minor_locator(minorlocator)
         if self.bottom_panel:
             self._set_xaxis_ticklabels(ax, majorformatter=majorformatter)

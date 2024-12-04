@@ -5,6 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pathlib
+from matplotlib.axes import Axes
+from typing import Dict
 # import palettable
 
 from matplotlib.gridspec import GridSpec, SubplotSpec
@@ -249,7 +251,7 @@ class DashboardBase(object):
 
         self.figure = figure
 
-        self.panels = {}
+        self.panels : Dict[int, PanelBase] = {}
         self.num_rows = None
         self.num_cols = None
         self.title = kwargs.pop('title', None)
@@ -559,7 +561,7 @@ class PanelBase(object):
         self.axes_overview[ax] = copy.deepcopy(self._ax_attr_model)
         self._current_ax = ax
 
-    def __call__(self, ax=None):
+    def __call__(self, ax=None) -> Axes:
         """
         Get the axes instance.
 
@@ -802,7 +804,7 @@ class PanelBase(object):
         self.sca(ax)
 
         # set colorbar label
-        cax_label_config = pybasic.dict_set_default(cax_label_config, rotation=270, va='bottom', size='small')
+        cax_label_config = pybasic.dict_set_default(cax_label_config, rotation=270, va='bottom', size='medium')
         if cax_label is not None:
             icb.set_label(cax_label, **cax_label_config)
 

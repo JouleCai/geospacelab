@@ -20,7 +20,7 @@ timestamps = {
 }
 
 
-default_colormap = "gist_ncar"
+default_colormap = "seismic_r"
 
 default_plot_config = {
     'line':         {
@@ -43,14 +43,14 @@ depend_0 = {'UT': 'SC_DATETIME',
 # depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
 
 ####################################################################################################################
-var_name = 'J_r'
+var_name = 'j_r'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'Radial current'
-var.label = r'$J_r$'
+var.label = r'$j_r$'
 var.unit = 'muA/m2'
 var.unit_label = r'$\mu$A$\cdot$m$^{-2}$'
-var.group = r'$J$'
+var.group = r'$j$'
 var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
@@ -68,14 +68,14 @@ axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ####################################################################################################################
-var_name = 'J_FA'
+var_name = 'j_FA'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'Field-aligned current'
-var.label = r'$J_{\parallel}$'
+var.label = r'$j_{\parallel}$'
 var.unit = 'muA/m2'
 var.unit_label = r'$\mu$A$\cdot$m$^{-2}$'
-var.group = r'$J$'
+var.group = r'$j$'
 var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs

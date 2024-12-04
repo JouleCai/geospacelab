@@ -90,8 +90,8 @@ class DMSPTSDashboard(TSDashboard):
 
 def example():
 
-    dt_fr = datetime.datetime.strptime('20150908' + '2034', '%Y%m%d%H%M')
-    dt_to = datetime.datetime.strptime('20150908' + '2036', '%Y%m%d%H%M')
+    dt_fr = datetime.datetime.strptime('20100908' + '2034', '%Y%m%d%H%M')
+    dt_to = datetime.datetime.strptime('20100908' + '2036', '%Y%m%d%H%M')
 
     dashboard = DMSPTSDashboard(
         dt_fr, dt_to, sat_id='F18',

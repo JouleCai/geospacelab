@@ -135,7 +135,7 @@ class Downloader(DownloaderBase):
                     self.done = True
                     continue
                 super().download(
-                    file_path_remote=file_path_remote, file_path_local=file_path_local,
+                    file_path_remote=file.name, file_path_local=file_path_local,
                     file_format='hdf5')
                 file_paths.append(file_path_local)
         return file_paths

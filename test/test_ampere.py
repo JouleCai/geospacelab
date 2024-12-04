@@ -6,9 +6,9 @@ import geospacelab.visualization.mpl.geomap.geodashboards as geomap
 
 
 def test_ampere():
-    dt_fr = datetime.datetime(2021, 8, 24, 8)
-    dt_to = datetime.datetime(2021, 8, 24, 12, 59)
-    time1 = datetime.datetime(2021, 8, 24, 10, 10)
+    dt_fr = datetime.datetime(2024, 5, 8, 0)
+    dt_to = datetime.datetime(2024, 5, 13, 23, 59)
+    time1 = datetime.datetime(2024, 5, 8, 10, 10)
     pole = 'N'
     
     db = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)})

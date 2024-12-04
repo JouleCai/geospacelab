@@ -132,7 +132,9 @@ class TSDashboard(Dashboard):
                 panel_config.update(sharex=self.panels[0]())
             if ind == len(self._panels_configs.keys())-1:
                 bottom_panel = True
-                panel_config.update(timeline_extra_labels=self.timeline_extra_labels, timeline_same_format=self.timeline_same_format)
+                panel_config.update(
+                    timeline_extra_labels=self.timeline_extra_labels, timeline_same_format=self.timeline_same_format,
+                )
             else:
                 bottom_panel = False
             panel_config.update(bottom_panel=bottom_panel)
@@ -393,7 +395,7 @@ class TSDashboard(Dashboard):
         kwargs.setdefault('facecolor', 'yellow')
         kwargs.setdefault('alpha', 0.4)
 
-        if panel_index == 0:
+        if panel_index == -1:
             if 'major' not in self.extra_axes.keys():
                 ax = self.add_major_axes()
             else:
@@ -435,9 +437,9 @@ class TSDashboard(Dashboard):
             text_config.setdefault('clip_on', False)
             ax.text(x, y, label, transform=ax.transAxes, **text_config)
 
-    def add_top_bar(self, dt_fr, dt_to, bottom=0, top=0.02, facecolor='orange', **kwargs):
+    def add_top_bar(self, dt_fr, dt_to, panel_index=-1, bottom=0, top=0.02, facecolor='orange', **kwargs):
         bottom_extend = -1. - bottom
         top_extend = top
         kwargs.setdefault('alpha', 1.)
-        self.add_shading(dt_fr, dt_to, bottom_extend=bottom_extend, top_extend=top_extend, facecolor=facecolor, **kwargs)
+        self.add_shading(dt_fr, dt_to, panel_index=panel_index, bottom_extend=bottom_extend, top_extend=top_extend, facecolor=facecolor, **kwargs)
 

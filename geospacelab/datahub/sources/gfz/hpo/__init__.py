@@ -117,7 +117,7 @@ class Dataset(datahub.DatasetSourced):
         dt0 = datetime.datetime(dt_fr.year, 1, 1)
         for i in range(diff_years + 1):
             thisyear = datetime.datetime(dt0.year + i, 1, 1)
-            if datetime.date.today().year == thisyear.year:
+            if datetime.date.today().year == thisyear.year and self.allow_download:
                 self.force_download = True
 
             initial_file_dir = kwargs.pop('initial_file_dir', None)

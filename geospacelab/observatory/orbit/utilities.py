@@ -299,7 +299,7 @@ class LEOToolbox(DatasetUser):
                 
     def griddata_by_sector(
             self, sector_name=None, variable_names=None, x_grid_res=20*60, y_grid_res=0.5, along_track_interp=True,
-            x_data_res=None, y_data_res=None
+            x_data_res=None, y_data_res=None, along_track_binning=False, 
             ):
         self.visual = 'on'
         dts_c = self['_'.join(('SECTOR', sector_name, 'DATETIME'))].value.flatten()
@@ -325,9 +325,7 @@ class LEOToolbox(DatasetUser):
         x_1 = np.array([(dt - dt0).total_seconds() for dt in x_data_1]) 
         # max_x = np.ceil(np.max(x) / self.xgrid_res) * self.xgrid_res
         # min_x = np.floor(np.min(x) / self.xgrid_res) * self.xgrid_res
-        total_seconds = (dts[-1] - dt0).total_seconds()
-        min_x = 0
-        max_x = total_seconds
+
         x_unique = np.unique(dts_c[sector > 0])
         x_unique = [(t - dt0).total_seconds() for t in x_unique]
         if x_data_res is None:
@@ -343,9 +341,18 @@ class LEOToolbox(DatasetUser):
             grid_x, grid_y = np.meshgrid(x_unique, np.linspace(lat_range[0], lat_range[1], ny))
             x_interp = False
         else:
-            nx = int(np.ceil((max_x - min_x) / x_grid_res) + 1)
-            grid_x, grid_y = np.meshgrid(np.linspace(min_x, max_x, nx),
-                                        np.linspace(lat_range[0], lat_range[1], ny))
+            min_x = np.floor((self.dt_fr - dt0).total_seconds() / x_grid_res) * x_grid_res
+            max_x = np.ceil((self.dt_to - dt0).total_seconds() / x_grid_res) * x_grid_res
+            # total_seconds = (dts[-1] - dt0).total_seconds()
+            # min_x = 0
+            # max_x = total_seconds
+            # nx = int(np.ceil((max_x - min_x) / x_grid_res))
+            # grid_x, grid_y = np.meshgrid(np.linspace(min_x, max_x, nx),
+            #                            np.linspace(lat_range[0], lat_range[1], ny))
+            grid_x, grid_y = np.meshgrid(
+                np.arange(min_x, max_x, x_grid_res),
+                np.linspace(lat_range[0], lat_range[1], ny)
+            )
             x_interp = True
 
         grid_lat = griddata((x_1, y), y, (grid_x, grid_y), method='nearest')
@@ -366,7 +373,7 @@ class LEOToolbox(DatasetUser):
         method = 'linear'
         for var_name in variable_names:
             vrb = self[var_name].value.flatten()[sector>0]
-            if along_track_interp:
+            if along_track_binning:
                 sector_1 = sector[sector>0]
                 n_tracks = int(np.max(sector))
                 n_lats = ny
@@ -378,6 +385,53 @@ class LEOToolbox(DatasetUser):
                     xd = x[sector_1 == ii]
                     yd = y[sector_1 == ii]
                     zd = vrb[sector_1 == ii]
+                    if (not list(xd)) or (not list(yd)):
+                        continue
+                        
+                    f = interp1d(yd, xd, bounds_error=False, fill_value= 'extrapolate')
+                    x_i = f(yy_1)
+                    xx_1[ii-1, :] = x_i
+
+                    if 'LON' in var_name:
+                        z_i = npmath.interp_period_data(yd, zd, yy_1,  period=360., method='linear', bounds_error=False)
+                    elif 'LST' in var_name:
+                        z_i = npmath.interp_period_data(yd, zd, yy_1,  period=24., method='linear', bounds_error=False)
+                    else:
+                        # f = interp1d(yd, zd, bounds_error=False, fill_value='extrapolate')
+                        # z_i = f(yy_1)
+                        z_i = np.ones_like(yy_1) * np.nan       
+                        for j, yyy in enumerate(yy_1):
+                            inds_y = np.where((yd >= yyy-y_grid_res/2) & (yd < yyy+y_grid_res/2))[0]
+                            if list(inds_y):
+                                z_i[j] = np.nanmean(zd[inds_y])
+                    zz_1[ii-1, :] = z_i 
+                for ii in range(grid_x.shape[0]):
+                    xd = xx_1[:, ii].flatten()
+                    zd = zz_1[:, ii].flatten()
+                    if x_interp:
+                        if 'LON' in var_name:
+                            z_i = npmath.interp_period_data(xd, zd, grid_x[0],  period=360., method='linear', bounds_error=False)
+                        elif 'LST' in var_name:
+                            z_i = npmath.interp_period_data(xd, zd, grid_x[0],  period=24., method='linear', bounds_error=False)
+                        else:
+                            f = interp1d(xd, zd, bounds_error=False, fill_value='extrapolate')
+                            z_i = f(grid_x[0])
+                        grid_z[ii, :] = z_i
+                    else:
+                        grid_z[ii, :] = zd 
+            elif along_track_interp:
+                sector_1 = sector[sector>0]
+                n_tracks = int(np.max(sector))
+                n_lats = ny
+                xx_1 = np.empty((n_tracks, n_lats))
+                zz_1 = np.empty((n_tracks, n_lats))
+                yy_1 = grid_y[:, 0].flatten()
+                grid_z = np.empty_like(grid_x)
+                for ii in np.arange(1, n_tracks+1):
+                    xd = x[sector_1 == ii]
+                    yd = y[sector_1 == ii]
+                    zd = vrb[sector_1 == ii]
+                    
                     if (not list(xd)) or (not list(yd)):
                         continue
 
