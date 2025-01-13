@@ -5,6 +5,7 @@
 import datetime
 import requests
 import bs4
+import certifi
 import os
 import zlib
 
@@ -76,8 +77,12 @@ class Downloader(object):
 
             # get a list of the files from dmsp ssusi website
             # based on the data type and date
-            r = requests.get(self.url_base + "data_retriver/",
-                             params=payload, verify=True)
+            try:
+                r = requests.get(self.url_base + "data_retriver/",
+                                params=payload, verify=True)
+            except:
+                r = requests.get(self.url_base + "data_retriver/",
+                                params=payload, verify=False)
             soup = bs4.BeautifulSoup(r.text, 'html.parser')
             div_filelist = soup.find("div", {"id": "filelist"})
             href_list = div_filelist.find_all(href=True)
@@ -111,7 +116,10 @@ class Downloader(object):
                     mylog.simpleinfo.info("The file {} exists.".format(file_name))
                     continue
                 mylog.simpleinfo.info("Downloading {} from the online database ...".format(file_name))
-                rf = requests.get(f_url, verify=True)
+                try:
+                    rf = requests.get(f_url, verify=True)
+                except:
+                    rf = requests.get(f_url, verify=False)
                 file_name = rf.url.split("/")[-1]
 
                 with open(file_path, "wb") as ssusi_data:

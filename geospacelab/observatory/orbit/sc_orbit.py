@@ -266,9 +266,11 @@ class OrbitPosition_SSCWS(DatasetSourced):
             reload = True
 
         if reload:
+            print("Reloading the satellite orbit data ...")
             ssc = SscWs()
             res = ssc.get_observatories()
             sat_list = res['Observatory']
+            print("Saving the data to {}.".format(str(file_path)))
             with open(file_path, 'wb') as fobj:
                 pickle.dump(sat_list, fobj, pickle.HIGHEST_PROTOCOL)
 
