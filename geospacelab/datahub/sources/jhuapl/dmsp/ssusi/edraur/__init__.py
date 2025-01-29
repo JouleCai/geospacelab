@@ -94,8 +94,11 @@ class Dataset(datahub.DatasetSourced):
             configured_variables=var_config.configured_variables
         )
         for file_path in self.data_file_paths:
-            load_obj = self.loader(file_path, file_type=self.product.lower(), pole=self.pole)
-
+            try:
+                load_obj = self.loader(file_path, file_type=self.product.lower(), pole=self.pole)
+            except Exception as e:
+                mylog.StreamLogger.warning(("Cannot load the data file: {}".format(file_path)))
+                print(e)
             for var_name in self._variables.keys():
                 if var_name == 'EMISSION_SPECTRA':
                     self._variables[var_name].value = load_obj.variables[var_name]

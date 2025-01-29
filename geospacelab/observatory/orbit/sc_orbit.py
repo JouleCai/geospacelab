@@ -255,15 +255,15 @@ class OrbitPosition_SSCWS(DatasetSourced):
     @staticmethod
     def list_satellites(reload=False, logging=True):
         file_path = prf.datahub_data_root_dir / 'SSCWS' / 'SSCWS_info_satellites.pkl'
-        mtime = datetime.datetime.fromtimestamp(file_path.stat().st_mtime, tz=datetime.timezone.utc)
-        time_c = datetime.datetime.now(datetime.timezone.utc)
-        diff_month = dttool.get_diff_months(mtime, time_c)
-        if diff_month >= 1:
-            reload = True
-            
         if not file_path.is_file():
             file_path.parent.resolve().mkdir(exist_ok=True, parents=True)
             reload = True
+        else:
+            mtime = datetime.datetime.fromtimestamp(file_path.stat().st_mtime, tz=datetime.timezone.utc)
+            time_c = datetime.datetime.now(datetime.timezone.utc)
+            diff_month = dttool.get_diff_months(mtime, time_c)
+            if diff_month >= 1:
+                reload = True
 
         if reload:
             print("Reloading the satellite orbit data ...")

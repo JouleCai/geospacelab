@@ -95,7 +95,8 @@ class Downloader(object):
 
                 m = re.search(rpattern, file.kindatdesc)
                 if m is None:
-                    continue
+                    if '_' + self.sat_id[1:] + self.file_type not in file.name:
+                        continue
 
                 file_path_remote = pathlib.Path(file.name)
                 file_name = file_path_remote.name
