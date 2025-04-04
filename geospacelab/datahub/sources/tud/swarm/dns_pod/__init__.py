@@ -62,7 +62,7 @@ class Dataset(datahub.DatasetSourced):
         self.facility = kwargs.pop('facility', 'SWARM')
         self.instrument = kwargs.pop('instrument', 'POD')
         self.product = kwargs.pop('product', 'DNS-POD')
-        self.product_version = kwargs.pop('product_version', 'v01')
+        self.product_version = kwargs.pop('product_version', 'v02')
         self.local_latest_version = ''
         self.allow_download = kwargs.pop('allow_download', False)
         self.force_download = kwargs.pop('force_download', False)
@@ -72,7 +72,7 @@ class Dataset(datahub.DatasetSourced):
 
         self.sat_id = kwargs.pop('sat_id', 'A')
 
-        self.metadata = None
+        self.metadata = {}
 
         allow_load = kwargs.pop('allow_load', False)
 
@@ -125,7 +125,18 @@ class Dataset(datahub.DatasetSourced):
         if self.add_APEX:
             self.convert_to_APEX()
             
-    
+    def add_GEO_LST(self):
+        lons = self['SC_GEO_LON'].flatten()
+        uts = self['SC_DATETIME'].flatten()
+        lsts = [ut + datetime.timedelta(seconds=int(lon/15.*3600)) for ut, lon in zip(uts, lons)]
+        lsts = [lst.hour + lst.minute/60. + lst.second/3600. for lst in lsts]
+        var = self.add_variable(var_name='SC_GEO_LST')
+        var.value = np.array(lsts)[:, np.newaxis]
+        var.label = 'LST'
+        var.unit = 'h'
+        var.depends = self['SC_GEO_LON'].depends
+        return var
+
     def convert_to_APEX(self):
         import geospacelab.cs as gsl_cs
 

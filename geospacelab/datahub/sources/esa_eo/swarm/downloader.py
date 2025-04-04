@@ -8,7 +8,7 @@ __license__ = "BSD-3-Clause License"
 __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
-
+import copy
 import datetime
 import numpy as np
 import requests
@@ -22,6 +22,7 @@ from contextlib import closing
 from geospacelab.datahub.__dataset_base__ import DownloaderBase
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as mylog
+import geospacelab.datahub.sources.esa_eo.swarm as swarm
 
 
 class Downloader(DownloaderBase):
@@ -40,11 +41,15 @@ class Downloader(DownloaderBase):
                  dt_fr, dt_to,
                  sat_id=None,
                  data_file_root_dir=None, ftp_data_dir=None, force=True, direct_download=True, file_version=None,
+                 username=swarm.default_username,
+                 password=swarm.eo_password,
                  file_extension = '.cdf',
                  **kwargs):
         self.ftp_host = "swarm-diss.eo.esa.int"
         self.ftp_port = 21
         self.sat_id = sat_id.upper()
+        self.username = username
+        self.__password__ = password
         if ftp_data_dir is None:
             raise ValueError
 
@@ -61,14 +66,15 @@ class Downloader(DownloaderBase):
     def download(self, **kwargs):
         done = False
         diff_month = dttool.get_diff_months(self.dt_fr, self.dt_to)
+        default_file_name_patterns = kwargs['file_name_patterns']
         for nm in range(diff_month+1):
             this_month = dttool.get_next_n_months(self.dt_fr, nm)
-            file_name_patterns = kwargs['file_name_patterns']
+            file_name_patterns = copy.deepcopy(default_file_name_patterns)
             file_name_patterns.append(this_month.strftime("%Y%m"))
             try:
-                ftp = ftplib.FTP()
+                ftp = ftplib.FTP_TLS()
                 ftp.connect(self.ftp_host, self.ftp_port, 30)  # 30 timeout
-                ftp.login()
+                ftp.login(user=self.username, passwd=self.__password__)
                 ftp.cwd(self.ftp_data_dir)
                 file_list = ftp.nlst()
                
@@ -124,8 +130,9 @@ class Downloader(DownloaderBase):
 
                 done = True
                 ftp.quit()
-            except:
+            except Exception as e:
                 print('Error during download from FTP')
+                print(e)
                 done = False
         return done
 
@@ -157,7 +164,7 @@ class Downloader(DownloaderBase):
 
         start_dts, stop_dts, versions = extract_timeline(file_list)
 
-        ind_dt = np.where((self.dt_fr < stop_dts) & (self.dt_to > start_dts))[0]
+        ind_dt = np.where((self.dt_fr <= stop_dts) & (self.dt_to >= start_dts))[0]
         if not list(ind_dt):
             raise FileExistsError
         file_list = [file_list[ii] for ii in ind_dt]

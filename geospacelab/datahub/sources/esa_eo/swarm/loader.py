@@ -72,8 +72,8 @@ class LoaderModel(object):
             epoch_to = cdflib.cdfepoch.compute_epoch([t.year, t.month, t.day, t.hour, t.minute, t.second])
         else:
             epoch_to = epochs[-1]
-        ind_t = np.where((epochs >= epoch_fr) & (epochs <= epoch_to))[0]
-
+        # ind_t = np.where((epochs >= epoch_fr) & (epochs <= epoch_to))[0]
+        ind_t = range(len(epochs))
         num_data = len(epochs)
         for var_name, cdf_var_name in self.variable_name_dict.items():
             if var_name == 'CDF_EPOCH':

@@ -32,7 +32,7 @@ def test():
 
 
 data_type_dict = {
-    'TEC-MAP': 'TEC binned',
+    'TEC-MAP': 'binned',
     'TEC-LOS': 'Line of sight',
     'TEC-Sites': 'List of sites',
 }

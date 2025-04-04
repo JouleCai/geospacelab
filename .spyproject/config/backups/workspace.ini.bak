@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['local/storm_20240510/event20240510_echaim.py', '../../01-Work/03-Code/SPADAViewer/loaders/load_uta_gitm.py']
+recent_files = ['local/storm_20240510/event20240510_echaim.py', '../../tmp/untitled0.py']
 
 [main]
 version = 0.2.0

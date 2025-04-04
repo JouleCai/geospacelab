@@ -34,7 +34,24 @@ class LEOToolbox(DatasetUser):
         self.sector_cs = 'GEO'
         self.sectors = {}
 
-    def search_orbit_nodes(self, data_interval=1):
+    def search_orbit_nodes(self, data_interval=1, t_res=None):
+        def check_nodes(nodes):
+            dts_nodes = nodes['DATETIME']
+            sectimes_nodes, _ = dttool.convert_datetime_to_sectime(dts_nodes)
+            diff_sectimes = np.diff(sectimes_nodes)
+            if t_res is not None:
+                sectime_res_1 = t_res
+            else:
+                sectime_res_1 = np.median(np.diff(sectimes_nodes))
+            inds_abnormal = np.where(diff_sectimes<sectime_res_1*0.6)[0]
+            if list(inds_abnormal):
+                iiii = np.array(inds_abnormal) + 1
+                nodes['INDEX'] = np.delete(nodes['INDEX'], iiii)
+                nodes['GEO_LON'] = np.delete(nodes['GEO_LON'], iiii)
+                nodes['GEO_LST'] = np.delete(nodes['GEO_LST'], iiii)
+                nodes['DATETIME'] = np.delete(nodes['DATETIME'], iiii)
+
+
         glat = self['SC_GEO_LAT'].value.flatten()
         glat_ = glat[0::data_interval]
         glon = self['SC_GEO_LON'].value.flatten()
@@ -61,19 +78,25 @@ class LEOToolbox(DatasetUser):
         self.ascending_nodes['GEO_LON'] = glon[inds_asc]
         self.ascending_nodes['GEO_LST'] = lst[inds_asc]
         self.ascending_nodes['DATETIME'] = dts[inds_asc]
+        check_nodes(self.ascending_nodes)
+
         self.descending_nodes['INDEX']= inds_dsc
         self.descending_nodes['GEO_LON'] = glon[inds_dsc]
         self.descending_nodes['GEO_LST'] = lst[inds_dsc]
         self.descending_nodes['DATETIME'] = dts[inds_dsc]
+        check_nodes(self.descending_nodes)
 
         self.northern_nodes['INDEX'] = ind_2
         self.northern_nodes['GEO_LON'] = glon[ind_2]
         self.northern_nodes['GEO_LST'] = lst[ind_2]
         self.northern_nodes['DATETIME'] = dts[ind_2]
+        check_nodes(self.northern_nodes)
+
         self.southern_nodes['INDEX'] = ind_3
         self.southern_nodes['GEO_LON'] = glon[ind_3]
         self.southern_nodes['GEO_LST'] = lst[ind_3]
         self.southern_nodes['DATETIME'] = dts[ind_3]
+        check_nodes(self.southern_nodes)
 
     def group_by_sector(self, sector_name, boundary_lat, sector_cs='GEO'):
         self.sector_cs = sector_cs
@@ -340,6 +363,7 @@ class LEOToolbox(DatasetUser):
         if x_grid_res is None:
             grid_x, grid_y = np.meshgrid(x_unique, np.linspace(lat_range[0], lat_range[1], ny))
             x_interp = False
+            x_grid_res=x_data_res
         else:
             min_x = np.floor((self.dt_fr - dt0).total_seconds() / x_grid_res) * x_grid_res
             max_x = np.ceil((self.dt_to - dt0).total_seconds() / x_grid_res) * x_grid_res
@@ -366,9 +390,34 @@ class LEOToolbox(DatasetUser):
         else:
             mask_y = np.abs(grid_y - grid_lat) > y_data_res * 1.2
             which_lat = 'GEO_LAT'
-            
+
         grid_sectime = griddata((x_1, y), x_1, (grid_x, grid_y), method='nearest')
-        mask_x = np.abs(grid_x - grid_sectime) > x_data_res * 1.5
+        mask_x = np.abs(grid_x - grid_sectime) > x_data_res * 1.2
+
+        # remove gaps
+        i_mask_x = np.where(mask_x)
+        rec_bounds_ind = {}
+        if list(i_mask_x[0]):
+            for ii, jj in zip(*i_mask_x):
+                xx = grid_x[ii, jj]
+                x_ii = grid_x[ii, :].flatten()
+                if xx in rec_bounds_ind.keys():
+                    bound_x_1 = rec_bounds_ind[xx][0]
+                    bound_x_2 = rec_bounds_ind[xx][1]
+                else:
+                    iii = np.where(x_unique<xx)[0]
+                    if not list(iii):
+                        bound_x_1 = x_ii[0] - x_data_res
+                    else:
+                        bound_x_1 = x_unique[iii[-1]] - x_grid_res
+                    iii = np.where(x_unique > xx)[0]
+                    if not list(iii):
+                        bound_x_2 = x_ii[-1] + x_grid_res
+                    else:
+                        bound_x_2 = x_unique[iii[0]] + x_data_res
+                    rec_bounds_ind[xx] = [bound_x_1, bound_x_2]
+                mask_x[ii, (x_ii >= bound_x_1) & (x_ii <= bound_x_2)] = True
+            pass
 
         method = 'linear'
         for var_name in variable_names:
@@ -380,7 +429,7 @@ class LEOToolbox(DatasetUser):
                 xx_1 = np.empty((n_tracks, n_lats))
                 zz_1 = np.empty((n_tracks, n_lats))
                 yy_1 = grid_y[:, 0].flatten()
-                grid_z = np.empty_like(grid_x)
+                grid_z = np.ones_like(grid_x)*np.nan
                 for ii in np.arange(1, n_tracks+1):
                     xd = x[sector_1 == ii]
                     yd = y[sector_1 == ii]
@@ -426,7 +475,7 @@ class LEOToolbox(DatasetUser):
                 xx_1 = np.empty((n_tracks, n_lats))
                 zz_1 = np.empty((n_tracks, n_lats))
                 yy_1 = grid_y[:, 0].flatten()
-                grid_z = np.empty_like(grid_x)
+                grid_z = np.ones_like(grid_x) * np.nan
                 for ii in np.arange(1, n_tracks+1):
                     xd = x[sector_1 == ii]
                     yd = y[sector_1 == ii]

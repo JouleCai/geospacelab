@@ -657,6 +657,10 @@ class PolarMapPanel(GeoPanel):
             unit_vector_scale=0.1, vector_unit='',
             color='r', alpha=0.9, quiverkey_config={},
             vector_width=1,
+            vector_root_marker='o',
+            vector_root_marker_size=0.2,
+            vector_root_marker_color='k',
+            vector_root_marker_facecolor='k',
             shading='on',
             edge='off',
             edge_color=None,
@@ -671,7 +675,9 @@ class PolarMapPanel(GeoPanel):
             legend_label=None,
             legend_linewidth=None,
             legend_fontsize=10,
+            legend_color=None,
             **kwargs):
+        kwargs.setdefault('zorder', 50)
         if ut is None:
             ut = self.ut
 
@@ -708,7 +714,14 @@ class PolarMapPanel(GeoPanel):
         vq = v_N_in * np.cos(pseudo_lons) + v_E_in * np.sin(pseudo_lons)
 
         kwargs.update(visible=True)
-        self.major_ax.plot(xq, yq, linestyle='', marker='o', markersize=0.2, color='k', markerfacecolor='k')
+        if vector_root_marker is not None:
+            self.major_ax.plot(
+                xq, yq,
+                linestyle='',
+                marker=vector_root_marker,
+                markersize=vector_root_marker_size,
+                color=vector_root_marker_color,
+                markerfacecolor=vector_root_marker_facecolor, zorder=kwargs['zorder'])
 
         mag = np.hypot(uq, vq)
 
@@ -755,7 +768,7 @@ class PolarMapPanel(GeoPanel):
             fontproperties.update(size=legend_fontsize)
             kwargs.update(visible='on')
             iqk = self.major_ax.quiverkey(
-                iq, X, Y, U, label, fontproperties=fontproperties, **kwargs
+                iq, X, Y, U, label, color=legend_color, fontproperties=fontproperties, **kwargs
             )
 
         return iq

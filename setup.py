@@ -66,6 +66,7 @@ setuptools.setup(
               'toml',
               'sscws',
               'pandas>=1.5.3',
+              'keyring',
           ],
     python_requires='>=3.7',
     # py_modules=["geospacelab"],

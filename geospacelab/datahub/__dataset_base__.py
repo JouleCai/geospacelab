@@ -80,6 +80,7 @@ class DatasetBase(object):
         self.dt_fr = dt_fr
         self.dt_to = dt_to
         self.visual = visual
+        self.metadata = {}
 
         self.label_fields = label_fields
 

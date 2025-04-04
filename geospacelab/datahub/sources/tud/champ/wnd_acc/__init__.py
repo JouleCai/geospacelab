@@ -75,7 +75,7 @@ class Dataset(datahub.DatasetSourced):
         self.add_APEX = kwargs.pop('add_APEX', False)
         self._data_root_dir = self.data_root_dir    # Record the initial root dir
 
-        self.metadata = None
+        self.metadata = {}
 
         allow_load = kwargs.pop('allow_load', False)
 
@@ -149,6 +149,18 @@ class Dataset(datahub.DatasetSourced):
         self['SC_APEX_LAT'].value = cs_apex['lat'].reshape(self['SC_DATETIME'].value.shape)
         self['SC_APEX_LON'].value = cs_apex['lon'].reshape(self['SC_DATETIME'].value.shape)
         self['SC_APEX_MLT'].value = cs_apex['mlt'].reshape(self['SC_DATETIME'].value.shape)
+
+    def add_GEO_LST(self):
+        lons = self['SC_GEO_LON'].flatten()
+        uts = self['SC_DATETIME'].flatten()
+        lsts = [ut + datetime.timedelta(seconds=int(lon/15.*3600)) for ut, lon in zip(uts, lons)]
+        lsts = [lst.hour + lst.minute/60. + lst.second/3600. for lst in lsts]
+        var = self.add_variable(var_name='SC_GEO_LST')
+        var.value = np.array(lsts)[:, np.newaxis]
+        var.label = 'LST'
+        var.unit = 'h'
+        var.depends = self['SC_GEO_LON'].depends
+        return var
 
     def convert_to_AACGM(self):
         import geospacelab.cs as gsl_cs

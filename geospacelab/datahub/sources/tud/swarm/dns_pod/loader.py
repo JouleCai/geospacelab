@@ -28,6 +28,8 @@ class Loader(object):
 
         if self.version == 'v01':
             self.load_v01()
+        elif self.version == 'v02':
+            self.load_v01()
         else:
             raise NotImplementedError
 
