@@ -1077,7 +1077,7 @@ class PolarMapPanel(GeoPanel):
     def add_colorbar(self, im, ax=None, figure=None,
                      c_scale='linear', c_label=None,
                      c_ticks=None, c_tick_labels=None, c_tick_label_step=1,
-                     left=1.1, bottom=0.1, width=0.05, height=0.7, **kwargs
+                     left=1.1, bottom=0.1, width=0.05, height=0.7, orientation='vertical', **kwargs
                      ):
         if figure is None:
             figure = plt.gcf()
@@ -1091,26 +1091,33 @@ class PolarMapPanel(GeoPanel):
         ca_width = ax_width * width
         ca_height = ax_height * height
         cax = self.add_axes([ca_left, ca_bottom, ca_width, ca_height], major=False, label=c_label)
-        cb = figure.colorbar(im, cax=cax, **kwargs)
-        ylim = cax.get_ylim()
+        cb = figure.colorbar(im, cax=cax, orientation=orientation, **kwargs)
+        
+        if orientation == 'vertical':
+            lim = cax.get_ylim()
+            cb.set_label(c_label, rotation=270, va='bottom', size='medium')
+            axis = cb.ax.yaxis
+        else:
+            lim = cax.get_xlim()
+            cb.set_label(c_label, rotation=0, va='top', size='medium',)
+            axis = cb.ax.xaxis
 
-        cb.set_label(c_label, rotation=270, va='bottom', size='medium')
         if c_ticks is not None:
-            cb.ax.yaxis.set_ticks(c_ticks)
+            axis.set_ticks(c_ticks)
             if c_tick_labels is not None:
-                cb.ax.yaxis.set_ticklabels(c_tick_labels)
+                axis.set_ticklabels(c_tick_labels)
         else:
             if c_scale == 'log':
-                num_major_ticks = int(np.ceil(np.diff(np.log10(ylim)))) * 2
-                cax.yaxis.set_major_locator(mticker.LogLocator(base=10.0, numticks=num_major_ticks))
+                num_major_ticks = int(np.ceil(np.diff(np.log10(lim)))) * 2
+                axis.set_major_locator(mticker.LogLocator(base=10.0, numticks=num_major_ticks))
                 n = c_tick_label_step
-                [l.set_visible(False) for (i, l) in enumerate(cax.yaxis.get_ticklabels()) if i % n != 0]
+                [l.set_visible(False) for (i, l) in enumerate(axis.get_ticklabels()) if i % n != 0]
                 # [l.set_ha('right') for (i, l) in enumerate(cax.yaxis.get_ticklabels()) if i % n != 0]
                 minorlocator = mticker.LogLocator(base=10.0, subs=(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
                                                      numticks=12)
-                cax.yaxis.set_minor_locator(minorlocator)
-                cax.yaxis.set_minor_formatter(mticker.NullFormatter())
-        cax.yaxis.set_tick_params(labelsize='x-small')
+                axis.set_minor_locator(minorlocator)
+                axis.set_minor_formatter(mticker.NullFormatter())
+        axis.set_tick_params(labelsize='small')
         return [cax, cb]
 
     def add_colorbar_vectors(self, iq, ax=None, figure=None,
