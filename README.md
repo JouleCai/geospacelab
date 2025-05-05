@@ -48,6 +48,7 @@ on [readthedocs.io](https://geospacelab.readthedocs.io/en/latest/).
 | Data Source                  | Variables                          | File Format           | Downloadable  | Express                       | Status | 
 |------------------------------|------------------------------------|-----------------------|---------------|-------------------------------|--------|
 | CDAWeb/OMNI                  | Solar wind and IMF                 |*cdf*                 | *True*        | __OMNIDashboard__             | stable |
+| CDAWeb/DMSP/SSUSI/EDR_AUR    | DMSP SSUSI EDR_AUR emission lines  | *netcdf*              | *True*        | __DMSPSSUSIDashboard__        | stable |
 | Madrigal/EISCAT              | Ionospheric Ne, Te, Ti, ...        | *EISCAT-hdf5*, *Madrigal-hdf5* | *True* | __EISCATDashboard__           | stable |
 | Madrigal/GNSS/TECMAP         | Ionospheric GPS TEC map            | *hdf5*                | *True*        | -                             | beta   |
 | Madrigal/DMSP/s1             | DMSP SSM, SSIES, etc               | *hdf5*                | *True*        | __DMSPTSDashboard__           | stable |
@@ -55,7 +56,6 @@ on [readthedocs.io](https://geospacelab.readthedocs.io/en/latest/).
 | Madrigal/DMSP/e              | DMSP SSJ                           | *hdf5*                | *True*        | __DMSPTSDashboard__           | stable |
 | Madrigal/Millstone Hill ISR+ | Millstone Hill ISR                 | *hdf5*                | *True*        | __MillstoneHillISRDashboard__ | stable |
 | Madrigal/Poker Flat ISR      | Poker Flat ISR                     | *hdf5*                | *True*        | __-_                          | stable |
-| JHUAPL/DMSP/SSUSI            | DMSP SSUSI                         | *netcdf*              | *True*        | __DMSPSSUSIDashboard__        | stable |
 | JHUAPL/AMPERE/fitted         | AMPERE FAC                         | *netcdf*              | *False*        | __AMPEREDashboard__           | stable |
 | SuperDARN/POTMAP             | SuperDARN potential map            | *ascii*             | *False*       | -                             | stable |                  
 | WDC/Dst                      | Dst index                          | *IAGA2002-ASCII*      | *True*        | -                             | stable |
@@ -318,6 +318,9 @@ Output:
 > ![alt text](https://github.com/JouleCai/geospacelab/blob/master/examples/OMNI_1min_20160314-060000-20160320-060000.png?raw=true)
 
 ### Example 4: Mapping geospatial data in the polar map.
+> **_NOTE_**: JHUAPL stopped supporting DMSP SSUSI on 14 Feb 2025. 
+From then on, the data source has been switched from JHUAPL to CDAWeb.
+ 
 ```python
 import datetime
 import matplotlib.pyplot as plt
