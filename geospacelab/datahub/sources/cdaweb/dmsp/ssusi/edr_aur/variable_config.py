@@ -30,7 +30,7 @@ default_plot_config = {
     'pcolormesh':   {
         'cmap':            default_colormap,
         'c_scale':         'log',
-        'c_lim':           [10, 6000],
+        'c_lim':           [50, 6000],
         'alpha':            0.9,
     }
 }
