@@ -14,14 +14,12 @@ from geospacelab.datahub.sources.esa_eo.swarm.loader import LoaderModel
 
 # define the default variable name dictionary
 default_variable_name_dict = {
-    'CDF_EPOCH': 'Time',
+    'CDF_EPOCH': 'time',
     'SC_GEO_LAT': 'latitude',
     'SC_GEO_LON': 'longitude',
     'SC_GEO_ALT': 'altitude',
     'SC_GEO_LST': 'local_solar_time',
     'rho_n': 'density',
-    'rho_n_ORBITMEAN': 'density_orbitmean',
-    'FLAG': 'validity_flag',
 }
 
 
@@ -38,4 +36,5 @@ class Loader(LoaderModel):
 
     def load_data(self, **kwargs):
         super(Loader, self).load_data(**kwargs)
+        self.variables['rho_n'][self.variables['rho_n']>1] = np.nan
         self.variables['SC_GEO_ALT'] = self.variables['SC_GEO_ALT'] * 1e-3

@@ -385,7 +385,7 @@ class TSDashboard(Dashboard):
 
         return results
 
-    def add_shading(self, dt_fr, dt_to, panel_index=0,
+    def add_shading(self, dt_fr, dt_to, panel_index=-1,
                     label=None, label_position=None, top_extend=0., bottom_extend=0., **kwargs):
 
         if label_position is None:

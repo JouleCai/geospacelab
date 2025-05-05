@@ -108,7 +108,7 @@ class EISCATDashboard(TSDashboard):
 
     def save_figure(self, file_name=None, file_dir=None, append_time=True, **kwargs):
         if file_name is None:
-            file_name = kwargs.pop('file_name', self.title.replace(', ', '_'))
+            file_name = '_'.join([s.strip() for s in self.title.split(',')])
         super().save_figure(file_name=file_name, file_dir=file_dir, append_time=append_time, **kwargs)
 
     def add_title(self, x=0.5, y=1.06, title=None, append_time=True, **kwargs):
@@ -158,7 +158,8 @@ def example():
     modulation = '60'
     load_mode = 'AUTO'
     dashboard = EISCATDashboard(
-        dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO'
+        dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO',
+        data_file_type="madrigal-hdf5"
     )
     dashboard.quicklook()
 

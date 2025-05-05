@@ -31,7 +31,7 @@ def test_ssusi():
     # If the orbit_id is specified, only one file will be downloaded. This option saves the downloading time.
     # dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole='N', sat_id='f17', orbit_id='46863')
     # If not specified, the data during the whole day will be downloaded.
-    dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole=pole, sat_id=sat_id, orbit_id=None)
+    dashboard.dock(datasource_contents=['cdaweb', 'dmsp', 'ssusi', 'edr_aur'], pole=pole, sat_id=sat_id, orbit_id=None)
     ds_s1 = dashboard.dock(
         datasource_contents=['madrigal', 'satellites', 'dmsp', 's1'],
         dt_fr=time1 - datetime.timedelta(minutes=45),

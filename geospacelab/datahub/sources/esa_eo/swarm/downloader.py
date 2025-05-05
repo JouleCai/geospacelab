@@ -71,14 +71,16 @@ class Downloader(DownloaderBase):
             this_month = dttool.get_next_n_months(self.dt_fr, nm)
             file_name_patterns = copy.deepcopy(default_file_name_patterns)
             file_name_patterns.append(this_month.strftime("%Y%m"))
+            ftp = ftplib.FTP_TLS()
+            ftp.connect(self.ftp_host, self.ftp_port, 30)
             try:
-                ftp = ftplib.FTP_TLS()
-                ftp.connect(self.ftp_host, self.ftp_port, 30)  # 30 timeout
                 ftp.login(user=self.username, passwd=self.__password__)
                 ftp.cwd(self.ftp_data_dir)
                 file_list = ftp.nlst()
                
                 file_names, versions = self.search_files(file_list=file_list, file_name_patterns=file_name_patterns)
+                if file_names is None:
+                    raise FileNotFoundError
                 file_dir_root = self.data_file_root_dir
                 for ind_f, file_name in enumerate(file_names):
                     dt_regex = re.compile(r'(\d{8}T\d{6})_(\d{8}T\d{6})_(\d{4})')
@@ -129,11 +131,11 @@ class Downloader(DownloaderBase):
                     mylog.simpleinfo.info("Done. The zip file has been removed.")
 
                 done = True
-                ftp.quit()
             except Exception as e:
                 print('Error during download from FTP')
                 print(e)
                 done = False
+            ftp.quit()
         return done
 
     def search_files(self, file_list=None, file_name_patterns=None):
@@ -166,7 +168,8 @@ class Downloader(DownloaderBase):
 
         ind_dt = np.where((self.dt_fr <= stop_dts) & (self.dt_to >= start_dts))[0]
         if not list(ind_dt):
-            raise FileExistsError
+            mylog.StreamLogger.info("No matching files found on the ftp")
+            return None, None
         file_list = [file_list[ii] for ii in ind_dt]
         versions = [versions[ii] for ii in ind_dt]
 

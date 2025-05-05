@@ -9,10 +9,10 @@ def test_ampere():
     dt_fr = datetime.datetime(2024, 5, 8, 0)
     dt_to = datetime.datetime(2024, 5, 13, 23, 59)
     time1 = datetime.datetime(2024, 5, 8, 10, 10)
-    pole = 'N'
+    pole = 'S'
     
     db = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)})
-    db.dock(datasource_contents=['jhuapl', 'ampere', 'grd'])
+    db.dock(datasource_contents=['jhuapl', 'ampere', 'grd'], pole=pole)
     db.set_layout(1, 1)
     ds_ampere = db.datasets[0]
 

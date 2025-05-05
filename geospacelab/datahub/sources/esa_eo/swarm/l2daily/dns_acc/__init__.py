@@ -14,9 +14,9 @@ from geospacelab.config import prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
-from geospacelab.datahub.sources.esa_eo.swarm.l2daily.dns_pod.loader import Loader as default_Loader
-from geospacelab.datahub.sources.esa_eo.swarm.l2daily.dns_pod.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.esa_eo.swarm.l2daily.dns_pod.variable_config as var_config
+from geospacelab.datahub.sources.esa_eo.swarm.l2daily.dns_acc.loader import Loader as default_Loader
+from geospacelab.datahub.sources.esa_eo.swarm.l2daily.dns_acc.downloader import Downloader as default_Downloader
+import geospacelab.datahub.sources.esa_eo.swarm.l2daily.dns_acc.variable_config as var_config
 
 
 default_dataset_attrs = {
@@ -47,8 +47,6 @@ default_variable_names = [
     'SC_GEO_ALT',
     'SC_GEO_LST',
     'rho_n',
-    'rho_n_ORBITMEAN',
-    'FLAG',
     ]
 
 # default_data_search_recursive = True
@@ -78,7 +76,7 @@ class Dataset(datahub.DatasetSourced):
 
         self.sat_id = kwargs.pop('sat_id', 'A')
 
-        self.metadata = None
+        self.metadata = {}
 
         allow_load = kwargs.pop('allow_load', False)
 
@@ -212,6 +210,63 @@ class Dataset(datahub.DatasetSourced):
         self['SC_AACGM_LON'].value = cs_aacgm['lon'].reshape(self['SC_DATETIME'].value.shape)
         self['SC_AACGM_MLT'].value = cs_aacgm['mlt'].reshape(self['SC_DATETIME'].value.shape)
 
+    def interp_evenly(self, time_res=None, data_time_res = 30, dt_fr=None, dt_to=None, masked=False):
+        from scipy.interpolate import interp1d
+        import geospacelab.toolbox.utilities.numpymath as nm
+
+        if time_res is None:
+            time_res = data_time_res
+
+        ds_new = datahub.DatasetUser(dt_fr=self.dt_fr, dt_to=self.dt_to, visual=self.visual)
+        ds_new.clone_variables(self)
+        dts = ds_new['SC_DATETIME'].value.flatten()
+        dt0 = dttool.get_start_of_the_day(dts[0])
+        x_0 = np.array([(dt - dt0).total_seconds() for dt in dts])
+        if dt_fr is None:
+            dt_fr = dts[0] - datetime.timedelta(
+                seconds=np.floor(((dts[0] - ds_new.dt_fr).total_seconds() / time_res)) * time_res
+            )
+        if dt_to is None:
+            dt_to = dts[-1] + datetime.timedelta(
+                seconds=np.floor(((ds_new.dt_to - dts[-1]).total_seconds() / time_res)) * time_res
+            )
+        sec_fr = (dt_fr - dt0).total_seconds()
+        sec_to = (dt_to - dt0).total_seconds()
+        x_1 = np.arange(sec_fr, sec_to + time_res / 2, time_res)
+
+        f = interp1d(x_0, x_0, kind='nearest', bounds_error=False, fill_value=(x_0[0], x_0[-1]))
+        pseudo_x = f(x_1)
+        mask = np.abs(pseudo_x - x_1) > data_time_res / 1.5
+
+        dts_new = np.array([dt0 + datetime.timedelta(seconds=sec) for sec in x_1])
+        ds_new['SC_DATETIME'].value = dts_new.reshape((dts_new.size, 1))
+
+        period_var_dict = {'SC_GEO_LON': 360.,
+                           'SC_AACGM_LON': 360.,
+                           'SC_APEX_LON': 360.,
+                           'SC_GEO_LST': 24.,
+                           'SC_AACGM_MLT': 24.,
+                           'SC_APEX_MLT': 24}
+
+        for var_name in ds_new.keys():
+            if var_name in ['SC_DATETIME']:
+                continue
+            if var_name in period_var_dict.keys():
+                var = ds_new[var_name].value.flatten()
+                var_new = nm.interp_period_data(x_0, var, x_1, period=period_var_dict[var_name], method='linear',
+                                                bounds_error=False)
+            else:
+                method = 'linear' if 'FLAG' not in var_name else 'nearest'
+                var = ds_new[var_name].value.flatten()
+                f = interp1d(x_0, var, kind=method, bounds_error=False)
+                var_new = f(x_1)
+            if masked:
+                var_new = np.ma.array(var_new, mask=mask, fill_value=np.nan)
+            else:
+                var_new[mask] = np.nan
+            ds_new[var_name].value = var_new.reshape((dts_new.size, 1))
+        return ds_new
+
     def time_filter_by_quality(self, quality_lim=None):
         if quality_lim is None:
             quality_lim = 0
@@ -253,7 +308,7 @@ class Dataset(datahub.DatasetSourced):
                 sat_id = self.sat_id
             file_patterns = [
                 'DNS' + sat_id.upper(),
-                'POD_2',
+                'ACC_2',
                 this_day.strftime('%Y%m%d') + 'T'
             ]
             # remove empty str
@@ -276,6 +331,7 @@ class Dataset(datahub.DatasetSourced):
                         search_pattern=search_pattern,
                         allow_multiple_files=True
                     )
+                self.allow_download = False
 
         return done
 

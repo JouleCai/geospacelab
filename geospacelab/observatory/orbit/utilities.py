@@ -421,6 +421,7 @@ class LEOToolbox(DatasetUser):
 
         method = 'linear'
         for var_name in variable_names:
+            # print(var_name)
             vrb = self[var_name].value.flatten()[sector>0]
             if along_track_binning:
                 sector_1 = sector[sector>0]

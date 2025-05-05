@@ -38,4 +38,7 @@ class Loader(LoaderModel):
 
     def load_data(self, **kwargs):
         super(Loader, self).load_data(**kwargs)
+        self.variables['rho_n'][self.variables['rho_n'] > 1] = np.nan
+        self.variables['rho_n'][self.variables['rho_n'] <= 0] = np.nan
+        self.variables['rho_n'][self.variables['FLAG'] > 0] = np.nan
         self.variables['SC_GEO_ALT'] = self.variables['SC_GEO_ALT'] * 1e-3

@@ -29,9 +29,11 @@ class Downloader(DownloaderModel):
 
         if ftp_data_dir is None:
             ftp_data_dir = f'Level2daily/Latest_baselines/DNS/POD/Sat_{sat_id.upper()}'
+            # ftp_data_dir = f'Level2daily/Older_baselines/DNS/POD/Sat_{sat_id.upper()}'
 
         if data_file_root_dir is None:
             data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Level2daily" / "DNS_POD"
+
         file_name_patterns = list(self._default_file_name_patterns)
 
         file_name_patterns.extend(['DNS' + sat_id.upper()])

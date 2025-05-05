@@ -207,7 +207,7 @@ modulation = 'ant'
 dh = DataHub(dt_fr, dt_to)
 # dock the first dataset (dataset index starts from 0)
 ds_isr = dh.dock(datasource_contents=[database_name, 'isr', facility_name],
-                      site=site, antenna=antenna, modulation=modulation, data_file_type='eiscat-hdf5')
+                      site=site, antenna=antenna, modulation=modulation, data_file_type='madrigal-hdf5')
 # load data
 ds_isr.load_data()
 # assign a variable from its own dataset to the datahub
@@ -248,7 +248,8 @@ antenna = 'UHF'
 modulation = '60'
 load_mode = 'AUTO'
 dashboard = eiscat.EISCATDashboard(
-    dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO'
+    dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO', 
+    data_file_type="madrigal-hdf5"
 )
 dashboard.quicklook()
 
@@ -336,12 +337,16 @@ dashboard = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsiz
 # If the orbit_id is specified, only one file will be downloaded. This option saves the downloading time.
 # dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole='N', sat_id='f17', orbit_id='46863')
 # If not specified, the data during the whole day will be downloaded.
-dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole=pole, sat_id=sat_id, orbit_id=None)
+dashboard.dock(
+    datasource_contents=dashboard.dock(datasource_contents=['cdaweb', 'dmsp', 'ssusi', 'edr_aur'], 
+    pole=pole, sat_id=sat_id, orbit_id=None
+)
 ds_s1 = dashboard.dock(
     datasource_contents=['madrigal', 'satellites', 'dmsp', 's1'],
     dt_fr=time1 - datetime.timedelta(minutes=45),
     dt_to=time1 + datetime.timedelta(minutes=45),
-    sat_id=sat_id)
+    sat_id=sat_id
+)
 
 dashboard.set_layout(1, 1)
 
