@@ -43,6 +43,7 @@ class Downloader(object):
         self.dt_fr = dt_fr
         self.dt_to = dt_to
         self.source_file_paths = []
+        self.done = False
 
         if data_file_root_dir is None:
             self.data_file_root_dir = prf.datahub_data_root_dir

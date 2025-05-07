@@ -57,7 +57,7 @@ setuptools.setup(
               'h5py>=3.2.1',
               'netcdf4>=1.5.7',
               'matplotlib>=3.5',
-              'madrigalweb>=3.2',
+              'madrigalweb>=3.3',
               'aacgmv2>=2.6.2',
               'cdflib>=1.2.3',
               'geopack>=1.0.10',
