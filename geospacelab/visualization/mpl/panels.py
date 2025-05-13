@@ -520,10 +520,10 @@ class TSPanel(Panel):
             else:
                 major_max = var_for_config.visual.axis[1].major_tick_max
                 if major_max is None:
-                    # ax.yaxis.set_minor_locator(mpl_ticker.AutoLocator())
-                    major_max = 5
-
-                ax.yaxis.set_major_locator(mpl_ticker.MaxNLocator(major_max))
+                    ax.yaxis.set_major_locator(mpl_ticker.AutoLocator())
+                    #major_max = 6
+                else:
+                    ax.yaxis.set_major_locator(mpl_ticker.MaxNLocator(major_max))
             minor_max = var_for_config.visual.axis[1].minor_tick_max
             if minor_max is None:
                 ax.yaxis.set_minor_locator(mpl_ticker.AutoMinorLocator())

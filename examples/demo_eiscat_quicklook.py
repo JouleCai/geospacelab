@@ -16,7 +16,8 @@ dt_to = datetime.datetime.strptime('20201210' + '0600', '%Y%m%d%H%M')
 
 site = 'UHF'
 antenna = 'UHF'
-modulation = '60'
+pulse_code = 'beata'
+modulation = ''
 load_mode = 'AUTO'
 dashboard = eiscat.EISCATDashboard(
     dt_fr, dt_to, site=site, antenna=antenna, modulation=modulation, load_mode='AUTO',

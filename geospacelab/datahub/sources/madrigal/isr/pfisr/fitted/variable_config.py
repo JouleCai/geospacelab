@@ -41,7 +41,7 @@ default_axis_dict_2d = {
     2:  {
         'data':     '@v.value',
         'label':    '@v.label',
-        'unit':     '@v.unit',
+        'unit':     '@v.unit_label',
     }
 }
 
@@ -82,16 +82,15 @@ var.visual.axis[1].config(**default_axis_dict_2d[1])
 var.visual.axis[2].config(**default_axis_dict_2d[2])
 var.visual.axis[2].scale = 'log'
 var.visual.axis[2].lim = [8e9, 9e11]
-# axis = var.visual.axis
-# axis[1].data = "@d.height.value"
-# axis[2].data = "@v.value"
-# axis[1].lim = [90, 350]
-# axis[1].label = 'h'
-# axis[1].unit = 'km'
-# axis[2].lim = [8e9, 9e11]
-# axis[2].scale = 'log'
-# axis[2].label = '@v.label'
-# axis[2].unit = '@v.unit_label'
+axis = var.visual.axis
+axis[1].data = "@d.HEIGHT.value"
+axis[2].data = "@v.value"
+axis[1].label = 'h'
+axis[1].unit = 'km'
+axis[2].lim = [8e9, 9e11]
+axis[2].scale = 'log'
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
 
 configured_variables[var_name] = var
 

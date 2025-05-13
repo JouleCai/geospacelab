@@ -28,17 +28,242 @@ import geospacelab.datahub.sources.madrigal as madrigal
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
 
+from geospacelab.datahub.sources.madrigal.downloader import Downloader as DownloaderBase
+
+
+class Downloader(DownloaderBase):
+
+    def __init__(
+            self, 
+            dt_fr: datetime.datetime, dt_to: datetime,
+            antennas=None, 
+            data_file_root_dir=None, 
+            kind_data="madrigal",
+            user_fullname=madrigal.default_user_fullname,
+            user_email=madrigal.default_user_email,
+            user_affiliation=madrigal.default_user_affiliation,
+            include_exp_name_patterns: list=None,
+            exclude_exp_name_patterns: list=None,
+            include_exp_ids: list=None,
+            exclude_exp_ids: list=None,
+            include_file_name_patterns: list = None,
+            exclude_file_name_patterns: list = None,
+            include_file_type_patterns=None,
+            exclude_file_type_patterns=None,
+            direct_download = True,
+            force_download = False,
+            dry_run: bool=False,
+            madrigal_url: str = "http://madrigal.eiscat.se/",
+        ):
+
+        # dt_fr = dttool.get_start_of_the_day(dt_fr)
+        # dt_to = dttool.get_end_of_the_day(dt_to)
+        
+        icodes = []
+        for a in antennas:
+            icodes.extend(instrument_codes[a])  
+        icodes = [int(i) for i in np.unique(icodes)]
+        
+        self.kind_data=kind_data
+
+        if data_file_root_dir is None:
+            self.data_file_root_dir = pfr.datahub_data_root_dir / 'Madrigal' / 'EISCAT' / 'Analyzed'
+        else:
+            self.data_file_root_dir = data_file_root_dir
+
+        super().__init__(
+            dt_fr=dt_fr, dt_to=dt_to, icodes=icodes,
+            include_exp_name_patterns=include_exp_name_patterns, 
+            exclude_exp_name_patterns=exclude_exp_name_patterns, 
+            include_exp_ids=include_exp_ids,
+            exclude_exp_ids=exclude_exp_ids,
+            include_file_name_patterns=include_file_name_patterns, 
+            exclude_file_name_patterns=exclude_file_name_patterns,
+            include_file_type_patterns=include_file_type_patterns, 
+            exclude_file_type_patterns=exclude_file_type_patterns,  
+            data_file_root_dir=data_file_root_dir,
+            force_download=force_download, direct_download=direct_download, dry_run=dry_run,
+            madrigal_url=madrigal_url,
+            user_fullname=user_fullname, user_email=user_email, user_affiliation=user_affiliation)
+
+    def download(self, **kwargs):
+        if self.kind_data.lower() == 'eiscat':
+            self.download_EISCAT()
+        elif self.kind_data.lower() == 'madrigal':
+            self.download_MAD()
+        else:
+            raise NotImplementedError    
+        return 
+    
+    def download_EISCAT(self):
+        exps, database = self.get_exp_list(
+            dt_fr=dttool.get_start_of_the_day(self.dt_fr),
+            dt_to=dttool.get_end_of_the_day(self.dt_to),
+            include_exp_name_patterns=self.include_exp_name_patterns,
+            exclude_exp_name_patterns=self.exclude_exp_name_patterns,
+            include_exp_ids=self.include_exp_ids,
+            exclude_exp_ids=self.exclude_exp_ids,
+            icodes=self.icodes,
+            madrigal_url=self.madrigal_url,
+            display=True)
+        self.exp_list = list(exps)
+        self.database = database
+        
+        cookies = {
+                'user_email': self.user_email,
+                'user_fullname': self.user_fullname,
+                'user_affiliation': self.user_affiliation
+            }
+        for exp in exps:
+            dt_fr_exp = datetime.datetime(
+                exp.startyear, exp.startmonth, exp.startday, exp.starthour, exp.startmin, exp.startsec
+            )
+            dt_to_exp = datetime.datetime(
+                exp.endyear, exp.endmonth, exp.endday, exp.endhour, exp.endmin, exp.endsec
+            )
+            if (dt_fr_exp >= self.dt_to) or (dt_to_exp <= self.dt_fr):
+                continue
+            try:
+                res = re.search(r'([\d]{4}\-[\d]{2}\-[\d]{2})_(\w+)@(\w+)', exp.name)
+                thisday = datetime.datetime.strptime(res.groups()[0], "%Y-%m-%d")
+                pulse_code = res.groups()[1]
+                antenna_ = res.groups()[2]
+                if 'uhf' in antenna_.lower():
+                    antenna = 'UHF'
+                elif 'vhf' in antenna_.lower():
+                    antenna = 'VHF'
+                elif any([a in antenna_.lower() for a in ['32m', '42m', 'esr']]):
+                    antenna = 'ESR'
+                elif 'sod' in antenna_.lower():
+                    antenna = 'SOD'
+                elif 'kir' in antenna_.lower():
+                    antenna = 'KIR'
+                else:
+                    raise NotImplementedError
+            except Exception as e:
+                print(e)
+                mylog.StreamLogger.warning("Parsing the experiment name was failed! EXP: {}".format(exp.name))
+            
+            url = "https://madrigal.eiscat.se/madrigal/showExperiment?experiment_list=" + str(exp.id) + "&show_plots="
+            
+            r = requests.get(url, cookies=cookies)
+            soup = bs4.BeautifulSoup(r.text, 'html.parser')
+            links = soup.find_all('a', href=True)
+            for link in links:
+                href = link['href']
+                if any(href.endswith(s) for s in ['.png', '.tar.gz', '.hdf5']):
+                    filename = href.split('/')[-1]
+                    file_dir_local = self.data_file_root_dir / antenna / thisday.strftime("%Y") / \
+                                (exp.name + '_EID-' + str(exp.id) + '_'
+                                 + dt_fr_exp.strftime("%Y%m%dT%H%M%S") + '_'
+                                 + dt_to_exp.strftime("%Y%m%dT%H%M%S"))
+                    file_dir_local.mkdir(parents=True, exist_ok=True)
+
+                    remote_file = requests.get(href)
+                    file_path = file_dir_local / filename
+                    if file_path.is_file() and not self.force_download:
+                        print("The file {} has been downloaded.".format(filename))
+                        self.done=True
+                        continue
+                    mylog.simpleinfo.info(
+                        'Downloading "{} ..."'.format(filename)
+                    )
+                    with open(file_path, "wb") as eiscat:
+                        eiscat.write(remote_file.content)
+                    mylog.simpleinfo.info('Saved to {}.'.format(file_dir_local))
+                    self.done = True
+        return 
+    
+    def download_MAD(self, **kwargs):
+
+        exps, database = self.get_exp_list(
+            dt_fr=dttool.get_start_of_the_day(self.dt_fr),
+            dt_to=dttool.get_end_of_the_day(self.dt_to),
+            include_exp_name_patterns=self.include_exp_name_patterns,
+            exclude_exp_name_patterns=self.exclude_exp_name_patterns,
+            include_exp_ids=self.include_exp_ids,
+            exclude_exp_ids=self.exclude_exp_ids,
+            icodes=self.icodes,
+            madrigal_url=self.madrigal_url,
+            display=True)
+        self.exp_list = list(exps)
+        self.database = database
+
+        exps, exps_error = self.get_online_file_list(
+            exp_list=self.exp_list, database=database,
+            include_file_name_patterns=self.include_file_name_patterns,
+            exclude_file_name_patterns=self.exclude_file_name_patterns,
+            include_file_type_patterns=self.include_file_type_patterns,
+            exclude_file_type_patterns=self.exclude_file_type_patterns,
+            display=True
+        )
+        self.exp_list_error = list(exps_error)
+
+        file_paths = [] 
+        for exp in exps:
+            dt_fr_exp = datetime.datetime(
+                exp.startyear, exp.startmonth, exp.startday, exp.starthour, exp.startmin, exp.startsec
+            )
+            dt_to_exp = datetime.datetime(
+                exp.endyear, exp.endmonth, exp.endday, exp.endhour, exp.endmin, exp.endsec
+            )
+            if (dt_fr_exp >= self.dt_to) or (dt_to_exp <= self.dt_fr):
+                continue
+            for file in list(exp.files):
+
+                file_path_remote = pathlib.Path(file.name)
+                file_name_remote = file_path_remote.name
+
+                try:
+                    res = re.search(r'([\d]{4}\-[\d]{2}\-[\d]{2})_(\w+)@(\w+)', exp.name)
+                    thisday = datetime.datetime.strptime(res.groups()[0], "%Y-%m-%d")
+                    pulse_code = res.groups()[1]
+                    antenna_ = res.groups()[2]
+                    if 'uhf' in antenna_.lower():
+                        antenna = 'UHF'
+                    elif 'vhf' in antenna_.lower():
+                        antenna = 'VHF'
+                    elif any([a in antenna_.lower() for a in ['32m', '42m', 'esr']]):
+                        antenna = 'ESR'
+                    elif 'sod' in antenna_.lower():
+                        antenna = 'SOD'
+                    elif 'kir' in antenna_.lower():
+                        antenna = 'KIR'
+                    else:
+                        raise NotImplementedError
+                except Exception as e:
+                    print(e)
+                    mylog.StreamLogger.warning("Parsing the experiment name was failed! EXP: {}".format(exp.name))
+
+                file_dir_local = self.data_file_root_dir / antenna / thisday.strftime("%Y") / \
+                                (exp.name + '_EID-' + str(exp.id) + '_'
+                                 + dt_fr_exp.strftime("%Y%m%dT%H%M%S") + '_'
+                                 + dt_to_exp.strftime("%Y%m%dT%H%M%S"))
+                file_dir_local.mkdir(parents=True, exist_ok=True)
+
+                file_name_local = file_name_remote
+                file_path_local = file_dir_local / file_name_local
+
+                super().download(
+                    file_path_remote=file.name, file_path_local=file_path_local,
+                    file_format='hdf5')
+                file_paths.append(file_path_local)
+        return file_paths
+
 
 def test():
-    sites = ['UHF']
-    dt_fr = datetime.datetime(2014, 1, 1,)
-    dt_to = datetime.datetime(2014, 12, 31)
-    # download_obj = Downloader(dt_fr, dt_to, sites=sites, kind_data="madrigal")
-    # schedule = EISCATSchedule(dt_fr=dt_fr, dt_to=dt_to)
-    # schedule.to_txt()
+    dt_0 = datetime.datetime(2016, 3, 9, 19)
+    dt_1 = datetime.datetime(2016, 3, 9, 23, 59)
+    downloader = DownloaderNew(
+        dt_fr=dt_0, dt_to=dt_1, 
+        kind_data='EISCAT',
+        antennas=['UHF', 'VHF'],
+        force_download=True,
+        exclude_file_type_patterns=['pp']
+        )
+    pass
 
-
-class Downloader(object):
+class DownloaderOld(object):
     """Download the quickplots and archieved analyzed results from EISCAT schedule webpage
     """
 
@@ -220,7 +445,8 @@ class Downloader(object):
 instrument_codes = {
     'UHF': [72],
     'VHF': [74],
-    'ESR': [95],
+    '42m': [95],
+    '32m': [95],
     'SOD': [73, 76],
     'KIR': [71, 75]
 }

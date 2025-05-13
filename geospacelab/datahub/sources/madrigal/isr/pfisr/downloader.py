@@ -110,6 +110,12 @@ class Downloader(DownloaderBase):
 
         file_paths = [] 
         for exp in exps:
+            dt_fr_exp = datetime.datetime(
+                exp.startyear, exp.startmonth, exp.startday, exp.starthour, exp.startmin, exp.startsec
+            )
+            dt_to_exp = datetime.datetime(
+                exp.endyear, exp.endmonth, exp.endday, exp.endhour, exp.endmin, exp.endsec
+            )
             for file in list(exp.files):
 
                 file_path_remote = pathlib.Path(file.name)
@@ -124,11 +130,14 @@ class Downloader(DownloaderBase):
                 if len(exp_name_patterns) > 5:
                     exp_name_patterns = exp_name_patterns[:5]
                 exp_name = '_'.join(exp_name_patterns).lower()
-                file_dir_local = self.data_file_root_dir / thisday.strftime("%Y") / thisday.strftime('%Y%m%d') / \
-                                ('eid-' + str(exp.id) + '_' + exp_name)
+                file_dir_local = self.data_file_root_dir / thisday.strftime("%Y") / \
+                                ('FPISR_EID-' + str(exp.id) + '_'
+                                 + dt_fr_exp.strftime("%Y%m%d%H%M%S") + '_'
+                                 + dt_to_exp.strftime("%Y%m%d%H%M%S") + '_' + exp_name)
                 file_dir_local.mkdir(parents=True, exist_ok=True)
-                file_name_local = 'PFISR_' + self.data_product.replace(' ', '_') + '_' + thisday.strftime(
-                    '%Y%m%d') + '.' + '.'.join(file_name_remote.split('.')[1:])
+                file_name_local = 'PFISR_' + thisday.strftime('%Y%m%d') + '_' + \
+                                  self.data_product.replace(' ', '_') + \
+                                  '.' + '.'.join(file_name_remote.split('.')[1:])
                 file_path_local = file_dir_local / file_name_local
                 if file_path_local.is_file():
                     mylog.simpleinfo.info("The file has been downloaded: {}.".format(file_path_local))

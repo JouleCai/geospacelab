@@ -12,6 +12,7 @@ __docformat__ = "reStructureText"
 import copy
 from geospacelab.datahub import VariableModel as Var
 import geospacelab.visualization.mpl.colormaps as cm
+from local.EISCAT_FPI.fpi.variable_config import default_colormap
 
 database = 'Madrigal'
 
@@ -28,7 +29,8 @@ coords = {
 depend_0 = {'UT': 'DATETIME'}
 depend_1 = {'CGM_LAT': 'CGM_LAT'}
 
-default_colormap = cm.cmap_jet_modified()
+# default_colormap = cm.cmap_jet_modified()
+default_colormap = 'turbo'
 
 default_axis_dict_2d = {
     1:     {

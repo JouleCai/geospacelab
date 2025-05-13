@@ -31,7 +31,7 @@ class Downloader(DownloaderBase):
             direct_download = True,
             force_download = False,
             dry_run: bool=False,
-            madrigal_url: str = "http://cedar.openmadrigal.org/"):
+            madrigal_url: str = "https://data.amisr.com/madrigal"):
         exclude_exp_ids = [100213840, ] if exclude_exp_ids is None else exclude_exp_ids
         include_file_type_patterns = INCLUDE_FILE_TYPE_PATTERNS if include_file_type_patterns is None else include_file_type_patterns
         data_product = 'vi'

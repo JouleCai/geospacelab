@@ -10,6 +10,8 @@ __docformat__ = "reStructureText"
 
 
 import datetime
+import re
+
 import numpy as np
 
 import geospacelab.datahub as datahub
@@ -27,9 +29,9 @@ default_dataset_attrs = {
     'kind': 'sourced',
     'database': madrigal_database,
     'facility': 'EISCAT',
-    'data_file_type': 'eiscat-hdf5',
+    'data_file_type': 'madrigal-hdf5',
     'data_file_ext': 'hdf5',
-    'data_root_dir': prf.datahub_data_root_dir / 'Madrigal' / 'EISCAT' / 'analyzed',
+    'data_root_dir': prf.datahub_data_root_dir / 'Madrigal' / 'EISCAT' / 'Analyzed',
     'allow_download': True,
     'status_control': False,
     'rasidual_contorl': False,
@@ -49,7 +51,7 @@ default_variable_names = [
 
 # default_data_search_recursive = True
 
-default_attrs_required = ['site', 'antenna', 'modulation']
+default_attrs_required = ['site', 'antenna',]
 
 
 class Dataset(datahub.DatasetSourced):
@@ -63,6 +65,7 @@ class Dataset(datahub.DatasetSourced):
         self.site = kwargs.pop('site', '')
         self.antenna = kwargs.pop('antenna', '')
         self.experiment = kwargs.pop('experiment', '')
+        self.experiment_ids = kwargs.pop('exp_ids', [])
         self.pulse_code = kwargs.pop('pulse_code', '')
         self.scan_mode = kwargs.pop('scan_mode', '')
         self.modulation = kwargs.pop('modulation', '')
@@ -102,6 +105,8 @@ class Dataset(datahub.DatasetSourced):
 
         if str(self.data_file_type):
             self.data_file_ext = self.data_file_type.split('-')[1]
+            if (self.load_mode == 'AUTO') and (self.data_file_type=='eiscat-mat'):
+                raise AttributeError
 
     def label(self, **kwargs):
         label = super().label()
@@ -253,57 +258,140 @@ class Dataset(datahub.DatasetSourced):
     def search_data_files(self, **kwargs):
         dt_fr = self.dt_fr
         dt_to = self.dt_to
-        diff_days = dttool.get_diff_days(dt_fr, dt_to)
-        day0 = dttool.get_start_of_the_day(dt_fr)
-        for i in range(diff_days + 1):
-            thisday = day0 + datetime.timedelta(days=i)
-            initial_file_dir = self.data_root_dir / self.site / thisday.strftime('%Y')
+        done = False
+        if not list(self.experiment_ids):
+            diff_days = dttool.get_diff_days(dt_fr, dt_to)
+            day0 = dttool.get_start_of_the_day(dt_fr)
+            for i in range(diff_days + 1):
+                thisday = day0 + datetime.timedelta(days=i)
+                initial_file_dir = self.data_root_dir / self.site / thisday.strftime('%Y')
 
-            file_patterns = []
-            if self.data_file_type == 'eiscat-hdf5':
-                file_patterns.append('EISCAT')
-            elif self.data_file_type == 'madrigal-hdf5':
-                file_patterns.append('MAD6400')
-            elif self.data_file_type == 'eiscat-mat':
-                pass
-            file_patterns.append(thisday.strftime('%Y-%m-%d'))
-            file_patterns.append(self.modulation)
-            file_patterns.append(self.antenna.lower())
-
-            # remove empty str
-            file_patterns = [pattern for pattern in file_patterns if str(pattern)]
-
-            search_pattern = '*' + '*'.join(file_patterns) + '*'
-            if self.data_file_type == 'eiscat-mat':
-                search_pattern = search_pattern + '/'
-            done = super().search_data_files(
-                initial_file_dir=initial_file_dir, search_pattern=search_pattern)
-
-            # Validate file paths
-
-            if not done and self.allow_download:
-                done = self.download_data()
-                if done:
-                    done = super().search_data_files(
-                        initial_file_dir=initial_file_dir, search_pattern=search_pattern)
+                file_patterns = []
+                if self.data_file_type == 'eiscat-hdf5':
+                    file_patterns.append('EISCAT')
+                elif self.data_file_type == 'madrigal-hdf5':
+                    file_patterns.append('MAD6400')
                 else:
-                    print('Cannot find files from the online database!')
+                    raise NotImplementedError
+                file_patterns.append(thisday.strftime('%Y-%m-%d'))
+                if str(self.pulse_code):
+                    file_patterns.append(self.pulse_code)
+                if str(self.modulation):
+                    file_patterns.append(self.modulation)
+                file_patterns.append(self.antenna.lower())
+
+                # remove empty str
+                file_patterns = [pattern for pattern in file_patterns if str(pattern)]
+
+                search_pattern = '*' + '*'.join(file_patterns) + '*'
+                done = super().search_data_files(
+                    initial_file_dir=initial_file_dir,
+                    search_pattern=search_pattern, allow_multiple_files=True)
+
+                # Validate file paths
+                if not done and self.allow_download:
+                    done = self.download_data()
+                    if done:
+                        done = super().search_data_files(
+                            initial_file_dir=initial_file_dir,
+                            search_pattern=search_pattern,
+                            allow_multiple_files=True
+                        )
+                    else:
+                        print('Cannot find files from the online database!')
+        else:
+            initial_file_dir = self.data_root_dir
+            for exp_id in self.experiment_ids:
+                file_patterns = []
+                if self.data_file_type == 'eiscat-hdf5':
+                    file_patterns.append('EISCAT')
+                elif self.data_file_type == 'madrigal-hdf5':
+                    file_patterns.append('MAD')
+                else:
+                    raise NotImplementedError
+                file_patterns.append(thisday.strftime('%Y-%m-%d'))
+                if str(self.pulse_code):
+                    file_patterns.append(self.pulse_code)
+                if str(self.modulation):
+                    file_patterns.append(self.modulation)
+                file_patterns.append(self.antenna.lower())
+                # remove empty str
+                file_patterns = [pattern for pattern in file_patterns if str(pattern)]
+                search_pattern = f"*EID-{exp_id}*/*{'*'.join(file_patterns)}*"
+                done = super().search_data_files(
+                    initial_file_dir=initial_file_dir,
+                    search_pattern=search_pattern, recursive=True, allow_multiple_files=True
+                )
+
+                if not done and self.allow_download:
+                    done = self.download_data()
+                    if done:
+                        done = super().search_data_files(
+                            initial_file_dir=initial_file_dir,
+                            search_pattern=search_pattern, recursive=True, allow_multiple_files=True
+                        )
+                    else:
+                        print('The requested experiment (ID: {}) does not exist in the online database!'.format(exp_id))
+                if len(done) > 1:
+                    mylog.StreamLogger.warning(
+                        "Multiple data files detected! " +
+                        "Specify the experiment pulse code and modulation may constrain the searching condition.")
+                    for fp in done:
+                        mylog.simpleinfo.info(str(fp))
+        self._check_multiple_files()
 
         return done
+
+    def _check_multiple_files(self):
+        file_paths = self.data_file_paths
+        exp_ids = []
+        for fp in file_paths:
+            rc = re.compile(r"EID\-([\d]+)")
+            res = rc.search(str(fp))
+            exp_ids.append(res.groups()[0])
+        exp_ids_unique = [eid for eid in np.unique(exp_ids)]
+
+        file_paths_new = []
+        for eid in exp_ids_unique:
+            inds_id = np.where(np.array(exp_ids)==eid)[0]
+            fps_sub = []
+            for ii in inds_id:
+                fp = file_paths[ii]
+                rc = re.compile(r".*_([\d]{8}T[\d]{6}).*_([\d]{8}T[\d]{6}).*[\d]{4}\-[\d]{2}\-[\d]{2}_([\w]+)@.*")
+                res = rc.search(str(fp))
+                dt_0 = datetime.datetime.strptime(res.groups()[0], '%Y%m%dT%H%M%S')
+                dt_1 = datetime.datetime.strptime(res.groups()[1], '%Y%m%dT%H%M%S')
+                if (dt_0 >= self.dt_to) or (dt_1<=self.dt_fr):
+                    continue
+                if str(self.pulse_code):
+                    if self.pulse_code not in res.groups()[2]:
+                        continue
+                if str(self.modulation):
+                    if self.modulation not in res.groups()[2]:
+                        continue
+                fps_sub.extend([fp])
+            if len(fps_sub) > 1:
+                mylog.StreamLogger.warning("Multiple data files for a single experiment detected! Only the first one is selected.")
+                # for fp in fps_sub:
+                #     mylog.simpleinfo.info(str(fp))
+                # fps_sub = fps_sub[0]
+            file_paths_new.extend(fps_sub)
+        self.data_file_paths = file_paths_new
+
 
     def download_data(self):
         if self.data_file_type == 'eiscat-hdf5':
             download_obj = self.downloader(dt_fr=self.dt_fr, dt_to=self.dt_to,
-                                           sites=[self.site], kind_data='eiscat',
-                                           data_file_root_dir=self.data_root_dir)
+                                           antennas=[self.antenna], kind_data='eiscat',
+                                           data_file_root_dir=self.data_root_dir,
+                                           exclude_file_type_patterns=['pp']
+            )
         elif self.data_file_type == 'madrigal-hdf5':
             download_obj = self.downloader(dt_fr=self.dt_fr, dt_to=self.dt_to,
-                                           sites=[self.site], kind_data='madrigal',
-                                           data_file_root_dir=self.data_root_dir)
-        elif self.data_file_type == 'eiscat-mat':
-            download_obj = self.downloader(dt_fr=self.dt_fr, dt_to=self.dt_to,
-                                                 sites=[self.site], kind_data='eiscat',
-                                           data_file_root_dir=self.data_root_dir)
+                                           antennas=[self.antenna], kind_data='madrigal',
+                                           data_file_root_dir=self.data_root_dir,
+                                           exclude_file_type_patterns=['pp']
+                                           )
         else:
             raise TypeError
         return download_obj.done

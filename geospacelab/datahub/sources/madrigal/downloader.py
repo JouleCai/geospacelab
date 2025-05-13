@@ -116,6 +116,7 @@ class Downloader(object):
         if file_path_local.is_file():
             mylog.simpleinfo.info("The file {} has been downloaded.".format(file_path_local.name))
             if not self.force_download:
+                self.done = True
                 return
         files_error = []
         mylog.simpleinfo.info("Downloading {} ...".format(file_path_remote))
@@ -192,8 +193,12 @@ class Downloader(object):
                 for file in files:
                     matching = 0
                     for fnp in include_file_name_patterns:
+                        if isinstance(fnp, str):
+                            fnp = [fnp]
                         if isinstance(fnp, list):
-                            fnp = '.*' + '.*'.join(fnp) + '.*'
+                            fnp = r'.*' + '.*'.join(fnp) + '.*'
+                        else:
+                            raise AttributeError
                         rc = re.compile(fnp)
                         file_name = pathlib.Path(file.name).name
                         rm = rc.match(file_name.lower())
@@ -212,8 +217,12 @@ class Downloader(object):
                 for file in files:
                     matching = 1
                     for fnp in exclude_file_name_patterns:
+                        if isinstance(fnp, str):
+                            fnp = [fnp]
                         if isinstance(fnp, list):
-                            fnp = '.*' + '.*'.join(fnp) + '.*'
+                            fnp = r'.*' + '.*'.join(fnp) + '.*'
+                        else:
+                            raise AttributeError
                         rc = re.compile(fnp)
                         file_name = pathlib.Path(file.name).name
                         rm = rc.match(file_name.lower())
@@ -232,8 +241,12 @@ class Downloader(object):
                 for file in files:
                     matching = 0
                     for fnp in include_file_type_patterns:
+                        if isinstance(fnp, str):
+                            fnp = [fnp]
                         if isinstance(fnp, list):
-                            fnp = '.*' + '.*'.join(fnp) + '.*'
+                            fnp = r'.*' + '.*'.join(fnp) + '.*'
+                        else:
+                            raise AttributeError
                         rc = re.compile(fnp)
                         rm = rc.match(file.kindatdesc.lower())
                         if rm is not None:
@@ -251,8 +264,12 @@ class Downloader(object):
                 for file in files:
                     matching = 1
                     for fnp in exclude_file_type_patterns:
+                        if isinstance(fnp, str):
+                            fnp = [fnp]
                         if isinstance(fnp, list):
-                            fnp = '.*' + '.*'.join(fnp) + '.*'
+                            fnp = r'.*' + '.*'.join(fnp) + '.*'
+                        else:
+                            raise AttributeError
                         rc = re.compile(fnp)
                         rm = rc.match(file.kindatdesc.lower())
                         if rm is not None:
@@ -281,7 +298,7 @@ class Downloader(object):
         if display:
             mylog.simpleinfo.info("Listing matched experiments and files ...")
             exp_info = Downloader.get_exp_info(exps, include_file_info=True)
-            mylog.simpleinfo.info("{:>10s}\t{:<24s}\t{:<24s}\t{:<16s}\t{:<15s}\t{:<40.40s}\t{:<30.30s}\t{:<80.80s}".format(
+            mylog.simpleinfo.info("{:>10s}\t{:<24s}\t{:<24s}\t{:<16s}\t{:<15s}\t{:<40.40s}\t{:<50.50s}\t{:<80.80s}".format(
                 'EXP NUM', 'START TIME', 'END TIME', 'DURATION (hour)', 'EXP ID', 'EXP Name', 'File Name', 'File Type'
             )
             )
@@ -293,7 +310,7 @@ class Downloader(object):
             ):
                 
                 for file in exp_info['FILES'][ind]:
-                    line_str = "{:>10d}\t{:<24s}\t{:<24s}\t{:<16.1f}\t{:<15d}\t{:<40.40s}\t{:<30.30s}\t{:<80.80s}".format(
+                    line_str = "{:>10d}\t{:<24s}\t{:<24s}\t{:<16.1f}\t{:<15d}\t{:<40.40s}\t{:<50.50s}\t{:<80.80s}".format(
                         ind + 1,
                         dt_fr.strftime("%Y-%m-%d %H:%M:%S"),
                         dt_to.strftime("%Y-%m-%d %H:%M:%S"),
@@ -437,8 +454,12 @@ class Downloader(object):
                 for exp in exps:
                     matching = 0
                     for enp in include_exp_name_patterns:
+                        if isinstance(enp, str):
+                            enp = [enp]
                         if isinstance(enp, list):
-                            enp = '.*' + '.*'.join(enp) + '.*'
+                            enp = r'.*' + '.*'.join(enp) + '.*'
+                        else:
+                            raise AttributeError
                         rc = re.compile(enp)
                         rm = rc.match(exp.name.lower())
                         if rm is not None:
@@ -456,8 +477,12 @@ class Downloader(object):
                 for exp in exps:
                     matching = 1
                     for enp in exclude_exp_name_patterns:
+                        if isinstance(enp, str):
+                            enp = [enp]
                         if isinstance(enp, list):
-                            enp = '.*' + '.*'.join(enp) + '.*'
+                            enp = r'.*' + '.*'.join(enp) + '.*'
+                        else:
+                            raise AttributeError
                         rc = re.compile(enp)
                         rm = rc.match(exp.name.lower())
                         if rm is not None:

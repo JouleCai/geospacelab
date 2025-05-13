@@ -11,6 +11,7 @@ __docformat__ = "reStructureText"
 import datetime
 import numpy as np
 import h5py
+import re
 
 from geospacelab.datahub.sources.madrigal.isr.pfisr.vi.loader import Loader as default_Loader
 from geospacelab.datahub.sources.madrigal.isr.pfisr.vi.downloader import Downloader as default_Downloader
@@ -120,12 +121,12 @@ class Dataset(datahub.DatasetSourced):
     def search_data_files(self, recursive=True, **kwargs):
         dt_fr = self.dt_fr
         dt_to = self.dt_to
-        
+        done = False
         if list(self.exp_ids):
             initial_file_dir = self.data_root_dir
-            
+
             for exp_id in self.exp_ids:
-                search_pattern = f"*eid-{exp_id}*/*{self.data_file_type}*"
+                search_pattern = f"*EID-{exp_id}*/*{self.data_file_type}*"
                 done = super().search_data_files(
                     initial_file_dir=initial_file_dir,
                     search_pattern=search_pattern, recursive=True, allow_multiple_files=True
@@ -140,59 +141,101 @@ class Dataset(datahub.DatasetSourced):
                         )
                     else:
                         print('The requested experiment does not exist in the online database!')
-        else:
-                
-            diff_days = dttool.get_diff_days(dt_fr, dt_to)
-            day0 = dttool.get_start_of_the_day(dt_fr)
-            for i in range(diff_days + 1):
-                thisday = day0 + datetime.timedelta(days=i)
-                initial_file_dir = self.data_root_dir / thisday.strftime('%Y') / thisday.strftime('%Y%m%d')
-
-                file_patterns = [f'PFISR_{self.data_file_type}', thisday.strftime('%Y%m%d')]
-
-                # remove empty str
-                file_patterns = [pattern for pattern in file_patterns if str(pattern)]
-
-                search_pattern = '*' + '*'.join(file_patterns) + '*'
-
-                if isinstance(self.exp_name_pattern, list):
-                    p = '_'.join(self.exp_name_pattern)
-                elif isinstance(self.exp_name_pattern, str):
-                    p = self.exp_name_pattern
-                else:
-                    p = ''
-                search_pattern = '*' + p + '*/' + search_pattern
-                recursive = False
-
-                done = super().search_data_files(
-                    initial_file_dir=initial_file_dir, search_pattern=search_pattern,
-                    allow_multiple_files=True, recursive=recursive)
-
-                # Validate file paths
-
-                if not done and self.allow_download:
-                    done = self.download_data()
-                    if done:
-                        done = super().search_data_files(
-                            initial_file_dir=initial_file_dir,
-                            search_pattern=search_pattern,
-                            allow_multiple_files=True, recursive=recursive
-                        )
+                if len(done) > 1:
+                    if isinstance(self.exp_name_pattern, (str, list)):
+                        mylog.StreamLogger.warning(
+                            "Multiple data files detected! Check the files:")
                     else:
-                        print('The requested experiment does not exist in the online database!')
+                        mylog.StreamLogger.warning(
+                            "Multiple data files detected!" +
+                            "Specify the experiment name by the keyword 'exp_name_pattern' if possible.")
+                    for fp in done:
+                        mylog.simpleinfo.info(fp)
 
-        if len(done) > 1:
-            if str(self.exp_name_pattern):
-                mylog.StreamLogger.warning(
-                    "Multiple data files detected! Check the files:")
-            else:
-                mylog.StreamLogger.warning(
-                    "Multiple data files detected!" +
-                    "Specify the experiment name by the keyword 'exp_name_pattern' if possible.")
-            for fp in done:
-                mylog.simpleinfo.info(fp)
+        else:
+            diff_years = dt_to.year - dt_fr.year
+            for ny in range(diff_years + 1):
+                initial_file_dir = self.data_root_dir / str(dt_to.year + ny)
+                search_pattern = "*EID-*/"
+                exp_dirs = list(initial_file_dir.glob(search_pattern))
+
+                if not list(exp_dirs):
+                    done = False
+                    continue
+
+                def dir_parser(dirs):
+                    dirs_out = []
+                    for d in dirs:
+                        rc = re.compile(r'_([\d]{14})')
+                        res = rc.findall(str(d))
+                        dt_0 = datetime.datetime.strptime(res[0], "%Y%m%d%H%M%S")
+                        dt_1 = datetime.datetime.strptime(res[1], "%Y%m%d%H%M%S")
+
+                        if dt_1 < dt_fr:
+                            continue
+                        if dt_0 > dt_to:
+                            continue
+                        dirs_out.append(d)
+                    return dirs_out
+
+                file_dirs = dir_parser(exp_dirs)
+
+                if not list(file_dirs):
+                    done = False
+                    continue
+
+                for fd in file_dirs:
+                    if isinstance(self.exp_name_pattern, list):
+                        p = '.*'.join(self.exp_name_pattern)
+                    elif isinstance(self.exp_name_pattern, str):
+                        p = self.exp_name_pattern
+                    else:
+                        p = '.*'
+                    rc = re.compile(p)
+                    res = rc.search(str(fd))
+                    if res is None:
+                        continue
+
+                    file_patterns = ['PFISR', self.data_file_type]
+
+                    # remove empty str
+                    file_patterns = [pattern for pattern in file_patterns if str(pattern)]
+
+                    search_pattern = '*' + '*'.join(file_patterns) + '*'
+
+                    recursive = False
+
+                    done = super().search_data_files(
+                        initial_file_dir=fd, search_pattern=search_pattern,
+                        allow_multiple_files=True, recursive=recursive)
+
+                    # Validate file paths
+
+                    if not done and self.allow_download:
+                        done = self.download_data()
+                        if done:
+                            done = super().search_data_files(
+                                initial_file_dir=initial_file_dir,
+                                search_pattern=search_pattern,
+                                allow_multiple_files=True, recursive=recursive
+                            )
+                        else:
+                            print('The requested experiment does not exist in the online database!')
+
+                    if len(done) > 1:
+                        if isinstance(self.exp_name_pattern, (str, list)):
+                            mylog.StreamLogger.warning(
+                                "Multiple data files detected! Check the files:")
+                        else:
+                            mylog.StreamLogger.warning(
+                                "Multiple data files detected!" +
+                                "Specify the experiment name by the keyword 'exp_name_pattern' if possible.")
+                        for fp in done:
+                            mylog.simpleinfo.info(fp)
 
         self._select_file_by_time_resolution()
+        import natsort
+        self.data_file_paths = natsort.natsorted(self.data_file_paths, reverse=False)
         return done
 
     def _select_file_by_time_resolution(self):

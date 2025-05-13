@@ -245,7 +245,8 @@ def sm_GetUrl(fetchurl, fetch='raw'):
             cafile = certifi.where()
         except:
             cafile = ''
-        with urllib.request.urlopen(fetchurl, cafile=cafile) as response:
+        # with urllib.request.urlopen(fetchurl, cafile=cafile) as response:
+        with urllib.request.urlopen(fetchurl,) as response:
             longstring = response.read()
 
             if fetch == 'json':
