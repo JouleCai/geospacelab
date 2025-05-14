@@ -207,8 +207,8 @@ class Downloader(DownloaderBase):
             dt_to_exp = datetime.datetime(
                 exp.endyear, exp.endmonth, exp.endday, exp.endhour, exp.endmin, exp.endsec
             )
-            if (dt_fr_exp >= self.dt_to) or (dt_to_exp <= self.dt_fr):
-                continue
+            # if (dt_fr_exp >= self.dt_to) or (dt_to_exp <= self.dt_fr):
+            #     continue
             for file in list(exp.files):
 
                 file_path_remote = pathlib.Path(file.name)

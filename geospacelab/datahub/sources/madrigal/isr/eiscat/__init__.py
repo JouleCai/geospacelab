@@ -72,7 +72,8 @@ class Dataset(datahub.DatasetSourced):
         self.data_file_type = kwargs.pop('data_file_type', '')
         self.affiliation = kwargs.pop('affiliation', '')
         self.allow_download = kwargs.pop('allow_download', True)
-        self.metadata = None
+        self.gate_num = kwargs.pop('gate_num', None)
+        self.metadata = {}
         self.add_AACGM = kwargs.pop('add_AACGM', True)
         self.add_APEX = kwargs.pop('add_APEX', False)
 
@@ -116,7 +117,9 @@ class Dataset(datahub.DatasetSourced):
         self.check_data_files(**kwargs)
 
         for file_path in self.data_file_paths:
-            load_obj = self.loader(file_path, file_type=self.data_file_type)
+            load_obj = self.loader(file_path, file_type=self.data_file_type, gate_num=self.gate_num)
+            if self.gate_num is None:
+                self.gate_num = load_obj.gate_num
 
             for var_name in self._variables.keys():
                 self._variables[var_name].join(load_obj.variables[var_name])
@@ -130,6 +133,12 @@ class Dataset(datahub.DatasetSourced):
             self.experiment = rawdata_path.split('/')[-1].split('@')[0]
             self.affiliation = load_obj.metadata['affiliation']
             self.metadata = load_obj.metadata
+
+        inds_cmb = np.argsort(self['DATETIME'].flatten())
+        if any(np.diff(np.array(inds_cmb))<0):
+            for var_name in self.keys():
+                self[var_name].value = self[var_name].value[inds_cmb, :]
+
         if self.add_AACGM or self.add_APEX:
             self.calc_lat_lon()
             # self.select_beams(field_aligned=True)
@@ -357,21 +366,23 @@ class Dataset(datahub.DatasetSourced):
             fps_sub = []
             for ii in inds_id:
                 fp = file_paths[ii]
-                rc = re.compile(r".*_([\d]{8}T[\d]{6}).*_([\d]{8}T[\d]{6}).*[\d]{4}\-[\d]{2}\-[\d]{2}_([\w]+)@.*")
+                rc = re.compile(r".*_([\d]{8}T[\d]{6}).*_([\d]{8}T[\d]{6}).*[\d]{4}\-[\d]{2}\-[\d]{2}_([\w.]+)@.*")
                 res = rc.search(str(fp))
                 dt_0 = datetime.datetime.strptime(res.groups()[0], '%Y%m%dT%H%M%S')
                 dt_1 = datetime.datetime.strptime(res.groups()[1], '%Y%m%dT%H%M%S')
                 if (dt_0 >= self.dt_to) or (dt_1<=self.dt_fr):
                     continue
                 if str(self.pulse_code):
-                    if self.pulse_code not in res.groups()[2]:
+                    if self.pulse_code not in res.groups()[2].lower():
                         continue
                 if str(self.modulation):
-                    if self.modulation not in res.groups()[2]:
+                    if self.modulation not in res.groups()[2].lower():
                         continue
+                if '_v' in res.groups()[2].lower():
+                    continue
                 fps_sub.extend([fp])
             if len(fps_sub) > 1:
-                mylog.StreamLogger.warning("Multiple data files for a single experiment detected! Only the first one is selected.")
+                mylog.StreamLogger.warning("Multiple data files for a single experiment detected!")
                 # for fp in fps_sub:
                 #     mylog.simpleinfo.info(str(fp))
                 # fps_sub = fps_sub[0]

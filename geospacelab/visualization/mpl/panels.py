@@ -736,6 +736,7 @@ class TSPanel(Panel):
         time_gap = var.visual.axis[0].mask_gap
         if time_gap is None:
             time_gap = self.time_gap
+        y_data = self._check_ydata(y_data)
         if time_gap:
             # x, y, z = arraytool.data_resample_2d(
             #     x=x_data, y=y_data, z=z_data, xtype='datetime', xres=x_data_res, method='Null', axis=0)
@@ -748,6 +749,21 @@ class TSPanel(Panel):
         data = {'x': x, 'y': y, 'z': z}
         return data
 
+    def _check_ydata(self, ydata):
+        inds_infinite = np.where(~np.isfinite(ydata))
+        if list(inds_infinite):
+            m, n = ydata.shape
+            for i in range(m):
+                yy = ydata[i, :].flatten()
+                iii = np.where(~np.isfinite(yy))
+                if not list(iii):
+                    continue
+                iii = np.where(np.isfinite(yy))[0]
+                xx = np.arange(0, n)
+                f = interp1d(xx[iii], yy[iii], kind='linear', bounds_error=False, fill_value='extrapolate')
+                yy_new = f(xx)
+                ydata[i, :] = yy_new
+        return ydata
     @staticmethod
     def generate_label(label: str, unit: str='', style: str='double'):
         label = label

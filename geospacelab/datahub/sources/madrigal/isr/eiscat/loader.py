@@ -13,6 +13,7 @@ import h5py
 import numpy as np
 import pathlib
 import re
+import scipy.interpolate as si
 
 from geospacelab.config import pref as prf
 
@@ -32,12 +33,12 @@ default_variable_names = [
 
 
 class Loader:
-    def __init__(self, file_path, file_type="eiscat-hdf5"):
+    def __init__(self, file_path, file_type="eiscat-hdf5", gate_num=None):
         self.variables = {}
         self.metadata = {}
         self.file_path = file_path
         self.file_type = file_type
-
+        self.gate_num = gate_num
         self.load_data()
 
     def load_data(self):
@@ -131,8 +132,19 @@ class Loader:
                         if num_col != nrec[0]:
                             print("Note: the number of range gates doesn't match nrec!")
                         var = var.reshape(num_row, num_col)
+                        if self.gate_num is None:
+                            self.gate_num = num_col
+                        else:
+                            var_array = np.empty((num_row, num_gates))
+                            var_array[::] = np.nan
+                            for i in range(num_row):
+                                var_array[i, 0:num_col] = var[i, :]
+                            var = var_array
                     elif nrec_group == 'par1d':
-                        num_gates = int(np.max(nrec))
+                        if self.gate_num is None:
+                            self.gate_num = num_gates = int(np.max(nrec))
+                        else:
+                            num_gates = self.gate_num
                         var_array = np.empty((num_row, num_gates))
                         var_array[:, :] = np.nan
                         rec_ind_1 = 0
@@ -201,21 +213,30 @@ class Loader:
         # check height and range
         vars['HEIGHT'] = vars['HEIGHT'] / 1000.
         vars['RANGE'] = vars['RANGE'] / 1000.
-        inds = np.where(np.isnan(vars['HEIGHT']))
-        for i in range(len(inds[0])):
-            ind_0 = inds[0][i]
-            ind_1 = inds[1][i]
-            x0 = np.arange(vars['HEIGHT'].shape[0])
-            y0 = vars['HEIGHT'][:, ind_1]
-            xp = x0[np.where(np.isfinite(y0))[0]]
-            yp = y0[np.isfinite(y0)]
-            vars['HEIGHT'][ind_0, ind_1] = np.interp(x0[ind_0], xp, yp)
 
-            x0 = np.arange(vars['RANGE'].shape[0])
-            y0 = vars['RANGE'][:, ind_1]
-            xp = x0[np.isfinite(y0)]
-            yp = y0[np.isfinite(y0)]
-            vars['RANGE'][ind_0, ind_1] = np.interp(x0[ind_0], xp, yp)
+        inds_nan = np.where(np.isnan(vars['HEIGHT']))
+        if list(inds_nan):
+            m, n = vars['HEIGHT'].shape
+            for i in range(m):
+                yy = vars['HEIGHT'][i, :].flatten()
+                iii = np.where(~np.isfinite(yy))
+                if not list(iii):
+                    continue
+                iii = np.where(np.isfinite(yy))[0]
+                xx = np.arange(0, n)
+                f = si.interp1d(xx[iii], yy[iii], kind='linear', bounds_error=False, fill_value='extrapolate')
+                yy_new = f(xx)
+                vars['HEIGHT'][i, :] = yy_new
+
+                yy = vars['RANGE'][i, :].flatten()
+                iii = np.where(~np.isfinite(yy))
+                if not list(iii):
+                    continue
+                iii = np.where(np.isfinite(yy))[0]
+                xx = np.arange(0, n)
+                f = si.interp1d(xx[iii], yy[iii], kind='linear', bounds_error=False, fill_value='extrapolate')
+                yy_new = f(xx)
+                vars['RANGE'][i, :] = yy_new
 
         if np.isscalar(vars['AZ']):
             az = np.empty((vars['DATETIME_1'].shape[0], 1))
@@ -336,8 +357,12 @@ class Loader:
             inds_ran_max = np.append(inds_ran_max, len(ran)-1)
             inds_ran_max.sort()
 
-            ngates_max = np.max(np.diff(inds_ran_max))
-            data_array = np.empty((nvar_h5, inds_ran_min.shape[0], ngates_max))
+            if self.gate_num is None:
+                self.gate_num = ngates_max = np.max(np.diff(inds_ran_max))
+            else:
+                ngates_max = self.gate_num
+            num_row = inds_ran_min.shape[0]
+            data_array = np.empty((nvar_h5, num_row, ngates_max))
             data_array[::] = np.nan
             for ip in range(nvar_h5):
                 var_tmp = np.array(data[ip])
@@ -345,7 +370,7 @@ class Loader:
                     ind1 = inds_ran_min[i]
                     ind2 = inds_ran_max[i]
                     data_array[ip, i, 0: ind2-ind1+1] = var_tmp[ind1: ind2+1]
-            num_row = inds_ran_min.shape[0]
+
             vars_h5 = {}
             for ip in range(nvar_h5):
 
@@ -382,21 +407,31 @@ class Loader:
             vars['T_e_err'] = vars['T_e'] * np.sqrt((vars['T_i_err'] / vars['T_i']) ** 2
                                                     + (vars['T_r_err'] / vars['T_r']) ** 2)
             vars['AZ'] = vars['AZ'] % 360.
-            inds = np.where(np.isnan(vars['HEIGHT']))
-            for i in range(len(inds[0])):
-                ind_0 = inds[0][i]
-                ind_1 = inds[1][i]
-                x0 = np.arange(vars['HEIGHT'].shape[0])
-                y0 = vars['HEIGHT'][:, ind_1]
-                xp = x0[np.where(np.isfinite(y0))[0]]
-                yp = y0[np.isfinite(y0)]
-                vars['HEIGHT'][ind_0, ind_1] = np.interp(x0[ind_0], xp, yp)
 
-                x0 = np.arange(vars['RANGE'].shape[0])
-                y0 = vars['RANGE'][:, ind_1]
-                xp = x0[np.isfinite(y0)]
-                yp = y0[np.isfinite(y0)]
-                vars['RANGE'][ind_0, ind_1] = np.interp(x0[ind_0], xp, yp)
+            inds_nan = np.where(np.isnan(vars['HEIGHT']))
+            if list(inds_nan):
+                m, n = vars['HEIGHT'].shape
+                for i in range(m):
+                    yy = vars['HEIGHT'][i, :].flatten()
+                    iii = np.where(~np.isfinite(yy))
+                    if not list(iii):
+                        continue
+                    iii = np.where(np.isfinite(yy))[0]
+                    xx = np.arange(0, n)
+                    f = si.interp1d(xx[iii], yy[iii], kind='linear', bounds_error=False, fill_value='extrapolate')
+                    yy_new = f(xx)
+                    vars['HEIGHT'][i, :] = yy_new
+
+                    yy = vars['RANGE'][i, :].flatten()
+                    iii = np.where(~np.isfinite(yy))
+                    if not list(iii):
+                        continue
+                    iii = np.where(np.isfinite(yy))[0]
+                    xx = np.arange(0, n)
+                    f = si.interp1d(xx[iii], yy[iii], kind='linear', bounds_error=False, fill_value='extrapolate')
+                    yy_new = f(xx)
+                    vars['RANGE'][i, :] = yy_new
+
 
             self.variables = vars
             self.metadata = metadata

@@ -10,9 +10,11 @@ __docformat__ = "reStructureText"
 
 
 import numpy
-from scipy.interpolate import interp1d
+import numpy as np
+from scipy.interpolate import interp1d, griddata
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pybasic as basic
+import geospacelab.toolbox.utilities.pylogging as mylog
 import datetime
 
 
@@ -132,6 +134,140 @@ def data_resample(
 )
 
     return xnew, ynew
+
+# def resample_2d(
+#         x_data, y_data, z_data,
+#         x_data_type=None,
+#         x_data_res=None,
+#         x_data_res_scale=1.,
+#         x_grid_res=None,
+#         x_grid_res_scale=1,
+#         x_grid_min=None,
+#         x_grid_max=None,
+#         along_x_interp=True,
+#         along_x_interp_method='nearest',
+#         along_x_binning=False,
+#         y_data_res=None,
+#         y_data_res_scale=1.,
+#         y_grid_res=None,
+#         y_grid_res_scale=1.,
+#         y_grid_min=None,
+#         y_grid_max=None,
+#         along_y_interp=True,
+#         along_y_interp_method='nearest',
+#         along_y_binning=False,
+# ):
+#     if along_x_interp==True and along_x_binning==True:
+#         mylog.StreamLogger.error('The keywords "along_x_interp" and "along_x_binning" cannot be True at the same time!')
+#         raise ValueError
+#     if along_y_interp==True and along_y_binning==True:
+#         mylog.StreamLogger.error('The keywords "along_y_interp" and "along_y_binning" cannot be True at the same time!')
+#         raise ValueError
+#
+#     num_x, num_y = z_data.shape
+#     if x_data_type == 'datetime':
+#         dt0 = dttool.get_start_of_the_day(numpy.nanmin(x_data.flatten()))
+#         sectime, dt0 = dttool.convert_datetime_to_sectime(x_data, dt0=dt0)
+#         x_data = sectime
+#
+#     # check x dim:
+#     if len(x_data.shape) == 1:
+#         x_dim = 1
+#     elif len(x_data.shape) == 2:
+#         if x_data.shape[1] == num_y:
+#             x_dim = 2
+#         else:
+#             x_dim = 1
+#     else:
+#         raise ValueError
+#     if x_dim == 1:
+#         xd = np.tile(x_data.flatten(), (1, num_y))
+#     else:
+#         xd = x_data
+#     min_x = np.nanmin(xd.flatten())
+#     max_x = np.nanmax(xd.flatten())
+#     # check y dim:
+#     if len(y_data.shape) == 1:
+#         y_dim = 1
+#     elif len(y_data.shape) == 2:
+#         if y_data.shape[1] == num_y:
+#             y_dim = 2
+#         else:
+#             y_dim = 1
+#     else:
+#         raise ValueError
+#     if y_dim == 1:
+#         yd = np.tile(x_data.flatten(), (num_x, 1))
+#     else:
+#         yd = y_data
+#     min_y = np.nanmin(yd.flatten())
+#     max_y = np.nanmax(yd.flatten())
+#
+#     if x_data_res is None:
+#         x_data_res_ = np.median(np.diff(xd[:, 0].flatten()))
+#     else:
+#         x_data_res_ = x_data_res
+#     if y_data_res is None:
+#         y_data_res_ = np.median(np.diff(yd[0, :].flatten()))
+#     else:
+#         y_data_res_ = y_data_res
+#
+#     if x_grid_res is None:
+#         xx = xd[:, 0].flatten()
+#         # along_x_interp=False
+#         # along_x_binning=False
+#         # x_grid_res=x_data_res
+#     else:
+#         if x_grid_min is None:
+#             x_grid_min = np.floor((min_x / x_grid_res)) * x_grid_res
+#         if x_grid_max is None:
+#             x_grid_max = np.ceil((max_x / x_grid_res)) * x_grid_res
+#         xx = np.arange(x_grid_min, x_grid_max+x_grid_res, x_grid_res)
+#     if y_grid_res is None:
+#         yy = yd[0, :].flatten()
+#         # along_y_interp=False
+#         # along_y_binning=False
+#         # y_grid_res=y_data_res
+#     else:
+#         if y_grid_min is None:
+#             y_grid_min = np.floor((min_y / y_grid_res)) * y_grid_res
+#         if y_grid_max is None:
+#             y_grid_max = np.ceil((max_y / y_grid_res)) * y_grid_res
+#         yy = np.arange(y_grid_min, y_grid_max+y_grid_res, y_grid_res)
+#
+#     grid_x, grid_y = numpy.meshgrid(xx,yy)
+#     grid_z = np.empty_like(grid_x)
+#     grid_z[::] = np.nan
+#
+#     if along_y_interp:
+#         grid_x_1 = np.empty_like((num_x, grid_z.shape[1])) * np.nan
+#         grid_y_1 = np.empty_like((num_x, grid_z.shape[1])) * np.nan
+#         grid_z_1 = np.empty_like((num_x, grid_z.shape[1])) * np.nan
+#         for i in range(num_x):
+#             x1 = xd[i, :].flatten()
+#             y1 = yd[i, :].flatten()
+#             z1 = z_data[i, :].flatten()
+#
+#             inds_finite = np.where(np.isfinite(x1) & np.isfinite(y1) & np.isfinite(z1))[0]
+#             if not list(inds_finite):
+#                 continue
+#
+#             f = interp1d(y1[inds_finite], x1[inds_finite],
+#                 kind='nearest', bounds_error=False, fill_value=np.nan)
+#             x_i = f(grid_y[i, :].flatten())
+#             grid_x_1[i, :] = x_i
+#
+#             f = interp1d(y1[inds_finite], y1[inds_finite],
+#                 kind='nearest', bounds_error=False, fill_value=np.nan)
+#             y_i = f(grid_y[i, :].flatten())
+#             grid_y_1[i, :] = y_i
+#
+#             f = interp1d(
+#                 y1[inds_finite], z1[inds_finite],
+#                 kind=along_y_interp_method, bounds_error=False, fill_value=np.nan)
+#             z_i = f(grid_y[i, :].flatten())
+#
+#             grid_z_1[i, :] = z_i
 
 
 def regridding_2d_xgaps(
