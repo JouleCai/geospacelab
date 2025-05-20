@@ -46,7 +46,7 @@ default_variable_names = [
     'DATETIME', 'AZ', 'EL', 'PULSE_LENGTH',
     'P_Tx', 'n_e', 'n_e_err', 'T_i', 'T_i_err', 'T_e', 'T_e_err',
     'v_i_los', 'v_i_los_err', 'comp_mix', 'comp_mix_err',
-    'HEIGHT', 'RANGE', 'CGM_LAT', 'CGM_LON'
+    'HEIGHT', 'RANGE', 'CGM_LAT', 'CGM_LON', 'BEAM_ID', 'CHISQ'
 ]
 
 # default_data_search_recursive = True
@@ -55,7 +55,7 @@ default_attrs_required = []
 
 pulse_code_dict = {
     'alternating code': 'AC',
-    'long pulse': 'PL',
+    'long pulse': 'LP',
 }
 
 
@@ -138,8 +138,8 @@ class Dataset(datahub.DatasetSourced):
         self.beam_az = load_obj.beam_az
         self.beam_el = load_obj.beam_el
 
-        if self.add_APEX or self.add_AACGM:
-            self.calc_lat_lon()
+        # if self.add_APEX or self.add_AACGM:
+        self.calc_lat_lon()
 
         if self['HEIGHT'].value is None:
             self['HEIGHT'] = self['GEO_ALT']
@@ -353,7 +353,7 @@ class Dataset(datahub.DatasetSourced):
             pulse_code=self.pulse_code,
             dry_run=dry_run,
             data_file_root_dir=self.data_root_dir,
-            include_exp_ids=self.exp_ids,
+            include_exp_ids=self.experiment_ids,
             include_exp_name_patterns=include_exp_name_patterns)
         return download_obj.data_file_paths
 

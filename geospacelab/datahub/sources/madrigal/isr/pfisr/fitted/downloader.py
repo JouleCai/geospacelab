@@ -15,7 +15,7 @@ EXCLUDE_FILE_TYPE_PATTERNS = [['from power'], ['velocity'], ['uncorrected']]
 
 pulse_code_dict = {
     'alternating code': 'AC',
-    'long pulse': 'PL',
+    'long pulse': 'LP',
 }
 
 

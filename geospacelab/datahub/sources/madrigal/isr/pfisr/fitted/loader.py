@@ -37,6 +37,8 @@ var_name_dict = {
     'CGM_LAT': 'cgm_lat',
     'CGM_LON': 'cgm_long',
     'HEIGHT': 'gdalt',
+    'BEAM_ID': 'beamid',
+    'CHISQ': 'chisq',
 }
 
 

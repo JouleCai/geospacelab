@@ -133,13 +133,14 @@ class Loader:
                             print("Note: the number of range gates doesn't match nrec!")
                         var = var.reshape(num_row, num_col)
                         if self.gate_num is None:
-                            self.gate_num = num_col
+                            num_gates=self.gate_num = num_col
                         else:
-                            var_array = np.empty((num_row, num_gates))
-                            var_array[::] = np.nan
-                            for i in range(num_row):
-                                var_array[i, 0:num_col] = var[i, :]
-                            var = var_array
+                            num_gates = self.gate_num
+                        var_array = np.empty((num_row, num_gates))
+                        var_array[::] = np.nan
+                        for i in range(num_row):
+                            var_array[i, 0:num_col] = var[i, :]
+                        var = var_array
                     elif nrec_group == 'par1d':
                         if self.gate_num is None:
                             self.gate_num = num_gates = int(np.max(nrec))
