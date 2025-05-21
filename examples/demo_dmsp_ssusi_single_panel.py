@@ -65,7 +65,7 @@ def test_ssusi():
     pcolormesh_config = lbhs.visual.plot_config.pcolormesh
     # Overlay the SSUSI image in the map.
     ipc = panel.overlay_pcolormesh(
-        data=lbhs_, coords={'lat': mlat_, 'lon': mlon_, 'mlt': mlt_}, cs='AACGM', **pcolormesh_config)
+        data=lbhs_, coords={'lat': mlat_, 'lon': mlon_, 'mlt': mlt_}, cs='AACGM', **pcolormesh_config, regridding=False)
     # Add a color bar
     panel.add_colorbar(ipc, c_label=band + " (R)", c_scale=pcolormesh_config['c_scale'], left=1.1, bottom=0.1,
                         width=0.05, height=0.7)
