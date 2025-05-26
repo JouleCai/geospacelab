@@ -8,7 +8,6 @@
 [![DOI](https://zenodo.org/badge/347315860.svg)](https://zenodo.org/badge/latestdoi/347315860)
 [![Downloads](https://pepy.tech/badge/geospacelab)](https://pepy.tech/project/geospacelab)
 ![](https://tokei.rs/b1/github/JouleCai/geospacelab)
-[![PyPI version fury.io](https://badge.fury.io/py/ansicolortags.svg)](https://pypi.python.org/pypi/geospacelab/)
 
 
 GeospaceLAB provides a framework of data access, analysis, and visualization for the researchers in space physics and space weather. The documentation can be found 
