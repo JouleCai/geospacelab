@@ -13,9 +13,9 @@ import numpy as np
 import h5py
 import re
 
-from geospacelab.datahub.sources.madrigal.isr.pfisr.vi.loader import Loader as default_Loader
-from geospacelab.datahub.sources.madrigal.isr.pfisr.vi.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.madrigal.isr.pfisr.vi.variable_config as var_config
+from geospacelab.datahub.sources.madrigal.isr.risr_n.vi.loader import Loader as default_Loader
+from geospacelab.datahub.sources.madrigal.isr.risr_n.vi.downloader import Downloader as default_Downloader
+import geospacelab.datahub.sources.madrigal.isr.risr_n.vi.variable_config as var_config
 from geospacelab.datahub.sources.madrigal import madrigal_database
 from geospacelab.config import prf
 from geospacelab import datahub
@@ -27,12 +27,12 @@ import geospacelab.toolbox.utilities.pylogging as mylog
 default_dataset_attrs = {
     'kind': 'sourced',
     'database': madrigal_database,
-    'facility': 'PFISR',
+    'facility': 'RISR-N',
     'exp_name_pattern': [],
     'exp_check': False,
     'data_file_type': 'vi',
     'data_file_ext': ['h5', 'hdf5'],
-    'data_root_dir': prf.datahub_data_root_dir / 'Madrigal' / 'PFISR',
+    'data_root_dir': prf.datahub_data_root_dir / 'Madrigal' / 'RISR-N',
     'allow_download': True,
     'status_control': False,
     'residual_control': False,
@@ -43,8 +43,9 @@ default_dataset_attrs = {
 
 default_variable_names = [
     'DATETIME', 'CGM_LAT', 'v_i_N', 'v_i_N_err', 'v_i_E', 'v_i_E_err', 'v_i_Z', 'v_i_Z_err', 'E_N', 'E_N_err', 'E_E',
-    'E_E_err', 'GEO_ALT_MAX', 'GEO_ALT_MIN', 'INT_TIME',     'EF_MAG', 'EF_MAG_err', 'EF_ANGLE',  'EF_ANGLE_err',
-    'v_i_MAG', 'v_i_MAG_err', 'v_i_ANGLE', 'v_i_ANGLE_err'
+    'E_E_err', 'GEO_ALT_MAX', 'GEO_ALT_MIN', 'INT_TIME', 
+    # 'EF_MAG', 'EF_MAG_err', 'EF_ANGLE',  'EF_ANGLE_err',
+    # 'v_i_MAG', 'v_i_MAG_err', 'v_i_ANGLE', 'v_i_ANGLE_err'
 ]
 
 # default_data_search_recursive = True
@@ -60,7 +61,7 @@ class Dataset(datahub.DatasetSourced):
 
         self.database = kwargs.pop('database', '')
         self.facility = kwargs.pop('facility', '')
-        self.site = kwargs.pop('site', PFISR('PFISR'))
+        self.site = kwargs.pop('site', RISR('RISR-N'))
         self.experiment = kwargs.pop('experiment', '')
         self.exp_ids = kwargs.pop('exp_ids', [])
         self.exp_name_pattern = kwargs.pop('exp_name_pattern', [])
@@ -194,7 +195,7 @@ class Dataset(datahub.DatasetSourced):
                     if res is None:
                         continue
 
-                    file_patterns = ['PFISR', self.data_file_type]
+                    file_patterns = ['RISR-N', self.data_file_type]
 
                     # remove empty str
                     file_patterns = [pattern for pattern in file_patterns if str(pattern)]
@@ -313,30 +314,26 @@ class Dataset(datahub.DatasetSourced):
     @site.setter
     def site(self, value):
         if isinstance(value, str):
-            self._site = PFISR(value)
+            self._site = RISR(value)
         elif issubclass(value.__class__, SiteModel):
             self._site = value
         else:
             raise TypeError
 
 
-class PFISR(SiteModel):
+
+class RISR(SiteModel):
     def __new__(cls, str_in, **kwargs):
         obj = super().__new__(cls, str_in, **kwargs)
         return obj
 
     def __init__(self, str_in, **kwargs):
-        self.name = 'Poker Flat ISR'
+        self.name = 'Resolute Bay North IS Radar'
         self.location = {
-            'GEO_LAT': 65.13,
-            'GEO_LON': 212.529,
-            'GEO_ALT': 0.215
+            'GEO_LAT': 74.72955,
+            'GEO_LON': 256.09424,
+            'GEO_ALT': 0.145
         }
-
-
-
-
-
 
 
 

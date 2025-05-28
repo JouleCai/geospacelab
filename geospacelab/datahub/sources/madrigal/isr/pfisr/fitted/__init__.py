@@ -232,9 +232,8 @@ class Dataset(datahub.DatasetSourced):
                 search_pattern = "*EID-*/"
                 exp_dirs = list(initial_file_dir.glob(search_pattern))
 
-                if not list(exp_dirs):
-                    done = False
-                    continue
+                if not list(exp_dirs) and self.allow_download:
+                    self.download_data()
 
                 def dir_parser(dirs):
                     dirs_out = []
@@ -252,9 +251,8 @@ class Dataset(datahub.DatasetSourced):
                     return dirs_out
                 file_dirs = dir_parser(exp_dirs)
 
-                if not list(file_dirs):
-                    done=False
-                    continue
+                if not list(file_dirs) and self.allow_download:
+                    self.download_data() 
 
                 for fd in file_dirs:
                     if isinstance(self.exp_name_pattern, list):
@@ -281,7 +279,7 @@ class Dataset(datahub.DatasetSourced):
                         initial_file_dir=fd, search_pattern=search_pattern,
                         allow_multiple_files=True, recursive=recursive)
 
-                # Validate file paths
+                    # Validate file paths
 
                     if not done and self.allow_download:
                         done = self.download_data()

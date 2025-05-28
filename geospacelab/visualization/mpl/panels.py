@@ -759,9 +759,12 @@ class TSPanel(Panel):
                 if not list(iii):
                     continue
                 iii = np.where(np.isfinite(yy))[0]
-                xx = np.arange(0, n)
-                f = interp1d(xx[iii], yy[iii], kind='linear', bounds_error=False, fill_value='extrapolate')
-                yy_new = f(xx)
+                if len(iii)<2:
+                    yy_new = np.nanmedian(ydata, axis=0)
+                else:
+                    xx = np.arange(0, n)
+                    f = interp1d(xx[iii], yy[iii], kind='linear', bounds_error=False, fill_value='extrapolate')
+                    yy_new = f(xx)
                 ydata[i, :] = yy_new
         return ydata
     @staticmethod

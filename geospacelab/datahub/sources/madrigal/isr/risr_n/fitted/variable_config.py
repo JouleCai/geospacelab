@@ -34,7 +34,7 @@ default_colormap = cm.cmap_jet_modified()
 default_axis_dict_2d = {
     1:     {
         'data':     '@d.HEIGHT.value',
-        'lim':      [90, 200],
+        'lim':      [None, None],
         'label':    'h',
         'unit':     'km',
     },
@@ -87,7 +87,7 @@ axis[1].data = "@d.HEIGHT.value"
 axis[2].data = "@v.value"
 axis[1].label = 'h'
 axis[1].unit = 'km'
-axis[2].lim = [8e9, 3e12]
+axis[2].lim = [8e9, 9e11]
 axis[2].scale = 'log'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
@@ -110,7 +110,6 @@ var.visual.plot_config.style = '2P'
 axis = var.visual.axis
 axis[1].data = "@d.HEIGHT.value"
 axis[2].data = "@v.value"
-axis[1].lim = [90, 200]
 axis[1].label = 'h'
 axis[1].unit = 'km'
 axis[2].lim = [100, 2500]
@@ -136,7 +135,6 @@ var.visual.plot_config.style = '2P'
 axis = var.visual.axis
 axis[1].data = "@d.HEIGHT.value"
 axis[2].data = "@v.value"
-axis[1].lim = [90, 200]
 axis[1].label = 'h'
 axis[1].unit = 'km'
 axis[2].lim = [100, 3500]
@@ -162,7 +160,6 @@ var.visual.plot_config.style = '2P'
 axis = var.visual.axis
 axis[1].data = "@d.HEIGHT.value"
 axis[2].data = "@v.value"
-axis[1].lim = [90, 200]
 axis[1].label = 'h'
 axis[1].unit = 'km'
 axis[2].lim = [-150, 150]

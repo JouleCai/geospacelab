@@ -43,7 +43,7 @@ default_dataset_attrs = {
 }
 
 default_variable_names = [
-    'DATETIME', 'AZ', 'AZ1', 'AZ2', 'EL', 'EL1', 'EL2', 'PULSE_LENGTH',
+    'DATETIME', 'DATETIME_1', 'DATETIME_2', 'AZ', 'AZ1', 'AZ2', 'EL', 'EL1', 'EL2', 'PULSE_LENGTH',
     'T_SYS', 'POWER_NORM', 'P_Tx', 'MODE_TYPE', 'POWER_LENGTH_F',
     'LAG_SPACING', 'IPP', 'f_Tx', 'v_PHASE_Tx', 'v_PHASE_Tx_err',
     'SCAN_TYPE', 'CYCN', 'POSN', 'RANGE_RES', 'RANGE',
@@ -52,7 +52,7 @@ default_variable_names = [
     'n_e_err', 'T_i', 'T_i_err', 'T_r', 'T_r_err', 'T_e', 'T_e_err',
     'nu_i', 'nu_i_err', 'v_i_los', 'v_i_los_err', 'comp_H_p',
     'comp_H_p_err', 'comp_mix', 'comp_mix_err', 'v_DOP_los', 'v_DOP_los_err',
-    'HEIGHT'
+    'HEIGHT', 
 ]
 
 # default_data_search_recursive = True
