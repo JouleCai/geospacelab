@@ -34,6 +34,7 @@ default_dataset_attrs = {
 
 default_variable_names = [
     'DATETIME', 'STARTING_TIME', 'STOPPING_TIME',
+    'ORBIT_ID',
     'GRID_MLAT', 'GRID_MLON', 'GRID_MLT', 'GRID_UT',
     'GRID_AUR_1216', 'GRID_AUR_1304', 'GRID_AUR_1356', 'GRID_AUR_LBHS', 'GRID_AUR_LBHL',
 ]
@@ -93,6 +94,8 @@ class Dataset(datahub.DatasetSourced):
             default_variable_names,
             configured_variables=var_config.configured_variables
         )
+        if self.orbit_id is None:
+            self.orbit_id = []
         for file_path in self.data_file_paths:
             try:
                 load_obj = self.loader(file_path, file_type=self.product.lower(), pole=self.pole)
@@ -105,14 +108,17 @@ class Dataset(datahub.DatasetSourced):
                     continue
                 if var_name in ['DATETIME', 'STARTING_TIME', 'STOPPING_TIME']:
                     value = np.array([load_obj.variables[var_name]])[np.newaxis, :]
+                elif var_name == 'ORBIT_ID':
+                    value = np.array([load_obj.metadata['ORBIT_ID']], dtype=str) 
                 else:
                     value = np.empty((1, ), dtype=object)
                     value[0] = load_obj.variables[var_name]
                     # value = load_obj.variables[var_name][np.newaxis, ::]
                 self._variables[var_name].join(value)
 
-            self.orbit_id = load_obj.metadata['ORBIT_ID']
-            # self.select_beams(field_aligned=True)
+        self.orbit_id = self['ORBIT_ID'].value
+        if len(self.orbit_id):
+            self.orbit_id = self.orbit_id[0]
         if self.time_clip:
             self.time_filter_by_range()
 
@@ -178,6 +184,7 @@ class Dataset(datahub.DatasetSourced):
         download_obj = self.downloader(
             dt_fr, dt_to,
             orbit_id=self.orbit_id, sat_id=self.sat_id,
+            data_file_root_dir=self.data_root_dir
         )
         return download_obj.done
 

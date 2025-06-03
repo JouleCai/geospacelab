@@ -126,3 +126,6 @@ data_root_dir = \"\"
             user_config_dict = toml.load(config_file_path)
         self.user_config = user_config_dict
         return user_config_dict
+
+
+prf = pref = Preferences()

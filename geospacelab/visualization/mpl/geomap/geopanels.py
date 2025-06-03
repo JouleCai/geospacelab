@@ -333,7 +333,7 @@ class PolarMapPanel(GeoPanel):
 
         pybasic.dict_set_default(gridlines_config, color='#331900', linewidth=0.5, linestyle=':',
                                      draw_labels=False)
-        gl = self().gridlines(crs=ccrs.PlateCarree(), **gridlines_config)
+        gl = self().gridlines(crs=ccrs.PlateCarree(), **gridlines_config,)
 
         gl.xlocator = xlocator
         gl.ylocator = ylocator
@@ -1068,10 +1068,20 @@ class PolarMapPanel(GeoPanel):
 
     def overlay_sites(self, site_ids=None, coords=None, cs=None, **kwargs):
         kwargs = pybasic.dict_set_default(kwargs, color='k', linestyle='', markersize=5, marker='.')
+        show_site_names = kwargs.pop('show_site_names', False)
+        site_names = kwargs.pop('site_names', [])
+        site_name_config = kwargs.pop('site_name_config', {'fontsize': 'small', })
+        site_name_config.update(color=kwargs['color'])
 
         cs_new = self.cs_transform(cs_fr=cs, coords=coords)
         
         isc = self().plot(cs_new['lon'], cs_new['lat'], transform=ccrs.PlateCarree(), **kwargs)
+        
+        if show_site_names:
+            if not list(site_names):
+                site_names = site_ids
+            for i, s in enumerate(site_names):
+                self().text(cs_new['lon'][i], cs_new['lat'][i], s, transform=ccrs.PlateCarree(), **site_name_config)
         return isc
 
     def add_colorbar(self, im, ax=None, figure=None,

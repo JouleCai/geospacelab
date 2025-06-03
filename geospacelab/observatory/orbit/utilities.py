@@ -47,7 +47,9 @@ class LEOToolbox(DatasetUser):
             if list(inds_abnormal):
                 iiii = np.array(inds_abnormal) + 1
                 nodes['INDEX'] = np.delete(nodes['INDEX'], iiii)
+                nodes['GEO_LAT'] = np.delete(nodes['GEO_LAT'], iiii)
                 nodes['GEO_LON'] = np.delete(nodes['GEO_LON'], iiii)
+                nodes['GEO_ALT'] = np.delete(nodes['GEO_ALT'], iiii)
                 nodes['GEO_LST'] = np.delete(nodes['GEO_LST'], iiii)
                 nodes['DATETIME'] = np.delete(nodes['DATETIME'], iiii)
 
@@ -55,6 +57,7 @@ class LEOToolbox(DatasetUser):
         glat = self['SC_GEO_LAT'].value.flatten()
         glat_ = glat[0::data_interval]
         glon = self['SC_GEO_LON'].value.flatten()
+        alt = self['SC_GEO_ALT'].flatten()
         lst = self['SC_GEO_LST'].value.flatten()
         dts = self['SC_DATETIME'].value.flatten()
         ind_1 = argrelextrema(np.abs(glat_), np.less, )[0]
@@ -74,26 +77,34 @@ class LEOToolbox(DatasetUser):
                 ind_between = np.where(ind_1 > ind_N)[0]
                 inds_asc.append(ind_1[ind_between[0]-1])
                 inds_dsc.append(ind_1[ind_between[0]])
-        self.ascending_nodes['INDEX'] = inds_asc
-        self.ascending_nodes['GEO_LON'] = glon[inds_asc]
+        self.ascending_nodes['INDEX'] = np.array(inds_asc)
+        self.ascending_nodes['GEO_LON'] = glon[inds_asc] 
+        self.ascending_nodes['GEO_LAT'] = glat[inds_asc] 
+        self.ascending_nodes['GEO_ALT'] = alt[inds_asc]  
         self.ascending_nodes['GEO_LST'] = lst[inds_asc]
         self.ascending_nodes['DATETIME'] = dts[inds_asc]
         check_nodes(self.ascending_nodes)
 
-        self.descending_nodes['INDEX']= inds_dsc
+        self.descending_nodes['INDEX']= np.array(inds_dsc)
         self.descending_nodes['GEO_LON'] = glon[inds_dsc]
+        self.descending_nodes['GEO_LAT'] = glat[inds_dsc]
+        self.descending_nodes['GEO_ALT'] = alt[inds_dsc]
         self.descending_nodes['GEO_LST'] = lst[inds_dsc]
         self.descending_nodes['DATETIME'] = dts[inds_dsc]
         check_nodes(self.descending_nodes)
 
         self.northern_nodes['INDEX'] = ind_2
         self.northern_nodes['GEO_LON'] = glon[ind_2]
+        self.northern_nodes['GEO_LAT'] = glat[ind_2]
+        self.northern_nodes['GEO_ALT'] = alt[ind_2]
         self.northern_nodes['GEO_LST'] = lst[ind_2]
         self.northern_nodes['DATETIME'] = dts[ind_2]
         check_nodes(self.northern_nodes)
 
         self.southern_nodes['INDEX'] = ind_3
         self.southern_nodes['GEO_LON'] = glon[ind_3]
+        self.southern_nodes['GEO_LAT'] = glat[ind_3]
+        self.southern_nodes['GEO_ALT'] = alt[ind_3]
         self.southern_nodes['GEO_LST'] = lst[ind_3]
         self.southern_nodes['DATETIME'] = dts[ind_3]
         check_nodes(self.southern_nodes)

@@ -45,7 +45,7 @@ var = Var(name=var_name, ndim=3, variable_type='scalar', visual=visual)
 var.fullname = 'GNSS TEC MAP'
 var.label = r'TEC'
 var.group = r'TEC'
-var.unit = 'TECu'
+var.unit = 'TECU'
 var.depends = {0: depend_0, 1: depend_1}
 # set plot attrs
 plot_config = var.visual.plot_config
@@ -53,6 +53,7 @@ plot_config.config(**default_plot_config)
 plot_config.style = '2P'
 # set axis attrs
 axis = var.visual.axis
-
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit'
 
 configured_variables[var_name] = var

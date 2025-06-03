@@ -54,6 +54,16 @@ def cmap_jhuapl_ssj_like():
     return mycmap
 
 
+def cmap_jhuapl_ssusi_like():
+    c1 = ['#000000', "#330066",
+          '#0000CC', '#0080FF',
+          "#00CC00", '#80FF00',
+          '#FFFF00', '#FF8000',
+          '#FF0000', '#FF6666']
+    mycmap = colors.LinearSegmentedColormap.from_list("jhuapl_ssusi_like", c1, N=500)
+    return mycmap
+
+
 def cmap_aurora():
     c1 = ['#848F9E', '#6A4CA1', '#4035A3', '#395EA6', '#003300', '#006600', '#009900', '#00BB00', '#00DD00', '#00FF00', '#80FF80', '#B3FFB3']
     c1 = ['#AEAAB0', '#78519A', '#51227B', '#310073',

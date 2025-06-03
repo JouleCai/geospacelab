@@ -6,15 +6,16 @@ from geospacelab.visualization.mpl.dashboards import TSDashboard
 
 
 def test_pfisr_fitted():
-    dt_fr = datetime.datetime(2021, 1, 6, 2)
-    dt_to = datetime.datetime(2021, 1, 6, 20, 59)
+    dt_fr = datetime.datetime(2024, 5, 11, 2)
+    dt_to = datetime.datetime(2024, 5, 11, 20, 59)
 
     exp_name_pattern = ['auroral', 'convection']
     # exp_name_pattern = None
     exp_ids = [100278402]
     exp_ids = [100253437]
+    exp_ids = []
     pulse_code = 'alternating code'
-    integration_time = 60.  # in [s]
+    integration_time = 180.  # in [s]
     beam_id = None
     beam_az = 205.70
     beam_el = 77.5

@@ -22,7 +22,7 @@ class Downloader(DownloaderBase):
         ):
         product = 'EDR_AUR'
         if data_file_root_dir is None:
-            data_file_root_dir = prf.datahub_data_root_dir / 'CDAWeb' / 'DMSP' / 'SSUSI' /product / sat_id.upper()
+            data_file_root_dir = prf.datahub_data_root_dir / 'CDAWeb' / 'DMSP' / 'SSUSI' / product
         self.sat_id = sat_id
         self.orbit_id = orbit_id
         self.source_subdirs = ['dmsp', 'dmsp'+self.sat_id.lower(), 'ssusi', 'data', 'edr-aurora']
@@ -78,7 +78,7 @@ class Downloader(DownloaderBase):
         year = int(sy)
         this_day = dttool.convert_doy_to_datetime(year, int(sdoy))
         if file_dir is None:
-            file_dir = self.data_file_root_dir / sy / this_day.strftime("%Y%m%d")
+            file_dir = self.data_file_root_dir /  self.sat_id.upper() / sy / this_day.strftime("%Y%m%d")
         super().save_file_from_http(url, file_dir=file_dir)
 
 

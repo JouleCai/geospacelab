@@ -9,9 +9,8 @@ __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
 
-from geospacelab.config._preferences import Preferences
+from geospacelab.config._preferences import prf, pref
 
-prf = pref = Preferences()
 
 try:
     opt = pref.user_config['visualization']
@@ -20,3 +19,5 @@ except KeyError:
     uc['visualization'] = dict()
     uc['visualization']['mpl'] = dict()
     pref.set_user_config(user_config=uc, set_as_default=True)
+
+from geospacelab.config.__mpl__ import mpl, plt
