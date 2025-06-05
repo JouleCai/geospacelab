@@ -134,16 +134,17 @@ class Dataset(datahub.DatasetSourced):
             self.affiliation = load_obj.metadata['affiliation']
             self.metadata = load_obj.metadata
 
-        inds_cmb = np.argsort(self['DATETIME'].flatten())
-        if any(np.diff(np.array(inds_cmb))<0):
-            for var_name in self.keys():
-                self[var_name].value = self[var_name].value[inds_cmb, :]
-
         if self.add_AACGM or self.add_APEX:
             self.calc_lat_lon()
             # self.select_beams(field_aligned=True)
         if self.time_clip:
             self.time_filter_by_range()
+
+        inds_cmb = np.argsort(self['DATETIME'].flatten())
+        if any(np.diff(np.array(inds_cmb)) < 0):
+            for var_name in self.keys():
+                self[var_name].value = self[var_name].value[inds_cmb, :]
+
         if self.status_control:
             self.status_mask()
         if self.residual_control:

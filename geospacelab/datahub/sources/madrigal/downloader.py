@@ -331,7 +331,7 @@ class Downloader(object):
             exclude_exp_name_patterns=None,
             include_exp_ids=None,
             exclude_exp_ids=None,
-            icodes=None, madrigal_url=None, display=True,
+            icodes=None, madrigal_url=None, display=True, level=0,
     ): 
         
         def try_to_get_database(max=3, interval=30):
@@ -383,8 +383,9 @@ class Downloader(object):
 
         exps_new = []
         another_madrigal_url = ''
+        
         for exp in exps:
-            if exp.id == -1:
+            if exp.id == -1 and level==0:
                 if another_madrigal_url != exp.madrigalUrl:
                     mylog.StreamLogger.warning(
                         f'Another Madrigal site detected: {exp.madrigalUrl}!'
@@ -400,12 +401,21 @@ class Downloader(object):
   
         exps = np.array(exps_new, dtype=object)
 
-        if not list(exps):
+        if not list(exps) and not str(another_madrigal_url):
             raise ValueError('Cannot find available experiments from the current database! Check the input values!')
-        elif str(another_madrigal_url):
+        elif str(another_madrigal_url) and level==0:
             mylog.StreamLogger.warning(
-                'Some data are located in another Madrigal site and will not be processed!'
+                'Some data are located in another Madrigal site: {}.'.format(another_madrigal_url)
             )
+            
+            exps, database = Downloader.get_exp_list(
+                    dt_fr=dt_fr, dt_to=dt_to,
+                    include_exp_name_patterns=include_exp_name_patterns,
+                    exclude_exp_name_patterns=exclude_exp_name_patterns,
+                    include_exp_ids=include_exp_ids,
+                    exclude_exp_ids=exclude_exp_ids,
+                    icodes=icodes, madrigal_url=another_madrigal_url, display=display, level=level+1
+            ) 
         else:
             pass
         

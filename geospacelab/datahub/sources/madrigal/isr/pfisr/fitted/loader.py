@@ -51,7 +51,7 @@ class Loader:
     :param load_data: True, load without calling the method "load_data" separately.
     :type load_data: bool
     """
-    def __init__(self, file_path, beam_id=None, beam_az=None, beam_el=None, direct_load=True):
+    def __init__(self, file_path, beam_id=None, beam_az=None, beam_el=None, direct_load=True, gate_num=None):
         self.file_path = file_path
         self.beam_id = beam_id
         self.beam_az = beam_az
@@ -59,6 +59,7 @@ class Loader:
         self.beams = None
         self.variables = {}
         self.metadata = {}
+        self.gate_num = gate_num
 
         self.done = False
         if direct_load:
@@ -184,9 +185,27 @@ class Loader:
                 elif var_name == 'dnel':
                     vars_fh5['dne'] = 10 ** np.array(fh5_vars_2d[var_name]).T
                 else:
-                    vars_fh5[var_name] = np.array(fh5_vars_2d[var_name]).T
+                    arr = np.array(fh5_vars_2d[var_name]).T
+
+                    if self.gate_num is None:
+                        vars_fh5[var_name] = arr
+
+                    else:
+                        arr_new = np.empty((arr.shape[0], self.gate_num))
+                        arr_new[::] = np.nan
+                        for ii in range(arr.shape[0]):
+                            arr_new[ii, 0: arr.shape[1]] = arr[ii, :]
+                        vars_fh5[var_name] = arr_new
+            self.gate_num = vars_fh5['ne'].shape[1]
+
             vars_fh5['range'] = np.array(data_fh5['Array Layout'][array_layout_str]['range'])[np.newaxis, :]
-            if np.median(vars_fh5['range'].flatten()) > 1e5:
+            if vars_fh5['range'].shape[1] < self.gate_num:
+                arr = np.empty((1, self.gate_num))
+                arr[::] = np.nan
+                arr[0, 0:vars_fh5['range'].shape[1]] = vars_fh5['range'].flatten()
+                vars_fh5['range'] = arr
+
+            if np.nanmedian(vars_fh5['range'].flatten()) > 1e5:
                 mylog.StreamLogger.warning(f"The variable range is detected in [m]. It is converted into [km].")
                 vars_fh5['range'] = vars_fh5['range'] * 1e-3
             vars_fh5['timestamps'] = np.array(data_fh5['Array Layout'][array_layout_str]['timestamps'])[:, np.newaxis]

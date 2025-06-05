@@ -33,6 +33,7 @@ default_dataset_attrs = {
     'exp_check': False,
     'data_file_ext': ['h5', 'hdf5'],
     'data_root_dir': prf.datahub_data_root_dir / 'Madrigal' / 'PFISR',
+    'force_download': False,
     'allow_download': True,
     'status_control': False,
     'residual_control': False,
@@ -76,6 +77,8 @@ class Dataset(datahub.DatasetSourced):
         self.affiliation = kwargs.pop('affiliation', '')
         self.pulse_code = kwargs.pop('pulse_code', 'alternating code')
         self.allow_download = kwargs.pop('allow_download', True)
+        self.force_download = kwargs.pop('force_download', False)
+        self.gate_num = kwargs.pop('gate_num', None)
         self.beam_id = kwargs.pop('beam_id', None)
         self.beam_az = kwargs.pop('beam_az', None)
         self.beam_el = kwargs.pop('beam_el', None)
@@ -124,15 +127,29 @@ class Dataset(datahub.DatasetSourced):
     def load_data(self, **kwargs):
         self.check_data_files(**kwargs)
 
+        load_objs = []
+        gate_nums = []
         for file_path in self.data_file_paths:
-            load_obj = self.loader(file_path, beam_az=self.beam_az, beam_el=self.beam_el, beam_id=self.beam_id)
+            load_obj = self.loader(file_path, beam_az=self.beam_az, beam_el=self.beam_el, beam_id=self.beam_id, gate_num=self.gate_num)
+            load_objs.append(load_obj)
+            gate_nums.append(load_obj.gate_num)
 
+        if len(np.unique(gate_nums)) > 1:
+            mylog.StreamLogger.warning(
+                "Multiple types of experiments detected with different gate" +
+                "numbers (maximum: {})! Set 'gate_num' to this number!".format(np.max(gate_nums)))
+            self.gate_num = np.max(gate_nums)
+            load_objs = []
+            for file_path in self.data_file_paths:
+                load_obj = self.loader(file_path, beam_az=self.beam_az, beam_el=self.beam_el, beam_id=self.beam_id,
+                                       gate_num=self.gate_num)
+                load_objs.append(load_obj)
+
+        for load_obj in load_objs:
             for var_name in self._variables.keys():
                 self._variables[var_name].join(load_obj.variables[var_name])
             self.metadata = load_obj.metadata
 
-        if self.show_beams:
-            load_obj.list_beams()
         self.beams = load_obj.beams
         self.beam_id = load_obj.beam_id
         self.beam_az = load_obj.beam_az
@@ -146,6 +163,23 @@ class Dataset(datahub.DatasetSourced):
 
         if self.time_clip:
             self.time_filter_by_range()
+
+        inds_cmb = np.argsort(self['DATETIME'].flatten())
+        if any(np.diff(np.array(inds_cmb))<0):
+            mylog.StreamLogger.warning("Multiple types of experiments detected! The times are re-sorted and data are combined!")
+            multi_experiments = True
+            for var_name in self.keys():
+                self[var_name].value = self[var_name].value[inds_cmb, :]
+        else:
+            multi_experiments = False
+
+
+        if self.show_beams:
+            if multi_experiments:
+                for load_obj  in load_objs:
+                    load_obj.list_beams()
+            else:
+                load_objs[0].list_beams()
 
     def calc_lat_lon(self):
         from geospacelab.cs import LENUSpherical
@@ -205,7 +239,7 @@ class Dataset(datahub.DatasetSourced):
                     search_pattern=search_pattern, recursive=True, allow_multiple_files=True
                 )
 
-                if not done and self.allow_download:
+                if (not done and self.allow_download) or self.force_download:
                     done = self.download_data()
                     if done:
                         done = super().search_data_files(
@@ -227,13 +261,16 @@ class Dataset(datahub.DatasetSourced):
 
         else:
             diff_years = dt_to.year - dt_fr.year
+            download_check = 0
             for ny in range(diff_years + 1):
                 initial_file_dir = self.data_root_dir / str(dt_to.year + ny)
                 search_pattern = "*EID-*/"
                 exp_dirs = list(initial_file_dir.glob(search_pattern))
 
-                if not list(exp_dirs) and self.allow_download:
-                    self.download_data()
+                if (not list(exp_dirs) and self.allow_download) or self.force_download:
+                    self.download_data() 
+                    download_check = 1
+                    exp_dirs = list(initial_file_dir.glob(search_pattern))
 
                 def dir_parser(dirs):
                     dirs_out = []
@@ -251,8 +288,8 @@ class Dataset(datahub.DatasetSourced):
                     return dirs_out
                 file_dirs = dir_parser(exp_dirs)
 
-                if not list(file_dirs) and self.allow_download:
-                    self.download_data() 
+                # if not list(file_dirs) and self.allow_download and download_check:
+                #    self.download_data() 
 
                 for fd in file_dirs:
                     if isinstance(self.exp_name_pattern, list):
@@ -281,7 +318,7 @@ class Dataset(datahub.DatasetSourced):
 
                     # Validate file paths
 
-                    if not done and self.allow_download:
+                    if not done and self.allow_download and download_check:
                         done = self.download_data()
                         if done:
                             done = super().search_data_files(
@@ -349,6 +386,7 @@ class Dataset(datahub.DatasetSourced):
         download_obj = self.downloader(
             dt_fr=self.dt_fr, dt_to=self.dt_to,
             pulse_code=self.pulse_code,
+            force_download=self.force_download,
             dry_run=dry_run,
             data_file_root_dir=self.data_root_dir,
             include_exp_ids=self.experiment_ids,
