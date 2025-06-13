@@ -34,7 +34,8 @@ def test_pfisr_fitted():
         pulse_code=pulse_code,
         beam_id=beam_id,
         beam_az=beam_az,
-        beam_el=beam_el
+        beam_el=beam_el,
+        force_download=True
     )
 
     n_e = ds_pfisr['n_e']

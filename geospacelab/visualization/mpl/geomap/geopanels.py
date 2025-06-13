@@ -13,6 +13,7 @@ import datetime
 import cartopy.crs as ccrs
 import re
 import copy
+import gc
 from cartopy.mpl.ticker import (
     LongitudeLocator, LatitudeLocator,
     LongitudeFormatter, LatitudeFormatter)
@@ -23,6 +24,8 @@ import matplotlib.colors as mcolors
 import matplotlib.cm as mcm
 from scipy.interpolate import interp1d, griddata
 import matplotlib.cm as cm
+import cartopy.mpl.geoaxes as geoaxes
+import weakref
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
 import geospacelab.visualization.mpl as mpl
@@ -159,6 +162,12 @@ class PolarMapPanel(GeoPanel):
         if self.depend_mlt:
             cs2.coords.lon = self._transform_mlt_to_lon(cs2.coords.mlt)
         return cs2
+    def clear(self):
+        self.projection = None
+        self._proj_class = None
+        geoaxes._PATH_TRANSFORM_CACHE.clear()
+        gc.collect()
+        super().clear()
 
     def overlay_coastlines(self, linestyle='-', linewidth=0.5, color='#797A7D', zorder=100, alpha=0.7,
                            resolution='110m', **kwargs):
@@ -202,7 +211,8 @@ class PolarMapPanel(GeoPanel):
             **kwargs)
         # self.ax.scatter(x_new, y_new, transform=self.default_transform,
         #             marker='.', edgecolors='none', color='#C0C0C0', s=1)
-
+        del x_new, y_new
+        coords = None
         return
 
     def overlay_gridlines(self,

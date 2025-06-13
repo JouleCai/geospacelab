@@ -121,6 +121,8 @@ class Dataset(datahub.DatasetSourced):
             self.orbit_id = self.orbit_id[0]
         if self.time_clip:
             self.time_filter_by_range()
+        
+        del load_obj
 
     def get_time_ind(self, ut, time_res=20*60, var_datetime_name='DATETIME', edge_cutoff=False, **kwargs):
         ind = super().get_time_ind(ut, time_res=time_res, var_datetime_name=var_datetime_name, edge_cutoff=edge_cutoff, **kwargs)

@@ -52,6 +52,8 @@ class Loader:
 
         self.variables = variables
         self.metadata.update(f_cdf.globalattsget())
+        
+        del f_cdf
         self.done = True
 
 

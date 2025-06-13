@@ -461,9 +461,9 @@ class VariableBase(object):
         :return:
         """
         if issubclass(var_new.__class__, VariableBase):
-            v = var_new.value
+            v = copy.deepcopy(var_new.value)
         else:
-            v = var_new
+            v = copy.deepcopy(var_new)
 
         if self.value is None:
             self.value = v

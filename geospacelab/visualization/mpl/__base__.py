@@ -5,6 +5,7 @@ import numpy as np
 import pathlib
 from matplotlib.axes import Axes
 from typing import Dict
+import gc
 # import palettable
 
 from matplotlib.gridspec import GridSpec, SubplotSpec
@@ -15,6 +16,7 @@ from geospacelab.toolbox.utilities.pyclass import StrBase
 import geospacelab.toolbox.utilities.pybasic as pybasic
 from geospacelab.visualization.mpl._helpers import check_panel_ax
 import geospacelab.toolbox.utilities.pylogging as mylog
+
 # from geospacelab.visualization.mpl.dashboards import Dashboard
 
 
@@ -168,9 +170,10 @@ class DashboardBase(object):
         for ind_p in keys:
             self.remove_panel(ind_p)
         for ax in self.extra_axes.values():
-            ax.remove()
+            ax.clear()
         self.extra_axes = {}
-
+        gc.collect()
+        
 
     def set_layout(self, num_rows=None, num_cols=None, **kwargs):
         """
@@ -450,7 +453,7 @@ class PanelBase(object):
         self.figure = figure
         self.axes = {}
         self.label = kwargs.pop('label', None)
-        self._current_ax = None
+        # self._current_ax_ref = None
         # self.objectives = kwargs.pop('objectives', {})
         if from_subplot:
             ax = self.figure.add_subplot(*args, **kwargs)
@@ -463,7 +466,7 @@ class PanelBase(object):
             ax = self.figure.add_axes(*args, **kwargs)
         self.axes['major'] = ax
         self.axes_overview[ax] = copy.deepcopy(self._ax_attr_model)
-        self._current_ax = ax
+        self.sca(ax)
 
     def __call__(self, ax=None) -> Axes:
         """
@@ -483,10 +486,15 @@ class PanelBase(object):
             raise AttributeError
 
     def clear(self):
-        for ax in self.axes.values():
-            ax.remove()
+        self._current_ax_ref = None
+        self.axes_overview.clear()
+        for key, ax in self.axes.items():
+            ax.clear()
+            del ax
+            self.axes[key] = None
 
-        self.axes = {}
+        self.axes.clear()
+        gc.collect()
 
     def sca(self, ax):
         """
@@ -495,7 +503,7 @@ class PanelBase(object):
         :param ax: the ax instance belong to the attribute axes.
         """
         plt.sca(ax)
-        self._current_ax = ax
+        self._current_ax_ref = weakref.ref(ax)
 
     def gca(self):
         """
@@ -503,7 +511,7 @@ class PanelBase(object):
 
         :return: Axes instance.
         """
-        return self._current_ax
+        return self._current_ax_ref()
 
     def add_axes(self, *args, major=False, label=None, **kwargs):
         """
@@ -555,13 +563,13 @@ class PanelBase(object):
         self.sca(ax)
         plt.grid(visible=visible, which=which, axis=axis, **kwargs)
 
-    @check_panel_ax
-    def clear_axes(self, ax=None, collection_names=('lines', 'collections', 'images', 'patches')):
-        for cn in collection_names:
-            cs = getattr(ax, cn)
-            ncs = len(cs)
-            for i in range(ncs):
-                cs.pop(ncs-1-i)
+    # @check_panel_ax
+    # def clear_axes(self, ax=None, collection_names=('lines', 'collections', 'images', 'patches', 'spines')):
+    #     for cn in collection_names:
+    #         cs = getattr(ax, cn)
+    #         ncs = len(cs)
+    #         for i in range(ncs):
+    #             cs.pop(ncs-1-i)
 
     def add_text(self, x, y, text, ax=None, **kwargs):
 

@@ -23,13 +23,13 @@ def test_tec():
     dt_fr = datetime.datetime(2021, 8, 24, 1)
     dt_to = datetime.datetime(2021, 8, 24, 23)
     db = geomap.GeoDashboard(dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (15, 10)})
-    db.dock(datasource_contents=['madrigal', 'gnss', 'tecmap'])
+    ds_tec = db.dock(datasource_contents=['madrigal', 'gnss', 'tecmap'])
     db.set_layout(2, 3, wspace=0.5)
 
-    tec = db.assign_variable('TEC_MAP', dataset_index=0)
-    dts = db.assign_variable('DATETIME', dataset_index=0).value.flatten()
-    glat = db.assign_variable('GEO_LAT', dataset_index=0).value
-    glon = db.assign_variable('GEO_LON', dataset_index=0).value
+    tec = ds_tec['TEC_MAP']
+    dts = ds_tec['DATETIME'].flatten()
+    glat = ds_tec['GEO_LAT'].value
+    glon = ds_tec['GEO_LON'].value
 
     """
     Generation of the first panel
@@ -59,9 +59,9 @@ def test_tec():
     tec_ = tec.value[ind_t[0]]
     # Configuration for plotting
     pcolormesh_config = tec.visual.plot_config.pcolormesh
-    pcolormesh_config.update(c_lim=[5, 12])
+    pcolormesh_config.update(c_lim=[0, 20])
     import geospacelab.visualization.mpl.colormaps as cm
-    pcolormesh_config.update(cmap='jet')
+    pcolormesh_config.update(cmap='turbo')
 
     # overlay the 2-D TEC map
     ipc = panel.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
@@ -82,10 +82,10 @@ def test_tec():
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
-    pcolormesh_config.update(c_lim=[5, 12])
+    pcolormesh_config.update(c_lim=[0, 20])
 
     import geospacelab.visualization.mpl.colormaps as cm
-    pcolormesh_config.update(cmap='jet')
+    pcolormesh_config.update(cmap='turbo')
     ipc = panel.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
     panel.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     panel.add_title(title=time_c.strftime("%Y-%m-%d %H:%M"))
@@ -103,10 +103,10 @@ def test_tec():
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
-    pcolormesh_config.update(c_lim=[5, 12])
+    pcolormesh_config.update(c_lim=[0, 20])
 
     import geospacelab.visualization.mpl.colormaps as cm
-    pcolormesh_config.update(cmap='jet')
+    pcolormesh_config.update(cmap='turbo')
     ipc = panel.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
     panel.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     panel.add_title(title=time_c.strftime("%Y-%m-%d %H:%M"))
@@ -124,10 +124,10 @@ def test_tec():
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
-    pcolormesh_config.update(c_lim=[5, 12])
+    pcolormesh_config.update(c_lim=[0, 20])
 
     import geospacelab.visualization.mpl.colormaps as cm
-    pcolormesh_config.update(cmap='jet')
+    pcolormesh_config.update(cmap='turbo')
     ipc = panel.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
     panel.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     panel.add_title(title=time_c.strftime("%Y-%m-%d %H:%M"))
@@ -144,10 +144,10 @@ def test_tec():
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
-    pcolormesh_config.update(c_lim=[5, 12])
+    pcolormesh_config.update(c_lim=[0, 20])
 
     import geospacelab.visualization.mpl.colormaps as cm
-    pcolormesh_config.update(cmap='jet')
+    pcolormesh_config.update(cmap='turbo')
     ipc = panel.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
     panel.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     panel.add_title(title=time_c.strftime("%Y-%m-%d %H:%M"))
@@ -165,15 +165,15 @@ def test_tec():
     #
     tec_ = tec.value[ind_t[0], :, :]
     pcolormesh_config = tec.visual.plot_config.pcolormesh
-    pcolormesh_config.update(c_lim=[5, 12])
+    pcolormesh_config.update(c_lim=[0, 20])
 
     import geospacelab.visualization.mpl.colormaps as cm
-    pcolormesh_config.update(cmap='jet')
+    pcolormesh_config.update(cmap='turbo')
     ipc = panel.overlay_pcolormesh(tec_, coords={'lat': glat, 'lon': glon, 'height': 250.}, cs='GEO', **pcolormesh_config)
     panel.add_colorbar(ipc, c_label="TECU", c_scale='linear', left=1.1, bottom=0.1, width=0.05, height=0.7)
     panel.add_title(title=time_c.strftime("%Y-%m-%d %H:%M"))
 
-    plt.savefig('example_tec_aacgm_fixed_mlt', dpi=200)
+    plt.savefig('example_tec_aacgm_fixed_mlt', dpi=300)
     plt.show()
 
 
