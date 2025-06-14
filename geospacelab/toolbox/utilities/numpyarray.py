@@ -270,6 +270,8 @@ def data_resample(
 #             grid_z_1[i, :] = z_i
 
 
+    
+
 def regridding_2d_xgaps(
     x, y, z,
     xtype=None, xres=None):
@@ -281,13 +283,29 @@ def regridding_2d_xgaps(
         x1 = sectime
     
     diff_x = numpy.diff(x1)
+    x_res_md = numpy.median(diff_x)
     if xres is None:
-        xres = numpy.median(diff_x)
+        xres = x_res_md
         
     if xtype == 'datetime' and basic.isnumeric(xres):
         xres = datetime.timedelta(seconds=xres)
+        x_res_md = datetime.timedelta(seconds=x_res_md)
+
+    xx_1 = np.empty_like(x)
+    xx_2 = np.empty_like(x)
+    for i, xxx in enumerate(x):
+        if i == 0:
+            xx_1[0] = xxx - np.min([datetime.timedelta(diff_x[0]), xres, x_res_md]) / 2
+        else:
+            xx_1[i] = xx_2[i-1] if xres > datetime.timedelta(seconds=diff_x[i-1]) else xxx - xres / 2
         
-    xx = numpy.hstack(((x.flatten() - xres / 2)[:, numpy.newaxis], (x.flatten() + xres / 2)[:, numpy.newaxis]))
+        if i == len(x) - 1:
+            xx_2[i] = xxx + np.min([datetime.timedelta(diff_x[i-1]), xres, x_res_md]) / 2 
+        else:
+            xx_2[i] = xxx + np.min([datetime.timedelta(diff_x[i]), xres, x_res_md]) / 2  
+        
+    
+    xx = numpy.hstack((xx_1[:, numpy.newaxis], xx_2[:, numpy.newaxis]))
     xnew = xx.flatten()
     
     if len(y.shape) == 1 or 1 in y.shape:
