@@ -215,13 +215,14 @@ class SpaceCartesianCS(SpaceCSBase):
 
         # phi: longitude, theta: co-latitude, r: radial distance
         r = np.sqrt(self.coords.x ** 2 + self.coords.y ** 2 + self.coords.z ** 2)
+        r_unit = self.coords.x_unit
         theta = np.arccos(self.coords.z / r)
         phi = npmath.trig_arctan_to_sph_lon(self.coords.x, self.coords.y)
         vector = None
         if self.vector is not None:
             mylog.StreamLogger.warning("The tranformation for vectors have not been implemented!")
 
-        coords = {'theta': theta, 'phi': phi, 'r': r}
+        coords = {'theta': theta, 'phi': phi, 'r': r, 'r_unit': r_unit}
         cs_new = set_cs(name=self.name, coords=coords,  vector=vector, kind='sph', ut=self.ut, **kwargs)
 
         return cs_new

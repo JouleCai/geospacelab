@@ -159,47 +159,51 @@ class Dataset(datahub.DatasetSourced):
 
     def fix_geo_lon(self):
         from geospacelab.observatory.orbit.sc_orbit import OrbitPosition_SSCWS
-        from scipy.interpolate import interp1d
+        from scipy.interpolate import CubicSpline
+
+        dts_1 = self['SC_DATETIME'].value.flatten()
+        dt0 = dttool.get_start_of_the_day(self.dt_fr)
+        sectime_1 = [(dt - dt0).total_seconds() for dt in dts_1]
+        glat_1 = self['SC_GEO_LAT'].flatten()
+        glon_1 = self['SC_GEO_LON'].flatten()
+        alt_1 = self['SC_GEO_ALT'].flatten()
+        
         # check outliers
         orbit_obj = OrbitPosition_SSCWS(
             dt_fr=self.dt_fr - datetime.timedelta(minutes=30),
             dt_to=self.dt_to + datetime.timedelta(minutes=30),
             sat_id='dmsp' + self.sat_id.lower()
         )
-
-        glat_1 = self['SC_GEO_LAT'].value.flatten()
-        glon_1 = self['SC_GEO_LON'].value.flatten()
-        if glat_1.size < 2:
-            return
-
-        dts_1 = self['SC_DATETIME'].value.flatten()
-        dt0 = dttool.get_start_of_the_day(self.dt_fr)
-        sectime_1 = [(dt - dt0).total_seconds() for dt in dts_1]
-
-        glat_2 = orbit_obj['SC_GEO_LAT'].value.flatten()
-        glon_2 = orbit_obj['SC_GEO_LON'].value.flatten()
-        dts_2 = orbit_obj['SC_DATETIME'].value.flatten()
-        sectime_2 = [(dt - dt0).total_seconds() for dt in dts_2]
-
-        factor = np.pi / 180.
-        sin_glon_1 = np.sin(glon_1 * factor)
-        sin_glon_2 = np.sin(glon_2 * factor)
-        cos_glon_2 = np.cos(glon_2 * factor)
-        itpf_sin = interp1d(sectime_2, sin_glon_2, kind='cubic', bounds_error=False, fill_value='extrapolate')
-        itpf_cos = interp1d(sectime_2, cos_glon_2, kind='cubic', bounds_error=False, fill_value='extrapolate')
-        sin_glon_2_i = itpf_sin(sectime_1)
-        cos_glon_2_i = itpf_cos(sectime_1)
-        rad = np.sign(sin_glon_2_i) * (np.pi / 2 - np.arcsin(cos_glon_2_i))
-        glon_new = rad / factor
-        # rad = np.where((rad >= 0), rad, rad + 2 * numpy.pi)
-
-        ind_outliers = np.where(np.abs(sin_glon_1 - sin_glon_2_i) > 0.03)[0]
-
+        dts = orbit_obj['SC_DATETIME'].flatten()
+        sectimes, _ = dttool.convert_datetime_to_sectime(dts, dt0=dt0)
+        x = orbit_obj['SC_GEO_X'].flatten()
+        y = orbit_obj['SC_GEO_Y'].flatten()
+        z = orbit_obj['SC_GEO_Z'].flatten()
+        f_x = CubicSpline(sectimes, x)
+        x_i = f_x(sectime_1)
+        f_y = CubicSpline(sectimes, y)
+        y_i = f_y(sectime_1)
+        f_z = CubicSpline(sectimes, z)
+        z_i = f_z(sectime_1)
+        
+        
+        cs = geo_cs.GEOCCartesian(
+            coords={'x': x_i, 'y': y_i, 'z': z_i, 'x_unit': 'km', 'y_unit': 'km', 'z_unit': 'km'}
+        )
+        cs_new = cs.to_spherical()
+        
+        # glat_2 = cs_new['lat']
+        glon_2 = cs_new['lon']
+        # alt_2 = cs_new['height']
+        
+        delta = np.sin(glon_2 * np.pi / 180.) - np.sin(glon_2 * np.pi / 180.)
+        
         if self.replace_orbit:
-            glon_1 = glon_new
+            glon_1 = glon_2
         else:
-            glon_1[ind_outliers] = glon_new[ind_outliers]
-        self['SC_GEO_LON'].value = glon_1.reshape((glon_1.size, 1))
+            glon_1[np.abs(delta)>0.05] = glon_2[np.abs(delta)>0.05]
+            
+        self['SC_GEO_LON'].value = glon_1[:, np.newaxis]
 
     def search_data_files(self, **kwargs):
 

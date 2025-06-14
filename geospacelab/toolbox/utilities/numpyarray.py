@@ -303,7 +303,6 @@ def regridding_2d_xgaps(
             xx_2[i] = xxx + np.min([datetime.timedelta(diff_x[i-1]), xres, x_res_md]) / 2 
         else:
             xx_2[i] = xxx + np.min([datetime.timedelta(diff_x[i]), xres, x_res_md]) / 2  
-        
     
     xx = numpy.hstack((xx_1[:, numpy.newaxis], xx_2[:, numpy.newaxis]))
     xnew = xx.flatten()
