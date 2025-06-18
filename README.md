@@ -284,7 +284,7 @@ dashboard.save_figure()
 dashboard.show()
 ```
 Output:
-> ![alt text](https://github.com/JouleCai/geospacelab/blob/master/examples/EISCAT_UHF_beata_cp1_60_20201209-180000-20201210-060000.png?raw=true)
+> ![alt text](https://github.com/JouleCai/geospacelab/blob/master/examples/EISCAT_UHF_beata__60_20201209-180000-20201210-060000.png?raw=true)
 
 ### Example 3: OMNI data and geomagnetic indices (WDC + GFZ):
 
