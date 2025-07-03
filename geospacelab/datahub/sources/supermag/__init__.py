@@ -13,6 +13,7 @@ from geospacelab.config import pref
 import geospacelab.datahub.sources.madrigal.utilities as utilities
 
 from geospacelab.datahub import DatabaseModel
+import geospacelab.toolbox.utilities.pylogging as mylog
 
 
 class SuperMAGDatabase(DatabaseModel):
@@ -38,6 +39,8 @@ except KeyError:
         # default_user_affiliation = 'GeospaceLab'
         save = 'y'
     else:
+        mylog.StreamLogger.info(
+            "A username is needed to download the SuperMAG data. If you don't have one, register as a new user on the webpage: https://supermag.jhuapl.edu/!")
         default_username = input("Username: ")
         # default_user_email = input("User's email: ")
         # default_user_affiliation = input("User's affiliation: ")

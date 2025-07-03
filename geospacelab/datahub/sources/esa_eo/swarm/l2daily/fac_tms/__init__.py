@@ -45,6 +45,7 @@ default_variable_names = [
     'SC_GEO_LAT',
     'SC_GEO_LON',
     'SC_GEO_r',
+    'SC_GEO_ALT',
     'j_r', 'j_r_err',
     'j_FA', 'j_FA_err',
     'FLAG_B',

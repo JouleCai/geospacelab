@@ -42,3 +42,4 @@ class Loader(LoaderModel):
     def load_data(self, **kwargs):
         super(Loader, self).load_data(**kwargs)
         self.variables['SC_GEO_r'] = self.variables['SC_GEO_r'] * 1e-3
+        self.variables['SC_GEO_ALT'] = self.variables['SC_GEO_r'] - 6371

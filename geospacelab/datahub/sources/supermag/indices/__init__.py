@@ -148,7 +148,7 @@ class Dataset(datahub.DatasetSourced):
 
             # Validate file paths
 
-            if not done and self.allow_download:
+            if (not done and self.allow_download) or self.force_download:
                 done = self.download_data()
                 if done:
                     done = super().search_data_files(

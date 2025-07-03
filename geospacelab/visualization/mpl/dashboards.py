@@ -16,6 +16,7 @@ import numpy as np
 import datetime
 import matplotlib as mpl
 import matplotlib.dates as mdates
+import cftime
 
 from geospacelab.datahub import DataHub
 
@@ -246,7 +247,7 @@ class TSDashboard(Dashboard):
 
     def add_vertical_line(self, dt_in, panel_index=-1,
                           label=None, label_position=None, top_extend=0., bottom_extend=0., **kwargs):
-        if type(dt_in) is not datetime.datetime:
+        if type(dt_in) not in [datetime.datetime, cftime.real_datetime]:
             return
 
         if label_position is None:

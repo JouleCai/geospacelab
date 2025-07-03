@@ -790,7 +790,7 @@ class PolarMapPanel(GeoPanel):
                           time_tick_label_fontweight='normal',
                           time_major_ticks=None,
                           time_minor_tick=True, time_minor_tick_res=60,
-                          time_tick_width=1, **kwargs):
+                          time_tick_width=1, show_start_point=False, **kwargs):
         default_trajectory_config = {
             'linewidth': 1,
             'linestyle': '-',
@@ -801,6 +801,15 @@ class PolarMapPanel(GeoPanel):
         default_trajectory_config.update(**kwargs.setdefault('trajectory_config', {}))
         default_trajectory_config.update(color=color)
         kwargs['trajectory_config'] = default_trajectory_config
+        
+        default_start_point_config = {
+            'clip_on': False,
+            'alpha': 0.6,
+            'marker': 's', 'markersize': 2, 
+            'markerfacecolor': kwargs['trajectory_config']['color'], 
+            'markeredgecolor': kwargs['trajectory_config']['color']}
+        default_start_point_config.update(**kwargs.setdefault('start_point_config', {}))
+        kwargs['start_point_config'] = default_start_point_config
 
         #
         # kwargs.setdefault('trajectory_config', {
@@ -836,9 +845,13 @@ class PolarMapPanel(GeoPanel):
             dts_in = sc_ut[i_st:i_ed+1]
 
             if self.ut is None:
-                self.ut = sc_ut[0]
+                self.ut = dts_in[int(len(dts_in) / 2)]
             if show_trajectory:
                 self.major_ax.plot(lon_in, lat_in, transform=ccrs.Geodetic(), **kwargs['trajectory_config'])
+                
+                if show_start_point:
+                    
+                    self.major_ax.plot(lon_in[0], lat_in[0], transform=ccrs.Geodetic(), **kwargs['start_point_config'])
 
             if time_tick:
                 data = self.projection.transform_points(ccrs.PlateCarree(), lon_in, lat_in)

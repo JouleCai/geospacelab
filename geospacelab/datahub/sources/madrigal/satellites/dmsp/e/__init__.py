@@ -19,6 +19,7 @@ from geospacelab.config import prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
+import geospacelab.cs as geo_cs
 from geospacelab.datahub.sources.madrigal.satellites.dmsp.e.loader import Loader as default_Loader
 from geospacelab.datahub.sources.madrigal.satellites.dmsp.downloader import Downloader as default_Downloader
 import geospacelab.datahub.sources.madrigal.satellites.dmsp.e.variable_config as var_config
@@ -201,7 +202,7 @@ class Dataset(datahub.DatasetSourced):
         if self.replace_orbit:
             glon_1 = glon_2
         else:
-            glon_1[np.abs(delta)>0.05] = glon_2[np.abs(delta)>0.05]
+            glon_1[np.abs(delta)>0.001] = glon_2[np.abs(delta)>0.001]
             
         self['SC_GEO_LON'].value = glon_1[:, np.newaxis]
 
