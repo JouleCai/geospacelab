@@ -355,10 +355,10 @@ class TSPanel(Panel):
         # minor locator must be set up after setting the major locator
         minormaxticks = var_for_config.visual.axis[0].minor_tick_max
         if minormaxticks is None:
-            minormaxticks = maxticks * 10 + 1
+            minormaxticks = maxticks * 5 + 1
         minorminticks = var_for_config.visual.axis[0].minor_tick_min
         if minorminticks is None:
-            minorminticks = minticks * 3 -1
+            minorminticks = minticks * 2 -1
         minorlocator = DatetimeMinorLocator(ax=ax, majorlocator=majorlocator, maxticks=minormaxticks, minticks=minorminticks)
         ax.xaxis.set_minor_locator(minorlocator)
         if self.bottom_panel:
@@ -752,7 +752,11 @@ class TSPanel(Panel):
     def _check_ydata(self, ydata):
         inds_infinite = np.where(~np.isfinite(ydata))
         if list(inds_infinite):
-            m, n = ydata.shape
+            try:
+                m, n = ydata.shape
+            except:
+                ydata = ydata[np.newaxis, :]
+                m, n = ydata.shape
             for i in range(m):
                 yy = ydata[i, :].flatten()
                 iii = np.where(~np.isfinite(yy))

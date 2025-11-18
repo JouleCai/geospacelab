@@ -183,7 +183,7 @@ class Loader:
                 if var_name == 'nel':
                     vars_fh5['ne'] = 10**np.array(fh5_vars_2d[var_name]).T
                 elif var_name == 'dnel':
-                    vars_fh5['dne'] = 10 ** np.array(fh5_vars_2d[var_name]).T
+                    vars_fh5['dne'] = 10**np.array(fh5_vars_2d[var_name]).T
                 else:
                     arr = np.array(fh5_vars_2d[var_name]).T
 

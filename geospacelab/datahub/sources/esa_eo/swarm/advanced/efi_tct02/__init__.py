@@ -170,7 +170,7 @@ class Dataset(datahub.DatasetSourced):
     def add_GEO_LST(self):
         lons = self['SC_GEO_LON'].flatten()
         uts = self['SC_DATETIME'].flatten()
-        lsts = [ut + datetime.timedelta(hours=lon / 15.) for ut, lon in zip(uts, lons)]
+        lsts = [ut + datetime.timedelta(seconds=int(lon / 15. * 3600)) for ut, lon in zip(uts, lons)]
         lsts = [lst.hour + lst.minute / 60. + lst.second / 3600. for lst in lsts]
         var = self.add_variable(var_name='SC_GEO_LST')
         var.value = np.array(lsts)[:, np.newaxis]
