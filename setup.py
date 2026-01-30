@@ -52,7 +52,7 @@ setuptools.setup(
               'requests>=2.26.0',
               'beautifulsoup4>=4.9.3',
               'natsort>=7.1.1',
-              'numpy>=1.23.0',
+              'numpy<2.4.0',
               'scipy>=1.6.0',
               'h5py>=3.2.1',
               'netcdf4>=1.5.7',
@@ -68,7 +68,7 @@ setuptools.setup(
               'pandas>=1.5.3',
               'keyring',
           ],
-    python_requires='>=3.7',
+    python_requires='>=3.9,<3.13',
     # py_modules=["geospacelab"],
     # package_dir={'':'geospacelab'},
     classifiers=[
@@ -79,10 +79,9 @@ setuptools.setup(
         'Topic :: Scientific/Engineering :: Astronomy',
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: BSD License',  # Again, pick a license
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         ],
 )
