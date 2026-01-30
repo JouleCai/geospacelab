@@ -25,7 +25,7 @@ default_dataset_attrs = {
     'instrument': 'ACC',
     'product': 'WND-ACC',
     'data_file_ext': 'txt',
-    'product_version': 'v01',
+    'product_version': 'v02',
     'data_root_dir': prf.datahub_data_root_dir / 'TUD' / 'CHAMP',
     'allow_load': True,
     'allow_download': True,
@@ -38,19 +38,38 @@ default_dataset_attrs = {
     'time_clip': True,
 }
 
-default_variable_names_v01 = [    
+default_variable_names_v01 = [
     'SC_DATETIME',
     'SC_GEO_LAT',
     'SC_GEO_LON',
     'SC_GEO_ALT',
     'SC_ARG_LAT',
     'SC_GEO_LST',
+    'u_CROSS',
+    'UNIT_VECTOR_N',
+    'UNIT_VECTOR_E',
+    'UNIT_VECTOR_D',
     'u_CROSS_N',
     'u_CROSS_E',
-    'u_CROSS_U',
+    'u_CROSS_D',
+]
+default_variable_names_v02 = [
+    'SC_DATETIME',
+    'SC_GEO_LAT',
+    'SC_GEO_LON',
+    'SC_GEO_ALT',
+    'SC_ARG_LAT',
+    'SC_GEO_LST',
     'u_CROSS',
+    'UNIT_VECTOR_N',
+    'UNIT_VECTOR_E',
+    'UNIT_VECTOR_D',
+    'u_CROSS_N',
+    'u_CROSS_E',
+    'u_CROSS_D',
+    'FLAG',
     ]
-default_variable_names_v02 = []
+
 
 # default_data_search_recursive = True
 
@@ -67,10 +86,12 @@ class Dataset(datahub.DatasetSourced):
         self.facility = kwargs.pop('facility', 'CHAMP')
         self.instrument = kwargs.pop('instrument', 'ACC')
         self.product = kwargs.pop('product', 'WND-ACC')
-        self.product_version = kwargs.pop('product_version', 'v01')
+        self.product_version = kwargs.pop('product_version', 'v02')
         self.local_latest_version = ''
         self.allow_download = kwargs.pop('allow_download', False)
         self.force_download = kwargs.pop('force_download', False)
+        self.download_dry_run = kwargs.pop('download_dry_run', False)
+        
         self.add_AACGM = kwargs.pop('add_AACGM', False) 
         self.add_APEX = kwargs.pop('add_APEX', False)
         self._data_root_dir = self.data_root_dir    # Record the initial root dir
@@ -130,7 +151,41 @@ class Dataset(datahub.DatasetSourced):
 
         if self.add_APEX:
             self.convert_to_APEX()
-            
+        self._add_u_CT()
+
+    def _add_u_CT(self):
+        from geospacelab.observatory.orbit.utilities import LEOToolbox
+        ds_leo = LEOToolbox(self.dt_fr, self.dt_to)
+        ds_leo.clone_variables(self)
+
+        wind_unit_vector = np.concatenate(
+            (
+                self['UNIT_VECTOR_N'].value,
+                self['UNIT_VECTOR_E'].value,
+                self['UNIT_VECTOR_D'].value
+            ),
+            axis=1
+        )
+        orbit_unit_vector = ds_leo.trajectory_local_unit_vector()
+        cp = np.cross(orbit_unit_vector, wind_unit_vector)
+        u_CT = -np.sign(cp[:, 2]) * (
+                (self['u_CROSS'].value.flatten() * self['UNIT_VECTOR_N'].flatten()) ** 2 +
+                (self['u_CROSS'].value.flatten() * self['UNIT_VECTOR_E'].flatten()) ** 2) ** 0.5
+        u_VCT = self['u_CROSS'].value.flatten() * self['UNIT_VECTOR_D'].flatten()
+
+        var = self['u_CROSS'].clone()
+        var.name = 'u_CT'
+        var.label = r'$u_{CT}$'
+        var.visual.axis[1].lim = [None, None]
+        var.value = u_CT[:, np.newaxis]
+        self['u_CT'] = var
+
+        var = self['u_CROSS'].clone()
+        var.name = 'u_VCT'
+        var.label = r'$u_{VCT}$'
+        var.visual.axis[1].lim = [None, None]
+        var.value = u_VCT[:, np.newaxis]
+        self['u_VCT'] = var
     
     def convert_to_APEX(self):
         import geospacelab.cs as gsl_cs
@@ -199,7 +254,9 @@ class Dataset(datahub.DatasetSourced):
             file_patterns = [
                 'CH',
                 self.product.upper().replace('-', '_'),
-                this_day.strftime('%Y_%m'),
+                this_day.strftime('%Y'),
+                this_day.strftime('%m'),
+                self.product_version,
             ]
             # remove empty str
             file_patterns = [pattern for pattern in file_patterns if str(pattern)]
@@ -221,7 +278,7 @@ class Dataset(datahub.DatasetSourced):
                         search_pattern=search_pattern,
                         allow_multiple_files=False
                     )
-
+        self.data_file_paths = np.unique(self.data_file_paths)
         return done
 
     def download_data(self, dt_fr=None, dt_to=None):
@@ -233,10 +290,11 @@ class Dataset(datahub.DatasetSourced):
             dt_fr, dt_to,
             product=self.product,
             version=self.product_version,
-            force=self.force_download
+            force_download=self.force_download,
+            dry_run=self.download_dry_run
         )
 
-        return download_obj.done
+        return any(download_obj.done)
 
     @property
     def database(self):

@@ -36,7 +36,8 @@ data_type_dict = {
     's4': 'plasma temp',
     'e': 'flux/energy',
     'ssies2': 'SSIES-2',
-    'hp':     'Hemispherical power'
+    'hp':     'Hemispherical power',
+    'ssies3':   'SSIES-3'
 }
 
 

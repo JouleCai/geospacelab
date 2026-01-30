@@ -104,7 +104,7 @@ class Dataset(datahub.DatasetSourced):
                 import matplotlib.dates as mdates
                 self._variables['Hp'].visual.plot_config.bar['width'] = \
                     (mdates.date2num(datetime.datetime(2000, 1, 1,) + datetime.timedelta(minutes=self.data_res)) \
-                    - mdates.date2num(datetime.datetime(2000, 1, 1))) * 0.9
+                    - mdates.date2num(datetime.datetime(2000, 1, 1))) * 1
             self._variables['ap'].config(name=f'Hp{self.data_res}', label=f'ap{self.data_res}')
             # self.select_beams(field_aligned=True)
         if self.time_clip:

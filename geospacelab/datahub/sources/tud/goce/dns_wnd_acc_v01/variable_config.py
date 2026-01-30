@@ -43,6 +43,31 @@ depend_0 = {'UT': 'SC_DATETIME',
 # depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
 
 ####################################################################################################################
+var_name = 'rho_n'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Neutral mass density'
+var.label = r'$\rho_n$'
+var.unit = 'kg/m-3'
+var.unit_label = r'kg$\cdot$m$^{-3}$'
+var.group = r'$\rho$'
+var.error = var_name + '_err'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1E'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+# axis[1].lim = [np.nan, np.nan]
+axis[2].label = '@v.label'
+axis[1].unit = '@v.unit_label'
+
+configured_variables[var_name] = var
+
+
+####################################################################################################################
 var_name = 'u_CROSS'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
@@ -51,22 +76,20 @@ var.label = r'$u_{cross}$'
 var.unit = 'm/s'
 var.unit_label = r'm/s'
 var.group = r'$u$'
-# var.error = var_name + '_err'
+var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
 plot_config = var.visual.plot_config
 plot_config.config(**default_plot_config)
-plot_config.style = '1noE'
+plot_config.style = '1E'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
 # axis[1].lim = [np.nan, np.nan]
 axis[2].label = '@v.label'
-axis[1].label = '@v.label'
 axis[1].unit = '@v.unit_label'
 
 configured_variables[var_name] = var
-
 
 ####################################################################################################################
 var_name = 'u_CROSS_E'
@@ -139,7 +162,6 @@ axis[2].label = '@v.label'
 axis[1].unit = '@v.unit_label'
 
 configured_variables[var_name] = var
-
 
 ####################################################################################################################
 var_name = 'SC_GEO_LAT'

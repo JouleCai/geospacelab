@@ -24,7 +24,7 @@ default_dataset_attrs = {
     'instrument': 'POD',
     'product': 'DNS-POD',
     'data_file_ext': 'txt',
-    'product_version': 'v01',
+    'product_version': 'v02',
     'data_root_dir': prf.datahub_data_root_dir / 'TUD' / 'SWARM',
     'allow_load': True,
     'allow_download': True,
@@ -37,7 +37,16 @@ default_dataset_attrs = {
     'time_clip': True,
 }
 
-default_variable_names = [
+default_variable_names_v01 = [
+    'SC_DATETIME',
+    'SC_GEO_LAT',
+    'SC_GEO_LON',
+    'SC_GEO_ALT',
+    'SC_ARG_LAT',
+    'SC_GEO_LST',
+    'rho_n',
+    ]
+default_variable_names_v02 = [
     'SC_DATETIME',
     'SC_GEO_LAT',
     'SC_GEO_LON',
@@ -66,6 +75,8 @@ class Dataset(datahub.DatasetSourced):
         self.local_latest_version = ''
         self.allow_download = kwargs.pop('allow_download', False)
         self.force_download = kwargs.pop('force_download', False)
+        self.download_dry_run = kwargs.pop('download_dry_run', False)
+        
         self.add_AACGM = kwargs.pop('add_AACGM', False) 
         self.add_APEX = kwargs.pop('add_APEX', False)
         self._data_root_dir = self.data_root_dir    # Record the initial root dir
@@ -103,6 +114,13 @@ class Dataset(datahub.DatasetSourced):
 
     def load_data(self, **kwargs):
         self.check_data_files(**kwargs)
+        
+        if self.product_version == 'v01':
+            default_variable_names = default_variable_names_v01
+        elif self.product_version == 'v02':
+            default_variable_names = default_variable_names_v02
+        else:
+            raise NotImplementedError(f"Product version {self.product_version} is not supported.")
 
         self._set_default_variables(
             default_variable_names,
@@ -271,7 +289,7 @@ class Dataset(datahub.DatasetSourced):
                         search_pattern=search_pattern,
                         allow_multiple_files=False
                     )
-
+        self.data_file_paths = np.unique(self.data_file_paths)
         return done
 
     def download_data(self, dt_fr=None, dt_to=None):
@@ -284,10 +302,11 @@ class Dataset(datahub.DatasetSourced):
             sat_id=self.sat_id,
             product=self.product,
             version=self.product_version,
-            force=self.force_download
+            force_download=self.force_download,
+            dry_run=self.download_dry_run
         )
 
-        return download_obj.done
+        return any(download_obj.done)
 
     @property
     def database(self):

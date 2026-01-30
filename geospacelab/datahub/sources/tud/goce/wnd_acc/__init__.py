@@ -8,24 +8,23 @@ import datetime
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, InstrumentModel, ProductModel
 from geospacelab.datahub.sources.tud import tud_database
-from geospacelab.datahub.sources.tud.goce import goce_facility
+from geospacelab.datahub.sources.tud.grace import grace_facility
 from geospacelab.config import prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
-
-from geospacelab.datahub.sources.tud.goce.dns_wnd_acc.loader import Loader as default_Loader
-from geospacelab.datahub.sources.tud.goce.dns_wnd_acc.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.tud.goce.dns_wnd_acc.variable_config as var_config
+from geospacelab.datahub.sources.tud.goce.wnd_acc.loader import Loader as default_Loader
+from geospacelab.datahub.sources.tud.goce.wnd_acc.downloader import (Downloader as default_Downloader)
+import geospacelab.datahub.sources.tud.goce.wnd_acc.variable_config as var_config
 
 
 default_dataset_attrs = {
     'database': tud_database,
-    'facility': goce_facility,
+    'facility': grace_facility,
     'instrument': 'ACC',
-    'product': 'DNS-WND-ACC',
+    'product': 'WND-ACC',
     'data_file_ext': 'txt',
-    'product_version': 'v01',
+    'product_version': 'v02',
     'data_root_dir': prf.datahub_data_root_dir / 'TUD' / 'GOCE',
     'allow_load': True,
     'allow_download': True,
@@ -38,30 +37,27 @@ default_dataset_attrs = {
     'time_clip': True,
 }
 
-default_variable_names_v01 = [    
+default_variable_names_v01 = []
+default_variable_names_v02 = [
     'SC_DATETIME',
     'SC_GEO_LAT',
     'SC_GEO_LON',
     'SC_GEO_ALT',
     'SC_ARG_LAT',
     'SC_GEO_LST',
-    'rho_n',
+    'u_CROSS',
+    'UNIT_VECTOR_N',
+    'UNIT_VECTOR_E',
+    'UNIT_VECTOR_D',
     'u_CROSS_N',
     'u_CROSS_E',
-    'u_CROSS_U',
-    'u_CROSS',
-    'rho_n_err',
-    'u_CROSS_err',
-    'FLAG_1',
-    'FLAG_2',
-    'FLAG_3',
-    'FLAG_4',
+    'u_CROSS_D',
+    'FLAG',
     ]
-default_variable_names_v02 = []
 
 # default_data_search_recursive = True
 
-default_attrs_required = []
+default_attrs_required = ['sat_id']
 
 
 class Dataset(datahub.DatasetSourced):
@@ -73,14 +69,18 @@ class Dataset(datahub.DatasetSourced):
         self.database = kwargs.pop('database', 'TUD')
         self.facility = kwargs.pop('facility', 'GOCE')
         self.instrument = kwargs.pop('instrument', 'ACC')
-        self.product = kwargs.pop('product', 'DNS-WND-ACC')
-        self.product_version = kwargs.pop('product_version', 'v01')
+        self.product = kwargs.pop('product', 'WND-ACC')
+        self.product_version = kwargs.pop('product_version', 'v02')
         self.local_latest_version = ''
         self.allow_download = kwargs.pop('allow_download', False)
         self.force_download = kwargs.pop('force_download', False)
+        self.download_dry_run = kwargs.pop('download_dry_run', False)
+        
         self.add_AACGM = kwargs.pop('add_AACGM', False) 
         self.add_APEX = kwargs.pop('add_APEX', False)
         self._data_root_dir = self.data_root_dir    # Record the initial root dir
+
+        self.sat_id = kwargs.pop('sat_id', '')
 
         self.metadata = {}
 
@@ -137,8 +137,57 @@ class Dataset(datahub.DatasetSourced):
 
         if self.add_APEX:
             self.convert_to_APEX()
-            
-    
+
+        self._add_u_CT()
+
+    def _add_u_CT(self):
+        from geospacelab.observatory.orbit.utilities import LEOToolbox
+        ds_leo = LEOToolbox(self.dt_fr, self.dt_to)
+        ds_leo.clone_variables(self)
+
+        wind_unit_vector = np.concatenate(
+            (
+                self['UNIT_VECTOR_N'].value,
+                self['UNIT_VECTOR_E'].value,
+                self['UNIT_VECTOR_D'].value
+            ),
+        axis=1
+        )
+        orbit_unit_vector = ds_leo.trajectory_local_unit_vector()
+        cp = np.cross(orbit_unit_vector, wind_unit_vector)
+        u_CT = -np.sign(cp[:, 2]) * (
+            (self['u_CROSS'].value.flatten() * self['UNIT_VECTOR_N'].flatten())**2 + 
+            (self['u_CROSS'].value.flatten() * self['UNIT_VECTOR_E'].flatten())**2)**0.5
+        u_VCT = self['u_CROSS'].value.flatten() * self['UNIT_VECTOR_D'].flatten()
+
+        var = self['u_CROSS'].clone()
+        var.name = 'u_CT'
+        var.label = r'$u_{CT}$'
+        var.visual.axis[1].lim = [None, None]
+        var.value = u_CT[:, np.newaxis]
+        self['u_CT'] = var
+        
+        var = self['u_CROSS'].clone()
+        var.name = 'u_VCT'
+        var.label = r'$u_{VCT}$'
+        var.visual.axis[1].lim = [None, None]
+        var.value = u_VCT[:, np.newaxis]
+        self['u_VCT'] = var
+
+
+    def add_GEO_LST(self):
+        lons = self['SC_GEO_LON'].flatten()
+        uts = self['SC_DATETIME'].flatten()
+        lsts = [ut + datetime.timedelta(seconds=int(lon/15.*3600)) for ut, lon in zip(uts, lons)]
+        lsts = [lst.hour + lst.minute/60. + lst.second/3600. for lst in lsts]
+        var = self.add_variable(var_name='SC_GEO_LST')
+        var.value = np.array(lsts)[:, np.newaxis]
+        var.label = 'LST'
+        var.unit = 'h'
+        var.depends = self['SC_GEO_LON'].depends
+        return var
+
+
     def convert_to_APEX(self):
         import geospacelab.cs as gsl_cs
 
@@ -156,18 +205,6 @@ class Dataset(datahub.DatasetSourced):
         self['SC_APEX_LAT'].value = cs_apex['lat'].reshape(self['SC_DATETIME'].value.shape)
         self['SC_APEX_LON'].value = cs_apex['lon'].reshape(self['SC_DATETIME'].value.shape)
         self['SC_APEX_MLT'].value = cs_apex['mlt'].reshape(self['SC_DATETIME'].value.shape)
-
-    def add_GEO_LST(self):
-        lons = self['SC_GEO_LON'].flatten()
-        uts = self['SC_DATETIME'].flatten()
-        lsts = [ut + datetime.timedelta(seconds=int(lon/15.*3600)) for ut, lon in zip(uts, lons)]
-        lsts = [lst.hour + lst.minute/60. + lst.second/3600. for lst in lsts]
-        var = self.add_variable(var_name='SC_GEO_LST')
-        var.value = np.array(lsts)[:, np.newaxis]
-        var.label = 'LST'
-        var.unit = 'h'
-        var.depends = self['SC_GEO_LON'].depends
-        return var
 
     def convert_to_AACGM(self):
         import geospacelab.cs as gsl_cs
@@ -206,7 +243,8 @@ class Dataset(datahub.DatasetSourced):
             file_patterns = [
                 'GO',
                 self.product.upper().replace('-', '_'),
-                this_day.strftime('%Y_%m'),
+                this_day.strftime('%Y_%m'), 
+                self.product_version + '.txt'
             ]
             # remove empty str
             file_patterns = [pattern for pattern in file_patterns if str(pattern)]
@@ -216,6 +254,7 @@ class Dataset(datahub.DatasetSourced):
                 initial_file_dir=initial_file_dir,
                 search_pattern=search_pattern,
                 allow_multiple_files=False,
+                include_extension=False,
             )
             # Validate file paths
 
@@ -228,7 +267,7 @@ class Dataset(datahub.DatasetSourced):
                         search_pattern=search_pattern,
                         allow_multiple_files=False
                     )
-
+        self.data_file_paths = np.unique(self.data_file_paths)
         return done
 
     def download_data(self, dt_fr=None, dt_to=None):
@@ -238,12 +277,14 @@ class Dataset(datahub.DatasetSourced):
             dt_to = self.dt_to
         download_obj = self.downloader(
             dt_fr, dt_to,
+            sat_id=self.sat_id,
             product=self.product,
             version=self.product_version,
-            force=self.force_download
+            force_download=self.force_download,
+            dry_run=self.download_dry_run,
         )
 
-        return download_obj.done
+        return any(download_obj.done)
 
     @property
     def database(self):

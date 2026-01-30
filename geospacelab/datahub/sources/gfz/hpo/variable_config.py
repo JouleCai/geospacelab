@@ -60,7 +60,9 @@ plot_config.bar = {
     'vmin': 0,
     'vmax': 10,
     'colormap': cm.cmap_for_kp(),
-    'width': mdates.date2num(datetime.datetime(1971, 1, 1, 0, 25)) - mdates.date2num(datetime.datetime(1971, 1, 1, 0))
+    'align': 'center',
+    'width': 1.
+    # 'width': mdates.date2num(datetime.datetime(1971, 1, 1, 0, 25)) - mdates.date2num(datetime.datetime(1971, 1, 1, 0))
 }
 # set axis attrs
 axis = var.visual.axis

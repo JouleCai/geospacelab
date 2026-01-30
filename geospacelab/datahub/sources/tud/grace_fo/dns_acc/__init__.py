@@ -70,6 +70,8 @@ class Dataset(datahub.DatasetSourced):
         self.local_latest_version = ''
         self.allow_download = kwargs.pop('allow_download', False)
         self.force_download = kwargs.pop('force_download', False)
+        self.download_dry_run = kwargs.pop('download_dry_run', False)
+        
         self.add_AACGM = kwargs.pop('add_AACGM', False) 
         self.add_APEX = kwargs.pop('add_APEX', False)
         self._data_root_dir = self.data_root_dir    # Record the initial root dir
@@ -227,7 +229,7 @@ class Dataset(datahub.DatasetSourced):
                         search_pattern=search_pattern,
                         allow_multiple_files=False
                     )
-
+        self.data_file_paths = np.unique(self.data_file_paths)
         return done
 
     def download_data(self, dt_fr=None, dt_to=None):
@@ -240,10 +242,11 @@ class Dataset(datahub.DatasetSourced):
             sat_id=self.sat_id,
             product=self.product,
             version=self.product_version,
-            force=self.force_download
+            force_download=self.force_download,
+            dry_run=self.download_dry_run,
         )
 
-        return download_obj.done
+        return any(download_obj.done)
 
     def interp_evenly(self, time_res=None, time_res_o=10, dt_fr=None, dt_to=None, masked=False):
         from scipy.interpolate import interp1d

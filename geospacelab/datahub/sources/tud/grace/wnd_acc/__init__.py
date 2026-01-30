@@ -46,6 +46,9 @@ default_variable_names_v02 = [
     'SC_ARG_LAT',
     'SC_GEO_LST',
     'u_CROSS',
+    'u_CROSS_N',
+    'u_CROSS_E',
+    'u_CROSS_D',
     'UNIT_VECTOR_N',
     'UNIT_VECTOR_E',
     'UNIT_VECTOR_D',
@@ -71,6 +74,8 @@ class Dataset(datahub.DatasetSourced):
         self.local_latest_version = ''
         self.allow_download = kwargs.pop('allow_download', False)
         self.force_download = kwargs.pop('force_download', False)
+        self.download_dry_run = kwargs.pop('download_dry_run', False)
+        
         self.add_AACGM = kwargs.pop('add_AACGM', False) 
         self.add_APEX = kwargs.pop('add_APEX', False)
         self._data_root_dir = self.data_root_dir    # Record the initial root dir
@@ -150,7 +155,10 @@ class Dataset(datahub.DatasetSourced):
         )
         orbit_unit_vector = ds_leo.trajectory_local_unit_vector()
         cp = np.cross(orbit_unit_vector, wind_unit_vector)
-        u_CT = -np.sign(cp[:, 2]) * self['u_CROSS'].value.flatten()
+        u_CT = -np.sign(cp[:, 2]) * (
+            (self['u_CROSS'].value.flatten() * self['UNIT_VECTOR_N'].flatten())**2 + 
+            (self['u_CROSS'].value.flatten() * self['UNIT_VECTOR_E'].flatten())**2)**0.5
+        u_VCT = self['u_CROSS'].value.flatten() * self['UNIT_VECTOR_D'].flatten()
 
         var = self['u_CROSS'].clone()
         var.name = 'u_CT'
@@ -158,6 +166,14 @@ class Dataset(datahub.DatasetSourced):
         var.visual.axis[1].lim = [None, None]
         var.value = u_CT[:, np.newaxis]
         self['u_CT'] = var
+        
+        var = self['u_CROSS'].clone()
+        var.name = 'u_VCT'
+        var.label = r'$u_{VCT}$'
+        var.visual.axis[1].lim = [None, None]
+        var.value = u_VCT[:, np.newaxis]
+        self['u_VCT'] = var
+
 
     def add_GEO_LST(self):
         lons = self['SC_GEO_LON'].flatten()
@@ -251,7 +267,7 @@ class Dataset(datahub.DatasetSourced):
                         search_pattern=search_pattern,
                         allow_multiple_files=False
                     )
-
+        self.data_file_paths = np.unique(self.data_file_paths)
         return done
 
     def download_data(self, dt_fr=None, dt_to=None):
@@ -264,10 +280,11 @@ class Dataset(datahub.DatasetSourced):
             sat_id=self.sat_id,
             product=self.product,
             version=self.product_version,
-            force=self.force_download
+            force_download=self.force_download,
+            dry_run=self.download_dry_run,
         )
 
-        return download_obj.done
+        return any(download_obj.done)
 
     @property
     def database(self):

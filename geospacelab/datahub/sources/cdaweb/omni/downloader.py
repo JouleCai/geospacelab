@@ -13,102 +13,115 @@ import datetime
 import requests
 import bs4
 import re
+import pathlib
 
 import geospacelab.toolbox.utilities.pydatetime as dttool
 import geospacelab.toolbox.utilities.pylogging as mylog
 from geospacelab.config import prf
 
+from geospacelab.datahub.sources.cdaweb.downloader import CDAWebHTTPDownloader as DownloaderBase
 
-class Downloader(object):
-    def __init__(self, dt_fr,  dt_to, res='1min', new_omni=True, data_file_root_dir=None, version=None):
-        if res == '1h':
-            new_omni = True
-        self.dt_fr = dt_fr
-        self.dt_to = dt_to
-        self.res = res
-        self.new_omni = new_omni
+
+class Downloader(DownloaderBase):
+    
+    def __init__(
+        self, 
+        dt_fr,  dt_to, 
+        time_res='1min', 
+        product='OMNI2', 
+        version='',
+        root_dir_local=None,
+        direct_download=True,
+        force_download=False,
+        dry_run=False,
+        ):
+
+        self.time_res = time_res
+        self.product = product
         self.version = version
-        self.done = False
-        if data_file_root_dir is None:
-            self.data_file_root_dir = prf.datahub_data_root_dir / "CDAWeb" / 'OMNI'
+        
+        if root_dir_local is None:
+            root_dir_local = prf.datahub_data_root_dir / "CDAWeb" / 'OMNI' 
         else:
-            self.data_file_root_dir = data_file_root_dir
+            root_dir_local = pathlib.Path(root_dir_local)
+        root_dir_remote = '/'.join([
+            self.root_dir_remote, 'omni', 'omni_cdaweb'
+            ])
+        super().__init__(
+            dt_fr, dt_to,
+            root_dir_local=root_dir_local,
+            root_dir_remote=root_dir_remote,
+            direct_download=direct_download,
+            force_download=force_download,
+            dry_run=dry_run,
+        ) 
+        
+    def search_from_http(self, *args, **kwargs):
+        dt_fr_1 = self.dt_fr
+        dt_to_1 = self.dt_to
+        diff_months = (dt_to_1.year - dt_fr_1.year) * 12 + dt_to_1.month - dt_fr_1.month
+        file_paths_remote = []
+        for nm in range(diff_months + 1):
+            this_month = dttool.get_next_n_months(dt_fr_1, nm)
+            
+            subdirs = []
+            
+            if self.time_res in ['1min', '5min']:
+                subdirs.append(f'{omni_product_dict[self.product]}_{self.time_res}')
+            elif self.time_res == '1h':
+                subdirs.append('hourly')
+            subdirs.append('{:4d}'.format(this_month.year))
+            
+            if self.time_res in ['1min', '5min',]:
+                file_name_patterns = [
+                    'omni', omni_product_dict[self.product], self.time_res, this_month.strftime("%Y%m")
+                    ]
+            elif self.time_res == '1h':
+                file_name_patterns = [
+                    'omni2', 'mrg1hr', this_month.strftime("%Y")
+                    ]
+            if str(self.version):
+                file_name_patterns.append(self.version)
+                
+            paths = super().search_from_http(subdirs=subdirs, file_name_patterns=file_name_patterns)
+            
+            if len(paths) > 1 and self.time_res != '1h':
+                mylog.StreamLogger.error("Find multiple matched files!")
+                print(paths)
 
-        self.url_base = "https://cdaweb.gsfc.nasa.gov/pub/data/omni/omni_cdaweb/"
+            file_paths_remote.extend(paths)
+        
+        return list(set(file_paths_remote))
+    
+    def save_files_from_http(self, file_paths_local=None, root_dir_remote=None):
+        
+        if file_paths_local is None:
+            file_paths_local = []
+            for fp_remote in self.file_paths_remote:
+                if self.time_res in ['1min', '5min']:
+                    subdir = f'{self.product}_high_res_{self.time_res}'
+                elif self.time_res == '1h':
+                    subdir = 'OMNI2_low_res_1h'
+            
+                fp_local = fp_remote.replace(self.base_url + '/' + self.root_dir_remote + '/', '')
+                pattern_replaced = fp_local.split('/')[0]
+                fp_local = fp_local.replace(
+                    pattern_replaced, subdir, 1
+                )
+                file_paths_local.append(self.root_dir_local / fp_local)
+        return super().save_files_from_http(file_paths_local, root_dir_remote)
+        
 
-        self.download()
-
-    def download(self):
-        if self.res in ['1min', '5min']:
-            self.download_high_res_omni()
-        elif self.res == '1h':
-            self.download_low_res_omni()
-
-    def download_high_res_omni(self):
-        if self.new_omni:
-            omni_type = "hro2"
-            omni_dir_name = 'OMNI2'
-        else:
-            omni_type = "hro"
-            omni_dir_name = "OMNI"
-
-        num_month = (self.dt_to.year - self.dt_fr.year) * 12 + self.dt_to.month - self.dt_fr.month + 1
-        dt0 = datetime.datetime(self.dt_fr.year, self.dt_fr.month, 1)
-        for nm in range(num_month):
-            dt1 = dttool.get_next_n_months(dt0, nm)
-            url = self.url_base + omni_type + '_' + self.res + '/' + '{:4d}'.format(dt1.year) + '/'
-
-            r = requests.get(url)
-
-            soup = bs4.BeautifulSoup(r.text, 'html.parser')
-            a_tags = soup.find_all('a', href=True)
-            hrefs = []
-            for a_tag in a_tags:
-                href = a_tag['href']
-                pattern = omni_type + '_' + self.res + '_' + dt1.strftime("%Y%m%d")
-                if pattern in href:
-                    hrefs.append(href)
-            if len(hrefs) == 0:
-                mylog.StreamLogger.info("Cannot find the queried data file!")
-                return
-            if len(hrefs) > 1:
-                mylog.StreamLogger.warning("Find multiple matched files!")
-                print(hrefs)
-                return
-
-            href = hrefs[0]
-            ma = re.search('v[0-5][0-9]', href)
-            version = ma.group(0)
-            if self.version is None:
-                self.version = version
-            elif self.version != version:
-                mylog.StreamLogger.info("Cannot find the queried data file! Version={}.".format(version))
-
-            r_file = requests.get(url + href, allow_redirects=True)
-            file_name = href
-            file_path = self.data_file_root_dir / (omni_dir_name + '_high_res_' + self.res)
-            file_path = file_path / '{:4d}'.format(dt1.year) / file_name
-            if file_path.is_file():
-                mylog.simpleinfo.info(
-                    "The file {} exists in the directory {}.".format(file_path.name, file_path.parent.resolve()))
-            else:
-                file_path.parent.resolve().mkdir(parents=True, exist_ok=True)
-                with open(file_path, "wb") as omni:
-                    mylog.simpleinfo.info(
-                        "Downloading {} to the directory {} ...".format(file_path.name, file_path.parent.resolve())
-                    )
-                    omni.write(r_file.content)
-                    mylog.simpleinfo.info("Done")
-            self.done = True
-
-    def download_low_res_omni(self):
-        raise NotImplemented
+omni_product_dict = {
+    'OMNI': 'hro',
+    'OMNI2': 'hro2',
+}
 
 
 def test():
     dt_fr = datetime.datetime(2020, 3, 4)
     dt_to = datetime.datetime(2020, 5, 3)
-    download_obj = Downloader(dt_fr, dt_to)
+    download_obj = Downloader(dt_fr, dt_to, force_download=True, time_res='1h')
     pass
 
 

@@ -25,7 +25,7 @@ class Downloader(DownloaderBase):
             dt_fr, dt_to,
             sat_id=sat_id,
             orbit_id=orbit_id,
-            product='EDR_AUR',
+            product='SDR_DISK',
             root_dir_local=root_dir_local,
             direct_download=direct_download,
             force_download=force_download,
@@ -38,7 +38,7 @@ if __name__ == "__main__":
         dt_fr = datetime.datetime(2011, 1, 6),
         dt_to = datetime.datetime(2011, 1, 6, 12),
         sat_id='F17',
-        orbit_id=None, #'21523',
+        orbit_id='21523',
         force_download=True,
         dry_run=False,
     )

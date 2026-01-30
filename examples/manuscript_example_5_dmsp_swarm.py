@@ -33,9 +33,9 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
     # If the orbit_id is specified, only one file will be downloaded. This option saves the downloading time.
     # dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'], pole='N', sat_id='f17', orbit_id='46863')
     # If not specified, the data during the whole day will be downloaded.
-    ds_dmsp_ssusi_edr = dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'edraur'],
+    ds_dmsp_ssusi_edr = dashboard.dock(datasource_contents=['cdaweb', 'dmsp', 'ssusi', 'edr_aur'],
                                        pole=pole, sat_id=sat_id, orbit_id=orbit_id)
-    ds_dmsp_ssusi_disk = dashboard.dock(datasource_contents=['jhuapl', 'dmsp', 'ssusi', 'sdrdisk'],
+    ds_dmsp_ssusi_disk = dashboard.dock(datasource_contents=['cdaweb', 'dmsp', 'ssusi', 'sdr_disk'],
                                         pole=pole, sat_id=sat_id, orbit_id=orbit_id, pp_type='DAY_AURORAL')
     ds_s1 = dashboard.dock(
         datasource_contents=['madrigal', 'satellites', 'dmsp', 's1'],

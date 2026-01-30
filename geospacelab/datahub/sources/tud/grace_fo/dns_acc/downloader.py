@@ -8,48 +8,43 @@ __license__ = "BSD-3-Clause License"
 __email__ = "lei.cai@oulu.fi"
 __docformat__ = "reStructureText"
 
+import datetime
 from geospacelab.config import prf
 
-from geospacelab.datahub.sources.tud.downloader import Downloader as DownloaderModel
+from geospacelab.datahub.sources.tud.downloader import TUDownloader as DownloaderBase   
 
 
-class Downloader(DownloaderModel):
-
-    def __init__(
-            self, dt_fr, dt_to,
-            sat_id=None,
-            product='DNS-ACC',
-            version='v02',
-            force=True, direct_download=True, **kwargs
-    ):
-        if version == 'v01':
-            raise ValueError
-        elif 'v02' in version:
-            v_str = "version_02"
-        else:
-            raise NotImplementedError
-        if sat_id == 'FO1':
-            sat_id = 'C'
-        else:
-            raise NotImplementedError
+class Downloader(DownloaderBase):
+    
+    def __init__(self, 
+        dt_fr, dt_to, 
+        mission='GRACE-FO', 
+        sat_id='FO1',
+        version='v02',  
+        product='DNS-ACC',
+        direct_download=True,
+        force_download=False,
+        dry_run=False,
+        ):
+        self.mission = mission
+        self.version = version
         
-        data_file_root_dir = prf.datahub_data_root_dir / "TUD" / "GRACE-FO" / product.upper() / version
-        ftp_data_dir = f'{v_str}/GRACE-FO_data'
-        file_name_patterns = [sat_id.upper(), product.replace('-', '_')]
-        super(Downloader, self).__init__(
-            dt_fr, dt_to,
-            data_file_root_dir=data_file_root_dir, ftp_data_dir=ftp_data_dir, force=force,
-            direct_download=direct_download, file_name_patterns=file_name_patterns, **kwargs
+        super().__init__(
+            dt_fr, dt_to, 
+            mission=mission,
+            sat_id=sat_id, 
+            version=version,
+            product=product,
+            direct_download=direct_download,
+            force_download=force_download,
+            dry_run=dry_run
         )
+        
 
-    def download(self, **kwargs):
-
-        done = super(Downloader, self).download(**kwargs)
-        return done
-
-    def search_files(self, **kwargs):
-
-        file_list = super(Downloader, self).search_files(**kwargs)
-
-        return file_list
-        # version control
+if __name__ == '__main__':
+    download = Downloader(
+        dt_fr=datetime.datetime(2020, 1, 1),
+        dt_to=datetime.datetime(2020, 3, 31),
+        force_download=False,
+        dry_run=False,
+    )

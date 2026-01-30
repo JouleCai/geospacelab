@@ -50,3 +50,6 @@ class Loader(object):
             self.variables['SC_GEO_LST'] = np.array(results[4]).astype(np.float32).reshape(num_rec, 1)
             self.variables['SC_ARG_LAT'] = np.array(results[5]).astype(np.float32).reshape(num_rec, 1)
             self.variables['rho_n'] = np.array(results[6]).astype(np.float32).reshape(num_rec, 1)
+
+
+    

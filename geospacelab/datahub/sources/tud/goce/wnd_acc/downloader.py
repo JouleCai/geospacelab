@@ -18,10 +18,10 @@ class Downloader(DownloaderBase):
     
     def __init__(self, 
         dt_fr, dt_to, 
-        mission='Swarm', 
-        sat_id='A',
+        mission='GOCE', 
+        sat_id='',
         version='v02',  
-        product='DNS-POD',
+        product='WND-ACC',
         direct_download=True,
         force_download=False,
         dry_run=False,

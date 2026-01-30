@@ -100,6 +100,8 @@ class Dataset(datahub.DatasetSourced):
         self.omni_res = kwargs.pop('omni_res', '1min')
         self.data_file_type = kwargs.pop('data_file_type','')
         self.allow_download = kwargs.pop('allow_download', True)
+        self.force_download = kwargs.pop('force_download', False)
+        self.download_dry_run = kwargs.pop('download_dry_run', False)
 
         self.metadata = None
 
@@ -165,7 +167,18 @@ class Dataset(datahub.DatasetSourced):
                                        '{:4d}'.format(thismonth.year)
                 file_patterns = [
                     self.omni_res,
-                    thismonth.strftime('%Y%m%d')
+                    thismonth.strftime('%Y%m')
+                ]
+            elif self.omni_res == '1h':
+                initial_file_dir = kwargs.pop('initial_file_dir', None)
+                if initial_file_dir is None:
+                    initial_file_dir = self.data_root_dir / \
+                        'OMNI2_low_res_1h' / \
+                        '{:4d}'.format(thismonth.year)
+                file_patterns = [
+                    'omni2',    
+                    'mrg1hr',
+                    thismonth.strftime('%Y')
                 ]
             else:
                 raise NotImplementedError
@@ -181,28 +194,27 @@ class Dataset(datahub.DatasetSourced):
 
             # Validate file paths
 
-            if not done and self.allow_download:
+            if (not done and self.allow_download) or (self.force_download):
                 done = self.download_data()
                 if done:
                     done = super().search_data_files(
                         initial_file_dir=initial_file_dir, search_pattern=search_pattern)
                 else:
                     print('Cannot find files from the online database!')
-
+        if list(self.data_file_paths):
+            self.data_file_paths = list(set(self.data_file_paths))
+            self.data_file_paths.sort()
         return done
 
     def download_data(self):
-        if self.data_file_type == 'hres-cdf':
-            if self.omni_type.upper() == 'OMNI':
-                new_omni = False
-            elif self.omni_type.upper() == 'OMNI2':
-                new_omni = True
-            download_obj = self.downloader(dt_fr=self.dt_fr, dt_to=self.dt_to,
-                                           res=self.omni_res, new_omni=new_omni,
-                                           data_file_root_dir=self.data_root_dir)
-        else:
-            raise NotImplementedError
-        return download_obj.done
+
+        download_obj = self.downloader(
+            dt_fr=self.dt_fr, dt_to=self.dt_to,
+            time_res=self.omni_res, product=self.omni_type,
+            root_dir_local=self.data_root_dir, 
+            force_download=self.force_download,
+            dry_run=self.download_dry_run,)
+        return any(download_obj.done)
 
     # _validate_IMF_cs = staticmethod(_validate_IMF_cs)
 

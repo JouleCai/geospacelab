@@ -114,8 +114,8 @@ class Downloader(object):
         dts = [datetime.datetime.strptime(dtstr+'000', "%Y-%m-%d %H:%M:%S.%f") for dtstr in results[0]]
         time_array = np.array(cftime.date2num(dts, units='seconds since 1970-01-01 00:00:00.0'))
         print('From {} to {}.'.format(
-            datetime.datetime.utcfromtimestamp(time_array[0]),
-            datetime.datetime.utcfromtimestamp(time_array[-1]))
+            datetime.datetime.fromtimestamp(time_array[0], tz=datetime.timezone.utc),
+            datetime.datetime.fromtimestamp(time_array[-1], tz=datetime.timezone.utc),)
         )
         asy_d_array = np.array(results[2])
         asy_d_array.astype(np.float32)

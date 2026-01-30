@@ -116,11 +116,11 @@ axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ####################################################################################################################
-var_name = 'u_CROSS_U'
+var_name = 'u_CROSS_D'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
-var.fullname = 'Cross neutral wind (Upward)'
-var.label = r'$u_{Up}$'
+var.fullname = 'Cross neutral wind (Downward)'
+var.label = r'$u_{Down}$'
 var.unit = 'm/s'
 var.unit_label = r'm/s'
 var.group = r'$u$'
