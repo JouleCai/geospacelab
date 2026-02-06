@@ -54,8 +54,9 @@ setuptools.setup(
               'natsort>=7.1.1',
               'numpy<2.4.0',
               'scipy>=1.6.0',
+               'netcdf4>=1.5.7',
               'h5py>=3.2.1',
-              'netcdf4>=1.5.7',
+
               'matplotlib>=3.5',
               'madrigalweb>=3.3',
               'aacgmv2>=2.6.2',

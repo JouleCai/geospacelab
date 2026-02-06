@@ -11,10 +11,12 @@ __docformat__ = "reStructureText"
 
 import datetime
 import numpy as np
+import pathlib as pathib
 
 from geospacelab.visualization.mpl.dashboards import TSDashboard
 import geospacelab.visualization.mpl.geomap.geodashboards as geomap
 
+cwd = pathib.Path(__file__).parent.resolve()
 
 def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_id, pole='N'):
     
@@ -290,7 +292,10 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
     db_swarm.draw()
     db_swarm.add_panel_labels()
 
-    db_swarm.save_figure(file_name='manuscript_example_5_compare_v2_E' + swarm_dn.strftime('%Y-%m-%d') + '_SWARM-' + swarm_sat_id + '_DMSP-' + dmsp_sat_id.upper(), )
+    # db_swarm.show()
+    db_swarm.save_figure(
+        file_dir= cwd,
+        file_name='manuscript_example_5_compare_v2_E' + swarm_dn.strftime('%Y-%m-%d') + '_SWARM-' + swarm_sat_id + '_DMSP-' + dmsp_sat_id.upper(), )
 
 
 def event_1_1():

@@ -134,7 +134,7 @@ class Dataset(datahub.DatasetSourced):
             self.time_filter_by_range(var_datetime_name='SC_DATETIME')
 
         if self.calib_orbit:
-            self.fix_geo_lon()
+           self.fix_geo_lon()
 
         if self.add_AACGM:
             self.convert_to_AACGM()
@@ -220,11 +220,11 @@ class Dataset(datahub.DatasetSourced):
         delta = np.sin(glon_2 * np.pi / 180.) - np.sin(glon_1 * np.pi / 180.)
         
         if self.replace_orbit:
-            glon_1 = glon_2
+            self['SC_GEO_LON'].value = glon_2[:, np.newaxis]
+            self['SC_GEO_LAT'].value = cs_new['lat'][:, np.newaxis]
         else:
             glon_1[np.abs(delta)>0.001] = glon_2[np.abs(delta)>0.001]
-            
-        self['SC_GEO_LON'].value = glon_1[:, np.newaxis]
+            self['SC_GEO_LON'].value = glon_1[:, np.newaxis]
 
     def search_data_files(self, **kwargs):
 

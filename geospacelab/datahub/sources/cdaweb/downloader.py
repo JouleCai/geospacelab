@@ -213,8 +213,11 @@ class DownloaderFromFTPBase(DownloaderBase):
         if file_paths_local is None:
             self.file_paths_local = []
             for fp_remote in self.file_paths_remote:
+                fp_local = self.root_dir_local
+                for p in fp_remote.replace(root_dir_remote, '').split('/'):
+                    fp_local = fp_local / p
                 self.file_paths_local.append(
-                    self.root_dir_local / fp_remote.replace(root_dir_remote, '')
+                    fp_local
                 )
         self.done = [False] * len(self.file_paths_remote)
         
@@ -347,8 +350,11 @@ class DownloaderFromHTTPBase(DownloaderBase):
         if file_paths_local is None:
             self.file_paths_local = []
             for fp_remote in self.file_paths_remote:
+                fp_local = self.root_dir_local
+                for p in fp_remote.replace(root_url, '').split('/'):
+                    fp_local = fp_local / p
                 self.file_paths_local.append(
-                    self.root_dir_local / fp_remote.replace(root_url, '')
+                    fp_local
                 )
         else:
             self.file_paths_local = file_paths_local

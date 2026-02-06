@@ -8,7 +8,7 @@ import scipy.signal as sig
 from geospacelab.datahub import DatasetUser
 from geospacelab.toolbox.utilities import pydatetime as dttool
 import geospacelab.toolbox.utilities.numpymath as npmath
-from geospacelab.cs import GEOCSpherical
+import geospacelab.cs as geo_cs
 
 
 class LEOToolbox(DatasetUser):
@@ -34,6 +34,27 @@ class LEOToolbox(DatasetUser):
         self.sector_cs = 'GEO'
         self.sectors = {}
 
+    def add_GEO_cartesian(self, cs_in='GEO', ):
+        
+        if cs_in == 'GEO':
+            coords={
+                'lat': self['SC_GEO_LAT'].value.flatten(),
+                'lon': self['SC_GEO_LON'].value.flatten(),
+                'height': self['SC_GEO_ALT'].value.flatten(),
+                'lat_unit': 'deg', 'lon_unit': 'deg', 'height_unit': 'km'
+            }
+        else:
+            raise NotImplementedError
+        
+        cs = geo_cs.GEOSpherical(
+            coords=coords
+        )
+        cs_new = cs.to_cartesian()
+        self.add_variable(var_name='SC_GEO_X', value=cs_new['x'].reshape((cs_new['x'].size, 1)))
+        self.add_variable(var_name='SC_GEO_Y', value=cs_new['y'].reshape((cs_new['y'].size, 1)))
+        self.add_variable(var_name='SC_GEO_Z', value=cs_new['z'].reshape((cs_new['z'].size, 1)))
+        return 
+    
     def search_orbit_nodes(self, data_interval=1, t_res=None):
         def check_nodes(nodes):
             dts_nodes = nodes['DATETIME']
@@ -330,7 +351,266 @@ class LEOToolbox(DatasetUser):
             }
         else:
             raise NotImplementedError
+    
+    def griddata_by_sector_new(
+        self, 
+        variable_names=None,
+        sector_name=None,
+        x_grid_res=20*60,
+        y_grid_res=0.5,
+        x_data_res=None,
+        y_data_res=None,
+        grid_method='linear',
+        along_x_interp_method='linear',
+        along_track_interp=True,
+        along_track_interp_method='linear',
+        along_track_binning=False,
+        along_track_binning_method='mean',
+        along_track_binning_size=None,
+        visual='on',
+    ):      
+        # Initialize parameters
+        if along_track_binning and along_track_interp:
+            raise ValueError('Only one of along_track_binning and along_track_interp can be True.') 
+        if along_track_binning:
+            if along_track_binning_size is None:
+                along_track_binning_size = y_grid_res
+        
+        self.visual = visual
+        dts_c = self['_'.join(('SECTOR', sector_name, 'DATETIME'))].value.flatten()
+        dts = self['SC_DATETIME'].value.flatten()
+        sector = self['SECTOR_' + sector_name].value.flatten()
+        pseudo_lat = self['_'.join(('SECTOR', sector_name, 'PSEUDO_LAT'))].value.flatten()
+        lat_range = self.sectors[sector_name]['PSEUDO_LAT_RANGE']
+        n_tracks = int(np.max(sector))
+        
+        if along_track_interp:
+            x_data = dts[sector > 0]
+        else:
+            x_data = dts_c[sector > 0]    
+        x_data_c = dts_c[sector>0]
+        x = np.array([(dt - dttool.get_start_of_the_day(self.dt_fr)).total_seconds() for dt in x_data])
+        x_c = np.array([(dt - dttool.get_start_of_the_day(self.dt_fr)).total_seconds() for dt in x_data_c])
+        x_unique_c = np.unique(x_c)
+        if x_data_res is None:
+            x_data_res = np.nanmedian(np.diff(x_unique_c))
+        
+        y_data = pseudo_lat[sector > 0]
+        y= y_data
+        if y_data_res is None:
+            diff_ys = []
+            for i in range(n_tracks):
+                sector_i = sector[sector>0]
+                y_track = y_data[sector_i == i+1]
+                if len(y_track) > 3:
+                    diff_ys.append(np.abs(y_track[len(y_track) // 2] - y_track[len(y_track) // 2 - 1]))
+            y_data_res = np.nanmedian(diff_ys)
+            if y_grid_res > y_data_res:
+                y_data_res = y_grid_res
                 
+        # Set the grids
+        dt0 = dttool.get_start_of_the_day(self.dt_fr)
+        ny = int(np.ceil(np.diff(lat_range) / y_grid_res) + 1)
+        ys = np.linspace(lat_range[0], lat_range[1], ny)
+        if x_grid_res is None:
+            xs = x_unique_c
+            # ys = ys[:-1] + y_grid_res / 2 
+            grid_x, grid_y = np.meshgrid(xs, ys)
+            x_interp = False
+            x_grid_res=x_data_res
+        else:
+            min_x = np.floor((self.dt_fr - dt0).total_seconds() / x_grid_res) * x_grid_res
+            max_x = np.ceil((self.dt_to - dt0).total_seconds() / x_grid_res) * x_grid_res
+            grid_x, grid_y = np.meshgrid(
+                np.arange(min_x, max_x, x_grid_res),
+                ys 
+            )
+            x_interp = True
+        if along_track_binning:
+            y_bins = [
+                ys - along_track_binning_size / 2,
+                ys + along_track_binning_size / 2
+            ]
+
+        grid_lat = griddata((x_c, y), y, (grid_x, grid_y), method='nearest')
+
+        if self.sector_cs == 'AACGM':
+            mask_y = np.abs(grid_y - grid_lat) > y_data_res * 2
+            which_lat = 'AACGM_LAT'
+        if self.sector_cs == 'APEX':
+            mask_y = np.abs(grid_y - grid_lat) > y_data_res * 2
+            which_lat = 'APEX_LAT' 
+        else:
+            mask_y = np.abs(grid_y - grid_lat) > y_data_res * 1.2
+            which_lat = 'GEO_LAT'
+
+        grid_sectime = griddata((x_c, y), x_c, (grid_x, grid_y), method='nearest')
+        mask_x = np.abs(grid_x - grid_sectime) > x_data_res * 1.2
+
+        # remove gaps
+        # i_mask_x = np.where(mask_x)
+        # rec_bounds_ind = {}
+        # if list(i_mask_x[0]):
+        #     for ii, jj in zip(*i_mask_x):
+        #         xx = grid_x[ii, jj]
+        #         x_ii = grid_x[ii, :].flatten()
+        #         if xx in rec_bounds_ind.keys():
+        #             bound_x_1 = rec_bounds_ind[xx][0]
+        #             bound_x_2 = rec_bounds_ind[xx][1]
+        #         else:
+        #             iii = np.where(x_unique_c<xx)[0]
+        #             if not list(iii):
+        #                 bound_x_1 = x_ii[0] - x_data_res
+        #             else:
+        #                 bound_x_1 = x_unique_c[iii[-1]] - x_grid_res
+        #             iii = np.where(x_unique_c > xx)[0]
+        #             if not list(iii):
+        #                 bound_x_2 = x_ii[-1] + x_grid_res
+        #             else:
+        #                 bound_x_2 = x_unique_c[iii[0]] + x_data_res
+        #             rec_bounds_ind[xx] = [bound_x_1, bound_x_2]
+        #         mask_x[ii, (x_ii >= bound_x_1) & (x_ii <= bound_x_2)] = True
+        #     pass
+        
+        # 
+        
+        for var_name in variable_names:
+            # print(var_name)
+            vrb = self[var_name].value.flatten()[sector>0]
+            if along_track_binning:
+                sector_1 = sector[sector>0]
+                n_lats = ny
+                xx_1 = np.full((n_tracks, n_lats), np.nan)
+                yy_1 = grid_y[:, 0].flatten()
+                zz_1 = np.full((n_tracks, n_lats), np.nan)
+                grid_z = np.ones_like(grid_x)*np.nan
+                
+                for ii in np.arange(1, n_tracks+1):
+                    xd = x[sector_1 == ii]
+                    yd = y[sector_1 == ii]
+                    zd = vrb[sector_1 == ii]
+                    if (not list(xd)) or (not list(yd)):
+                        continue
+                    inds_sorted = np.argsort(yd)
+                    yd_sorted = yd[inds_sorted]
+                    inds_y_bin_0 = np.searchsorted(yd_sorted, y_bins[0])
+                    inds_y_bin_1 = np.searchsorted(yd_sorted, y_bins[1])
+                    for ib0, ib1 in zip(inds_y_bin_0, inds_y_bin_1):
+                        if along_track_binning_method == 'mean':
+                            z_i = np.nanmean(zd[inds_sorted[ib0:ib1]])
+                        elif along_track_binning_method == 'median':
+                            z_i = np.nanmedian(zd[inds_sorted[ib0:ib1]])
+                        elif along_track_binning_method == 'max':
+                            z_i = np.nanmax(zd[inds_sorted[ib0:ib1]])
+                        elif along_track_binning_method == 'min':
+                            z_i = np.nanmin(zd[inds_sorted[ib0:ib1]])
+                        
+                            if list(z_i):
+                                z_bin = np.nanmean(z_i)
+                            else:
+                                z_bin = np.nan
+                    f = interp1d(yd, xd, bounds_error=False, fill_value= 'extrapolate')
+                    x_i = f(yy_1)
+                    xx_1[ii-1, :] = x_i
+
+                    if 'LON' in var_name:
+                        z_i = npmath.interp_period_data(yd, zd, yy_1,  period=360., method='linear', bounds_error=False)
+                    elif 'LST' in var_name:
+                        z_i = npmath.interp_period_data(yd, zd, yy_1,  period=24., method='linear', bounds_error=False)
+                    else:
+                        # f = interp1d(yd, zd, bounds_error=False, fill_value='extrapolate')
+                        # z_i = f(yy_1)
+                        z_i = np.ones_like(yy_1) * np.nan       
+                        for j, yyy in enumerate(yy_1):
+                            inds_y = np.where((yd >= yyy-y_grid_res/2) & (yd < yyy+y_grid_res/2))[0]
+                            if list(inds_y):
+                                z_i[j] = np.nanmean(zd[inds_y])
+                    zz_1[ii-1, :] = z_i 
+                for ii in range(grid_x.shape[0]):
+                    xd = xx_1[:, ii].flatten()
+                    zd = zz_1[:, ii].flatten()
+                    if x_interp:
+                        if 'LON' in var_name:
+                            z_i = npmath.interp_period_data(xd, zd, grid_x[0],  period=360., method='linear', bounds_error=False)
+                        elif 'LST' in var_name:
+                            z_i = npmath.interp_period_data(xd, zd, grid_x[0],  period=24., method='linear', bounds_error=False)
+                        else:
+                            f = interp1d(xd, zd, bounds_error=False, fill_value='extrapolate')
+                            z_i = f(grid_x[0])
+                        grid_z[ii, :] = z_i
+                    else:
+                        grid_z[ii, :] = zd 
+            elif along_track_interp:
+                sector_1 = sector[sector>0]
+                n_tracks = int(np.max(sector))
+                n_lats = ny
+                xx_1 = np.empty((n_tracks, n_lats))
+                zz_1 = np.empty((n_tracks, n_lats))
+                yy_1 = grid_y[:, 0].flatten()
+                grid_z = np.ones_like(grid_x) * np.nan
+                for ii in np.arange(1, n_tracks+1):
+                    xd = x[sector_1 == ii]
+                    yd = y[sector_1 == ii]
+                    zd = vrb[sector_1 == ii]
+                    
+                    if (not list(xd)) or (not list(yd)):
+                        continue
+
+                    f = interp1d(yd, xd, bounds_error=False, fill_value= 'extrapolate')
+                    x_i = f(yy_1)
+                    xx_1[ii-1, :] = x_i
+
+                    if 'LON' in var_name:
+                        z_i = npmath.interp_period_data(yd, zd, yy_1,  period=360., method='linear', bounds_error=False)
+                    elif 'LST' in var_name:
+                        z_i = npmath.interp_period_data(yd, zd, yy_1,  period=24., method='linear', bounds_error=False)
+                    else:
+                        f = interp1d(yd, zd, bounds_error=False, fill_value='extrapolate')
+                        z_i = f(yy_1)
+                    zz_1[ii-1, :] = z_i 
+                for ii in range(grid_x.shape[0]):
+                    xd = xx_1[:, ii].flatten()
+                    zd = zz_1[:, ii].flatten()
+                    if x_interp:
+                        if 'LON' in var_name:
+                            z_i = npmath.interp_period_data(xd, zd, grid_x[0],  period=360., method='linear', bounds_error=False)
+                        elif 'LST' in var_name:
+                            z_i = npmath.interp_period_data(xd, zd, grid_x[0],  period=24., method='linear', bounds_error=False)
+                        else:
+                            f = interp1d(xd, zd, bounds_error=False, fill_value='extrapolate')
+                            z_i = f(grid_x[0])
+                        grid_z[ii, :] = z_i
+                    else:
+                        grid_z[ii, :] = zd
+            else:
+                grid_z = griddata((x, y), vrb, (grid_x, grid_y), method=method)
+            grid_z[mask_y] = np.nan
+            grid_z[mask_x] = np.nan
+            var_name_in = '_'.join(('SECTOR', sector_name, 'GRID', var_name))
+            self.sectors[sector_name]['VARIABLE_NAMES'].append(var_name_in) 
+            
+            # self.add_variable(var_name=var_name_in, value=grid_z.T)
+            self[var_name_in] = self[var_name].clone(omit_attrs='visual')
+            self[var_name_in].visual = 'new'
+            var = self[var_name_in]
+            var.value = grid_z.T
+            var.set_depend(0, {'UT': '_'.join(('SECTOR', sector_name, 'GRID_DATETIME'))})
+            var.set_depend(1, {which_lat: '_'.join(('SECTOR', sector_name, 'GRID_LAT'))})
+            var.visual.axis[0].data = '@d.' + '_'.join(('SECTOR', sector_name, 'GRID_DATETIME'))
+            var.visual.axis[1].data = '@d.' + '_'.join(('SECTOR', sector_name, 'GRID_LAT'))
+            var.visual.axis[1].label = 'GLAT' if self.sector_cs == 'GEO' else 'MLAT'
+            var.visual.axis[1].unit = r'$^\circ$'
+            var.visual.axis[1].lim = lat_range
+            var.visual.axis[2].data = '@v.value'
+            var.visual.axis[2].data_scale = self[var_name].visual.axis[1].data_scale
+            var.visual.axis[2].label = '@v.label'
+            var.visual.axis[2].unit = '@v.unit'
+            var.visual.plot_config.style = '2P'
+            var.visual.plot_config.pcolormesh.update(cmap='jet')
+        
+           
+        return
+    
     def griddata_by_sector(
             self, sector_name=None, variable_names=None, x_grid_res=20*60, y_grid_res=0.5, along_track_interp=True,
             x_data_res=None, y_data_res=None, along_track_binning=False, 

@@ -200,11 +200,12 @@ class Dataset(datahub.DatasetSourced):
         delta = np.sin(glon_2 * np.pi / 180.) - np.sin(glon_2 * np.pi / 180.)
         
         if self.replace_orbit:
-            glon_1 = glon_2
+            self['SC_GEO_LON'].value = glon_2[:, np.newaxis]
+            self['SC_GEO_LAT'].value = cs_new['lat'][:, np.newaxis]
         else:
             glon_1[np.abs(delta)>0.001] = glon_2[np.abs(delta)>0.001]
-            
-        self['SC_GEO_LON'].value = glon_1[:, np.newaxis]
+            self['SC_GEO_LON'].value = glon_1[:, np.newaxis]
+        
 
     def search_data_files(self, **kwargs):
 
