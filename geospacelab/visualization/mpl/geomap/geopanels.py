@@ -215,6 +215,159 @@ class PolarMapPanel(GeoPanel):
         coords = None
         return
 
+    def overlay_lands(self, linestyle='-', linewidth=0.5,
+            edge_color='#666666', fill_color='#AAAAAA', zorder=1, alpha=0.7,
+            resolution='110m', **kwargs):
+        """
+        Overlay land polygons onto the map with custom coordinate transformation.
+
+        Args:
+            linestyle (str): Style of the coastline borders.
+            linewidth (float): Width of the coastline borders.
+            edge_color (str): Color for the coastline borders.
+            fill_color (str): Color for the land areas.
+            zorder (int): Layer order of the drawing.
+            alpha (float): Transparency level (0-1).
+            resolution (str): Natural Earth data resolution ('110m', '50m', '10m').
+            **kwargs: Additional arguments passed to PolyCollection.
+        """
+
+        # -------------------------------------------------------------------------
+        # Case 1: Standard Geographic coordinates
+        # -------------------------------------------------------------------------
+        if self.cs == 'GEO':
+            # Delegate to the parent class method which is simply applicable for GEO
+            super().overlay_lands(
+                facecolor=fill_color,
+                edgecolor=edge_color,
+                linewidth=linewidth,
+                linestyle=linestyle,
+                zorder=zorder,
+                alpha=alpha,
+                **kwargs
+            )
+            return
+
+        # -------------------------------------------------------------------------
+        # Case 2: Custom Coordinate System (Transformation required)
+        # -------------------------------------------------------------------------
+        import cartopy.io.shapereader as shpreader
+        from shapely.geometry import Polygon
+        from shapely.ops import orient
+        from matplotlib.collections import PolyCollection
+
+        # Load land geometries from Natural Earth dataset
+        shpfilename = shpreader.natural_earth(
+            resolution=resolution,
+            category='physical',
+            name='land'
+        )
+        reader = shpreader.Reader(shpfilename)
+
+        # This list will store transformed coordinate arrays for PolyCollection
+        poly_list = []
+
+        for geom in reader.geometries():
+            # Ensure we are working with a list of simple Polygons
+            if geom.geom_type == 'Polygon':
+                geoms = [geom]
+            elif geom.geom_type == 'MultiPolygon':
+                geoms = geom.geoms
+            else:
+                # Skip non-polygonal geometries if any
+                continue
+
+            for g in geoms:
+                # Extract raw longitude and latitude from the exterior boundary
+                raw_coords = np.array(g.exterior.coords)
+                lons, lats = raw_coords[:, 0], raw_coords[:, 1]
+
+                # Setup input dictionary for the custom transformation method
+                # Height is set to a default value (e.g., 50km) to reduce conversion for altitude < 0.
+                coords_in = {
+                    'lat': lats,
+                    'lon': lons,
+                    'height': np.zeros_like(lats) + 50.
+                }
+
+                try:
+                    # Apply custom coordinate transformation
+                    coords_out = self.cs_transform(
+                        cs_fr='GEO',
+                        cs_to=self.cs,
+                        coords=coords_in
+                    )
+                    x_new = coords_out['lon']
+                    y_new = coords_out['lat']
+
+                    # Remove invalid coordinates (NaNs) produced during transformation
+                    mask = ~np.isnan(x_new) & ~np.isnan(y_new)
+
+                    if np.any(mask):
+                        # Create a stack of [x, y] coordinates
+                        poly_points = np.column_stack([x_new[mask], y_new[mask]])
+
+                        # Construct a Shapely polygon to fix orientation and topology
+                        temp_poly = Polygon(poly_points)
+
+                        # Force Counter-Clockwise (CCW) orientation.
+                        # This is crucial for consistent filling in Matplotlib.
+                        corrected_poly = orient(temp_poly, sign=1.0)
+
+                        # HEURISTIC: Check if the polygon area is abnormally large.
+                        # In some projections, if points wrap around the globe incorrectly,
+                        # the "outside" becomes the "inside". We flip the orientation if so.
+                        if corrected_poly.area > 150 * 90:
+                            corrected_poly = orient(corrected_poly, sign=-1.0)
+
+                        # Convert back to coordinate array for plotting
+                        coords_array = np.array(corrected_poly.exterior.coords)
+                        x_check = coords_array[:, 0]
+
+                        # Filter out "ghost" polygons.
+                        # Polygons stretching across the entire map (due to 0/360 degree jumps)
+                        # are identified by checking the distance between median and extremes.
+                        lon_span_limit = 350.0
+                        if (np.median(x_check) - np.min(x_check) > lon_span_limit or 
+                            np.max(x_check) - np.median(x_check) > lon_span_limit):
+                            continue
+
+                        poly_list.append(coords_array)
+
+                except Exception:
+                    # Silently skip individual polygons that fail transformation
+                    # (e.g., polygons located outside the projection's valid domain)
+                    continue
+
+        # -------------------------------------------------------------------------
+        # Render polygons using PolyCollection
+        # -------------------------------------------------------------------------
+        if not poly_list:
+            return
+
+        # IMPORTANT: 'transform' must match the coordinate space of x_new/y_new.
+        # If self.cs_transform already projected the points, use self.projection.
+        # If points are still lon/lat, use ccrs.Geodetic().
+        coll = PolyCollection(
+            poly_list,
+            transform=ccrs.Geodetic(),
+            facecolor=fill_color,
+            edgecolor=edge_color,
+            linewidth=linewidth,
+            linestyle=linestyle,
+            zorder=zorder,
+            alpha=alpha,
+            **kwargs
+        )
+
+        # Add the collection to the Axes instance
+        self().add_collection(coll)
+
+        # Clean up temporary list to free memory
+        del poly_list
+
+        return
+
     def overlay_gridlines(self,
                       lat_res=None, lon_res=None,
                       lat_label_separator=None, lon_label_separator=None,
@@ -222,7 +375,6 @@ class PolarMapPanel(GeoPanel):
                       lat_label=True, lat_label_clock=6.5, lat_label_config={},
                       lon_label=True, lon_label_config={},
                       gridlines_config={}):
-
         default_gridlines_label_config = {
             'lon-fixed': {
                 'lat_res': 10.,
