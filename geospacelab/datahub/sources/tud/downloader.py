@@ -106,11 +106,10 @@ class TUDownloader(DownloaderBase):
                 version_dict[version_in_fn[:3]], 
                 self.mission + '_data'
             ]]) + '/'
-
-            fp_local = fp_remote.replace(replacement, '')
-            file_paths_local.append(
-                self.root_dir_local / self.mission.upper() /
-                self.product.upper() / version_in_fn / fp_local)
+            fp_local = self.root_dir_local / self.mission.upper() / self.product.upper() / version_in_fn
+            for p in fp_remote.replace(replacement, '').split('/'):
+                fp_local = fp_local / p
+            file_paths_local.append(fp_local)
         super().save_files_from_http(file_paths_local, root_dir_remote)  
         
         for i, (done, file_path) in enumerate(zip(self.done, self.file_paths_local)):

@@ -174,12 +174,14 @@ class Dataset(datahub.DatasetSourced):
         var.value = u_VCT[:, np.newaxis]
         self['u_VCT'] = var
 
-
     def add_GEO_LST(self):
+        import geospacelab.observatory.earth.sun_position as sun_position
         lons = self['SC_GEO_LON'].flatten()
         uts = self['SC_DATETIME'].flatten()
-        lsts = [ut + datetime.timedelta(seconds=int(lon/15.*3600)) for ut, lon in zip(uts, lons)]
-        lsts = [lst.hour + lst.minute/60. + lst.second/3600. for lst in lsts]
+
+        lsts = sun_position.convert_datetime_longitude_to_local_solar_time(
+            dts=uts, lons=lons
+        )
         var = self.add_variable(var_name='SC_GEO_LST')
         var.value = np.array(lsts)[:, np.newaxis]
         var.label = 'LST'

@@ -8,7 +8,10 @@ import scipy.signal as sig
 from geospacelab.datahub import DatasetUser
 from geospacelab.toolbox.utilities import pydatetime as dttool
 import geospacelab.toolbox.utilities.numpymath as npmath
-import geospacelab.cs as geo_cs
+import geospacelab.toolbox.utilities.interpolation as gsl_interp
+import geospacelab.toolbox.utilities.binning as gsl_binning
+import geospacelab.toolbox.utilities.pylogging as mylog
+import geospacelab.cs as gsl_cs
 
 
 class LEOToolbox(DatasetUser):
@@ -43,13 +46,24 @@ class LEOToolbox(DatasetUser):
                 'height': self['SC_GEO_ALT'].value.flatten(),
                 'lat_unit': 'deg', 'lon_unit': 'deg', 'height_unit': 'km'
             }
+            cs = gsl_cs.GEOD(
+                coords=coords
+            )
+            cs_new = cs.to_GEOC().to_cartesian()
+        elif cs_in == 'GEOC':
+            coords={
+                'x': self['SC_GEO_X'].value.flatten(),
+                'y': self['SC_GEO_Y'].value.flatten(),
+                'z': self['SC_GEO_Z'].value.flatten(),
+                'x_unit': 'km', 'y_unit': 'km', 'z_unit': 'km'
+            }
+            cs = gsl_cs.GEOCCartesian(
+                coords=coords
+            )
+            cs_new = cs.to_cartesian()
         else:
             raise NotImplementedError
-        
-        cs = geo_cs.GEOSpherical(
-            coords=coords
-        )
-        cs_new = cs.to_cartesian()
+
         self.add_variable(var_name='SC_GEO_X', value=cs_new['x'].reshape((cs_new['x'].size, 1)))
         self.add_variable(var_name='SC_GEO_Y', value=cs_new['y'].reshape((cs_new['y'].size, 1)))
         self.add_variable(var_name='SC_GEO_Z', value=cs_new['z'].reshape((cs_new['z'].size, 1)))
@@ -352,14 +366,16 @@ class LEOToolbox(DatasetUser):
         else:
             raise NotImplementedError
     
-    def griddata_by_sector_new(
+    def griddata_by_sector_v2(
         self, 
         variable_names=None,
         sector_name=None,
         x_grid_res=20*60,
         y_grid_res=0.5,
         x_data_res=None,
+        x_data_res_scale=1.5,
         y_data_res=None,
+        y_data_res_scale=1.5,
         grid_method='linear',
         along_x_interp_method='linear',
         along_track_interp=True,
@@ -403,8 +419,11 @@ class LEOToolbox(DatasetUser):
                 sector_i = sector[sector>0]
                 y_track = y_data[sector_i == i+1]
                 if len(y_track) > 3:
-                    diff_ys.append(np.abs(y_track[len(y_track) // 2] - y_track[len(y_track) // 2 - 1]))
+                    diff_ys.append(
+                        np.nanmax(np.abs(np.diff(y_track)))
+                    )
             y_data_res = np.nanmedian(diff_ys)
+            y_data_res_scale = 1.5
             if y_grid_res > y_data_res:
                 y_data_res = y_grid_res
                 
@@ -427,53 +446,59 @@ class LEOToolbox(DatasetUser):
             )
             x_interp = True
         if along_track_binning:
-            y_bins = [
-                ys - along_track_binning_size / 2,
-                ys + along_track_binning_size / 2
-            ]
-
-        grid_lat = griddata((x_c, y), y, (grid_x, grid_y), method='nearest')
+            y_bins = ys - y_grid_res / 2
+            y_bins = np.append(y_bins, ys[-1] + y_grid_res / 2)
+        else:
+            y_bins = None
 
         if self.sector_cs == 'AACGM':
-            mask_y = np.abs(grid_y - grid_lat) > y_data_res * 2
             which_lat = 'AACGM_LAT'
         if self.sector_cs == 'APEX':
-            mask_y = np.abs(grid_y - grid_lat) > y_data_res * 2
             which_lat = 'APEX_LAT' 
         else:
-            mask_y = np.abs(grid_y - grid_lat) > y_data_res * 1.2
             which_lat = 'GEO_LAT'
+        if not along_track_binning and not along_track_interp:
+            grid_lat = griddata((x_c, y), y, (grid_x, grid_y), method='nearest')
 
-        grid_sectime = griddata((x_c, y), x_c, (grid_x, grid_y), method='nearest')
-        mask_x = np.abs(grid_x - grid_sectime) > x_data_res * 1.2
+            if self.sector_cs == 'AACGM':
+                mask_y = np.abs(grid_y - grid_lat) > y_data_res * 2
+            if self.sector_cs == 'APEX':
+                mask_y = np.abs(grid_y - grid_lat) > y_data_res * 2
+            else:
+                mask_y = np.abs(grid_y - grid_lat) > y_data_res * 1.2
 
-        # remove gaps
-        # i_mask_x = np.where(mask_x)
-        # rec_bounds_ind = {}
-        # if list(i_mask_x[0]):
-        #     for ii, jj in zip(*i_mask_x):
-        #         xx = grid_x[ii, jj]
-        #         x_ii = grid_x[ii, :].flatten()
-        #         if xx in rec_bounds_ind.keys():
-        #             bound_x_1 = rec_bounds_ind[xx][0]
-        #             bound_x_2 = rec_bounds_ind[xx][1]
-        #         else:
-        #             iii = np.where(x_unique_c<xx)[0]
-        #             if not list(iii):
-        #                 bound_x_1 = x_ii[0] - x_data_res
-        #             else:
-        #                 bound_x_1 = x_unique_c[iii[-1]] - x_grid_res
-        #             iii = np.where(x_unique_c > xx)[0]
-        #             if not list(iii):
-        #                 bound_x_2 = x_ii[-1] + x_grid_res
-        #             else:
-        #                 bound_x_2 = x_unique_c[iii[0]] + x_data_res
-        #             rec_bounds_ind[xx] = [bound_x_1, bound_x_2]
-        #         mask_x[ii, (x_ii >= bound_x_1) & (x_ii <= bound_x_2)] = True
-        #     pass
-        
+            grid_sectime = griddata((x_c, y), x_c, (grid_x, grid_y), method='nearest')
+            mask_x = np.abs(grid_x - grid_sectime) > x_data_res * 1.2
+
+            # remove gaps
+            i_mask_x = np.where(mask_x)
+            rec_bounds_ind = {}
+            if list(i_mask_x[0]):
+                for ii, jj in zip(*i_mask_x):
+                    xx = grid_x[ii, jj]
+                    x_ii = grid_x[ii, :].flatten()
+                    if xx in rec_bounds_ind.keys():
+                        bound_x_1 = rec_bounds_ind[xx][0]
+                        bound_x_2 = rec_bounds_ind[xx][1]
+                    else:
+                        iii = np.where(x_unique_c<xx)[0]
+                        if not list(iii):
+                            bound_x_1 = x_ii[0] - x_data_res
+                        else:
+                            bound_x_1 = x_unique_c[iii[-1]] - x_grid_res
+                        iii = np.where(x_unique_c > xx)[0]
+                        if not list(iii):
+                            bound_x_2 = x_ii[-1] + x_grid_res
+                        else:
+                            bound_x_2 = x_unique_c[iii[0]] + x_data_res
+                        rec_bounds_ind[xx] = [bound_x_1, bound_x_2]
+                    mask_x[ii, (x_ii >= bound_x_1) & (x_ii <= bound_x_2)] = True
+                pass                    
+        else:
+            mask_x = np.zeros_like(grid_x, dtype=bool)
+            mask_y = np.zeros_like(grid_y, dtype=bool)
         # 
-        
+        var_name_suffix = ''
         for var_name in variable_names:
             # print(var_name)
             vrb = self[var_name].value.flatten()[sector>0]
@@ -486,57 +511,88 @@ class LEOToolbox(DatasetUser):
                 grid_z = np.ones_like(grid_x)*np.nan
                 
                 for ii in np.arange(1, n_tracks+1):
+                    
                     xd = x[sector_1 == ii]
                     yd = y[sector_1 == ii]
                     zd = vrb[sector_1 == ii]
                     if (not list(xd)) or (not list(yd)):
                         continue
-                    inds_sorted = np.argsort(yd)
-                    yd_sorted = yd[inds_sorted]
-                    inds_y_bin_0 = np.searchsorted(yd_sorted, y_bins[0])
-                    inds_y_bin_1 = np.searchsorted(yd_sorted, y_bins[1])
-                    for ib0, ib1 in zip(inds_y_bin_0, inds_y_bin_1):
-                        if along_track_binning_method == 'mean':
-                            z_i = np.nanmean(zd[inds_sorted[ib0:ib1]])
-                        elif along_track_binning_method == 'median':
-                            z_i = np.nanmedian(zd[inds_sorted[ib0:ib1]])
-                        elif along_track_binning_method == 'max':
-                            z_i = np.nanmax(zd[inds_sorted[ib0:ib1]])
-                        elif along_track_binning_method == 'min':
-                            z_i = np.nanmin(zd[inds_sorted[ib0:ib1]])
-                        
-                            if list(z_i):
-                                z_bin = np.nanmean(z_i)
-                            else:
-                                z_bin = np.nan
-                    f = interp1d(yd, xd, bounds_error=False, fill_value= 'extrapolate')
-                    x_i = f(yy_1)
+                                  
+                    x_i = gsl_interp.interp1d(
+                        yd, xd, yy_1, method='linear',
+                        x_res=y_data_res,
+                        x_res_scale = y_data_res_scale,
+                        segment=True,
+                        extrap=False,
+                    )
                     xx_1[ii-1, :] = x_i
-
+                    
                     if 'LON' in var_name:
-                        z_i = npmath.interp_period_data(yd, zd, yy_1,  period=360., method='linear', bounds_error=False)
-                    elif 'LST' in var_name:
-                        z_i = npmath.interp_period_data(yd, zd, yy_1,  period=24., method='linear', bounds_error=False)
+                        z_i = gsl_interp.interp1d_periodic_y(
+                            yd, zd, y_bins, method=along_track_binning_method,
+                            period=360.,
+                            segment=True,
+                            x_res=y_data_res,
+                            x_res_scale=y_data_res_scale,
+                            extrap=False,
+                        )
+                    elif 'LST' in var_name or 'MLT' in var_name:
+                        z_i = gsl_interp.interp1d_periodic_y(
+                            yd, zd, y_bins, method=along_track_binning_method,
+                            period=24.,
+                            segment=True,
+                            x_res=y_data_res,
+                            x_res_scale=y_data_res_scale,
+                            extrap=False,
+                        )
                     else:
-                        # f = interp1d(yd, zd, bounds_error=False, fill_value='extrapolate')
-                        # z_i = f(yy_1)
-                        z_i = np.ones_like(yy_1) * np.nan       
-                        for j, yyy in enumerate(yy_1):
-                            inds_y = np.where((yd >= yyy-y_grid_res/2) & (yd < yyy+y_grid_res/2))[0]
-                            if list(inds_y):
-                                z_i[j] = np.nanmean(zd[inds_y])
+                        inds_sorted = np.argsort(yd)
+                        yd_sorted = yd[inds_sorted]
+                        z_i = gsl_binning.binning1d(
+                            yd_sorted, zd[inds_sorted], y_bins, method=along_track_binning_method,
+                            segment=True,
+                            x_res = y_data_res,
+                            x_res_scale = y_data_res_scale,
+                            extrap=False,
+                        )
+                        if along_track_binning_method in ['median', 'max', 'min']:
+                            var_name_suffix = along_track_binning_method.upper()
+                        elif '%' in along_track_binning_method:
+                            var_name_suffix = '_PCT{}'.format(along_track_binning_method.replace('%', ''))
+                        elif along_track_binning_method == 'mean':
+                            var_name_suffix = ''
+                        else:
+                            raise ValueError('Unknown track binning method.')
                     zz_1[ii-1, :] = z_i 
                 for ii in range(grid_x.shape[0]):
                     xd = xx_1[:, ii].flatten()
                     zd = zz_1[:, ii].flatten()
                     if x_interp:
                         if 'LON' in var_name:
-                            z_i = npmath.interp_period_data(xd, zd, grid_x[0],  period=360., method='linear', bounds_error=False)
-                        elif 'LST' in var_name:
-                            z_i = npmath.interp_period_data(xd, zd, grid_x[0],  period=24., method='linear', bounds_error=False)
+                            z_i = gsl_interp.interp1d_periodic_y(
+                                xd, zd, grid_x[0], period=360., method=along_x_interp_method,
+                                segment=True,
+                                x_res=x_data_res,
+                                x_res_scale=x_data_res_scale,
+                                extrap=False,
+                            )
+                        elif 'LST' in var_name or 'MLT' in var_name:
+                            z_i = gsl_interp.interp1d_periodic_y(
+                                xd, zd, grid_x[0], period=24., method=along_x_interp_method,
+                                segment=True,
+                                x_res=x_data_res,
+                                x_res_scale=x_data_res_scale,
+                                extrap=False,
+                            )
                         else:
-                            f = interp1d(xd, zd, bounds_error=False, fill_value='extrapolate')
-                            z_i = f(grid_x[0])
+                            z_i = gsl_interp.interp1d(
+                                xd, zd, grid_x[0],
+                                method=along_x_interp_method,
+                                segment=True,
+                                x_res=x_data_res,
+                                x_res_scale=x_data_res_scale,
+                                extrap=False,
+                            )
                         grid_z[ii, :] = z_i
                     else:
                         grid_z[ii, :] = zd 
@@ -555,38 +611,82 @@ class LEOToolbox(DatasetUser):
                     
                     if (not list(xd)) or (not list(yd)):
                         continue
+                    try:
+                        x_i = gsl_interp.interp1d(
+                            yd, xd, yy_1, method='linear',
+                            segment=True,
+                            x_res=y_data_res,
+                            x_res_scale=y_data_res_scale,
+                            extrap=False,
+                        )
+                        xx_1[ii-1, :] = x_i
 
-                    f = interp1d(yd, xd, bounds_error=False, fill_value= 'extrapolate')
-                    x_i = f(yy_1)
-                    xx_1[ii-1, :] = x_i
+                        if 'LON' in var_name:
+                            z_i = gsl_interp.interp1d_periodic_y(
+                                yd, zd, yy_1, method=along_track_interp_method,
+                                period=360.,
+                                segment=True,
+                                x_res=y_data_res,
+                                x_res_scale=y_data_res_scale,
+                                extrap=False,
+                            )
+                        elif 'LST' in var_name or 'MLT' in var_name:
+                            z_i = gsl_interp.interp1d_periodic_y(
+                                yd, zd, yy_1, method=along_track_interp_method,
+                                period=24.,
+                                segment=True,
+                                x_res=y_data_res,
+                                x_res_scale=y_data_res_scale,
+                                extrap=False,
+                            )
+                        else:
+                            z_i = gsl_interp.interp1d(
+                                yd, zd, yy_1, method=along_track_interp_method,
+                                segment=True,
+                                x_res=y_data_res,
+                                x_res_scale=y_data_res_scale,
+                                extrap=False)
+                        zz_1[ii - 1, :] = z_i
+                    except Exception as e:
+                        mylog.StreamLogger.error(e)
 
-                    if 'LON' in var_name:
-                        z_i = npmath.interp_period_data(yd, zd, yy_1,  period=360., method='linear', bounds_error=False)
-                    elif 'LST' in var_name:
-                        z_i = npmath.interp_period_data(yd, zd, yy_1,  period=24., method='linear', bounds_error=False)
-                    else:
-                        f = interp1d(yd, zd, bounds_error=False, fill_value='extrapolate')
-                        z_i = f(yy_1)
-                    zz_1[ii-1, :] = z_i 
                 for ii in range(grid_x.shape[0]):
                     xd = xx_1[:, ii].flatten()
                     zd = zz_1[:, ii].flatten()
                     if x_interp:
                         if 'LON' in var_name:
-                            z_i = npmath.interp_period_data(xd, zd, grid_x[0],  period=360., method='linear', bounds_error=False)
-                        elif 'LST' in var_name:
-                            z_i = npmath.interp_period_data(xd, zd, grid_x[0],  period=24., method='linear', bounds_error=False)
+                            z_i = gsl_interp.interp1d_periodic_y(
+                                xd, zd, grid_x[0], period=360., method=along_x_interp_method,
+                                segment=True,
+                                x_res=x_data_res,
+                                x_res_scale=x_data_res_scale,
+                                extrap=False,
+                            )
+                        elif 'LST' in var_name or 'MLT' in var_name:
+                            z_i = gsl_interp.interp1d_periodic_y(
+                                xd, zd, grid_x[0], period=24., method=along_x_interp_method,
+                                segment=True,
+                                x_res=x_data_res,
+                                x_res_scale=x_data_res_scale,
+                                extrap=False,
+                            )
                         else:
-                            f = interp1d(xd, zd, bounds_error=False, fill_value='extrapolate')
-                            z_i = f(grid_x[0])
+                            z_i = gsl_interp.interp1d(
+                                xd, zd, grid_x[0], method=along_x_interp_method,
+                                segment=True,
+                                x_res=x_data_res,
+                                x_res_scale=x_data_res_scale,
+                                extrap=False,)
                         grid_z[ii, :] = z_i
                     else:
-                        grid_z[ii, :] = zd
+                        grid_z[ii, :] = zd 
             else:
-                grid_z = griddata((x, y), vrb, (grid_x, grid_y), method=method)
+                grid_z = griddata((x, y), vrb, (grid_x, grid_y), method=grid_method)
             grid_z[mask_y] = np.nan
             grid_z[mask_x] = np.nan
             var_name_in = '_'.join(('SECTOR', sector_name, 'GRID', var_name))
+            if str(var_name_suffix):
+                var_name_in = '_'.join((var_name_in, var_name_suffix))
             self.sectors[sector_name]['VARIABLE_NAMES'].append(var_name_in) 
             
             # self.add_variable(var_name=var_name_in, value=grid_z.T)
@@ -608,13 +708,24 @@ class LEOToolbox(DatasetUser):
             var.visual.plot_config.style = '2P'
             var.visual.plot_config.pcolormesh.update(cmap='jet')
         
-           
+        grid_x_name = '_'.join(('SECTOR', sector_name, 'GRID', 'X'))
+        grid_x = grid_x.T
+        self.add_variable(var_name=grid_x_name, value=grid_x)
+        grid_y_name = '_'.join(('SECTOR', sector_name, 'GRID', 'Y'))
+        grid_y = grid_y.T
+        self.add_variable(var_name=grid_y_name, value=grid_y)
+        var_name = '_'.join(('SECTOR', sector_name, 'GRID_DATETIME'))
+        grid_dts = np.array([dt0 + datetime.timedelta(seconds=sec) for sec in grid_x[:, 0]])
+        self.add_variable(var_name=var_name, value=grid_dts[:, np.newaxis])
+        var_name = '_'.join(('SECTOR', sector_name, 'GRID_LAT'))
+        self.add_variable(var_name=var_name, value=grid_y[0, :][np.newaxis, :])
         return
     
     def griddata_by_sector(
             self, sector_name=None, variable_names=None, x_grid_res=20*60, y_grid_res=0.5, along_track_interp=True,
             x_data_res=None, y_data_res=None, along_track_binning=False, 
             ):
+        mylog.StreamLogger.warning('This method will be deprecated. Use griddata_by_sector_v2 instead.')
         self.visual = 'on'
         dts_c = self['_'.join(('SECTOR', sector_name, 'DATETIME'))].value.flatten()
         dts = self['SC_DATETIME'].value.flatten()
@@ -844,18 +955,42 @@ class LEOToolbox(DatasetUser):
 
 
         return
-    
+
     def add_GEO_LST(self):
+        import geospacelab.observatory.earth.sun_position as sun_position
         lons = self['SC_GEO_LON'].flatten()
         uts = self['SC_DATETIME'].flatten()
-        lsts = [ut + datetime.timedelta(seconds=int(lon / 15. * 3600)) for ut, lon in zip(uts, lons)]
-        lsts = [lst.hour + lst.minute / 60. + lst.second / 3600. for lst in lsts]
+
+        lsts = sun_position.convert_datetime_longitude_to_local_solar_time(
+            dts=uts, lons=lons
+        )
         var = self.add_variable(var_name='SC_GEO_LST')
         var.value = np.array(lsts)[:, np.newaxis]
         var.label = 'LST'
         var.unit = 'h'
         var.depends = self['SC_GEO_LON'].depends
         return var
+
+    def add_SC_sun_position(self):
+        import geospacelab.observatory.earth.sun_position as sun_position
+        lats = self['SC_GEO_LAT'].flatten()
+        lons = self['SC_GEO_LON'].flatten()
+        uts = self['SC_DATETIME'].flatten()
+
+        sun_positions = sun_position.convert_datetime_longitude_latitude_to_solar_position(
+            dts=uts, lons=lons, lats=lats
+        )
+        var = self.add_variable(var_name='SC_SZA')
+        var.value = np.array(sun_positions[0])[:, np.newaxis]
+        var.label = 'SZA'
+        var.unit = r'$\circ$'
+        var.depends = self['SC_GEO_LON'].depends
+
+        var = self.add_variable(var_name='SC_SAA')
+        var.value = np.array(sun_positions[1])[:, np.newaxis]
+        var.label = 'SAA'
+        var.unit = r'$\circ$'
+        var.depends = self['SC_GEO_LON'].depends
     
     @staticmethod
     def format_pseudo_lat_label(ax, sector_name, is_integer=True, y_tick_res=15.):
@@ -994,7 +1129,7 @@ class LEOToolbox(DatasetUser):
         lon_0 = self['SC_GEO_LON'].flatten()
         height_0 = self['SC_GEO_ALT'].flatten()
         
-        cs_0 = GEOCSpherical(coords={'lat': lat_0, 'lon': lon_0, 'height': height_0})
+        cs_0 = gsl_cs.GEOCSpherical(coords={'lat': lat_0, 'lon': lon_0, 'height': height_0})
         phi_0 = cs_0['phi']
         theta_0 = cs_0['theta']
         cs_0 = cs_0.to_cartesian()

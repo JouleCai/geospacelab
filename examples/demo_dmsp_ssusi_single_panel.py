@@ -73,10 +73,11 @@ def test_ssusi():
     # Overlay the gridlines
     panel.overlay_gridlines(lat_res=5, lon_label_separator=5)
 
-    # Overlay the coastlines in the AACGM coordinate
-    #panel.overlay_coastlines()
     # Fill land area in the AACGM coordinate
     panel.overlay_lands( edge_color=None, fill_color='tan', zorder=1, alpha=0.3 )
+
+    # Overlay the coastlines in the AACGM coordinate
+    panel.overlay_coastlines()
 
     # Overlay cross-track velocity along satellite trajectory
     sc_dt = ds_s1['SC_DATETIME'].value.flatten()

@@ -21,7 +21,8 @@ class GEO(SpaceSphericalCS):
     def __init__(self, coords=None, ut=None, vector=None, **kwargs):
         
         kwargs.setdefault('new_coords', ['lat', 'lon', 'height', 'lst'])
-        super().__init__(name='GEO', coords=coords, vector=vector, ut=ut, **kwargs)
+        kwargs.setdefault('name', 'GEO')
+        super().__init__(coords=coords, vector=vector, ut=ut, **kwargs)
 
     def to_AACGM(self, append_mlt=False):
         cs_geoc = self.to_GEOC(kind='sph')

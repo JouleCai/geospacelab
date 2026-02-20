@@ -321,6 +321,12 @@ Output:
 From then on, the data source has been switched from JHUAPL to CDAWeb.
  
 ```python
+
+import datetime
+import matplotlib.pyplot as plt
+import geospacelab.visualization.mpl.geomap.geodashboards as geomap
+
+
 dt_fr = datetime.datetime(2015, 9, 8, 8)
 dt_to = datetime.datetime(2015, 9, 8, 23, 59)
 time_c = datetime.datetime(2015, 9, 8, 20, 21)

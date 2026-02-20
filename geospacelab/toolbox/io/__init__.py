@@ -6,5 +6,5 @@ __author__ = "Lei Cai"
 __copyright__ = "Copyright 2021, GeospaceLab"
 __license__ = "BSD-3-Clause License"
 __email__ = "lei.cai@oulu.fi"
-__docformat__ = "reStructureText"
+__docformat__ = "reStructuredText"
 

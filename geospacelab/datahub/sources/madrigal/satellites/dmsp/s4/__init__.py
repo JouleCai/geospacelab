@@ -241,6 +241,21 @@ class Dataset(datahub.DatasetSourced):
         #     glon_1[ind_outliers] = glon_new[ind_outliers]
         # self['SC_GEO_LON'].value = glon_1.reshape((glon_1.size, 1))
 
+    def add_GEO_LST(self):
+        import geospacelab.observatory.earth.sun_position as sun_position
+        lons = self['SC_GEO_LON'].flatten()
+        uts = self['SC_DATETIME'].flatten()
+
+        lsts = sun_position.convert_datetime_longitude_to_local_solar_time(
+            dts=uts, lons=lons
+        )
+        var = self.add_variable(var_name='SC_GEO_LST')
+        var.value = np.array(lsts)[:, np.newaxis]
+        var.label = 'LST'
+        var.unit = 'h'
+        var.depends = self['SC_GEO_LON'].depends
+        return var
+
     def search_data_files(self, **kwargs):
 
         dt_fr = self.dt_fr

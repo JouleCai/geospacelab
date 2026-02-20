@@ -6,11 +6,11 @@ __author__ = "Lei Cai"
 __copyright__ = "Copyright 2021, GeospaceLAB"
 __credits__ = ["Lei Cai"]
 __license__ = "BSD-3-Clause License"
-__version__ = "0.12.2"
+__version__ = "0.12.4"
 __maintainer__ = "Lei Cai"
 __email__ = "lei.cai@oulu.fi"
 __status__ = "Developing"
-__docformat__ = "reStructureText"
+__docformat__ = "reStructuredText"
 
 
 import geospacelab.config as config

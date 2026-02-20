@@ -187,7 +187,7 @@ def get_doy(dts, year=None, decimal=False):
     if type_in is datetime:
         dts = [dts]
     dts = numpy.array(dts)
-    doys = numpy.empty_like(dts)
+    doys = numpy.full_like(dts, fill_value=numpy.nan, dtype=numpy.int32)
 
     if year is not None:
         dt0 = datetime(year, 1, 1, 0, 0, 0)
