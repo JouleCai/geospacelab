@@ -383,6 +383,9 @@ panel.add_colorbar(ipc, c_label=band + " (R)", c_scale=pcolormesh_config['c_scal
 # Overlay the gridlines
 panel.overlay_gridlines(lat_res=5, lon_label_separator=5)
 
+# Fill land area in the AACGM coordinate
+panel.overlay_lands( edge_color=None, fill_color='tan', zorder=1, alpha=0.3 )
+
 # Overlay the coastlines in the AACGM coordinate
 panel.overlay_coastlines()
 
