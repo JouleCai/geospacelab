@@ -374,13 +374,13 @@ class DashboardBase(object):
             format = 'png'
             file_path = file_path.with_suffix('.png')
         else:
-            if sufs[-1] in default_filetypes.keys():
+            if sufs[-1][1:] in default_filetypes.keys():
                 format = sufs[-1].split('.')[-1]
             else:
                 format = 'png'
                 file_path = file_path.with_suffix('.png')
-
-        plt.savefig(file_path, dpi=dpi, format=format, **kwargs)
+        kwargs.setdefault('format', format)
+        plt.savefig(file_path, dpi=dpi, **kwargs)
 
     @staticmethod
     def show():
@@ -737,7 +737,7 @@ class PanelBase(object):
                                                      numticks=12)
                 cax.yaxis.set_minor_locator(minorlocator)
                 cax.yaxis.set_minor_formatter(mpl.ticker.NullFormatter())
-        cax.yaxis.set_tick_params(labelsize='x-small')
+        cax.yaxis.set_tick_params(labelsize='small')
         return icb
 
     @property

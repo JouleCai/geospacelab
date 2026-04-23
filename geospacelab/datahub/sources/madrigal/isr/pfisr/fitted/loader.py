@@ -142,11 +142,96 @@ class Loader:
         
         return metadata
 
-    def load_from_table_layout(self):
-        variables = {}
-        metadata = {}
+    # def load_from_table_layout(self):
+    #     variables = {}
+    #     metadata = {}
+        
+    #     if self.beam_id is None:
+    #         self.list_beams(display=True)
+            
+    #         self.select_beam(az=self.beam_az, el=self.beam_el)
+        
+    #     def check_dtypes(table):
+    #         rec = table[0]
+    #         var_fh5_names = rec.dtype.names
+    #         var_fh5_types = [f[0] for f in rec.dtype.fields.values()]
+    #         return var_fh5_names, var_fh5_types
 
+    #     with h5py.File(self.file_path, 'r') as fh5:
+    #         data_fh5 = fh5['Data']
+            
+    #         data_table = data_fh5['Table Layout'][::]
+    #         var_fh5_names, var_fh5_types = check_dtypes(data_table)
+            
+    #         data_table = list(zip(*data_table))
+            
+    #         inds_beam = np.where(data_table[var_fh5_names.index('beamid')] == self.beam_id)[0]
+    #         if not list(inds_beam):
+    #             mylog.StreamLogger.error(f"Cannot find the beam with ID={self.beam_id} in the data table!")
+    #             raise AttributeError
+    #         vars_fh5 = {}
+    #         for i, var_name_fh5 in enumerate(var_fh5_names):
+    #             arr = np.array(data_table[i][inds_beam])
+    #             vars_fh5[var_name_fh5] = arr
+            
+    #         n_rows = len(np.unique(vars_fh5['ut1_unix']))
+    #         n_gates = int(len(vars_fh5['ut1_unix']) / n_rows)
+    #         self.gate_num = n_gates
+    #         vars_fh5_1d_names = [
+    #             'year', 'month', 'day', 'hour', 'min', 'sec', 
+    #             'recno', 'kindat', 'kinst', 'ut1_unix', 'ut2_unix', 
+    #             'beamid', 'azm', 'elm', 'pl', 'power', 'numtxaeu', 'numrxaeu', 
+    #             'cbadl', 'tfreq', 'rfreq']
+    #         for i, var_name_fh5 in enumerate(var_fh5_names):
+    #             if var_name_fh5 in vars_fh5_1d_names:
+    #                 vars_fh5[var_name_fh5] = vars_fh5[var_name_fh5].reshape((n_rows, 1))
+    #             else:
+    #                 vars_fh5[var_name_fh5] = vars_fh5[var_name_fh5].reshape((n_rows, n_gates))
 
+    #         vars_fh5['range'] = np.array(data_fh5['Array Layout'][array_layout_str]['range'])[np.newaxis, :]
+    #         if vars_fh5['range'].shape[1] < self.gate_num:
+    #             arr = np.empty((1, self.gate_num))
+    #             arr[::] = np.nan
+    #             arr[0, 0:vars_fh5['range'].shape[1]] = vars_fh5['range'].flatten()
+    #             vars_fh5['range'] = arr
+
+    #         if np.nanmedian(vars_fh5['range'].flatten()) > 1e5:
+    #             mylog.StreamLogger.warning(f"The variable range is detected in [m]. It is converted into [km].")
+    #             vars_fh5['range'] = vars_fh5['range'] * 1e-3
+    #         vars_fh5['timestamps'] = np.array(data_fh5['Array Layout'][array_layout_str]['timestamps'])[:, np.newaxis]
+    #         for var_name, var_name_fh5 in var_name_dict.items():
+    #             if var_name_fh5 not in vars_fh5.keys():
+    #                 mylog.StreamLogger.warning(f"The requested variable {var_name_fh5} does not exist in the data file!")
+    #                 variables[var_name] = None
+    #                 continue
+    #             variables[var_name] = vars_fh5[var_name_fh5]
+
+    #         variables['comp_mix'] = 1. - variables['comp_O_p']
+    #         variables['comp_mix_err'] = variables['comp_O_p_err']
+
+    #         variables['RANGE'] = np.tile(vars_fh5['range'], [variables['n_e'].shape[0], 1])
+    #         variables['DATETIME'] = dttool.convert_unix_time_to_datetime_cftime(vars_fh5['timestamps'])
+                
+    #         self.variables = variables
+            
+    #         metadata = self.get_metadata()
+            
+    #         if 'alternating' in metadata['kind of data file'].lower():
+    #             pulse_code = 'Alternating Code'
+    #         elif 'long pulse' in metadata['kind of data file'].lower():
+    #             pulse_code = 'Long Pulse'
+    #         else:
+    #             pulse_code = ''
+            
+    #         pulse_length = np.nanmedian(variables['PULSE_LENGTH'].flatten())
+            
+    #         metadata['PULSE_CODE'] = pulse_code
+    #         metadata['PULSE_LENGTH'] = pulse_length
+
+    #         self.beam_az = np.nanmedian(variables['AZ'])
+    #         self.beam_el = np.nanmedian(variables['EL'])
+            
+    #         self.metadata = metadata
 
     def load(self):
         variables = {}

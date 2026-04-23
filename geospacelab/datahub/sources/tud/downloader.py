@@ -174,10 +174,10 @@ class TUDownloader(DownloaderBase):
     def _validate_version(self):
         if self.mission.upper() in ['SWARM', 'CHAMP', 'GOCE', 'GRACE']:
             valid_versions = ['v01', 'v02']
-            assert self.version in valid_versions, f"Invalid version {self.version}. Valid versions are {valid_versions}."
+            assert any(v in self.version for v in valid_versions), f"Invalid version {self.version}. Valid versions are {valid_versions}."
         elif self.mission.upper() == 'GRACE-FO':
             valid_versions = ['v02']
-            assert self.version in valid_versions, f"Invalid version {self.version}. Valid versions are {valid_versions}."
+            assert any(v in self.version for v in valid_versions), f"Invalid version {self.version}. Valid versions are {valid_versions}."
         else:
             raise NotImplementedError(f"Mission {self.mission} is not supported.")
         return

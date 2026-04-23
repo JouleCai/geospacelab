@@ -65,8 +65,7 @@ def convert_datetime_to_sectime(dts, dt0=None):
     if dt0 is None:
         dt0 = get_start_of_the_day(dts.flatten()[0])
 
-    dt_delta = dts.flatten() - dt0
-    sectime = [dt_temp.total_seconds() for dt_temp in dt_delta]
+    sectime = [(dt - dt0).total_seconds() for dt in dts.flatten()]
 
     if dts_type is list:
         return sectime, dt0

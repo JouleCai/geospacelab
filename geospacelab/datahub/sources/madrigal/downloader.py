@@ -344,7 +344,6 @@ class Downloader(object):
                         time.sleep(interval)
                     continue
             
-            print(e)
             raise ImportError(f"Failed to connect the Madrigal database with {max} connection(s)!")
         
         def try_to_get_experiments(max=3, interval=30):
@@ -361,8 +360,6 @@ class Downloader(object):
                     if m < max - 1:
                         time.sleep(interval)
                     continue
-            
-            print(e)
             raise ImportError(f"Failed to get the experiments from the database with {max} connection(s)!") 
         
         include_exp_name_patterns = [] if include_exp_name_patterns is None else include_exp_name_patterns
