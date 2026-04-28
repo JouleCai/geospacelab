@@ -48,55 +48,49 @@ class LoaderModel(object):
         if self.file_type == 'cdf':
             self.load_cdf_data()
 
-    def load_cdf_data(self,):
+    def load_cdf_data(self, var_names_cdf_epoch=None, var_names_independent_time=None):
         """
         load the data from the cdf file
         :return:
         """
+        if var_names_independent_time is None:
+            var_names_independent_time = []
+        
         cdf_file = cdflib.CDF(self.file_path)
         cdf_info = cdf_file.cdf_info()
-        variables = cdf_info.zVariables
-
-        if dict(self.variable_name_dict):
-            new_dict = {vn: vn for vn in variables}
-            self.variable_name_dict = pybasic.dict_set_default(self.variable_name_dict, **new_dict)
-
-        epochs = cdf_file.varget(variable=self.variable_name_dict['CDF_EPOCH'])
-        if self.dt_fr is not None:
-            t = self.dt_fr
-            epoch_fr = cdflib.cdfepoch.compute_epoch([t.year, t.month, t.day, t.hour, t.minute, t.second])
-        else:
-            epoch_fr = epochs[0]
-        if self.dt_to is not None:
-            t = self.dt_to
-            epoch_to = cdflib.cdfepoch.compute_epoch([t.year, t.month, t.day, t.hour, t.minute, t.second])
-        else:
-            epoch_to = epochs[-1]
-        # ind_t = np.where((epochs >= epoch_fr) & (epochs <= epoch_to))[0]
-        ind_t = range(len(epochs))
-        num_data = len(epochs)
-        for var_name, cdf_var_name in self.variable_name_dict.items():
-            if var_name == 'CDF_EPOCH':
-                epochs = epochs[ind_t]
-                epochs = cdflib.cdfepoch.unixtime(epochs)
-                dts = [datetime.timedelta(seconds=epoch) + datetime.datetime(1970, 1, 1, 0, 0, 0) for epoch in epochs]
-                self.variables['SC_DATETIME'] = np.array(dts).reshape((len(dts), 1))
-                continue
-            # if var_name == 'CDF_EPOCH':
-            #     epochs = epochs[ind_t]
-            #     dts = cdflib.cdfepoch.to_datetime(epochs)
-            #     self.variables['SC_DATETIME'] = np.array(dts).reshape((len(dts), 1))
-            #     continue
-            var = cdf_file.varget(variable=cdf_var_name)
-            var = np.array(var)
-            vshape = var.shape
-
-            if num_data not in vshape:
-                self.variables[var_name] = var
-                continue
-
-            if len(vshape) == 1:
-                var = var[:, np.newaxis]
-            self.variables[var_name] = var[ind_t, ::]
-
+        var_names_cdf = cdf_info.zVariables
+        #  cdf_file.varattsget('MLT')
+        # {'FIELDNAM': 'MLT', 'CATDESC': 'Magnetic local time.', 'Type': 'CDF_FLOAT', 'UNITS': 'hour', 'VAR_TYPE': 'data', 'DEPEND_0': 'Time', 'DISPLAY_TYPE': 'time_series', 'LABLAXIS': 'MLT', 'VALIDMIN': np.float32(0.0), 'VALIDMAX': np.float32(24.0)}
+        # However, not all products have the full record of the data types and other attributibutes. For example, the AEJ_LPS product does not have the 'DEPEND_0' attribute for the variables that depend on time, and thus we need to specify the variable names of the variables that are epoch and independent of time.
+        
+        variables_cdf = {}
+        epoch_lengths = []
+        for vn_cdf in var_names_cdf:
+            if vn_cdf in var_names_cdf_epoch:
+                epochs = cdf_file.varget(variable=vn_cdf)
+                epochs = np.array(cdflib.cdfepoch.unixtime(epochs))
+                shape = epochs.shape
+                dts = [datetime.timedelta(seconds=epoch) + datetime.datetime(1970, 1, 1, 0, 0, 0) for epoch in epochs.flatten()]
+                variables_cdf[vn_cdf] = np.array(dts).reshape(shape)
+                epoch_lengths.append(shape[0])
+            else:
+                variables_cdf[vn_cdf] = np.array(cdf_file.varget(variable=vn_cdf))
+        
+        variables = {}
+        for var_name, var_name_cdf in self.variable_name_dict.items():
+            if var_name_cdf not in variables_cdf:
+                raise ValueError(f"Variable name {var_name_cdf} not found in the cdf file.")
+            data = variables_cdf[var_name_cdf]
+            if data.shape[0] in epoch_lengths and var_name not in var_names_independent_time:
+                if len(data.shape) == 1:
+                    data = data[:, np.newaxis]
+                else:
+                    pass
+            if 'CDF_EPOCH' in var_name:
+                var_name_ = var_name.replace('CDF_EPOCH', 'SC_DATETIME')
+            else:
+                var_name_ = var_name
+            variables[var_name_] = data
+        
+        self.variables = variables
 

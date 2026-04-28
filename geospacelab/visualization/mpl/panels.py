@@ -406,7 +406,7 @@ class TSPanel(Panel):
             if label in x_depend.keys():
                 y0 = x_depend[label].flatten()
             elif label in var_for_config.dataset.keys():
-                y0 = var_for_config.dataset[label].value
+                y0 = var_for_config.dataset[label].flatten()
             else:
                 raise KeyError
             if 'MLT' in label.upper():

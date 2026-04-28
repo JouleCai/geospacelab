@@ -1,0 +1,84 @@
+import datetime
+import matplotlib.pyplot as plt
+import numpy as np
+import pathlib
+
+import geospacelab.visualization.mpl.dashboards as dashboards
+
+cwd = pathlib.Path(__file__).parent.resolve()
+file_dir_figure = cwd / 'figures'
+file_dir_figure.mkdir(parents=True, exist_ok=True)
+
+def test_swarm_AEJ_LPS_overview():
+    """Test Swarm AEJ/LPS data product
+    
+    """
+    dt_fr = datetime.datetime(2024, 5, 10, 12, 0)
+    dt_to = datetime.datetime(2024, 5, 11, 12, 0)
+
+    db = dashboards.TSDashboard(
+        dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)},
+        )
+
+    ds = db.dock(datasource_contents=['esa_eo', 'swarm', 'l2daily', 'aej_lps'], sat_id='C', add_APEX=True, add_AACGM=True)
+
+    glat = ds['GEO_LAT']
+    glon = ds['GEO_LON']
+    J_CF_N = ds['J_CF_N']
+    J_CF_E = ds['J_CF_E']
+    J_DF_N = ds['J_DF_N']
+    J_DF_E = ds['J_DF_E']
+    J_r = ds['J_r']
+    
+    panel_layouts = [
+        [J_CF_N, J_CF_E],
+        [J_DF_N, J_DF_E],
+        [J_r],
+        [glat, [glon]]
+    ]
+
+    db.set_layout(panel_layouts=panel_layouts)
+    db.draw()
+
+    db.save_figure(file_dir=file_dir_figure, file_name='example_swarm_aej_lps_overview', dpi=300, append_time=False)
+    db.show()
+    
+def test_swarm_AEJ_LPS_zoom():
+    """Test Swarm AEJ/LPS data product
+    
+    """
+    dt_fr = datetime.datetime(2024, 5, 10, 20, 30)
+    dt_to = datetime.datetime(2024, 5, 10, 21, 0)
+
+    db = dashboards.TSDashboard(
+        dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)},
+        timeline_extra_labels=['GEO_LAT', 'GEO_LON', 'APEX_LAT', 'APEX_LON', 'APEX_MLT',] 
+        )
+
+    ds = db.dock(datasource_contents=['esa_eo', 'swarm', 'l2daily', 'aej_lps'], sat_id='C', add_APEX=True, add_AACGM=True)
+
+    glat = ds['GEO_LAT']
+    glon = ds['GEO_LON']
+    J_CF_N = ds['J_CF_N']
+    J_CF_E = ds['J_CF_E']
+    J_DF_N = ds['J_DF_N']
+    J_DF_E = ds['J_DF_E']
+    J_r = ds['J_r']
+    
+    panel_layouts = [
+        [J_CF_N, J_CF_E],
+        [J_DF_N, J_DF_E],
+        [J_r],
+        [glat, [glon]]
+    ]
+
+    db.set_layout(panel_layouts=panel_layouts)
+    db.draw()
+
+    db.save_figure(file_dir=file_dir_figure, file_name='example_swarm_aej_lps_zoom', dpi=300, append_time=False)
+    db.show()
+
+
+if __name__ == "__main__":
+    test_swarm_AEJ_LPS_overview()
+    test_swarm_AEJ_LPS_zoom()

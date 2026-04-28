@@ -242,8 +242,7 @@ class VariableBase(object):
             name='', fullname='', label='', group='',
             unit='', unit_label=None, quantity=None,
             variable_type='scalar',
-            ndim=None, depends=None, dataset=None, visual=None,
-            **kwargs):
+            ndim=None, depends=None, dataset=None, visual=None, description='', **kwargs):
         """Initial settings
 
             :param  name: The variable's name, ['']
@@ -290,6 +289,7 @@ class VariableBase(object):
 
         self.name = name
         self.fullname = fullname
+        self.description = description
 
         self.label = label
 
@@ -315,7 +315,7 @@ class VariableBase(object):
         self.visual = visual
         self._attrs_registered = ['name', 'fullname', 'label', 'data_type', 'group', 'unit', 'unit_label',
                                   'quantity', 'value', 'error', 'variable_type', 'ndim', 'depends', 'dataset',
-                                  'visual']
+                                  'visual', 'description']
 
     def config(self, logging=True, **kwargs):
         """

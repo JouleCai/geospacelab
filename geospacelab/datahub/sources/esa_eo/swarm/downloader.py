@@ -63,14 +63,18 @@ class Downloader(DownloaderBase):
             dt_fr, dt_to, data_file_root_dir=data_file_root_dir, force=force, direct_download=direct_download, **kwargs
         )
 
-    def download(self, **kwargs):
+    def download(self, long_term=False,**kwargs):
         done = False
         diff_month = dttool.get_diff_months(self.dt_fr, self.dt_to)
         default_file_name_patterns = kwargs['file_name_patterns']
-        for nm in range(diff_month+1):
-            this_month = dttool.get_next_n_months(self.dt_fr, nm)
+        if not long_term:
+            months = [dttool.get_next_n_months(self.dt_fr, nm) for nm in range(diff_month+1)]
+        else:           
+            months = [self.dt_fr]
+        for this_month in months:
             file_name_patterns = copy.deepcopy(default_file_name_patterns)
-            file_name_patterns.append(this_month.strftime("%Y%m"))
+            if not long_term:
+                file_name_patterns.append(this_month.strftime("%Y%m"))
             ftp = ftplib.FTP_TLS()
             ftp.connect(self.ftp_host, self.ftp_port, 30)
             try:
@@ -79,6 +83,7 @@ class Downloader(DownloaderBase):
                 file_list = ftp.nlst()
                
                 file_names, versions = self.search_files(file_list=file_list, file_name_patterns=file_name_patterns)
+                
                 if file_names is None:
                     raise FileNotFoundError
                 file_dir_root = self.data_file_root_dir
