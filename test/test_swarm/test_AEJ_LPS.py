@@ -40,7 +40,7 @@ def test_swarm_AEJ_LPS_overview():
     db.set_layout(panel_layouts=panel_layouts)
     db.draw()
 
-    db.save_figure(file_dir=file_dir_figure, file_name='example_swarm_aej_lps_overview', dpi=150, append_time=False)
+    db.save_figure(file_dir=file_dir_figure, file_name='example_swarm_aej_lps_overview', dpi=100, append_time=False)
     db.show()
     
 def test_swarm_AEJ_LPS_zoom():
@@ -75,7 +75,7 @@ def test_swarm_AEJ_LPS_zoom():
     db.set_layout(panel_layouts=panel_layouts)
     db.draw()
 
-    db.save_figure(file_dir=file_dir_figure, file_name='example_swarm_aej_lps_zoom', dpi=150, append_time=False)
+    db.save_figure(file_dir=file_dir_figure, file_name='example_swarm_aej_lps_zoom', dpi=100, append_time=False)
     db.show()
 
 
