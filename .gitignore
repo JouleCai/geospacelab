@@ -10,5 +10,5 @@ build
 .eggs
 geospacelab.egg-info
 
-tests/test_swarm/figures/*.png
+test/test_swarm/figures/*
 
