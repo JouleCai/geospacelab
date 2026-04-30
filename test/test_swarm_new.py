@@ -28,4 +28,4 @@ def test_swarm():
 
 
 if __name__ == "__main__":
-    test_swarm_fac()
+    test_swarm()

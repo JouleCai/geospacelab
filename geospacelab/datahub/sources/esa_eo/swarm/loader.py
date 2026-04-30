@@ -29,11 +29,15 @@ class LoaderModel(object):
     :param direct_load: call the method :meth:`~.LoadModel.load_data` directly or not
     :type direct_load: bool
     """
-    def __init__(self, file_path, file_type='cdf', variable_name_dict=None, direct_load=True, dt_fr=None, dt_to=None, **kwargs):
+    def __init__(
+        self, file_path, file_type='cdf', 
+        product_version=None,
+        variable_name_dict=None, direct_load=True, dt_fr=None, dt_to=None, **kwargs):
 
         self.file_path = pathlib.Path(file_path)
         self.file_type = file_type
         self.variables = {}
+        self.product_version = product_version
         self.dt_fr = dt_fr
         self.dt_to = dt_to
 

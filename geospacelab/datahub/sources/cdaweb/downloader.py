@@ -56,7 +56,6 @@ class DownloaderBase(object):
         direct_download=False,
         force_download=False,
         dry_run=False,
-        download_from = None,
         **kwargs
     ):
 
@@ -106,7 +105,7 @@ class DownloaderBase(object):
                 to_download = False
         return to_download
     
-    def _search_files(self, file_list, file_name_patterns):
+    def _search_files(self, file_list, file_name_patterns, **kwargs):
         search_pattern = '.*' + '.*'.join(file_name_patterns) + '.*'
         fn_regex = re.compile(search_pattern)
         file_names = list(filter(fn_regex.match, file_list))
@@ -180,12 +179,24 @@ class DownloaderFromFTPBase(DownloaderBase):
             ftp.login(user=self.username, passwd=self.password)
             ftp.cwd(self.root_dir_remote)
             
-            self.file_paths_remote = self.search_from_ftp(
-                ftp, subdirs=subdirs, file_name_patterns=file_name_patterns
-            )
-            self.save_files_from_ftp(ftp)
+            try: 
+                self.file_paths_remote = self.search_from_ftp(
+                    ftp, subdirs=subdirs, file_name_patterns=file_name_patterns, 
+                    **kwargs
+                )
+            except Exception as e:
+                mylog.StreamLogger.error(f"Error occurred while searching files from FTP: {e}")
             
-    def search_from_ftp(self, ftp, subdirs: None | list=None, file_name_patterns: None | list=None):
+            try:  
+                self.save_files_from_ftp(ftp, **kwargs)
+            except Exception as e:
+                mylog.StreamLogger.error(f"Error occurred while saving files from FTP: {e}")
+            
+    def search_from_ftp(
+        self, ftp, subdirs: None | list=None, 
+        file_name_patterns: None | list=None, 
+        **kwargs
+        ):
         if subdirs is not None:
             for subdir in subdirs:
                 ftp.cwd(subdir)
@@ -198,15 +209,16 @@ class DownloaderFromFTPBase(DownloaderBase):
                 raise
 
         file_names = self._search_files(
-            file_list=files, file_name_patterns=file_name_patterns
+            file_list=files, file_name_patterns=file_name_patterns, **kwargs
         )        
         
-        file_paths_remote = []
-        for fn in file_names:
-            file_paths_remote.append(ftp.pwd() + '/' + fn)
+        pwd_ = ftp.pwd()
+        file_paths_remote =[pwd_ + '/' + file_name for file_name in file_names]
         return file_paths_remote
     
-    def save_files_from_ftp(self, ftp, file_paths_local=None, root_dir_remote=None):
+    def save_files_from_ftp(self, ftp, file_paths_local=None, root_dir_remote=None, dry_run=None, **kwargs):
+        if dry_run is None:
+            dry_run = self.dry_run
         if root_dir_remote is None:
             root_dir_remote = self.root_dir_remote
             
@@ -219,9 +231,11 @@ class DownloaderFromFTPBase(DownloaderBase):
                 self.file_paths_local.append(
                     fp_local
                 )
+        else:
+            self.file_paths_local = file_paths_local
         self.done = [False] * len(self.file_paths_remote)
         
-        if self.dry_run:
+        if dry_run:
             for i, (fp_remote, fp_local) in enumerate(zip(self.file_paths_remote, self.file_paths_local)):
                 mylog.simpleinfo.info(
                     f"Dry run: Downloading the file {fp_remote} to {fp_local} ..."
@@ -250,7 +264,7 @@ class DownloaderFromFTPBase(DownloaderBase):
                 
                 bufsize=1024
                 total=ftp.size(fp_remote)
-                pbar=tqdm(total=total)
+                pbar=tqdm.tqdm(total=total)
                 def bar(data):
                     f.write(data)
                     pbar.update(len(data))

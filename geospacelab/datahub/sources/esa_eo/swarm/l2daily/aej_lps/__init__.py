@@ -26,7 +26,7 @@ default_dataset_attrs = {
     'facility': swarm_facility,
     'instrument': 'MAG',
     'product': 'AEJ_LPS',
-    'data_file_ext': 'cdf',
+    'data_file_ext': '.cdf',
     'product_version': 'latest',
     'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Level2daily' / 'AEJ_LPS',
     'allow_load': True,
