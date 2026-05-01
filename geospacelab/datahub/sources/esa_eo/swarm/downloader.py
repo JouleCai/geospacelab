@@ -140,6 +140,8 @@ class DownloaderSwarm(DownloaderFromFTPBase):
             self.download(
                 with_TLS=True, subdirs=self.sub_dirs_remote, file_name_patterns=self.product_pattherns,
             )
+            if self._files_record_remote['file_path'].size == 0:
+                raise LookupError("Error during indexing the files.")
             self._indexing_record = copy.deepcopy(self._files_record_remote)
             self._files_record_remote = copy.deepcopy(FILE_RECORD_REMOTE_MODEL)
             self._save_indexing_result(file_path_indexing)
@@ -148,6 +150,7 @@ class DownloaderSwarm(DownloaderFromFTPBase):
         self._load_indexing_result(file_path_indexing)
     
     def _save_indexing_result(self, file_path):
+        file_path.parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, 'wb') as f:
             pickle.dump(self._indexing_record, f, protocol=pickle.HIGHEST_PROTOCOL)
         
@@ -190,12 +193,44 @@ class DownloaderSwarm(DownloaderFromFTPBase):
                 file_paths_remote.extend(file_paths_remote_)
                 ftp.cwd(pwd_)
             files_record = self._parse_searched_files(file_paths_remote, **kwargs)
+        if self.product in ['AEJ_PBL', 'AEJ_PBS']:
+            files_record = self._filtering_files_by_same_start_time(files_record)
         if not self._indexing:
             files_record = self._filtering_files_by_time(files_record, dt_fr=dt_fr, dt_to=dt_to)
             files_record = self._filtering_files_by_version(files_record, version=self.product_version)
         self._files_record_remote = files_record
         file_paths_remote = files_record['file_path']
         return file_paths_remote
+    
+    def _filtering_files_by_same_start_time(self, files_record):
+        dts_fr = files_record['datetime_fr']
+        versions = files_record['product_version']
+        dts_to = files_record['datetime_to']
+        
+        dt_fr_unique, inds_dt_fr_unique, inds_dt_fr_inverse = np.unique(dts_fr, return_index=True, return_inverse=True)
+        records = []
+        for ind_dt_fr_u, dt_fr_u in enumerate(dt_fr_unique):
+            ii = np.where(inds_dt_fr_inverse == ind_dt_fr_u)[0]
+            versions_u = versions[ii]
+
+            ver_unique, inds_v_unique, inds_v_inverse = np.unique(versions_u, return_index=True, return_inverse=True)
+            for ind_v_u, ver_u in enumerate(ver_unique):
+                ii_v = np.where(inds_v_inverse == ind_v_u)[0]
+                records.append(
+                    {
+                        'datetime_fr': dts_fr[ii][ii_v],
+                        'version': versions_u[ii_v],
+                        'datetime_to': dts_to[ii][ii_v],
+                        'index': ii[ii_v],
+                    }
+                )
+        inds = []
+        for record in records:
+            ii = np.argmax(record['datetime_to'])
+            ind_to_keep = record['index'][ii]
+            inds.append(ind_to_keep)
+        files_record = {key: files_record[key][inds] for key in files_record.keys()}
+        return files_record
     
     def _filtering_files_by_time(self, files_record, dt_fr=None, dt_to=None):
         dts_fr = files_record['datetime_fr']
@@ -215,7 +250,7 @@ class DownloaderSwarm(DownloaderFromFTPBase):
 
         inds_f = []
         for file_with_version in files_with_versions:
-            versions = file_with_version['versions']
+            versions = file_with_version['version']
             if version == 'latest':
                 version_latest = max(versions)
                 version = version_latest
@@ -223,31 +258,46 @@ class DownloaderSwarm(DownloaderFromFTPBase):
             if not list(ii_v):
                 mylog.StreamLogger.warning(f"No file with the version {version} found for the file name pattern {file_with_version['file_names'][0]}.")
                 continue
-            inds_f.append(file_with_version['indices'][ii_v][0])
+            inds_f.append(file_with_version['index'][ii_v][0])
         files_record_filtered = {key: files_record[key][inds_f] for key in files_record.keys()}
         return files_record_filtered
 
     def _check_file_versions(self, files_record, ):
         versions = files_record['product_version']
-        file_names = files_record['file_name']
-        file_names_ = [fn.replace(v, '') for fn, v in zip(file_names, versions)]
-        fn_unique, inds_fn_unique, inds_fn_inverse = np.unique(file_names_, return_index=True, return_inverse=True) 
-        file_paths = files_record['file_path']
-        
-        files_with_versions = []
-        for fn_u, ifn in zip(fn_unique, inds_fn_unique):
-            ii = np.where(inds_fn_inverse == ifn)[0]
-            versions_c = versions[ii]
-            
-            files_with_versions.append(
+        dts_fr = files_record['datetime_fr']
+        dts_fr_unique, inds_dt_fr_unique, inds_dt_fr_inverse = np.unique(dts_fr, return_index=True, return_inverse=True)
+        records = []
+        for ind_dt_fr_u, dt_fr_u in enumerate(dts_fr_unique):
+            ii = np.where(inds_dt_fr_inverse == ind_dt_fr_u)[0]
+            versions_u = versions[ii]
+
+            records.append(
                 {
-                    'file_names': file_names[ii],
-                    'file_paths': file_paths[ii],
-                    'versions': versions_c,
-                    'indices': ii,
+                    'datetime_fr': dts_fr[ii],
+                    'file_names': files_record['file_name'][ii],
+                    'file_path': files_record['file_path'][ii],
+                    'version': versions_u,
+                    'index': ii,
                 }
             )
-        return files_with_versions
+        # file_names_ = [fn.replace(v, '') for fn, v in zip(file_names, versions)]
+        # fn_unique, inds_fn_unique, inds_fn_inverse = np.unique(file_names_, return_index=True, return_inverse=True) 
+        # file_paths = files_record['file_path']
+        
+        # files_with_versions = []
+        # for ifn, fn in enumerate(fn_unique):
+        #     ii = np.where(inds_fn_inverse == ifn)[0]
+        #     versions_c = versions[ii]
+            
+        #     files_with_versions.append(
+        #         {
+        #             'file_names': file_names[ii],
+        #             'file_paths': file_paths[ii],
+        #             'versions': versions_c,
+        #             'indices': ii,
+        #         }
+        #     )
+        return records
     
     def save_files_from_ftp(self, ftp, file_paths_local=None, root_dir_remote=None, dry_run=None, **kwargs):
         if self._indexing:

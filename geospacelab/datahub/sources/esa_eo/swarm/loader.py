@@ -14,6 +14,7 @@ import numpy as np
 import cdflib
 
 import geospacelab.toolbox.utilities.pybasic as pybasic
+import geospacelab.toolbox.utilities.pylogging as mylog
 
 default_variable_name_dict = {
 }
@@ -59,6 +60,8 @@ class LoaderModel(object):
         """
         if var_names_independent_time is None:
             var_names_independent_time = []
+        if var_names_cdf_epoch is None:
+            var_names_cdf_epoch = [vn_cdf for vn, vn_cdf in self.variable_name_dict.items() if 'CDF_EPOCH' in vn]
         
         cdf_file = cdflib.CDF(self.file_path)
         cdf_info = cdf_file.cdf_info()
@@ -72,8 +75,8 @@ class LoaderModel(object):
         for vn_cdf in var_names_cdf:
             if vn_cdf in var_names_cdf_epoch:
                 epochs = cdf_file.varget(variable=vn_cdf)
-                epochs = np.array(cdflib.cdfepoch.unixtime(epochs))
                 shape = epochs.shape
+                epochs = np.array(cdflib.cdfepoch.unixtime(epochs.flatten()))
                 dts = [datetime.timedelta(seconds=epoch) + datetime.datetime(1970, 1, 1, 0, 0, 0) for epoch in epochs.flatten()]
                 variables_cdf[vn_cdf] = np.array(dts).reshape(shape)
                 epoch_lengths.append(shape[0])
@@ -83,7 +86,8 @@ class LoaderModel(object):
         variables = {}
         for var_name, var_name_cdf in self.variable_name_dict.items():
             if var_name_cdf not in variables_cdf:
-                raise ValueError(f"Variable name {var_name_cdf} not found in the cdf file.")
+                mylog.StreamLogger.warning(f"Variable name {var_name_cdf} not found in the cdf file.")
+                continue
             data = variables_cdf[var_name_cdf]
             if data.shape[0] in epoch_lengths and var_name not in var_names_independent_time:
                 if len(data.shape) == 1:

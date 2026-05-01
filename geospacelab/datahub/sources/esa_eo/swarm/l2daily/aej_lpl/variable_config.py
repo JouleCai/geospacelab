@@ -37,20 +37,22 @@ default_plot_config = {
 configured_variables = {}
 visual = 'on'
 
-depend_0 = {'UT': 'SC_DATETIME',
-            'GEO_LAT': 'GEO_LAT', 'GEO_LON': 'GEO_LON', 'GEO_ALT': 'GEO_ALT',
+depend_0 = {'UT': 'DATETIME',
+            'GEO_LAT': 'GEO_LAT', 'GEO_LON': 'GEO_LON', 'GEO_ALT': 'GEO_ALT', 'GEO_r': 'GEO_r',
             'AACGM_LAT': 'AACGM_LAT', 'AACGM_LON': 'AACGM_LON', 'AACGM_MLT': 'AACGM_MLT'}
+
+depend_0_qual = {'UT_QUAL': 'DATETIME_QUAL'}
 # depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
 
 ####################################################################################################################
-var_name = 'J_N'
+var_name = 'DATETIME'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
-var.fullname = 'Northward current'
-var.label = r'$J_N$'
-var.unit = 'A/km'
-var.unit_label = r'A/km'
-var.group = r'$J$'
+var.fullname = 'Time of observation'
+var.label = r't'
+var.unit = 'UT'
+var.unit_label = r'UT'
+var.group = r''
 # var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
@@ -63,6 +65,155 @@ axis[1].data = "@v.value"
 # axis[1].lim = [np.nan, np.nan]
 axis[1].label = '@v.group'
 axis[1].unit = ''
+axis[2].label = '@v.label'
+axis[1].unit = '@v.unit_label'
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'GEO_LAT'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Geographic Latitude'
+var.label = r'GLAT'
+var.unit = 'degrees'
+var.unit_label = r'$^\circ$'
+var.group = r'Latitude'
+# var.error = var_name + '_err'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [-90, 90]
+axis[1].ticks = np.arange(-90, 91, 30)
+axis[1].label = '@v.group'
+axis[2].label = '@v.label'
+axis[1].unit = '@v.unit_label'
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'GEO_LON'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Geographic Longitude'
+var.label = r'GLON'
+var.unit = 'degrees'
+var.unit_label = r'$^\circ$'
+var.group = r'Longitude'
+# var.error = var_name + '_err'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [0, 360]
+axis[1].ticks = np.arange(0, 361, 90)
+axis[1].label = '@v.group'
+axis[2].label = '@v.label'
+axis[1].unit = '@v.unit_label'
+configured_variables[var_name] = var
+
+###################################################################################################################
+var_name = 'QD_LAT'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Quasi-Dipole Latitude'
+var.label = r'QD_LAT'
+var.unit = 'degrees'
+var.unit_label = r'$^\circ$'
+var.group = r'Latitude'
+# var.error = var_name + '_err'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [-90, 90]
+axis[1].ticks = np.arange(-90, 91, 30)
+axis[1].label = '@v.group'
+axis[2].label = '@v.label'
+axis[1].unit = '@v.unit_label'  
+configured_variables[var_name] = var
+
+###################################################################################################################
+var_name = 'QD_LON'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Quasi-Dipole Longitude'
+var.label = r'QD_LON'
+var.unit = 'degrees'
+var.unit_label = r'$^\circ$'
+var.group = r'Longitude'
+# var.error = var_name + '_err'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [0, 360]
+axis[1].ticks = np.arange(0, 361, 90)
+axis[1].label = '@v.group'
+axis[2].label = '@v.label'
+axis[1].unit = '@v.unit_label'
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'QD_MLT'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Quasi-Dipole Magnetic Local Time'
+var.label = r'QD_MLT'
+var.unit = 'hours'
+var.unit_label = r'h'
+var.group = r'MLT'
+# var.error = var_name + '_err'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [0, 24]
+axis[1].ticks = np.arange(0, 25, 6)
+axis[1].label = '@v.group'
+axis[2].label = '@v.label'
+axis[1].unit = '@v.unit_label'
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'J_N'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Northward horizontal sheet current density'
+var.label = r'$J_{N}$'
+var.unit = 'A/km'
+var.unit_label = r'A/km'
+var.group = r'$J$'
+# var.error = var_name + '_err'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+# axis[1].lim = [-2000, 2000]
+axis[1].label = '@v.group'
 axis[2].label = '@v.label'
 axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
@@ -71,63 +222,11 @@ configured_variables[var_name] = var
 var_name = 'J_E'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
-var.fullname = 'Easthward current'
-var.label = r'$J_N$'
+var.fullname = 'Eastward horizontal sheet current density'
+var.label = r'$J_{E}$'
 var.unit = 'A/km'
 var.unit_label = r'A/km'
 var.group = r'$J$'
-# var.error = var_name + '_err'
-var.depends = {0: depend_0}
-# set plot attrs
-plot_config = var.visual.plot_config
-plot_config.config(**default_plot_config)
-plot_config.style = '1noE'
-# set axis attrs
-axis = var.visual.axis
-axis[1].data = "@v.value"
-# axis[1].lim = [np.nan, np.nan]
-axis[1].label = '@v.group'
-axis[1].unit = ''
-axis[2].label = '@v.label'
-axis[1].unit = '@v.unit_label'
-configured_variables[var_name] = var
-
-
-
-####################################################################################################################
-var_name = 'J_E_QD'
-var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var.fullname = 'Easthward current in QD'
-var.label = r'$J_N$'
-var.unit = 'A/km'
-var.unit_label = r'A/km'
-var.group = r'$J$'
-# var.error = var_name + '_err'
-var.depends = {0: depend_0}
-# set plot attrs
-plot_config = var.visual.plot_config
-plot_config.config(**default_plot_config)
-plot_config.style = '1noE'
-# set axis attrs
-axis = var.visual.axis
-axis[1].data = "@v.value"
-# axis[1].lim = [np.nan, np.nan]
-axis[1].label = '@v.group'
-axis[1].unit = ''
-axis[2].label = '@v.label'
-axis[1].unit = '@v.unit_label'
-configured_variables[var_name] = var
-
-
-####################################################################################################################
-var_name = 't_Q'
-var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var.fullname = 'Flag bits indicating data quality or properties'
-var.label = r't$_Q$'
-var.unit = 's'
-var.group = r''
 # var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
@@ -140,19 +239,68 @@ axis[1].data = "@v.value"
 # axis[1].lim = [-2000, 2000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
-
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
+#####################################################################################################################
+var_name = 'J_QD'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Eastward horizontal sheet current density in Quasi-Dipole coordinates'
+var.label = r'$J_{QD}$ '
+var.unit = 'A/km'
+var.unit_label = r'A/km'
+var.group = r'$J_{QD}$'
+# var.error = var_name + '_err'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+# axis[1].lim = [-2000, 2000]
+axis[1].label = '@v.group'
+axis[2].label = '@v.label'
+axis[1].unit = '@v.unit_label'
+configured_variables[var_name] = var
+
+###################################################################################################################
+var_name = 'DATETIME_QUAL'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Quality flag of the observation time'
+var.label = r't$_Q$'
+var.unit = 'UT'
+var.unit_label = r'UT'
+var.group = r''
+# var.error = var_name + '_err'
+var.depends = {0: depend_0_qual}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+# axis[1].lim = [-2000, 2000]
+axis[1].label = '@v.group'
+axis[2].label = '@v.label'
+axis[1].unit = '@v.unit_label'
+configured_variables[var_name] = var
+
+######################################################################################################################
 var_name = 'RMS_MISFIT'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
-var.fullname = 'Flag bits indicating data quality or properties'
+var.fullname = 'Root Mean Square error misfit between observations and model values for the oval crossing'
 var.label = 'RMS_MISFIT'
 var.unit = 'nT'
+var.unit_label = r'nT'
 var.group = r''
 # var.error = var_name + '_err'
-var.depends = {0: depend_0}
+var.depends = {0: depend_0_qual}
 # set plot attrs
 plot_config = var.visual.plot_config
 plot_config.config(**default_plot_config)
@@ -163,19 +311,20 @@ axis[1].data = "@v.value"
 # axis[1].lim = [-2000, 2000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
-
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
+######################################################################################################################
 var_name = 'CONFIDENCE'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
-var.fullname = 'Flag bits indicating data quality or properties'
-var.label = r'Confidence'
+var.fullname = 'Confidence level of the observation'
+var.label = 'Confidence'
 var.unit = ''
+var.unit_label = ''
 var.group = r''
 # var.error = var_name + '_err'
-var.depends = {0: depend_0}
+var.depends = {0: depend_0_qual}
 # set plot attrs
 plot_config = var.visual.plot_config
 plot_config.config(**default_plot_config)
@@ -186,6 +335,5 @@ axis[1].data = "@v.value"
 # axis[1].lim = [-2000, 2000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
-
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var

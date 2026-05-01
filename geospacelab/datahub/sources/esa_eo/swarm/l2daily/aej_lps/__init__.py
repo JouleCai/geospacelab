@@ -84,6 +84,12 @@ class Dataset(SwarmDataset):
         file_patterns = ['AEJ' + self.sat_id.upper(), 'LPS']
         return super().search_data_files(file_patterns, file_pattern_daily, **kwargs)
     
+    def time_filter_by_range(self, **kwargs):
+        kwargs.update({'var_datetime_name': 'DATETIME'})
+        super().time_filter_by_range(**kwargs)
+        kwargs.update({'var_datetime_name': 'DATETIME_QUAL'})
+        super().time_filter_by_range(**kwargs)
+    
     def add_GEO_LST(self, var_name_datetime='DATETIME', var_name_glon='GEO_LON'):
         return super().add_GEO_LST(var_name_datetime, var_name_glon)
     

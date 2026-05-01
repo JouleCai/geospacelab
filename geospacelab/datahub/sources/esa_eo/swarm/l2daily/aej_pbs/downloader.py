@@ -21,7 +21,7 @@ class Downloader(DownloaderSwarm):
         self,
         dt_fr, dt_to,
         sat_id=None,
-        product='AEJ_LPL',
+        product='AEJ_PBS',
         product_version='latest',
         file_extension='.cdf',
         data_file_root_dir=None,
@@ -36,13 +36,13 @@ class Downloader(DownloaderSwarm):
         root_dir_remote = '/Level2daily'
         
         if data_file_root_dir is None:
-            data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Level2daily" / "AEJ_LPL"
+            data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Level2daily" / "AEJ_PBS"
         root_dir_local = data_file_root_dir
         
         self._default_sub_dirs_remote = {
-            'latest': ['Latest_baselines', 'AEJ', 'LPL'],
-            'Older_baselines': ['Older_baselines', 'AEJ', 'LPL'], # No older baselines for AEJ_LPL
-            'Entire_mission': ['Entire_mission_data', 'AEJ', 'LPL']
+            'latest': ['Latest_baselines', 'AEJ', 'PBS'],
+            # 'Older_baselines': ['Older_baselines', 'AEJ', 'PBS'], # No older baselines for AEJ_PBS
+            'Entire_mission': ['Entire_mission_data', 'AEJ', 'PBS']
         }
         
         

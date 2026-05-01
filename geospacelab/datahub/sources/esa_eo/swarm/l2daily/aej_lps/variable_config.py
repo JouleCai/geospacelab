@@ -91,7 +91,7 @@ axis[1].lim = [-90, 90]
 axis[1].ticks = np.arange(-90, 91, 30)
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ####################################################################################################################
@@ -116,7 +116,7 @@ axis[1].lim = [0, 360]
 axis[1].ticks = np.arange(0, 361, 90)
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'  
+axis[1].unit = '@v.unit_label'  
 configured_variables[var_name] = var
 
 ###################################################################################################################
@@ -141,7 +141,7 @@ axis[1].lim = [-90, 90]
 axis[1].ticks = np.arange(-90, 91, 30)
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'  
+axis[1].unit = '@v.unit_label'  
 configured_variables[var_name] = var
 
 ###################################################################################################################
@@ -166,7 +166,7 @@ axis[1].lim = [0, 360]
 axis[1].ticks = np.arange(0, 361, 90)
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'  
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ####################################################################################################################
@@ -191,7 +191,7 @@ axis[1].lim = [0, 24]
 axis[1].ticks = np.arange(0, 25, 6)
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ####################################################################################################################
@@ -215,7 +215,7 @@ axis[1].data = "@v.value"
 # axis[1].lim = [-2000, 2000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ####################################################################################################################
@@ -239,7 +239,7 @@ axis[1].data = "@v.value"
 # axis[1].lim = [-2000, 2000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 #####################################################################################################################
@@ -263,7 +263,7 @@ axis[1].data = "@v.value"
 # axis[1].lim = [-2000, 2000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 #####################################################################################################################
@@ -287,7 +287,7 @@ axis[1].data = "@v.value"
 # axis[1].lim = [-2000, 2000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ######################################################################################################################
@@ -311,7 +311,7 @@ axis[1].data = "@v.value"
 # axis[1].lim = [-2000, 2000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var    
 
 #######################################################################################################################
@@ -335,7 +335,7 @@ axis[1].data = "@v.value"
 # axis[1].lim = [-2000, 2000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ########################################################################################################################
@@ -359,7 +359,7 @@ axis[1].data = "@v.value"
 # axis[1].lim = [-2000, 2000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ###################################################################################################################
@@ -383,7 +383,7 @@ axis[1].data = "@v.value"
 # axis[1].lim = [-2000, 2000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ######################################################################################################################
@@ -407,7 +407,7 @@ axis[1].data = "@v.value"
 # axis[1].lim = [-2000, 2000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ######################################################################################################################
@@ -431,5 +431,5 @@ axis[1].data = "@v.value"
 # axis[1].lim = [-2000, 2000]
 axis[1].label = '@v.group'
 axis[2].label = '@v.label'
-axis[2].unit = '@v.unit_label'
+axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var

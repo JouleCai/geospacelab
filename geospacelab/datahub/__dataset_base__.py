@@ -397,7 +397,7 @@ class DatasetSourced(DatasetBase):
             raise NotImplementedError
         self.data_file_num = len(self.data_file_paths)
 
-    def time_filter_by_range(self, var_datetime=None, var_datetime_name=None):
+    def time_filter_by_range(self, var_datetime=None, var_datetime_name=None, var_names=None):
         """
         Clip the times.
         :param var_datetime:
@@ -411,9 +411,9 @@ class DatasetSourced(DatasetBase):
         if var_datetime.value is None:
             return
         inds = np.where((var_datetime.value.flatten() >= self.dt_fr) & (var_datetime.value.flatten() <= self.dt_to))[0]
-        self.time_filter_by_inds(inds, var_datetime=var_datetime)
+        self.time_filter_by_inds(inds, var_datetime=var_datetime, var_names=var_names)
 
-    def time_filter_by_inds(self, inds, var_datetime=None):
+    def time_filter_by_inds(self, inds, var_datetime=None, var_names=None):
         if inds is None:
             return
         if not list(inds):
@@ -421,9 +421,12 @@ class DatasetSourced(DatasetBase):
             return
         if var_datetime is None:
             var_datetime = self['DATETIME']
-
+        if var_names is None:
+            var_names = self.keys()
+        
         shape_0 = var_datetime.value.shape[0]
-        for var in self._variables.values():
+        for vn in var_names:
+            var = self[vn]
             if var.value is None:
                 continue
             if var.value.shape[0] == shape_0 and len(var.value.shape) > 1:

@@ -115,9 +115,6 @@ class Dataset(datahub.DatasetSourced):
     
     def time_filter_by_range(self, **kwargs):
         kwargs.setdefault('var_datetime_name', 'SC_DATETIME')
-        kwargs.update({'var_datetime_name': 'DATETIME'})
-        super().time_filter_by_range(**kwargs)
-        kwargs.update({'var_datetime_name': 'DATETIME_QUAL'})
         super().time_filter_by_range(**kwargs)
 
     def add_GEO_LST(self, var_name_datetime='SC_DATETIME', var_name_glon='SC_GEO_LON'):
@@ -128,12 +125,17 @@ class Dataset(datahub.DatasetSourced):
         lsts = sun_position.convert_datetime_longitude_to_local_solar_time(
             dts=uts, lons=lons
         )
-        name_prefix = var_name_glon.replace('GEO_LON', '')
-        var = self.add_variable(var_name=name_prefix + 'GEO_LST')
+        
+        var = self[var_name_glon].clone()
+        var.name = var_name_glon.replace('GEO_LON', 'GEO_LST')
         var.value = np.array(lsts)[:, np.newaxis]
         var.label = 'LST'
         var.unit = 'h'
-        var.depends = self[var_name_glon].depends
+        var.unit_label = 'h'
+        var.group = 'GEO_LST'
+        var.visual.axis[1].lim = [0, 24]
+        var.visual.axis[1].ticks = np.arange(0, 24, 6)
+        self[var.name] = var
         return var
             
     
@@ -150,17 +152,33 @@ class Dataset(datahub.DatasetSourced):
             'r': grs
         }
         
-        name_prefix = var_name_glat.replace('GEO_LAT', '')
-        
         dts = self[var_name_datetime].value.flatten()
         cs_sph = gsl_cs.GEOCSpherical(coords=coords_in, ut=dts)
         cs_apex = cs_sph.to_APEX(append_mlt=True)
-        self.add_variable(name_prefix + 'APEX_LAT')
-        self.add_variable(name_prefix + 'APEX_LON')
-        self.add_variable(name_prefix + 'APEX_MLT')
-        self[name_prefix + 'APEX_LAT'].value = cs_apex['lat'].reshape(self[var_name_datetime].value.shape)
-        self[name_prefix + 'APEX_LON'].value = cs_apex['lon'].reshape(self[var_name_datetime].value.shape)
-        self[name_prefix + 'APEX_MLT'].value = cs_apex['mlt'].reshape(self[var_name_datetime].value.shape)
+        
+        var = self[var_name_glat].clone()
+        var.name = var_name_glat.replace('GEO_LAT', 'APEX_LAT')
+        var.value = cs_apex['lat'].reshape(self[var_name_datetime].value.shape)
+        var.label = 'APEX MLAT'
+        self[var.name] = var
+        
+        var = self[var_name_glon].clone()
+        var.name = var_name_glon.replace('GEO_LON', 'APEX_LON')
+        var.value = cs_apex['lon'].reshape(self[var_name_datetime].value.shape)
+        var.label = 'APEX MLON'
+        self[var.name] = var
+        
+        var = self[var_name_glon].clone()
+        var.name = var_name_glon.replace('GEO_LON', 'APEX_MLT')
+        var.value = cs_apex['mlt'].reshape(self[var_name_datetime].value.shape)
+        var.label = 'APEX MLT'
+        var.unit = 'h'
+        var.unit_label = 'h'
+        var.group = 'APEX_MLT'
+        var.visual.axis[1].lim = [0, 24]
+        var.visual.axis[1].ticks = np.arange(0, 24, 6)
+        self[var.name] = var
+        
 
     def convert_to_AACGM(self, var_name_glat='SC_GEO_LAT', var_name_glon='SC_GEO_LON', var_name_gr='SC_GEO_r', var_name_datetime='SC_DATETIME'):
         import geospacelab.cs as gsl_cs
@@ -179,13 +197,28 @@ class Dataset(datahub.DatasetSourced):
         cs_sph = gsl_cs.GEOCSpherical(coords=coords_in, ut=dts)
         cs_aacgm = cs_sph.to_AACGM(append_mlt=True)
         
-        name_prefix = var_name_glat.replace('GEO_LAT', '')
-        self.add_variable(name_prefix + 'AACGM_LAT')
-        self.add_variable(name_prefix + 'AACGM_LON')
-        self.add_variable(name_prefix + 'AACGM_MLT')
-        self[name_prefix + 'AACGM_LAT'].value = cs_aacgm['lat'].reshape(self[var_name_datetime].value.shape)
-        self[name_prefix + 'AACGM_LON'].value = cs_aacgm['lon'].reshape(self[var_name_datetime].value.shape)
-        self[name_prefix + 'AACGM_MLT'].value = cs_aacgm['mlt'].reshape(self[var_name_datetime].value.shape)
+        var = self[var_name_glat].clone()
+        var.name = var_name_glat.replace('GEO_LAT', 'AACGM_LAT')
+        var.value = cs_aacgm['lat'].reshape(self[var_name_datetime].value.shape)
+        var.label = 'AACGM MLAT'
+        self[var.name] = var
+        
+        var = self[var_name_glon].clone()
+        var.name = var_name_glon.replace('GEO_LON', 'AACGM_LON')
+        var.value = cs_aacgm['lon'].reshape(self[var_name_datetime].value.shape)
+        var.label = 'AACGM MLON'
+        self[var.name] = var    
+        
+        var = self[var_name_glon].clone()
+        var.name = var_name_glon.replace('GEO_LON', 'AACGM_MLT')
+        var.value = cs_aacgm['mlt'].reshape(self[var_name_datetime].value.shape)
+        var.label = 'AACGM MLT'
+        var.unit = 'h'
+        var.unit_label = 'h'
+        var.group = 'AACGM_MLT'
+        var.visual.axis[1].lim = [0, 24]
+        var.visual.axis[1].ticks = np.arange(0, 24, 6)
+        self[var.name] = var
         
     def time_filter_by_flag(self, flag_name, condition=None):
         
@@ -229,7 +262,7 @@ class Dataset(datahub.DatasetSourced):
             )
             # Validate file paths
 
-        if (not any(done) and self.allow_download) or self.force_download:
+        if (not all(done) and self.allow_download) or self.force_download:
             if self.product_version in ['latest', '', None]:
                 mylog.simpleinfo.info("Searching the latest version of the data product on the server...")
             download_obj = self.download_data()

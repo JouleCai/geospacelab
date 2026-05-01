@@ -15,13 +15,14 @@ from geospacelab.datahub.sources.esa_eo.swarm.loader import LoaderModel
 # define the default variable name dictionary
 default_variable_name_dict = {
     'CDF_EPOCH': 't',
-    'SC_GEO_LAT': 'Latitude',
-    'SC_GEO_LON': 'Longitude',
-    'SC_QD_LAT': 'Latitude_QD',
-    'SC_QD_LON': 'Longitude_QD',
+    'GEO_LAT': 'Latitude',
+    'GEO_LON': 'Longitude',
+    'QD_LAT': 'Latitude_QD',
+    'QD_LON': 'Longitude_QD',
+    'QD_MLT': 'MLT',
     'J': 'J',
-    'J_E_QD': 'J_QD',
-    't_Q': 't_qual',
+    'J_QD': 'J_QD',
+    'CDF_EPOCH_QUAL': 't_qual',
     'RMS_MISFIT': 'RMS_misfit',
     'CONFIDENCE': 'Confidence',
 }
@@ -39,8 +40,18 @@ class Loader(LoaderModel):
         super(Loader, self).__init__(*args, **kwargs)
 
     def load_data(self, **kwargs):
+        
         super(Loader, self).load_data(**kwargs, )
         self.variables['DATETIME'] = self.variables['SC_DATETIME']
+        self.variables['DATETIME_QUAL'] = self.variables['SC_DATETIME_QUAL']
+        self.variables['GEO_ALT'] = np.ones_like(self.variables['GEO_LAT']) * 110. # the altitude of the AEJ_LPS product is fixed to 110 km
+        self.variables['GEO_r'] = self.variables['GEO_ALT'] / 6371.2 + 1 # the radius of the Earth is assumed to be 6371.2 km
+        self.variables['GEO_LON'] = self.variables['GEO_LON'] % 360. # convert the longitude to [0, 360]
+        self.variables['QD_LON'] = self.variables['QD_LON'] % 360. # convert the longitude to [0, 360]
+        
         self.variables['J_N'] = self.variables['J'][:, 0][:, np.newaxis]
         self.variables['J_E'] = self.variables['J'][:, 1][:, np.newaxis]
-        self.variables['SC_GEO_ALT'] = np.ones_like(self.variables['SC_GEO_LAT']) * 110.
+
+    def load_cdf_data(self, var_names_cdf_epoch=None, var_names_independent_time=None):
+        var_names_cdf_epoch = ['t', 't_qual']  # the variable names of the variables that are epoch in the cdf files
+        return super().load_cdf_data(var_names_cdf_epoch=var_names_cdf_epoch, var_names_independent_time=var_names_independent_time)
