@@ -100,6 +100,8 @@ default_variable_names = [
     'QD_MLT_EEJ_PB',
     
     'QUALITY_FLAG',
+    'QUALITY_FLAG_BIN_AUX',
+    'QUALITY_FLAG_BIN_IND',
     
     'B_N_MAX',
     'B_N_MIN',
@@ -125,8 +127,11 @@ class Dataset(SwarmDataset):
     
     def __init__(self, **kwargs):
         kwargs = basic.dict_set_default(kwargs, **Dataset._default_dataset_attrs)
-
         super().__init__(**kwargs)
+    
+    def load_data(self, **kwargs):
+        kwargs.setdefault('omit_join_variables', ['QUALITY_FLAG_BIN_IND'])
+        return super().load_data(**kwargs)
         
     def search_data_files(self, file_patterns=None, file_name_by_day=False, archive_yearly=True, **kwargs):
         file_patterns = ['AEJ' + self.sat_id.upper(), 'PBS']
@@ -142,7 +147,7 @@ class Dataset(SwarmDataset):
             'DATETIME_WEJ_PEAK', 
             'GEO_LAT_WEJ_PEAK', 'GEO_r_WEJ_PEAK', 'GEO_ALT_WEJ_PEAK', 'GEO_LON_WEJ_PEAK', 
             'QD_LAT_WEJ_PEAK', 'QD_LON_WEJ_PEAK', 'QD_MLT_WEJ_PEAK', 
-            'WEJ_PEAK', 'QUALITY_FLAG', 
+            'WEJ_PEAK', 'QUALITY_FLAG', 'QUALITY_FLAG_BIN_AUX',
             'B_N_MAX', 'B_N_MIN', 'B_E_MAX', 'B_E_MIN', 
             'GEO_LAT_B_MIN', 'GEO_LON_B_MIN', 'GEO_LAT_B_MAX', 'GEO_LON_B_MAX']})
         super().time_filter_by_range(**kwargs)

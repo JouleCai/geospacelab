@@ -14,9 +14,9 @@ from geospacelab.config import prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
-from geospacelab.datahub.sources.esa_eo.swarm.l2daily.dns_pod.loader import Loader as default_Loader
-from geospacelab.datahub.sources.esa_eo.swarm.l2daily.dns_pod.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.esa_eo.swarm.l2daily.dns_pod.variable_config as var_config
+from geospacelab.datahub.sources.esa_eo.swarm.l1b.efi_lpi.loader import Loader as default_Loader
+from geospacelab.datahub.sources.esa_eo.swarm.l1b.efi_lpi.downloader import Downloader as default_Downloader
+import geospacelab.datahub.sources.esa_eo.swarm.l1b.efi_lpi.variable_config as var_config
 from geospacelab.datahub.sources.esa_eo.swarm.dataset import Dataset as SwarmDataset
 
 
@@ -24,18 +24,18 @@ from geospacelab.datahub.sources.esa_eo.swarm.dataset import Dataset as SwarmDat
 default_dataset_attrs = {
     'database': esaeo_database,
     'facility': swarm_facility,
-    'instrument': 'POD',
-    'product': 'DNS_POD',
+    'instrument': 'EFI',
+    'product': 'EFI_LPI',
     'data_file_ext': '.cdf',
     'product_version': 'latest',
-    'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Level2daily' / 'DNS_POD',
+    'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Level1b' / 'EFI_LPI',
     'allow_load': True,
     'allow_download': True,
     'force_download': False,
     'data_search_recursive': False,
     'add_AACGM': False,
     'add_APEX': False,
-    'add_GEO_LST': False,
+    'add_GEO_LST': True,
     'quality_control': False,
     'calib_control': False,
     'label_fields': ['database', 'facility', 'instrument', 'product'],
@@ -45,14 +45,36 @@ default_dataset_attrs = {
 
 default_variable_names = [
     'SC_DATETIME',
+    'Sync_Status',
     'SC_GEO_LAT',
     'SC_GEO_LON',
     'SC_GEO_r',
-    'SC_GEO_LST',
-    'rho_n',
-    'rho_n_ORBITMEAN',
-    'FLAG',
-    ]
+    'v_SC_ITRF',
+    'n_i',
+    'CALIB_n_i',
+    'n_i_err',
+    'n_e',
+    'n_e_err',
+    'T_e',
+    'T_e_err',
+    'CALIB_T_e',
+    'V_SC',
+    'V_SC_err',
+    'FLAG_LP',
+    'FLAG_n_i',
+    'FLAG_n_e',
+    'FLAG_T_e',
+    'FLAG_V_SC',
+    'FLAG_BITS_1',
+    'FLAG_BITS_2',
+    'FLAG_1_BIN_AUX',
+    'FLAG_2_BIN_AUX',
+    'FLAG_1_BIN_IND',
+    'FLAG_2_BIN_IND',
+    'Gamma_1',
+    'Gamma_2',
+]
+
 
 # default_data_search_recursive = True
 
@@ -68,11 +90,14 @@ class Dataset(SwarmDataset):
     
     def __init__(self, **kwargs):
         kwargs = basic.dict_set_default(kwargs, **Dataset._default_dataset_attrs)
-
         super().__init__(**kwargs)
+        
+    def load_data(self, **kwargs):
+        kwargs.setdefault('omit_join_variables', ['FLAG_1_BIN_IND', 'FLAG_2_BIN_IND'])
+        return super().load_data(**kwargs)
     
     def search_data_files(self, file_patterns=None, file_name_by_day=True, archive_yearly=True, **kwargs):
-        file_patterns = ['DNS' + self.sat_id.upper(), 'POD']
+        file_patterns = ['EFI' + self.sat_id.upper(), 'LPI']
         return super().search_data_files(
             file_patterns=file_patterns, 
             file_name_by_day=file_name_by_day, 

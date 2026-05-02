@@ -100,6 +100,8 @@ default_variable_names = [
     'QD_MLT_EEJ_PB',
     
     'QUALITY_FLAG',
+    'QUALITY_FLAG_BIN_AUX',
+    'QUALITY_FLAG_BIN_IND',
     ]
 
 # default_data_search_recursive = True
@@ -119,6 +121,10 @@ class Dataset(SwarmDataset):
 
         super().__init__(**kwargs)
         
+    def load_data(self, **kwargs):
+        kwargs.setdefault('omit_join_variables', ['QUALITY_FLAG_BIN_IND'])
+        return super().load_data(**kwargs)
+        
     def search_data_files(self, file_patterns=None, file_name_by_day=False, archive_yearly=True, **kwargs):
         file_patterns = ['AEJ' + self.sat_id.upper(), 'PBL']
         return super().search_data_files(
@@ -133,7 +139,7 @@ class Dataset(SwarmDataset):
             'DATETIME_WEJ_PEAK', 
             'GEO_LAT_WEJ_PEAK', 'GEO_r_WEJ_PEAK', 'GEO_ALT_WEJ_PEAK', 'GEO_LON_WEJ_PEAK', 
             'QD_LAT_WEJ_PEAK', 'QD_LON_WEJ_PEAK', 'QD_MLT_WEJ_PEAK', 
-            'WEJ_PEAK', 'QUALITY_FLAG']})
+            'WEJ_PEAK', 'QUALITY_FLAG', 'QUALITY_FLAG_BIN_AUX', ]})
         super().time_filter_by_range(**kwargs)
         
         kwargs.update({'var_datetime_name': 'DATETIME_EEJ_PEAK'})

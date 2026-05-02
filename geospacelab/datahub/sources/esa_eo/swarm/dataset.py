@@ -100,14 +100,19 @@ class Dataset(datahub.DatasetSourced):
     def load_data(self, **kwargs):
         self.check_data_files(**kwargs)
 
+        default_variable_names = kwargs.pop('default_variable_names', self._default_variable_names)
+        omit_join_variables = kwargs.pop('omit_join_variables', [])
+
         self._set_default_variables(
-            self._default_variable_names,
+            default_variable_names,
             configured_variables=self._default_variable_config.configured_variables
         )
-        for file_path, product_version in zip(self.data_file_paths, self.data_file_versions):
+        for i, (file_path, product_version) in enumerate(zip(self.data_file_paths, self.data_file_versions)):
             load_obj = self.loader(file_path, file_type='cdf', product_version=product_version)
 
             for var_name in self._variables.keys():
+                if i > 0 and var_name in omit_join_variables:
+                    continue
                 value = load_obj.variables[var_name]
                 self._variables[var_name].join(value)
 
@@ -325,8 +330,12 @@ class Dataset(datahub.DatasetSourced):
         if from_download and self.allow_download:
             mylog.simpleinfo.info("Searching the data product \"{}\" with the version \"{}\" on the server...".format(self.product, self.product_version))
             download_obj = self.download_data(dt_fr=dt_fr, dt_to=dt_to)
-            file_paths = download_obj.file_paths_local
-            file_paths = [pathlib.Path(fp).with_suffix(self.data_file_ext) for fp in file_paths]
+            file_paths = []
+            for fp in download_obj.file_paths_local:
+                dt_fr, dt_to, version = self._parse_file_name(fp.name)
+                search_pattern = f"*{dt_fr.strftime('%Y%m%dT%H%M%S')}*{dt_to.strftime('%Y%m%dT%H%M%S')}*{version}*{self.data_file_ext}"
+                file_path = list(pathlib.Path(fp.parent).glob(search_pattern))[0]
+                file_paths.append(file_path)
             files_record = download_obj._files_record_remote
             self.data_file_versions = files_record['product_version']
             self.data_file_paths = file_paths

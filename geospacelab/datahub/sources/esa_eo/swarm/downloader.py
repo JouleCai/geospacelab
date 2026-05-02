@@ -344,8 +344,16 @@ class DownloaderSwarm(DownloaderFromFTPBase):
                 mylog.StreamLogger.warning(f"The file {file_path_local} is not a zip file. It cannot be uncompressed."  )
     
     def _to_download(self, file_path, with_suffix=None):
+        # Avoid the file name of cdf is different from the zip file, e.g., L1B data files.
         with_suffix = with_suffix if with_suffix is not None else self.file_extension
-        return super()._to_download(file_path, with_suffix)
+        dt_fr, dt_to, version = self._parse_file_name(file_path.name)
+        search_pattern = f"*{dt_fr.strftime('%Y%m%dT%H%M%S')}*{dt_to.strftime('%Y%m%dT%H%M%S')}*{version}*{with_suffix}"
+        file_path = list(file_path.parent.glob(search_pattern))
+        if not list(file_path):
+            return True
+        else:
+            return False
+        # return super()._to_download(file_path, with_suffix)
     
     def _parse_file_name(self, file_name, rc_pattern=None):
         if rc_pattern is None:

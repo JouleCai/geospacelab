@@ -20,7 +20,7 @@ timestamps = {
 }
 
 
-default_colormap = "seismic_r"
+default_colormap = "seismic"
 
 default_plot_config = {
     'line':         {
@@ -37,62 +37,15 @@ default_plot_config = {
 configured_variables = {}
 visual = 'on'
 
-depend_0 = {'UT': 'SC_DATETIME',
-            'GEO_LAT': 'SC_GEO_LAT', 'GEO_LON': 'SC_GEO_LON',
-            'AACGM_LAT': 'SC_AACGM_LAT', 'AACGM_LON': 'SC_AACGM_LON', 'AACGM_MLT': 'SC_AACGM_MLT',
-            'APEX_LAT': 'SC_APEX_LAT', 'APEX_LON': 'SC_APEX_LON', 'APEX_MLT': 'SC_APEX_MLT',
+depend_0 = {'UT': 'DATETIME',
+            'GEO_LAT': 'GEO_LAT', 'GEO_LON': 'GEO_LON',
             }
+
+depend_1 = {'MLAT': 'QD_LAT'}
 # depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
 
 ####################################################################################################################
-var_name = 'rho_n'
-var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var.fullname = 'Neutral mass density'
-var.label = r'$\rho_n$'
-var.unit = 'kg/m3'
-var.unit_label = r'kg$\cdot$m$^{-3}$'
-var.group = r'$\rho$'
-# var.error = var_name + '_err'
-var.depends = {0: depend_0}
-# set plot attrs
-plot_config = var.visual.plot_config
-plot_config.config(**default_plot_config)
-plot_config.style = '1noE'
-# set axis attrs
-axis = var.visual.axis
-axis[1].data = "@v.value"
-# axis[1].lim = [np.nan, np.nan]
-axis[2].label = '@v.label'
-axis[1].unit = '@v.unit_label'
-
-configured_variables[var_name] = var
-
-####################################################################################################################
-var_name = 'rho_n_ORBITMEAN'
-var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
-# set variable attrs
-var.fullname = 'Neutral mass density (orbit mean)'
-var.label = r'$\rho_n$ (orbit mean)'
-var.unit = 'kg/m3'
-var.unit_label = r'kg$\cdot$m$^{-3}$'
-var.group = r'$\rho$'
-# var.error = var_name + '_err'
-var.depends = {0: depend_0}
-# set plot attrs
-plot_config = var.visual.plot_config
-plot_config.config(**default_plot_config)
-plot_config.style = '1noE'
-# set axis attrs
-axis = var.visual.axis
-axis[1].data = "@v.value"
-# axis[1].lim = [np.nan, np.nan]
-axis[2].label = '@v.label'
-axis[1].unit = '@v.unit_label'
-configured_variables[var_name] = var
-
-####################################################################################################################
-var_name = 'SC_DATETIME'
+var_name = 'DATETIME'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'Time of observation'
@@ -117,7 +70,7 @@ axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ####################################################################################################################
-var_name = 'SC_GEO_LAT'
+var_name = 'GEO_LAT'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'Geographic Latitude'
@@ -142,7 +95,7 @@ axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ####################################################################################################################
-var_name = 'SC_GEO_LON'
+var_name = 'GEO_LON'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'Geographic Longitude'
@@ -167,7 +120,7 @@ axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ####################################################################################################################
-var_name = 'SC_GEO_LST'
+var_name = 'GEO_LST'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
 var.fullname = 'S/C geographic local solar time'
@@ -191,6 +144,112 @@ axis[1].unit = '@v.unit_label'
 configured_variables[var_name] = var
 
 ####################################################################################################################
+var_name = 'EF_EQ'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Equatorial electric field'
+var.label = r'EF$_{EQ}$'
+var.unit = 'mV/m'
+var.unit_label = r'mV/m'
+var.group = r'Equatorial electric field'
+# var.error = var_name + '_err'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [None, None]
+axis[1].label = '@v.label'
+axis[1].unit = '@v.unit_label'  
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'EEJ_E'
+var = Var(name=var_name, ndim=2, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Magnetic eastward component of EEJ'
+var.label = r'EEJ$_E$'
+var.unit = 'A/km'
+var.unit_label = r'A/km'
+var.group = r'Equatorial electrojet'
+# var.error = var_name + '_err'
+var.depends = {
+    0: depend_0,
+    1: depend_1
+    }
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '2P'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@d.QD_LAT"
+axis[1].lim = [-20, 20]
+axis[1].label = 'QD MLAT'
+axis[1].unit = r'$\circ$'
+axis[2].data = "@v.value"
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'EEJ_N'
+var = Var(name=var_name, ndim=2, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Magnetic northward component of EEJ'
+var.label = r'EEJ$_N$'
+var.unit = 'A/km'
+var.unit_label = r'A/km'
+var.group = r'Equatorial electrojet'
+# var.error = var_name + '_err'
+var.depends = {
+    0: depend_0,
+    1: depend_1
+    }
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '2P'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@d.QD_LAT"
+axis[1].lim = [-20, 20]
+axis[1].label = 'QD MLAT'
+axis[1].unit = r'$\circ$'
+axis[2].data = "@v.value"
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
+axis[2].lim = [None, None]
+configured_variables[var_name] = var
+
+####################################################################################################################
+var_name = 'Relative_Error'
+var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Relative error between modelled and observed euqatorial electrojet'
+var.label = r'RelErr'
+var.unit = ''
+
+var.unit_label = ''
+var.group = r'Flag'  
+# var.error = var_name + '_err'
+var.depends = {0: depend_0}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '1noE'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@v.value"
+axis[1].lim = [None, None]
+axis[1].label = '@v.label'
+axis[1].unit = '@v.unit_label'  
+configured_variables[var_name] = var
+
+####################################################################################################################
 var_name = 'FLAG'
 var = Var(name=var_name, ndim=1, variable_type='scalar', visual=visual)
 # set variable attrs
@@ -209,7 +268,7 @@ plot_config.style = '1noE'
 # set axis attrs
 axis = var.visual.axis
 axis[1].data = "@v.value"
-axis[1].lim = [-1, 3]
+axis[1].lim = [None, None]
 axis[1].label = '@v.label'
 axis[1].unit = '@v.unit_label'  
 configured_variables[var_name] = var

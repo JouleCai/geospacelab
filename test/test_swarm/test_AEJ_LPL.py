@@ -22,7 +22,7 @@ def test_swarm_AEJ_LPL_overview():
 
     ds = db.dock(
         datasource_contents=['esa_eo', 'swarm', 'l2daily', 'aej_lpl'], 
-        product_version='0201', # 'latest' (default), '0301', 
+        product_version='latest', # 'latest' (default), '0301', 
         sat_id='C', add_APEX=True, add_AACGM=True)
 
     glat = ds['GEO_LAT']

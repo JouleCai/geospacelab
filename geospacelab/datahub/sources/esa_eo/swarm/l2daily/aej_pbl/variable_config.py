@@ -1223,3 +1223,33 @@ axis[1].unit = '@v.unit_label'
 axis[2].label = '@v.label'
 axis[2].unit = '@v.unit_label'
 configured_variables[var_name] = var
+
+#####################################################################################################################
+var_name = 'QUALITY_FLAG_BIN_AUX'
+var = Var(name=var_name, ndim=2, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Binary flag (Gain)'
+var.label = r'FLAG Gain'
+var.unit = ''
+var.unit_label = ''
+var.group = r'FLAG'  
+# var.error = var_name + '_err'
+var.depends = {
+    0: depend_0_WEJ_PEAK,
+    1: {'Binary Index': 'QUALITY_FLAG_BIN_IND'},
+    }
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**{'pcolormesh': {'cmap': 'binary'}})
+plot_config.style = '2P'
+# set axis attrs
+axis = var.visual.axis
+axis[1].data = "@d.QUALITY_FLAG_BIN_IND"
+axis[1].lim = [-0.5, 13.5]
+axis[1].label = 'Binary Index'
+axis[1].unit = ''
+axis[2].value = "@v.value"
+axis[2].label = '@v.label'
+axis[2].unit = '@v.unit_label'
+axis[2].lim = [0, 1]
+configured_variables[var_name] = var    

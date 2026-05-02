@@ -162,9 +162,9 @@ class Dataset(datahub.DatasetSourced):
         if self.add_APEX:
             self.convert_to_APEX()
 
-        self.add_GEO_LST()
+        self.calc_GEO_LST()
 
-    def add_GEO_LST(self):
+    def calc_GEO_LST(self):
         import geospacelab.observatory.earth.sun_position as sun_position
         lons = self['SC_GEO_LON'].flatten()
         uts = self['SC_DATETIME'].flatten()

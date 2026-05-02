@@ -49,7 +49,7 @@ def test_swarm_DNS_ACC_zoom():
 
     db = dashboards.TSDashboard(
         dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)},
-        timeline_extra_labels=['GEO_LAT', 'GEO_LON', 'AACGM_LAT', 'AACGM_LON', 'AACGM_MLT',] 
+        timeline_extra_labels=['GEO_LAT', 'GEO_LON', 'APEX_LAT', 'APEX_LON', 'APEX_MLT',] 
         )
 
     ds = db.dock(datasource_contents=['esa_eo', 'swarm', 'l2daily', 'dns_acc'], sat_id='C', add_APEX=True, add_AACGM=True)

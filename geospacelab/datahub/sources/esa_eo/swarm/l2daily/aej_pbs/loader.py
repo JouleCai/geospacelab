@@ -119,5 +119,10 @@ class Loader(LoaderModel):
         self.variables['GEO_LAT_B_MAX'] = self.variables['GEO_LAT_B'][:, 1][:, np.newaxis]
         self.variables['GEO_LON_B_MAX'] = self.variables['GEO_LON_B'][:, 1][:, np.newaxis]
         
+        fb = self.variables['QUALITY_FLAG'].flatten()
+        fb = (((fb[:,None] & (1 << np.arange(14)))) > 0).astype(int)
+        self.variables['QUALITY_FLAG_BIN_AUX'] = fb
+        self.variables['QUALITY_FLAG_BIN_IND'] = np.arange(14)[np.newaxis, :]
+        
     def load_cdf_data(self, var_names_cdf_epoch=None, var_names_independent_time=None):
         return super().load_cdf_data(var_names_cdf_epoch=var_names_cdf_epoch, var_names_independent_time=var_names_independent_time)

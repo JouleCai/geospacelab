@@ -41,7 +41,7 @@ def test_swarm_AEJ_PBS_overview():
             ds['QD_LAT_EEJ_EB'],
         ],
         [
-            ds['QUALITY_FLAG'],
+            ds['QUALITY_FLAG_BIN_AUX'],
         ],
     ]
 
@@ -85,7 +85,7 @@ def test_swarm_AEJ_PBS_zoom():
             ds['QD_LAT_EEJ_EB'],
             ],
         [
-            ds['QUALITY_FLAG'],
+            ds['QUALITY_FLAG_BIN_AUX'],
         ],
     ]
 

@@ -76,10 +76,20 @@ class LoaderModel(object):
             if vn_cdf in var_names_cdf_epoch:
                 epochs = cdf_file.varget(variable=vn_cdf)
                 shape = epochs.shape
-                epochs = np.array(cdflib.cdfepoch.unixtime(epochs.flatten()))
-                dts = [datetime.timedelta(seconds=epoch) + datetime.datetime(1970, 1, 1, 0, 0, 0) for epoch in epochs.flatten()]
-                variables_cdf[vn_cdf] = np.array(dts).reshape(shape)
-                epoch_lengths.append(shape[0])
+                epochs_ = epochs.flatten()
+                inds_epoch = np.where((epochs_>0) & (np.isfinite(epochs_)))[0]
+                if epochs_.size != inds_epoch.size:
+                    dts = np.full_like(epochs_, None, dtype=object)
+                    epochs_valid = np.array(cdflib.cdfepoch.unixtime(epochs_[inds_epoch]))
+                    dts_valid = [datetime.timedelta(seconds=epoch) + datetime.datetime(1970, 1, 1, 0, 0, 0) for epoch in epochs_valid]
+                    dts[inds_epoch] = dts_valid
+                    variables_cdf[vn_cdf] = np.array(dts).reshape(shape)
+                    epoch_lengths.append(shape[0])
+                else:
+                    epochs = np.array(cdflib.cdfepoch.unixtime(epochs.flatten()))
+                    dts = [datetime.timedelta(seconds=epoch) + datetime.datetime(1970, 1, 1, 0, 0, 0) for epoch in epochs.flatten()]
+                    variables_cdf[vn_cdf] = np.array(dts).reshape(shape)
+                    epoch_lengths.append(shape[0])
             else:
                 variables_cdf[vn_cdf] = np.array(cdf_file.varget(variable=vn_cdf))
         
