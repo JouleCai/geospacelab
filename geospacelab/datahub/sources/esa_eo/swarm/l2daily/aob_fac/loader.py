@@ -14,12 +14,16 @@ from geospacelab.datahub.sources.esa_eo.swarm.loader import LoaderModel
 
 # define the default variable name dictionary
 default_variable_name_dict = {
-    'CDF_EPOCH': 'time',
-    'rho_n': 'density',
-    'SC_GEO_LAT': 'latitude',
-    'SC_GEO_LON': 'longitude',
-    'SC_GEO_ALT': 'altitude',
-    'SC_GEO_LST': 'local_solar_time',
+    'CDF_EPOCH': 't',
+    'SC_GEO_LAT': 'Latitude',
+    'SC_GEO_LON': 'Longitude',
+    'SC_GEO_Radius': 'Radius',
+    'SC_QD_LAT': 'Latitude_QD',
+    'SC_QD_LON': 'Longitude_QD',
+    'SC_QD_MLT': 'MLT',
+    'BOUNDARY_FLAG': 'Boundary_Flag',
+    'QUALITY': 'Quality',
+    'PAIR_INDICATOR': 'Pair_Indicator',
 }
 
 
@@ -33,10 +37,9 @@ class Loader(LoaderModel):
         
         super(Loader, self).load_data(**kwargs, )
         
-        self.variables['SC_GEO_r'] = self.variables['SC_GEO_ALT'] / 6371.2e3 + 1.0
-        self.variables['rho_n'][self.variables['rho_n']>1] = np.nan
-        self.variables['SC_GEO_ALT'] = self.variables['SC_GEO_ALT'] * 1e-3
-        self.variables['SC_GEO_LON'] = self.variables['SC_GEO_LON'] % 360
+        self.variables['SC_GEO_r'] = self.variables['SC_GEO_Radius'] / 6371.2e3
+        self.variables['QUALITY_Pa'] = self.variables['QUALITY'][:, 0][:, np.newaxis]
+        self.variables['QUALITY_Sigma'] = self.variables['QUALITY'][:, 1][:, np.newaxis]
 
     def load_cdf_data(self, var_names_cdf_epoch=None, var_names_independent_time=None):
        return super().load_cdf_data(var_names_cdf_epoch=var_names_cdf_epoch, var_names_independent_time=var_names_independent_time)

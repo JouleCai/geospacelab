@@ -14,29 +14,31 @@ from geospacelab.datahub.sources.esa_eo.swarm.loader import LoaderModel
 
 # define the default variable name dictionary
 default_variable_name_dict = {
-    'CDF_EPOCH': 'time',
-    'rho_n': 'density',
+    'CDF_EPOCH': 'Time',
     'SC_GEO_LAT': 'latitude',
     'SC_GEO_LON': 'longitude',
     'SC_GEO_ALT': 'altitude',
     'SC_GEO_LST': 'local_solar_time',
+    'rho_n': 'density',
+    'rho_n_ORBITMEAN': 'density_orbitmean',
+    'FLAG': 'validity_flag',
 }
 
 
 class Loader(LoaderModel):
-    
+    """
+    Load SWARM 2Hz or 16HZ TII data products. Currently support versions higher than "0301".
+
+    The class is a hierarchy of :class:`SWARM data LoaderModel <geospacelab.datahub.sources.esa_eo.swarm.loader.LoaderModel>`
+
+    """
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('variable_name_dict', default_variable_name_dict)
         super(Loader, self).__init__(*args, **kwargs)
 
     def load_data(self, **kwargs):
-        
-        super(Loader, self).load_data(**kwargs, )
-        
-        self.variables['SC_GEO_r'] = self.variables['SC_GEO_ALT'] / 6371.2e3 + 1.0
-        self.variables['rho_n'][self.variables['rho_n']>1] = np.nan
+        super(Loader, self).load_data(**kwargs)
+        self.variables['rho_n'][self.variables['rho_n'] > 1] = np.nan
+        self.variables['rho_n'][self.variables['rho_n'] <= 0] = np.nan
+        self.variables['rho_n'][self.variables['FLAG'] > 0] = np.nan
         self.variables['SC_GEO_ALT'] = self.variables['SC_GEO_ALT'] * 1e-3
-        self.variables['SC_GEO_LON'] = self.variables['SC_GEO_LON'] % 360
-
-    def load_cdf_data(self, var_names_cdf_epoch=None, var_names_independent_time=None):
-       return super().load_cdf_data(var_names_cdf_epoch=var_names_cdf_epoch, var_names_independent_time=var_names_independent_time)

@@ -20,7 +20,10 @@ def test_swarm_AEJ_LPL_overview():
         dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 8)},
         )
 
-    ds = db.dock(datasource_contents=['esa_eo', 'swarm', 'l2daily', 'aej_lpl'], sat_id='C', add_APEX=True, add_AACGM=True)
+    ds = db.dock(
+        datasource_contents=['esa_eo', 'swarm', 'l2daily', 'aej_lpl'], 
+        product_version='0201', # 'latest' (default), '0301', 
+        sat_id='C', add_APEX=True, add_AACGM=True)
 
     glat = ds['GEO_LAT']
     glon = ds['GEO_LON']
@@ -36,7 +39,7 @@ def test_swarm_AEJ_LPL_overview():
 
     db.set_layout(panel_layouts=panel_layouts)
     db.draw()
-    db.add_title(title='Swarm AEJ/LPL Overview', fontsize='medium', append_time=True)
+    db.add_title(title='Swarm-{} AEJ/LPL Overview'.format(ds.sat_id), fontsize='medium', append_time=True)
 
     db.save_figure(file_dir=file_dir_figure, file_name='example_AEJ_LPL_Swarm-{}_overview'.format(ds.sat_id), dpi=100, append_time=False)
     db.show()
@@ -69,7 +72,7 @@ def test_swarm_AEJ_LPL_zoom():
 
     db.set_layout(panel_layouts=panel_layouts)
     db.draw()
-    db.add_title(title='Swarm AEJ/LPL Zoom', fontsize='medium', append_time=True)
+    db.add_title(title='Swarm-{} AEJ/LPL Zoom'.format(ds.sat_id), fontsize='medium', append_time=True)
     
     db.save_figure(file_dir=file_dir_figure, file_name='example_AEJ_LPL_Swarm-{}_zoom'.format(ds.sat_id), dpi=100, append_time=False)
     db.show()

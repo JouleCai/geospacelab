@@ -21,7 +21,7 @@ class Downloader(DownloaderSwarm):
         self,
         dt_fr, dt_to,
         sat_id=None,
-        product='DNS_ACC',
+        product='AOB_FAC',
         product_version='latest',
         file_extension='.cdf',
         data_file_root_dir=None,
@@ -32,17 +32,17 @@ class Downloader(DownloaderSwarm):
 
         mission = 'SWARM'
         file_class = 'OPER'
-        product_level = '2'
+        product_level = '2F'
         root_dir_remote = '/Level2daily'
         
         if data_file_root_dir is None:
-            data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Level2daily" / "DNS_ACC"
+            data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Level2daily" / "AOB_FAC"
         root_dir_local = data_file_root_dir
         
         self._default_sub_dirs_remote = {
-            'latest': ['Latest_baselines', 'DNS', 'ACC'],
-            'Older_baselines': ['Older_baselines', 'DNS', 'ACC'], 
-            'Entire_mission': ['Entire_mission_data', 'DNS', 'ACC']
+            'latest': ['Latest_baselines', 'AOB', 'FAC'],
+            'Older_baselines': ['Older_baselines', 'AOB', 'FAC'], 
+            'Entire_mission': ['Entire_mission_data', 'AOB', 'FAC']
         }
         
         

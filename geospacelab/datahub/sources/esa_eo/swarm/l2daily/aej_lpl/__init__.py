@@ -76,9 +76,13 @@ class Dataset(SwarmDataset):
 
         super().__init__(**kwargs)
         
-    def search_data_files(self, file_patterns=None, file_pattern_daily=True, **kwargs):
+    def search_data_files(self, file_patterns=None, file_name_by_day=True, archive_yearly=True, **kwargs):
         file_patterns = ['AEJ' + self.sat_id.upper(), 'LPL']
-        return super().search_data_files(file_patterns, file_pattern_daily, **kwargs)
+        return super().search_data_files(
+            file_patterns=file_patterns, 
+            file_name_by_day=file_name_by_day, 
+            archive_yearly=archive_yearly, 
+            **kwargs)
     
     def time_filter_by_range(self, **kwargs):
         kwargs.update({'var_datetime_name': 'DATETIME'})
@@ -86,8 +90,8 @@ class Dataset(SwarmDataset):
         kwargs.update({'var_datetime_name': 'DATETIME_QUAL'})
         super().time_filter_by_range(**kwargs)
     
-    def add_GEO_LST(self, var_name_datetime='DATETIME', var_name_glon='GEO_LON'):
-        return super().add_GEO_LST(var_name_datetime, var_name_glon)
+    def calc_GEO_LST(self, var_name_datetime='DATETIME', var_name_glon='GEO_LON'):
+        return super().calc_GEO_LST(var_name_datetime, var_name_glon)
     
     def convert_to_APEX(self, var_name_glat='GEO_LAT', var_name_glon='GEO_LON', var_name_gr='GEO_r', var_name_datetime='DATETIME'):
         return super().convert_to_APEX(var_name_glat, var_name_glon, var_name_gr, var_name_datetime)

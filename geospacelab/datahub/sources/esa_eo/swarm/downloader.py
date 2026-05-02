@@ -101,6 +101,8 @@ class DownloaderSwarm(DownloaderFromFTPBase):
         self._indexing = False
         self._files_record_remote = copy.deepcopy(FILE_RECORD_REMOTE_MODEL)
         
+        dt_fr = dttool.get_start_of_the_day(dt_fr) if dt_fr is not None else None
+        dt_to = dttool.get_end_of_the_day(dt_to) if dt_to is not None else None 
         super().__init__(
             dt_fr, dt_to,
             ftp_host=ftp_host, ftp_port=ftp_port,
@@ -114,7 +116,7 @@ class DownloaderSwarm(DownloaderFromFTPBase):
         self._validate()
         
         if self.query_mode == 'on':
-            drect_download = False    
+            direct_download = False    
         if direct_download:
             self.direct_download = True
             self.download(with_TLS=True, subdirs=self.sub_dirs_remote, file_name_patterns=self.product_pattherns, **kwargs)
@@ -193,7 +195,7 @@ class DownloaderSwarm(DownloaderFromFTPBase):
                 file_paths_remote.extend(file_paths_remote_)
                 ftp.cwd(pwd_)
             files_record = self._parse_searched_files(file_paths_remote, **kwargs)
-        if self.product in ['AEJ_PBL', 'AEJ_PBS']:
+        if self.product in ['AEJ_PBL', 'AEJ_PBS', 'AOB_FAC']:
             files_record = self._filtering_files_by_same_start_time(files_record)
         if not self._indexing:
             files_record = self._filtering_files_by_time(files_record, dt_fr=dt_fr, dt_to=dt_to)

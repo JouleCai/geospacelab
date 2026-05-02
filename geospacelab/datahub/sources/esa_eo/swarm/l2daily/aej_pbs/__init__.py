@@ -128,9 +128,13 @@ class Dataset(SwarmDataset):
 
         super().__init__(**kwargs)
         
-    def search_data_files(self, file_patterns=None, file_pattern_daily=True, **kwargs):
-        file_patterns = ['AEJ' + self.sat_id.upper(), 'PBL']
-        return super().search_data_files(file_patterns, file_pattern_daily, **kwargs)
+    def search_data_files(self, file_patterns=None, file_name_by_day=False, archive_yearly=True, **kwargs):
+        file_patterns = ['AEJ' + self.sat_id.upper(), 'PBS']
+        return super().search_data_files(
+            file_patterns=file_patterns, 
+            file_name_by_day=file_name_by_day, 
+            archive_yearly=archive_yearly, 
+            **kwargs)
     
     def time_filter_by_range(self, **kwargs):
         kwargs.update({'var_datetime_name': 'DATETIME_WEJ_PEAK'})
@@ -179,14 +183,14 @@ class Dataset(SwarmDataset):
             'QD_LAT_EEJ_PB', 'QD_LON_EEJ_PB', 'QD_MLT_EEJ_PB']})
         super().time_filter_by_range(**kwargs)
     
-    def add_GEO_LST(self, var_name_datetime='DATETIME', var_name_glon='GEO_LON'):
+    def calc_GEO_LST(self, var_name_datetime='DATETIME', var_name_glon='GEO_LON'):
         
-        super().add_GEO_LST(var_name_datetime='DATETIME_WEJ_PEAK', var_name_glon='GEO_LON_WEJ_PEAK')
-        super().add_GEO_LST(var_name_datetime='DATETIME_EEJ_PEAK', var_name_glon='GEO_LON_EEJ_PEAK')
-        super().add_GEO_LST(var_name_datetime='DATETIME_WEJ_EB', var_name_glon='GEO_LON_WEJ_EB')
-        super().add_GEO_LST(var_name_datetime='DATETIME_EEJ_EB', var_name_glon='GEO_LON_EEJ_EB')
-        super().add_GEO_LST(var_name_datetime='DATETIME_WEJ_PB', var_name_glon='GEO_LON_WEJ_PB')
-        super().add_GEO_LST(var_name_datetime='DATETIME_EEJ_PB', var_name_glon='GEO_LON_EEJ_PB')
+        super().calc_GEO_LST(var_name_datetime='DATETIME_WEJ_PEAK', var_name_glon='GEO_LON_WEJ_PEAK')
+        super().calc_GEO_LST(var_name_datetime='DATETIME_EEJ_PEAK', var_name_glon='GEO_LON_EEJ_PEAK')
+        super().calc_GEO_LST(var_name_datetime='DATETIME_WEJ_EB', var_name_glon='GEO_LON_WEJ_EB')
+        super().calc_GEO_LST(var_name_datetime='DATETIME_EEJ_EB', var_name_glon='GEO_LON_EEJ_EB')
+        super().calc_GEO_LST(var_name_datetime='DATETIME_WEJ_PB', var_name_glon='GEO_LON_WEJ_PB')
+        super().calc_GEO_LST(var_name_datetime='DATETIME_EEJ_PB', var_name_glon='GEO_LON_EEJ_PB')
         
     
     def convert_to_APEX(self, var_name_glat='GEO_LAT', var_name_glon='GEO_LON', var_name_gr='GEO_r', var_name_datetime='DATETIME'):

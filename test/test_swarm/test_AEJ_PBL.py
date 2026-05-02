@@ -47,7 +47,7 @@ def test_swarm_AEJ_PBL_overview():
 
     db.set_layout(panel_layouts=panel_layouts)
     db.draw()
-    db.add_title(title='Swarm AEJ/PBL Overview', fontsize='medium', append_time=True)
+    db.add_title(title='Swarm-{} AEJ/PBL Overview'.format(ds.sat_id), fontsize='medium', append_time=True)
 
     db.save_figure(file_dir=file_dir_figure, file_name='example_AEJ_PBL_Swarm-{}_overview'.format(ds.sat_id), dpi=100, append_time=False)
     db.show()
@@ -91,7 +91,7 @@ def test_swarm_AEJ_PBL_zoom():
 
     db.set_layout(panel_layouts=panel_layouts)
     db.draw()
-    db.add_title(title='Swarm AEJ/PBL Zoom', fontsize='medium', append_time=True)
+    db.add_title(title='Swarm-{} AEJ/PBL Zoom'.format(ds.sat_id), fontsize='medium', append_time=True)
     
     db.save_figure(file_dir=file_dir_figure, file_name='example_AEJ_PBL_Swarm-{}_zoom'.format(ds.sat_id), dpi=100, append_time=False)
     db.show()
