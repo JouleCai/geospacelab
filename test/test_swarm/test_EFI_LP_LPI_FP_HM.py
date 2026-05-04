@@ -109,10 +109,44 @@ def test_swarm_EFI_LP_FP_overview():
 
     db.save_figure(file_dir=file_dir_figure, file_name='example_EFI_LP_FP_Swarm-{}_overview'.format(ds.sat_id), dpi=100, append_time=False)
     db.show()
+
+
+def test_swarm_EFI_LP_HM_overview():
+    """Test Swarm EFI/LP-HM data product
+    
+    """
+    dt_fr = datetime.datetime(2016, 3, 14, 20, 15)
+    dt_to = datetime.datetime(2016, 3, 14, 21, 0)
+
+    db = dashboards.TSDashboard(
+        dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 10)},
+        timeline_extra_labels=['GEO_LAT', 'GEO_LON', 'APEX_LAT', 'APEX_LON', 'APEX_MLT'],
+        )
+
+    ds = db.dock(
+        datasource_contents=['esa_eo', 'swarm', 'advanced', 'efi_lp_hm'], 
+        product_version='latest', # 'latest' (default),
+        sat_id='A', add_APEX=True)
+    
+    panel_layouts = [
+        [ds['n_p']],
+        [ds['T_e'], ds['T_e_HG'], ds['T_e_LG']],
+        [ds['V_SC_HG'], ds['V_SC_LG']],
+        [ds['FLAG_BIN_AUX'],],
+    ]
+    
+    ds['T_e'].visual.axis[1].lim = [-10, 10000]
+    
+    db.set_layout(panel_layouts=panel_layouts)
+    db.draw()
+    db.add_title(title='Swarm-{} EFI/LP-HM Overview'.format(ds.sat_id), fontsize='medium', append_time=True)
+
+    db.save_figure(file_dir=file_dir_figure, file_name='example_EFI_LP_HM_Swarm-{}_overview'.format(ds.sat_id), dpi=100, append_time=False)
+    db.show()
     
 
-def test_swarm_compare_EFI_LP_FP():
-    """Test comparison of Swarm EFI/LP-FP data product with EFI/LP 1B data product
+def test_swarm_compare_EFI_LP_FP_HM():
+    """Test Swarm EFI/LP-FP vs. EFI/LP-HM data products
     
     """
     dt_fr = datetime.datetime(2016, 3, 14, 20, 15)
@@ -133,27 +167,39 @@ def test_swarm_compare_EFI_LP_FP():
         product_version='latest', # 'latest' (default),
         sat_id='A', add_APEX=True)
     
+    ds_lp_hm = db.dock(
+        datasource_contents=['esa_eo', 'swarm', 'advanced', 'efi_lp_hm'], 
+        product_version='latest', # 'latest' (default),
+        sat_id='A', add_APEX=True)
+    
     panel_layouts = [
-        [ds_lp_fp['n_p'], ds_lp_1b['n_i'], ds_lp_1b['n_e']],
-        [ds_lp_1b['T_e']],
+        [ds_lp_fp['n_p'], ds_lp_1b['n_i'], ds_lp_1b['n_e'], ds_lp_hm['n_p']],
+        [ds_lp_1b['T_e'], ds_lp_hm['T_e'], ds_lp_hm['T_e_HG'], ds_lp_hm['T_e_LG']],
         [ds_lp_1b['FLAG_LP'], ds_lp_1b['FLAG_n_i'], ds_lp_1b['FLAG_n_e'], ds_lp_1b['FLAG_T_e'], ds_lp_1b['FLAG_V_SC']],
         [ds_lp_1b['FLAG_1_BIN_AUX'],],
         [ds_lp_1b['FLAG_2_BIN_AUX'],],
+        [ds_lp_hm['FLAG_BIN_AUX'],],
     ]
     ds_lp_1b['n_i'].visual.axis[2].label = r"n$_i$ (1B)"
     ds_lp_1b['n_e'].visual.axis[2].label = r"n$_e$ (1B)"
     ds_lp_1b['T_e'].visual.axis[2].label = r"T$_e$ (1B)"
     ds_lp_fp['n_p'].visual.axis[2].label = r"n$_p$ (FP)"
+    ds_lp_hm['n_p'].visual.axis[2].label = r"n$_p$ (HM)"
+    ds_lp_hm['T_e'].visual.axis[2].label = r"T$_e$ (HM)"
+    ds_lp_hm['T_e_HG'].visual.axis[2].label = r"T$_e$ (HG)"
+    ds_lp_hm['T_e_LG'].visual.axis[2].label = r"T$_e$ (LG)"
+    ds_lp_1b['T_e'].visual.axis[1].lim = [-10, 10000]
     
     db.set_layout(panel_layouts=panel_layouts)
     db.draw()
-    db.add_title(title='Swarm-{} EFI/LP-FP vs. EFI/LP 1B Comparison'.format(ds_lp_fp.sat_id), fontsize='medium', append_time=True)
+    db.add_title(title='Swarm-{} EFI/LP 1B vs FP vs HM Comparison'.format(ds_lp_fp.sat_id), fontsize='medium', append_time=True)
 
-    db.save_figure(file_dir=file_dir_figure, file_name='example_EFI_LP_FP_vs_EFI_LP_1B_Swarm-{}_comparison'.format(ds_lp_fp.sat_id), dpi=100, append_time=False)
+    db.save_figure(file_dir=file_dir_figure, file_name='example_EFI_LP_FP_vs_EFI_LP_1B_vs_EFI_LP_HM_Swarm-{}_comparison'.format(ds_lp_fp.sat_id), dpi=100, append_time=False)
     db.show()
 
 if __name__ == "__main__":
     # test_swarm_EFI_LP_1B_overview()
     # test_swarm_EFI_LPI_1B_overview()
-    #test_swarm_EFI_LP_FP_overview()
-    test_swarm_compare_EFI_LP_FP()
+    # test_swarm_EFI_LP_FP_overview()
+    # test_swarm_compare_EFI_LP_FP_HM()
+    test_swarm_EFI_LP_HM_overview()

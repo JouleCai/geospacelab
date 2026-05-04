@@ -53,7 +53,7 @@ class Downloader(DownloaderSwarm):
             file_class=file_class,
             file_extension=file_extension,
             product=product,
-            product_pattherns=None,
+            product_patterns=None,
             product_level=product_level,
             product_version=product_version,
             root_dir_local=root_dir_local,

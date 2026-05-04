@@ -334,8 +334,10 @@ class Dataset(datahub.DatasetSourced):
             for fp in download_obj.file_paths_local:
                 dt_fr, dt_to, version = self._parse_file_name(fp.name)
                 search_pattern = f"*{dt_fr.strftime('%Y%m%dT%H%M%S')}*{dt_to.strftime('%Y%m%dT%H%M%S')}*{version}*{self.data_file_ext}"
-                file_path = list(pathlib.Path(fp.parent).glob(search_pattern))[0]
-                file_paths.append(file_path)
+                file_path = list(pathlib.Path(fp.parent).glob(search_pattern))
+                if len(file_path) > 1:
+                    mylog.StreamLogger.warning(f"Multiple files found for the pattern {search_pattern} in the directory {fp.parent}!")
+                file_paths.extend(file_path)
             files_record = download_obj._files_record_remote
             self.data_file_versions = files_record['product_version']
             self.data_file_paths = file_paths

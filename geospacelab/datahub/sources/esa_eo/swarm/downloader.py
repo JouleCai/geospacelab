@@ -55,7 +55,7 @@ class DownloaderSwarm(DownloaderFromFTPBase):
         file_class=None,
         file_extension=None,
         product=None,
-        product_pattherns=None,
+        product_patterns=None,
         product_level=None,
         product_version=None,
         ftp_host=None, ftp_port=21,
@@ -81,9 +81,9 @@ class DownloaderSwarm(DownloaderFromFTPBase):
         self.file_class = file_class
         self.file_extension = file_extension
         self.product = product
-        if product_pattherns is None:
-            product_pattherns = product.split('_')
-        self.product_pattherns = product_pattherns
+        if product_patterns is None:
+            product_patterns = product.split('_')
+        self.product_patterns = product_patterns
         self.product_level = product_level
         self.product_version = product_version
         self._files_record_remote = None
@@ -119,7 +119,7 @@ class DownloaderSwarm(DownloaderFromFTPBase):
             direct_download = False    
         if direct_download:
             self.direct_download = True
-            self.download(with_TLS=True, subdirs=self.sub_dirs_remote, file_name_patterns=self.product_pattherns, **kwargs)
+            self.download(with_TLS=True, subdirs=self.sub_dirs_remote, file_name_patterns=self.product_patterns, **kwargs)
     
     def _validate(self):
         if self._file_dir_indexing is None:
@@ -140,7 +140,7 @@ class DownloaderSwarm(DownloaderFromFTPBase):
             mylog.StreamLogger.info(f"Indexing the files for the product {self.product} of the satellite {self.sat_id} ...")
             self._from_indexing_record = False
             self.download(
-                with_TLS=True, subdirs=self.sub_dirs_remote, file_name_patterns=self.product_pattherns,
+                with_TLS=True, subdirs=self.sub_dirs_remote, file_name_patterns=self.product_patterns,
             )
             if self._files_record_remote['file_path'].size == 0:
                 raise LookupError("Error during indexing the files.")
@@ -168,7 +168,7 @@ class DownloaderSwarm(DownloaderFromFTPBase):
         self, ftp, subdirs: Union[list, dict] = None, file_name_patterns = None, **kwargs
         ):
         if file_name_patterns is None:
-            file_name_patterns = self.product_pattherns 
+            file_name_patterns = self.product_patterns
         if self._indexing:
             dt_fr = datetime.datetime(1900, 1, 1)
             dt_to = datetime.datetime(2100, 1, 1)
@@ -189,11 +189,11 @@ class DownloaderSwarm(DownloaderFromFTPBase):
                 pwd_ = ftp.pwd()
                 subdirs_ = subdirs_k + ['Sat_{}'.format(self.sat_id.upper())]
                 file_paths_remote_ = super().search_from_ftp(ftp, subdirs_, file_name_patterns, **kwargs)
-
+                ftp.cwd(pwd_)
                 if not list(file_paths_remote_):
                     continue
                 file_paths_remote.extend(file_paths_remote_)
-                ftp.cwd(pwd_)
+
             files_record = self._parse_searched_files(file_paths_remote, **kwargs)
         if self.product in ['AEJ_PBL', 'AEJ_PBS', 'AOB_FAC']:
             files_record = self._filtering_files_by_same_start_time(files_record)
@@ -282,23 +282,7 @@ class DownloaderSwarm(DownloaderFromFTPBase):
                     'index': ii,
                 }
             )
-        # file_names_ = [fn.replace(v, '') for fn, v in zip(file_names, versions)]
-        # fn_unique, inds_fn_unique, inds_fn_inverse = np.unique(file_names_, return_index=True, return_inverse=True) 
-        # file_paths = files_record['file_path']
-        
-        # files_with_versions = []
-        # for ifn, fn in enumerate(fn_unique):
-        #     ii = np.where(inds_fn_inverse == ifn)[0]
-        #     versions_c = versions[ii]
-            
-        #     files_with_versions.append(
-        #         {
-        #             'file_names': file_names[ii],
-        #             'file_paths': file_paths[ii],
-        #             'versions': versions_c,
-        #             'indices': ii,
-        #         }
-        #     )
+
         return records
     
     def save_files_from_ftp(self, ftp, file_paths_local=None, root_dir_remote=None, dry_run=None, **kwargs):
@@ -352,6 +336,7 @@ class DownloaderSwarm(DownloaderFromFTPBase):
         if not list(file_path):
             return True
         else:
+            mylog.simpleinfo.info(f"The file {file_path} already exists: skip downloading.")
             return False
         # return super()._to_download(file_path, with_suffix)
     

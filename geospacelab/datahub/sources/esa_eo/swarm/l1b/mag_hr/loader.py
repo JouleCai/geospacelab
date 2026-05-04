@@ -15,22 +15,18 @@ from geospacelab.datahub.sources.esa_eo.swarm.loader import LoaderModel
 # define the default variable name dictionary
 default_variable_name_dict = {
     'CDF_EPOCH': 'Timestamp',
+    'SYNC_STATUS': 'SyncStatus',
     'SC_GEO_LAT': 'Latitude',
     'SC_GEO_LON': 'Longitude',
-    # 'SC_GEO_ALT': 'Height',
-    'SC_GEO_r': 'Radius',
-    # 'SC_SZA': 'SZA',
-    # 'SC_SAz': 'SAz',
-    # 'SC_ST': 'ST',
-    # 'SC_DIP_LAT': 'Diplat',
-    # 'SC_DIP_LON': 'Diplon',
-    # 'SC_QD_LAT': 'MLat',
-    # 'SC_QD_MLT': 'MLT',
-    # 'SC_AACGM_LAT': 'AACGMLat',
-    # 'SC_AACGM_LON': 'AACGMLon',
-    'B_NEC': 'B_NEC',
+    'SC_GEO_R': 'Radius',
     'B_VFM': 'B_VFM',
+    'B_NEC': 'B_NEC',
+    'dB_Sun_VFM': 'dB_Sun',
+    'dB_AOCS_VFM': 'dB_AOCS',
+    'dB_other_VFM': 'dB_other',
+    'B_VFM_err': 'B_error',
     'q_NEC_CRF': 'q_NEC_CRF',
+    'Att_error': 'Att_error',
     'FLAG_B': 'Flags_B',
     'FLAG_q': 'Flags_q',
     'FLAG_Platform': 'Flags_Platform',
@@ -38,19 +34,56 @@ default_variable_name_dict = {
 
 
 class Loader(LoaderModel):
-    """
-    Load SWARM 2Hz or 16HZ TII data products. Currently support versions higher than "0301".
-
-    The class is a hierarchy of :class:`SWARM data LoaderModel <geospacelab.datahub.sources.esa_eo.swarm.loader.LoaderModel>`
-
-    """
+    
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('variable_name_dict', default_variable_name_dict)
         super(Loader, self).__init__(*args, **kwargs)
 
     def load_data(self, **kwargs):
-        super(Loader, self).load_data(**kwargs)
+        
+        super(Loader, self).load_data(**kwargs, )
+        
+        self.variables['SC_GEO_r'] = self.variables['SC_GEO_R'] / 6371.2e3
+        self.variables['SC_GEO_LON'] = self.variables['SC_GEO_LON'] % 360
+        
         self.variables['B_N'] = self.variables['B_NEC'][:, 0][:, np.newaxis]
         self.variables['B_E'] = self.variables['B_NEC'][:, 1][:, np.newaxis]
         self.variables['B_C'] = self.variables['B_NEC'][:, 2][:, np.newaxis]
-        self.variables['SC_GEO_r'] = self.variables['SC_GEO_r'] * 1e-3
+        
+        self.variables['B_VFM_x'] = self.variables['B_VFM'][:, 0][:, np.newaxis]
+        self.variables['B_VFM_y'] = self.variables['B_VFM'][:, 1][:, np.newaxis]
+        self.variables['B_VFM_z'] = self.variables['B_VFM'][:, 2][:, np.newaxis]
+        
+        self.variables['B_VFM_x_err'] = self.variables['B_VFM_err'][:, 0][:, np.newaxis]
+        self.variables['B_VFM_y_err'] = self.variables['B_VFM_err'][:, 1][:, np.newaxis]
+        self.variables['B_VFM_z_err'] = self.variables['B_VFM_err'][:, 2][:, np.newaxis]
+        
+        self.variables['dB_Sun_VFM_x'] = self.variables['dB_Sun_VFM'][:, 0][:, np.newaxis]
+        self.variables['dB_Sun_VFM_y'] = self.variables['dB_Sun_VFM'][:, 1][:, np.newaxis]
+        self.variables['dB_Sun_VFM_z'] = self.variables['dB_Sun_VFM'][:, 2][:, np.newaxis]
+        
+        self.variables['dB_AOCS_VFM_x'] = self.variables['dB_AOCS_VFM'][:, 0][:, np.newaxis]
+        self.variables['dB_AOCS_VFM_y'] = self.variables['dB_AOCS_VFM'][:, 1][:, np.newaxis]
+        self.variables['dB_AOCS_VFM_z'] = self.variables['dB_AOCS_VFM'][:, 2][:, np.newaxis]
+        
+        self.variables['dB_other_VFM_x'] = self.variables['dB_other_VFM'][:, 0][:, np.newaxis]
+        self.variables['dB_other_VFM_y'] = self.variables['dB_other_VFM'][:, 1][:, np.newaxis]
+        self.variables['dB_other_VFM_z'] = self.variables['dB_other_VFM'][:, 2][:, np.newaxis]
+        
+        fb = self.variables['FLAG_B'].flatten()
+        fb = (((fb[:,None] & (1 << np.arange(8)))) > 0).astype(int)
+        self.variables['FLAG_B_BIN_AUX'] = fb
+        self.variables['FLAG_B_BIN_IND'] = np.arange(fb.shape[1])[np.newaxis, :] - 0.5
+        
+        fb = self.variables['FLAG_q'].flatten()
+        fb = (((fb[:,None] & (1 << np.arange(8)))) > 0).astype(int)
+        self.variables['FLAG_q_BIN_AUX'] = fb
+        self.variables['FLAG_q_BIN_IND'] = np.arange(fb.shape[1])[np.newaxis, :] - 0.5
+        
+        fb = self.variables['FLAG_Platform'].flatten()
+        fb = (((fb[:,None] & (1 << np.arange(9)))) > 0).astype(int)
+        self.variables['FLAG_Platform_BIN_AUX'] = fb
+        self.variables['FLAG_Platform_BIN_IND'] = np.arange(fb.shape[1])[np.newaxis, :] - 0.5
+
+    def load_cdf_data(self, var_names_cdf_epoch=None, var_names_independent_time=None):
+       return super().load_cdf_data(var_names_cdf_epoch=var_names_cdf_epoch, var_names_independent_time=var_names_independent_time)
