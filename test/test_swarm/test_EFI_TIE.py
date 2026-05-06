@@ -56,6 +56,7 @@ def test_swarm_EFI_TIE_zoom():
         [ds['FLAG_T_i_DRIFT_MODEL_BIN_AUX']],
         [ds['FLAG_T_i_DRIFT_BIN_AUX']],
         [ds['T_e_LP'],],
+        # [ds['Te_adj_LP'],], # Variable name in the original file can also be used to access the variable, which is more robust to changes in variable names in the future. The variable name dict can be used to map the original variable names to more user-friendly names.
         [ds['T_n_MSIS'],],
     ]
 

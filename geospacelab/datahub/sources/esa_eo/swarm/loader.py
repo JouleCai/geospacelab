@@ -33,7 +33,11 @@ class LoaderModel(object):
     def __init__(
         self, file_path, file_type='cdf', 
         product_version=None,
-        variable_name_dict=None, direct_load=True, dt_fr=None, dt_to=None, **kwargs):
+        variable_name_dict=None, 
+        from_VirES = False,
+        from_HAPI = False,
+        from_FAST = False,
+        direct_load=True, dt_fr=None, dt_to=None, **kwargs):
 
         self.file_path = pathlib.Path(file_path)
         self.file_type = file_type
@@ -50,8 +54,16 @@ class LoaderModel(object):
             self.load_data()
 
     def load_data(self, **kwargs):
-        if self.file_type == 'cdf':
-            self.load_cdf_data()
+        
+        if self.from_VirES:
+            self.load_from_VirES(**kwargs)
+        elif self.from_HAPI:
+            self.load_from_HAPI(**kwargs)
+        else:
+            if 'cdf' in self.file_type.lower():
+                self.load_cdf_data()
+            else:
+                raise NotImplementedError(f"File type {self.file_type} not supported for loading.")
 
     def load_cdf_data(self, var_names_cdf_epoch=None, var_names_independent_time=None):
         """
@@ -83,15 +95,15 @@ class LoaderModel(object):
                     epochs_valid = np.array(cdflib.cdfepoch.unixtime(epochs_[inds_epoch]))
                     dts_valid = [datetime.timedelta(seconds=epoch) + datetime.datetime(1970, 1, 1, 0, 0, 0) for epoch in epochs_valid]
                     dts[inds_epoch] = dts_valid
-                    variables_cdf[vn_cdf] = np.array(dts).reshape(shape)
+                    variables_cdf['DATETIME_' + vn_cdf] = np.array(dts).reshape(shape)
                     epoch_lengths.append(shape[0])
                 else:
                     epochs = np.array(cdflib.cdfepoch.unixtime(epochs.flatten()))
                     dts = [datetime.timedelta(seconds=epoch) + datetime.datetime(1970, 1, 1, 0, 0, 0) for epoch in epochs.flatten()]
-                    variables_cdf[vn_cdf] = np.array(dts).reshape(shape)
+                    variables_cdf['DATETIME_' + vn_cdf] = np.array(dts).reshape(shape)
                     epoch_lengths.append(shape[0])
-            else:
-                variables_cdf[vn_cdf] = np.array(cdf_file.varget(variable=vn_cdf))
+            
+            variables_cdf[vn_cdf] = np.array(cdf_file.varget(variable=vn_cdf))
         
         variables = {}
         for var_name, var_name_cdf in self.variable_name_dict.items():
@@ -99,16 +111,39 @@ class LoaderModel(object):
                 mylog.StreamLogger.warning(f"Variable name {var_name_cdf} not found in the cdf file.")
                 continue
             data = variables_cdf[var_name_cdf]
-            if data.shape[0] in epoch_lengths and var_name not in var_names_independent_time:
-                if len(data.shape) == 1:
-                    data = data[:, np.newaxis]
-                else:
-                    pass
-            if 'CDF_EPOCH' in var_name:
-                var_name_ = var_name.replace('CDF_EPOCH', 'SC_DATETIME')
+            if len(data.shape) == 0:
+                data = np.array([data])
             else:
-                var_name_ = var_name
-            variables[var_name_] = data
+                if data.shape[0] in epoch_lengths and var_name not in var_names_independent_time:
+                    if len(data.shape) == 1:
+                        data = data[:, np.newaxis]
+            if 'CDF_EPOCH' in var_name:
+                var_name_t = var_name.replace('CDF_EPOCH', 'SC_DATETIME')
+                data_t = variables_cdf['DATETIME_' + var_name_cdf]
+                if len(data_t.shape) == 1:
+                    data_t = data_t[:, np.newaxis]
+                variables[var_name_t] = data_t
+            variables[var_name] = data
         
         self.variables = variables
-
+        
+    def load_from_VirES(self, collection=None, kwargs_products=None):
+        from viresclient import SwarmRequest
+        mylog.StreamLogger.info(f"Loading data from VirES for collection {collection} with products {kwargs_products}.")
+        request = SwarmRequest()
+        request.set_collection(collection)
+        request.set_products(**kwargs_products)
+        data = request.get_between(start_time=self.dt_fr, end_time=self.dt_to)
+        mylog.StreamLogger.info(f"Data loaded from VirES.")
+        return data
+    
+    def load_from_HAPI(
+        self, 
+        server="https://vires.services/hapi", 
+        dataset=None, 
+        parameters=""):
+        from hapiclient import hapi
+        mylog.StreamLogger.info(f"Loading data from HAPI for server {server}, dataset {dataset}, parameters {parameters}.")
+        data, meta = hapi(server, dataset, parameters=parameters, start=self.dt_fr, stop=self.dt_to)
+        mylog.StreamLogger.info(f"Data loaded from HAPI.")
+        return data, meta

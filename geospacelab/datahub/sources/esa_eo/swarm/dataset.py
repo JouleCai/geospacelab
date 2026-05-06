@@ -66,6 +66,7 @@ class Dataset(datahub.DatasetSourced):
         self._data_root_dir_init = copy.deepcopy(self.data_root_dir)    # Record the initial root dir
 
         self.sat_id = kwargs.pop('sat_id', 'A')
+        self.variable_name_dict = kwargs.pop('variable_name_dict', None)
 
         self.metadata = None
 
@@ -109,6 +110,7 @@ class Dataset(datahub.DatasetSourced):
         )
         for i, (file_path, product_version) in enumerate(zip(self.data_file_paths, self.data_file_versions)):
             load_obj = self.loader(file_path, file_type='cdf', product_version=product_version)
+            self.variable_name_dict = load_obj.variable_name_dict
 
             for var_name in self._variables.keys():
                 if i > 0 and var_name in omit_join_variables:
@@ -338,9 +340,12 @@ class Dataset(datahub.DatasetSourced):
                 if len(file_path) > 1:
                     mylog.StreamLogger.warning(f"Multiple files found for the pattern {search_pattern} in the directory {fp.parent}!")
                 file_paths.extend(file_path)
-            files_record = download_obj._files_record_remote
-            self.data_file_versions = files_record['product_version']
+            versions = []
+            for file_path in file_paths:
+                dt_fr, dt_to, version = self._parse_file_name(file_path.name)
+                versions.append(version) 
             self.data_file_paths = file_paths
+            self.data_file_versions = versions
         return 
     
     def _filtering_files_by_same_start_time(self, files_record):
@@ -487,6 +492,15 @@ class Dataset(datahub.DatasetSourced):
         )
         
         return download_obj
+    
+    def __getitem__(self, key):
+        if key in self._variables.keys():
+            return self._variables[key]
+        else:
+            if self.variable_name_dict is not None and key in self.variable_name_dict.values():
+                key_c = [k for k, v in self.variable_name_dict.items() if v == key][0]
+                return self._variables[key_c]
+            raise KeyError(f"The variable {key} is not found in the dataset.")
 
     @property
     def database(self):

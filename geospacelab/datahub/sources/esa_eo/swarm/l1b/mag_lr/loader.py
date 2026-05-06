@@ -96,3 +96,11 @@ class Loader(LoaderModel):
 
     def load_cdf_data(self, var_names_cdf_epoch=None, var_names_independent_time=None):
        return super().load_cdf_data(var_names_cdf_epoch=var_names_cdf_epoch, var_names_independent_time=var_names_independent_time)
+   
+    
+    def load_from_VirES(self, collection=None, kwargs_products=None):
+        if self.from_FAST:
+            collection 
+            
+        data = super().load_from_VirES(collection=collection, kwargs_products=kwargs_products)
+        df = data.as_dataframe()

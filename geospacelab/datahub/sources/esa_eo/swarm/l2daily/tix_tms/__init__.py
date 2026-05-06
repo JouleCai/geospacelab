@@ -14,9 +14,9 @@ from geospacelab.config import prf
 import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
-from geospacelab.datahub.sources.esa_eo.swarm.l1b.mag_lr.loader import Loader as default_Loader
-from geospacelab.datahub.sources.esa_eo.swarm.l1b.mag_lr.downloader import Downloader as default_Downloader
-import geospacelab.datahub.sources.esa_eo.swarm.l1b.mag_lr.variable_config as var_config
+from geospacelab.datahub.sources.esa_eo.swarm.l2daily.tix_tms.loader import Loader as default_Loader
+from geospacelab.datahub.sources.esa_eo.swarm.l2daily.tix_tms.downloader import Downloader as default_Downloader
+import geospacelab.datahub.sources.esa_eo.swarm.l2daily.tix_tms.variable_config as var_config
 from geospacelab.datahub.sources.esa_eo.swarm.dataset import Dataset as SwarmDataset
 
 
@@ -24,18 +24,18 @@ from geospacelab.datahub.sources.esa_eo.swarm.dataset import Dataset as SwarmDat
 default_dataset_attrs = {
     'database': esaeo_database,
     'facility': swarm_facility,
-    'instrument': 'MAG',
-    'product': 'MAG_LR',
+    'instrument': 'EFI',
+    'product': 'TIX_TMS',
     'data_file_ext': '.cdf',
     'product_version': 'latest',
-    'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Level1b' / 'MAG_LR',
+    'data_root_dir': prf.datahub_data_root_dir / 'ESA' / 'SWARM' / 'Level2daily' / 'TIX_TMS',
     'allow_load': True,
     'allow_download': True,
     'force_download': False,
     'data_search_recursive': False,
     'add_AACGM': False,
     'add_APEX': False,
-    'add_GEO_LST': True,
+    'add_GEO_LST': False,
     'quality_control': False,
     'calib_control': False,
     'label_fields': ['database', 'facility', 'instrument', 'product'],
@@ -44,53 +44,27 @@ default_dataset_attrs = {
 }
 
 default_variable_names = [
-    'SC_DATETIME',
-    'SYNC_STATUS',
+    'DATETIME',
     'SC_GEO_LAT',
     'SC_GEO_LON',
-    'SC_GEO_r',
-    'B_VFM',
-    'B_VFM_x',
-    'B_VFM_y',
-    'B_VFM_z',
-    'B_VFM_x_err',
-    'B_VFM_y_err',
-    'B_VFM_z_err',
-    'B_NEC',
-    'B_N',
-    'B_E',
-    'B_C',
-    'dB_Sun_VFM',
-    'dB_Sun_VFM_x',
-    'dB_Sun_VFM_y',
-    'dB_Sun_VFM_z',
-    'dB_AOCS_VFM',
-    'dB_AOCS_VFM_x',
-    'dB_AOCS_VFM_y',
-    'dB_AOCS_VFM_z',
-    'dB_other_VFM',
-    'dB_other_VFM_x',
-    'dB_other_VFM_y',
-    'dB_other_VFM_z',   
-    'B_VFM_err',
-    'q_NEC_CRF',
-    'Att_error',
-    'FLAG_B',
-    'FLAG_q',
-    'FLAG_Platform',
-    'FLAG_B_BIN_AUX',
-    'FLAG_B_BIN_IND',
-    'FLAG_q_BIN_AUX',
-    'FLAG_q_BIN_IND',
-    'FLAG_Platform_BIN_AUX',
-    'FLAG_Platform_BIN_IND',
-    'FLAG_F',
-    'FLAG_F_BIN_AUX',
-    'FLAG_F_BIN_IND',
-    'ASM_Freq_Dev',
-    'F',
-    'F_err',
+    'GEO_LAT',
+    'GEO_LON',
+    'Distance',
+    'Azimuth',
+    'Tegix_X',
+    'Tegix_X_Sigma',
+    'Tegix_X_P95',
+    'Tegix_Y',
+    'Tegix_Y_Sigma',
+    'Tegix_Y_P95',
+    'Tegix_Total',
+    'Tegix_Sigma',
+    'Tegix_P95',
+    'N_Measurements',
+    'Flag_Tegix',
+    'Orbit_Label',
 ]
+
 
 # default_data_search_recursive = True
 
@@ -106,39 +80,31 @@ class Dataset(SwarmDataset):
     
     def __init__(self, **kwargs):
         kwargs = basic.dict_set_default(kwargs, **Dataset._default_dataset_attrs)
+
         super().__init__(**kwargs)
         
     def load_data(self, **kwargs):
-        kwargs.setdefault('omit_join_variables', ['FLAG_B_BIN_IND', 'FLAG_q_BIN_IND', 'FLAG_Platform_BIN_IND', 'FLAG_F_BIN_IND'])
+        kwargs.setdefault('omit_join_variables', [])
         return super().load_data(**kwargs)
     
     def search_data_files(self, file_patterns=None, file_name_by_day=True, archive_yearly=True, **kwargs):
-        file_patterns = ['MAG' + self.sat_id.upper(), 'LR']
-        super().search_data_files(
+        file_patterns = ['TIX', 'TMS']
+        return super().search_data_files(
             file_patterns=file_patterns, 
             file_name_by_day=file_name_by_day, 
             archive_yearly=archive_yearly, 
             **kwargs)
-        file_paths = []
-        versions = []
-        for fp, version in zip(self.data_file_paths, self.data_file_versions):
-            if 'ASM_VFM_IC' in fp.name:
-                continue
-            file_paths.append(fp)
-            versions.append(version)
-        self.data_file_paths = file_paths
-        self.data_file_versions = versions
-
+    
     def time_filter_by_range(self, **kwargs):
-        kwargs.update({'var_datetime_name': 'SC_DATETIME'})
+        kwargs.update({'var_datetime_name': 'DATETIME'})
         super().time_filter_by_range(**kwargs)
     
-    def calc_GEO_LST(self, var_name_datetime='SC_DATETIME', var_name_glon='SC_GEO_LON'):
+    def calc_GEO_LST(self, var_name_datetime='DATETIME', var_name_glon='GEO_LON'):
         return super().calc_GEO_LST(var_name_datetime, var_name_glon)
     
-    def convert_to_APEX(self, var_name_glat='SC_GEO_LAT', var_name_glon='SC_GEO_LON', var_name_gr='SC_GEO_r', var_name_datetime='SC_DATETIME'):
+    def convert_to_APEX(self, var_name_glat='GEO_LAT', var_name_glon='GEO_LON', var_name_gr='GEO_r', var_name_datetime='DATETIME'):
         return super().convert_to_APEX(var_name_glat, var_name_glon, var_name_gr, var_name_datetime)
     
-    def convert_to_AACGM(self, var_name_glat='SC_GEO_LAT', var_name_glon='SC_GEO_LON', var_name_gr='SC_GEO_r', var_name_datetime='SC_DATETIME'):
+    def convert_to_AACGM(self, var_name_glat='GEO_LAT', var_name_glon='GEO_LON', var_name_gr='GEO_r', var_name_datetime='DATETIME'):
         return super().convert_to_AACGM(var_name_glat, var_name_glon, var_name_gr, var_name_datetime)
     
