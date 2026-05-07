@@ -48,6 +48,7 @@ default_variable_names = [
     'SC_GEO_LAT',
     'SC_GEO_LON',
     'SC_GEO_r',
+    'SC_GEO_ALT',
     'SC_GEO_LST',
     'rho_n',
     'rho_n_ORBITMEAN',

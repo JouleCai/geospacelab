@@ -18,6 +18,9 @@ import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
 
+import geospacelab.observatory.orbit.sc_orbit as sco
+import geospacelab.observatory.orbit.utilities as scu
+
 
 FILE_RECORD_MODEL = {
     'id': np.empty((0, ), dtype=int),
@@ -63,6 +66,11 @@ class Dataset(datahub.DatasetSourced):
         self.add_AACGM = kwargs.pop('add_AACGM', False) 
         self.add_APEX = kwargs.pop('add_APEX', False)
         self.add_GEO_LST = kwargs.pop('add_GEO_LST', True)
+        self.from_VirES = kwargs.pop('from_VirES', False)
+        self.kwargs_VirES = kwargs.pop('kwargs_VirES', {})
+        self.from_HAPI = kwargs.pop('from_HAPI', False)
+        self.kwargs_HAPI = kwargs.pop('kwargs_HAPI', {})
+        self.from_FAST = kwargs.pop('from_FAST', False)
         self._data_root_dir_init = copy.deepcopy(self.data_root_dir)    # Record the initial root dir
 
         self.sat_id = kwargs.pop('sat_id', 'A')
@@ -100,27 +108,38 @@ class Dataset(datahub.DatasetSourced):
 
     def load_data(self, **kwargs):
         self.check_data_files(**kwargs)
+        
+        if not self.from_VirES and not self.from_HAPI:
+            default_variable_names = kwargs.pop('default_variable_names', self._default_variable_names)
+            omit_join_variables = kwargs.pop('omit_join_variables', [])
 
-        default_variable_names = kwargs.pop('default_variable_names', self._default_variable_names)
-        omit_join_variables = kwargs.pop('omit_join_variables', [])
+            self._set_default_variables(
+                default_variable_names,
+                configured_variables=self._default_variable_config.configured_variables
+            )
+            for i, (file_path, product_version) in enumerate(zip(self.data_file_paths, self.data_file_versions)):
+                load_obj = self.loader(file_path, file_type='cdf', product_version=product_version)
+                self.variable_name_dict = load_obj.variable_name_dict
 
-        self._set_default_variables(
-            default_variable_names,
-            configured_variables=self._default_variable_config.configured_variables
-        )
-        for i, (file_path, product_version) in enumerate(zip(self.data_file_paths, self.data_file_versions)):
-            load_obj = self.loader(file_path, file_type='cdf', product_version=product_version)
-            self.variable_name_dict = load_obj.variable_name_dict
-
-            for var_name in self._variables.keys():
-                if i > 0 and var_name in omit_join_variables:
-                    continue
-                value = load_obj.variables[var_name]
-                self._variables[var_name].join(value)
-
+                for var_name in self._variables.keys():
+                    # print(var_name)
+                    if i > 0 and var_name in omit_join_variables:
+                        continue
+                    if var_name not in load_obj.variables:
+                        mylog.StreamLogger.warning(f"Variable {var_name} not found in the loaded data from the file {file_path}. Skipping this variable.")
+                        continue
+                    value = load_obj.variables[var_name]
+                    self._variables[var_name].join(value)
             # self.select_beams(field_aligned=True)
-        if self.time_clip:
-            self.time_filter_by_range(var_datetime_name='SC_DATETIME')
+            if self.time_clip:
+                self.time_filter_by_range(var_datetime_name='SC_DATETIME')
+        elif self.from_VirES:
+            self._load_from_VirES(**kwargs)
+        elif self.from_HAPI:
+            self._load_from_HAPI(**kwargs)
+        else:
+            raise NotImplementedError("Loading method not implemented for the data source.")
+
         if self.quality_control:
             self.time_filter_by_quality()
         if self.calib_control:
@@ -134,6 +153,12 @@ class Dataset(datahub.DatasetSourced):
 
         if self.add_GEO_LST:
             self.calc_GEO_LST()
+    
+    def _load_from_VirES(self, **kwargs):
+        raise NotImplementedError("Loading from VirES is not implemented yet. Please use the loader in the specific product submodule, e.g., geospacelab.datahub.sources.esa_eo.swarm.l1b.mag_lr.loader.Loader, which inherits from the loader in this module and implements the method _load_from_VirES to load data from VirES for the specific product.")
+    
+    def _load_from_HAPI(self, **kwargs):
+        raise NotImplementedError("Loading from HAPI is not implemented yet. Please use the loader in the specific product submodule, e.g., geospacelab.datahub.sources.esa_eo.swarm.l1b.mag_lr.loader.Loader, which inherits from the loader in this module and implements the method _load_from_HAPI to load data from HAPI for the specific product.")
     
     def time_filter_by_range(self, **kwargs):
         kwargs.setdefault('var_datetime_name', 'SC_DATETIME')
@@ -492,6 +517,77 @@ class Dataset(datahub.DatasetSourced):
         )
         
         return download_obj
+    
+    def gridding(
+        self, 
+        sector = None, 
+        var_names_gridding=None, 
+        *,
+        sector_cs='GEO',
+        boundary_lat=None,
+        dt_fr = None, dt_to = None,
+        along_track_interp=True,
+        along_track_interp_method='linear',
+        along_track_binning=False,
+        along_track_binning_method='mean',
+        along_track_binning_res=None,
+        along_track_binning_step=None,
+        along_x_interp_method='linear',
+        x_grid_res=None,
+        y_grid_res=0.5,
+        x_data_res=None,
+        x_data_res_scale=1.5,
+        y_data_res=None,
+        y_data_res_scale=1.5,
+        grid_method='linear',
+        visual='on',
+        ):
+        
+        if dt_fr is None:
+            dt_fr = self.dt_fr
+        if dt_to is None:
+            dt_to = self.dt_to
+        if var_names_gridding is None:
+            raise ValueError("The variable names for gridding must be specified.")
+        if sector is None:
+            raise ValueError("The sector for gridding must be specified. Options are: 'ASC', 'DSC', 'N', and 'S'.")
+        
+        if boundary_lat is None:
+            if sector in ['N', 'S']:
+                boundary_lat = 0.
+            else:
+                boundary_lat = 90.
+        
+        if sector_cs not in ['GEO', 'AACGM', 'APEX']:
+            raise ValueError("The coordinate system for sector division must be specified. Options are: 'GEO', 'AACGM', and 'APEX'.")
+        
+        if 'SC_DATETIME' not in self._variables.keys():
+            raise PermissionError("The variable SC_DATETIME is required for gridding but not found in the dataset. This data product may not be suitable for this gridding method.")
+        
+        ds_leo = scu.LEOToolbox(dt_fr, dt_to)
+        ds_leo.clone_variables(self)
+        ds_leo.group_by_sector(sector_name=sector, boundary_lat=boundary_lat, sector_cs=sector_cs)
+
+        ds_leo.griddata_by_sector_v2(
+            sector_name=sector, variable_names=var_names_gridding,
+            x_grid_res=x_grid_res,
+            y_grid_res=y_grid_res,
+            x_data_res=x_data_res,
+            x_data_res_scale=x_data_res_scale,
+            y_data_res=y_data_res,
+            y_data_res_scale=y_data_res_scale,
+            grid_method=grid_method,
+            along_x_interp_method=along_x_interp_method,
+            along_track_interp=along_track_interp,
+            along_track_interp_method=along_track_interp_method,
+            along_track_binning=along_track_binning,
+            along_track_binning_method=along_track_binning_method,
+            along_track_binning_res=along_track_binning_res,
+            along_track_binning_step=along_track_binning_step,
+            visual=visual,)
+        
+        return ds_leo
+
     
     def __getitem__(self, key):
         if key in self._variables.keys():

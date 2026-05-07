@@ -5,6 +5,7 @@
 import numpy as np
 import datetime
 import copy
+import re
 
 import geospacelab.datahub as datahub
 from geospacelab.datahub import DatabaseModel, FacilityModel, InstrumentModel, ProductModel
@@ -90,6 +91,9 @@ default_variable_names = [
     'ASM_Freq_Dev',
     'F',
     'F_err',
+    'dF_Sun',
+    'dF_AOCS',
+    'dF_other',
 ]
 
 # default_data_search_recursive = True
@@ -142,3 +146,130 @@ class Dataset(SwarmDataset):
     def convert_to_AACGM(self, var_name_glat='SC_GEO_LAT', var_name_glon='SC_GEO_LON', var_name_gr='SC_GEO_r', var_name_datetime='SC_DATETIME'):
         return super().convert_to_AACGM(var_name_glat, var_name_glon, var_name_gr, var_name_datetime)
     
+    def _load_from_HAPI(self, **kwargs):
+        return super()._load_from_HAPI(**kwargs)
+    
+    def _load_from_VirES(self, **kwargs):
+        kwargs.update(kwargs_VirES=self.kwargs_VirES)
+        
+        load_obj = self.loader(
+            dt_fr=self.dt_fr, dt_to=self.dt_to, 
+            sat_id=self.sat_id, 
+            from_VirES=True, 
+            from_FAST=self.from_FAST, 
+            **kwargs,)
+        
+        variables = load_obj.variables
+        configured_variables = self._default_variable_config.configured_variables
+        
+        for vn in variables:
+            if vn in self._default_variable_names:
+                self.add_variable(vn, configured_variables=configured_variables)
+                self[vn].value = variables[vn]
+            else:
+                if vn.endswith('_N') or vn.endswith('_E') or vn.endswith('_C'):
+                    pattern = re.sub(r'_[NEC]$', '', vn)
+                    pattern = pattern.replace('B_res_', '')
+                    pattern = re.sub('^B_', '', pattern)
+                elif vn.endswith('_N_err') or vn.endswith('_E_err') or vn.endswith('_C_err'):
+                    pattern = re.sub(r'_[NEC]_err$', '', vn)
+                    pattern = re.sub('^B_', '', pattern)
+                elif vn.endswith('_VFM_x') or vn.endswith('_VFM_y') or vn.endswith('_VFM_z'):
+                    pattern = re.sub(r'_VFM_[xyz]$', '', vn)
+                    pattern = re.sub('^B_', '', pattern)
+                    pattern = re.sub('^dB_Sun_', '', pattern)
+                    pattern = re.sub('^dB_AOCS_', '', pattern)
+                    pattern = re.sub('^dB_other_', '', pattern)
+                elif vn.endswith('_VFM_x_err') or vn.endswith('_VFM_y_err') or vn.endswith('_VFM_z_err'):
+                    pattern = re.sub(r'_VFM_[xyz]_err$', '', vn)
+                    pattern = re.sub('^B_', '', pattern)
+                    pattern = re.sub('^dB_Sun_', '', pattern)
+                    pattern = re.sub('^dB_AOCS_', '', pattern)
+                    pattern = re.sub('^dB_other_', '', pattern)
+                elif vn.startswith('F_') or vn.startswith('dF_'):
+                    pattern = vn.replace('F_res_', '')
+                    pattern = re.sub(r'^F_', '', pattern)
+                    pattern = re.sub(r'^dF_Sun_', '', pattern)
+                    pattern = re.sub(r'^dF_AOCS_', '', pattern)
+                    pattern = re.sub(r'^dF_other_', '', pattern)
+                else:
+                    mylog.StreamLogger.warning(f"Variable {vn} is not in the default variable names and does not match the patterns for automatically assigning configured variable names. It will be added without a configured variable name, and may not be included in the default panels for plotting and analysis. Please check if this variable should be included in the default variable names or if it follows the naming patterns for automatic assignment of configured variable names.")
+                    self.add_variable(vn, configured_variables=configured_variables)
+                    self[vn].value = variables[vn]
+                    continue
+                configured_variable_name = vn.replace(pattern, '').replace('__', '_').strip('_')   
+                if '_res' in configured_variable_name:
+                    configured_variable_name = configured_variable_name.replace('_res', '')     
+                self.add_variable(vn, configured_variable_name=configured_variable_name, configured_variables=configured_variables)
+                self[vn].value = variables[vn]
+                
+                if '_res_' in vn:
+                    vn = vn.replace('_NEC', '')
+                    self[vn].label = pattern + ' ' +  r'$\Delta$' + self[vn].label
+                    self[vn].group = r'$\Delta$' + self[vn].group
+                else:
+                    self[vn].label = pattern + ' ' + self[vn].label
+                
+        return
+    
+    def _load_from_HAPI(self, **kwargs):
+        
+        kwargs.update(kwargs_VirES=self.kwargs_VirES)
+        
+        load_obj = self.loader(
+            dt_fr=self.dt_fr, dt_to=self.dt_to, 
+            sat_id=self.sat_id, 
+            from_HAPI=True, 
+            from_FAST=self.from_FAST, 
+            **kwargs,)
+        
+        variables = load_obj.variables
+        configured_variables = self._default_variable_config.configured_variables
+        
+        for vn in variables:
+            if vn in self._default_variable_names:
+                self.add_variable(vn, configured_variables=configured_variables)
+                self[vn].value = variables[vn]
+            else:
+                if vn.endswith('_N') or vn.endswith('_E') or vn.endswith('_C'):
+                    pattern = re.sub(r'_[NEC]$', '', vn)
+                    pattern = pattern.replace('B_res_', '')
+                    pattern = re.sub('^B_', '', pattern)
+                elif vn.endswith('_N_err') or vn.endswith('_E_err') or vn.endswith('_C_err'):
+                    pattern = re.sub(r'_[NEC]_err$', '', vn)
+                    pattern = re.sub('^B_', '', pattern)
+                elif vn.endswith('_VFM_x') or vn.endswith('_VFM_y') or vn.endswith('_VFM_z'):
+                    pattern = re.sub(r'_VFM_[xyz]$', '', vn)
+                    pattern = re.sub('^B_', '', pattern)
+                    pattern = re.sub('^dB_Sun_', '', pattern)
+                    pattern = re.sub('^dB_AOCS_', '', pattern)
+                    pattern = re.sub('^dB_other_', '', pattern)
+                elif vn.endswith('_VFM_x_err') or vn.endswith('_VFM_y_err') or vn.endswith('_VFM_z_err'):
+                    pattern = re.sub(r'_VFM_[xyz]_err$', '', vn)
+                    pattern = re.sub('^B_', '', pattern)
+                    pattern = re.sub('^dB_Sun_', '', pattern)
+                    pattern = re.sub('^dB_AOCS_', '', pattern)
+                    pattern = re.sub('^dB_other_', '', pattern)
+                elif vn.startswith('F_') or vn.startswith('dF_'):
+                    pattern = vn.replace('F_res_', '')
+                    pattern = re.sub(r'^F_', '', pattern)
+                    pattern = re.sub(r'^dF_Sun_', '', pattern)
+                    pattern = re.sub(r'^dF_AOCS_', '', pattern)
+                    pattern = re.sub(r'^dF_other_', '', pattern)
+                else:
+                    mylog.StreamLogger.warning(f"Variable {vn} is not in the default variable names and does not match the patterns for automatically assigning configured variable names. It will be added without a configured variable name, and may not be included in the default panels for plotting and analysis. Please check if this variable should be included in the default variable names or if it follows the naming patterns for automatic assignment of configured variable names.")
+                    self.add_variable(vn, configured_variables=configured_variables)
+                    self[vn].value = variables[vn]
+                    continue
+                configured_variable_name = vn.replace(pattern, '').replace('__', '_').strip('_')   
+                if '_res' in configured_variable_name:
+                    configured_variable_name = configured_variable_name.replace('_res', '')     
+                self.add_variable(vn, configured_variable_name=configured_variable_name, configured_variables=configured_variables)
+                self[vn].value = variables[vn]
+                
+                if '_res_' in vn:
+                    vn = vn.replace('_NEC', '')
+                    self[vn].label = pattern + ' ' +  r'$\Delta$' + self[vn].label
+                    self[vn].group = r'$\Delta$' + self[vn].group
+                else:
+                    self[vn].label = pattern + ' ' + self[vn].label

@@ -43,7 +43,7 @@ class Loader(LoaderModel):
         self.variables['SC_GEO_LON'] = self.variables['SC_GEO_LON'] % 360
         
         fb = np.int32(np.floor(self.variables['FLAG'].flatten()))
-        max_num_digits = len(str(np.max(fb)))
+        max_num_digits = 10 # len(str(np.max(fb)))
         fb_arr = [d for fbn in fb for d in str(fbn).zfill(max_num_digits)]
         fb_arr = np.array(fb_arr, dtype=int).reshape(fb.shape[0], max_num_digits)
         fb_arr = np.fliplr(fb_arr)
@@ -51,7 +51,7 @@ class Loader(LoaderModel):
         self.variables['FLAG_DIGIT_IND'] = np.arange(fb_arr.shape[1]+1)[np.newaxis,:] - 0.5
         
         fb = np.int64(np.floor(self.variables['FLAG_F'].flatten()))
-        max_num_digits = len(str(np.max(fb)))
+        max_num_digits = 10 # len(str(np.max(fb)))
         fb_arr = [d for fbn in fb for d in str(fbn).zfill(max_num_digits)]
         fb_arr = np.array(fb_arr, dtype=int).reshape(fb.shape[0], max_num_digits)
         fb_arr = np.fliplr(fb_arr)
@@ -59,7 +59,7 @@ class Loader(LoaderModel):
         self.variables['FLAG_F_DIGIT_IND'] = np.arange(fb_arr.shape[1]+1)[np.newaxis,:] - 0.5
         
         fb = np.int64(np.floor(self.variables['FLAG_B'].flatten()))
-        max_num_digits = len(str(np.max(fb)))
+        max_num_digits = 10 # len(str(np.max(fb)))
         fb_arr = [d for fbn in fb for d in str(fbn).zfill(max_num_digits)]
         fb_arr = np.array(fb_arr, dtype=int).reshape(fb.shape[0], max_num_digits)
         fb_arr = np.fliplr(fb_arr)
@@ -67,7 +67,7 @@ class Loader(LoaderModel):
         self.variables['FLAG_B_DIGIT_IND'] = np.arange(fb_arr.shape[1]+1)[np.newaxis,:] - 0.5
         
         fb = np.int64(np.floor(self.variables['FLAG_q'].flatten()))
-        max_num_digits = len(str(np.max(fb)))
+        max_num_digits = 10 # len(str(np.max(fb)))
         fb_arr = [d for fbn in fb for d in str(fbn).zfill(max_num_digits)]
         fb_arr = np.array(fb_arr, dtype=int).reshape(fb.shape[0], max_num_digits)
         fb_arr = np.fliplr(fb_arr)

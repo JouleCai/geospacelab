@@ -37,27 +37,33 @@ class LEOToolbox(DatasetUser):
         self.sector_cs = 'GEO'
         self.sectors = {}
 
-    def add_GEO_cartesian(self, cs_in='GEO', ):
+    def add_GEO_cartesian(self, coords=None, cs_in='GEO', ):
+        
+        if coords is None:
+            lat = self['SC_GEO_LAT'].value.flatten()
+            lon = self['SC_GEO_LON'].value.flatten()
+            
+            if 'SC_GEO_ALT' in self.keys():
+                coords = {
+                    'lat': lat,
+                    'lon': lon,
+                    'height': self['SC_GEO_ALT'].value.flatten(),
+                    'lat_unit': 'deg', 'lon_unit': 'deg', 'height_unit': 'km'
+                }
+            elif 'SC_GEO_r' in self.keys():
+                coords = {
+                    'lat': lat,
+                    'lon': lon,
+                    'r': self['SC_GEO_r'].value.flatten(),
+                }
         
         if cs_in == 'GEO':
-            coords={
-                'lat': self['SC_GEO_LAT'].value.flatten(),
-                'lon': self['SC_GEO_LON'].value.flatten(),
-                'height': self['SC_GEO_ALT'].value.flatten(),
-                'lat_unit': 'deg', 'lon_unit': 'deg', 'height_unit': 'km'
-            }
             cs = gsl_cs.GEOD(
                 coords=coords
             )
             cs_new = cs.to_GEOC().to_cartesian()
         elif cs_in == 'GEOC':
-            coords={
-                'x': self['SC_GEO_X'].value.flatten(),
-                'y': self['SC_GEO_Y'].value.flatten(),
-                'z': self['SC_GEO_Z'].value.flatten(),
-                'x_unit': 'km', 'y_unit': 'km', 'z_unit': 'km'
-            }
-            cs = gsl_cs.GEOCCartesian(
+            cs = gsl_cs.GEOCSpherical(
                 coords=coords
             )
             cs_new = cs.to_cartesian()
@@ -88,6 +94,19 @@ class LEOToolbox(DatasetUser):
                 nodes['GEO_LST'] = np.delete(nodes['GEO_LST'], iiii)
                 nodes['DATETIME'] = np.delete(nodes['DATETIME'], iiii)
 
+        if self['SC_GEO_ALT'].value is None:
+            try:
+                if 'SC_GEO_r' in self.keys():
+                    self['SC_GEO_ALT'].value = self['SC_GEO_r'].value * 6371.2 - 6371.2
+                elif 'SC_GEO_R' in self.keys():
+                    self['SC_GEO_ALT'].value = self['SC_GEO_R'].value - 6371.2
+                else:
+                    raise ValueError('Neither SC_GEO_r nor SC_GEO_R is available to calculate SC_GEO_ALT.')
+            except Exception as e:
+                mylog.error('Failed to calculate SC_GEO_ALT for searching orbit nodes. {}'.format(e))
+        
+        if self['SC_GEO_LST'].value is None:
+            self.add_GEO_LST()
 
         glat = self['SC_GEO_LAT'].value.flatten()
         glat_ = glat[0::data_interval]
@@ -382,15 +401,18 @@ class LEOToolbox(DatasetUser):
         along_track_interp_method='linear',
         along_track_binning=False,
         along_track_binning_method='mean',
-        along_track_binning_size=None,
+        along_track_binning_res=None,
+        along_track_binning_step=None,
         visual='on',
     ):      
         # Initialize parameters
         if along_track_binning and along_track_interp:
             raise ValueError('Only one of along_track_binning and along_track_interp can be True.') 
         if along_track_binning:
-            if along_track_binning_size is None:
-                along_track_binning_size = y_grid_res
+            if along_track_binning_res is None:
+                along_track_binning_res = y_grid_res
+            if along_track_binning_step is None:
+                along_track_binning_step = along_track_binning_res
         
         self.visual = visual
         dts_c = self['_'.join(('SECTOR', sector_name, 'DATETIME'))].value.flatten()
@@ -429,8 +451,12 @@ class LEOToolbox(DatasetUser):
                 
         # Set the grids
         dt0 = dttool.get_start_of_the_day(self.dt_fr)
-        ny = int(np.ceil(np.diff(lat_range) / y_grid_res) + 1)
-        ys = np.linspace(lat_range[0], lat_range[1], ny)
+        if along_track_interp:
+            ny = int(np.ceil(np.diff(lat_range) / y_grid_res) + 1)
+            ys = np.linspace(lat_range[0], lat_range[1], ny)
+        elif along_track_binning:
+            ny = int(np.ceil((lat_range[1] - lat_range[0]) / along_track_binning_step))
+            ys = np.arange(lat_range[0], lat_range[1], along_track_binning_step) + along_track_binning_step / 2
         if x_grid_res is None:
             xs = x_unique_c
             # ys = ys[:-1] + y_grid_res / 2 
@@ -446,8 +472,8 @@ class LEOToolbox(DatasetUser):
             )
             x_interp = True
         if along_track_binning:
-            y_bins = ys - y_grid_res / 2
-            y_bins = np.append(y_bins, ys[-1] + y_grid_res / 2)
+            n_bins = ny + 1
+            y_bins = np.linspace(lat_range[0], lat_range[1], n_bins)
         else:
             y_bins = None
 
@@ -528,8 +554,9 @@ class LEOToolbox(DatasetUser):
                     xx_1[ii-1, :] = x_i
                     
                     if 'LON' in var_name:
+                        y_i = y_bins[:-1] + along_track_binning_step / 2
                         z_i = gsl_interp.interp1d_periodic_y(
-                            yd, zd, y_bins, method=along_track_binning_method,
+                            yd, zd, y_i, method=along_track_binning_method,
                             period=360.,
                             segment=True,
                             x_res=y_data_res,
@@ -537,24 +564,30 @@ class LEOToolbox(DatasetUser):
                             extrap=False,
                         )
                     elif 'LST' in var_name or 'MLT' in var_name:
+                        y_i = y_bins[:-2] + along_track_binning_step / 2
                         z_i = gsl_interp.interp1d_periodic_y(
-                            yd, zd, y_bins, method=along_track_binning_method,
+                            yd, zd, y_i, method=along_track_binning_method,
                             period=24.,
                             segment=True,
                             x_res=y_data_res,
                             x_res_scale=y_data_res_scale,
                             extrap=False,
                         )
-                    else:
-                        inds_sorted = np.argsort(yd)
-                        yd_sorted = yd[inds_sorted]
-                        z_i = gsl_binning.binning1d(
-                            yd_sorted, zd[inds_sorted], y_bins, method=along_track_binning_method,
-                            segment=True,
-                            x_res = y_data_res,
-                            x_res_scale = y_data_res_scale,
-                            extrap=False,
-                        )
+                    else: 
+                        # z_i = gsl_binning.binning1d(
+                        #     yd_sorted, zd[inds_sorted], y_bins, method=along_track_binning_method,
+                        #     segment=True,
+                        #     x_res = y_data_res,
+                        #     x_res_scale = y_data_res_scale,
+                        #     extrap=False,
+                        # )
+                        z_i = gsl_binning.binning1d_moving(
+                            yd, zd, 
+                            x_0=y_bins[0],
+                            x_1=y_bins[-1],
+                            method=along_track_binning_method,
+                            bin_step=along_track_binning_step,
+                            bin_res=along_track_binning_res,)
                         if along_track_binning_method in ['median', 'max', 'min']:
                             var_name_suffix = along_track_binning_method.upper()
                         elif '%' in along_track_binning_method:
@@ -704,9 +737,9 @@ class LEOToolbox(DatasetUser):
             var.visual.axis[2].data = '@v.value'
             var.visual.axis[2].data_scale = self[var_name].visual.axis[1].data_scale
             var.visual.axis[2].label = '@v.label'
-            var.visual.axis[2].unit = '@v.unit'
+            var.visual.axis[2].unit = '@v.unit_label'
             var.visual.plot_config.style = '2P'
-            var.visual.plot_config.pcolormesh.update(cmap='jet')
+            var.visual.plot_config.pcolormesh.update(cmap='turbo')
         
         grid_x_name = '_'.join(('SECTOR', sector_name, 'GRID', 'X'))
         grid_x = grid_x.T
@@ -929,7 +962,7 @@ class LEOToolbox(DatasetUser):
             var.set_depend(1, {which_lat: '_'.join(('SECTOR', sector_name, 'GRID_LAT'))})
             var.visual.axis[0].data = '@d.' + '_'.join(('SECTOR', sector_name, 'GRID_DATETIME'))
             var.visual.axis[1].data = '@d.' + '_'.join(('SECTOR', sector_name, 'GRID_LAT'))
-            var.visual.axis[1].label = 'GLAT' if self.sector_cs == 'GEO' else 'MLAT'
+            var.visual.axis[1].label = 'ARG GLAT' if self.sector_cs == 'GEO' else 'ARG MLAT'
             var.visual.axis[1].unit = r'$^\circ$'
             var.visual.axis[1].lim = lat_range
             var.visual.axis[2].data = '@v.value'
@@ -992,8 +1025,20 @@ class LEOToolbox(DatasetUser):
         var.unit = r'$\circ$'
         var.depends = self['SC_GEO_LON'].depends
     
-    @staticmethod
-    def format_pseudo_lat_label(ax, sector_name, is_integer=True, y_tick_res=15.):
+    def format_pseudo_lat_axis(self, ax, sector_name, inverse=False, add_sperator=True):
+        if inverse:
+            ax.invert_yaxis()
+        yys = {
+            'N': [90, 90],
+            'S': [270, 270],
+            'ASC': [0, 0],
+            'DSC': [180, 180],
+        }
+        if add_sperator:
+            ax.plot(ax.get_xlim(), yys[sector_name], color='k', linestyle='--', linewidth=1.5, zorder=100)
+        return
+    
+    def format_pseudo_lat_label(self, ax, sector_name, is_integer=True, y_tick_res=15., ylabel=None):
         if is_integer:
             lat_format = '{:4.0f}'
         else:
@@ -1074,6 +1119,10 @@ class LEOToolbox(DatasetUser):
         ax.set_yticks(yticks)
         ax.set_yticklabels(ylabels)
         ax.set_ylim(y_lim)
+        
+        if ylabel is None:
+            ylabel = ax.get_ylabel().replace('ARG ', '')
+        ax.set_ylabel(ylabel)
 
         return
 
@@ -1189,5 +1238,6 @@ class LEOToolbox(DatasetUser):
         v_unit[:, 2] = - v_new[:, 2] / norm
         
         return v_unit
+
 
          

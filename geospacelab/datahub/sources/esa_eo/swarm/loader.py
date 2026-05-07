@@ -31,34 +31,42 @@ class LoaderModel(object):
     :type direct_load: bool
     """
     def __init__(
-        self, file_path, file_type='cdf', 
+        self, file_path=None, file_type='cdf', 
         product_version=None,
         variable_name_dict=None, 
         from_VirES = False,
         from_HAPI = False,
         from_FAST = False,
+        sat_id=None,
         direct_load=True, dt_fr=None, dt_to=None, **kwargs):
 
-        self.file_path = pathlib.Path(file_path)
+        self.file_path = pathlib.Path(file_path) if file_path is not None else None
         self.file_type = file_type
         self.variables = {}
         self.product_version = product_version
         self.dt_fr = dt_fr
         self.dt_to = dt_to
+        self.sat_id = sat_id.upper() if sat_id is not None else None
+        
+        self.from_HAPI = from_HAPI
+        self.from_VirES = from_VirES
+        self.from_FAST = from_FAST
 
         if variable_name_dict is None:
             variable_name_dict = default_variable_name_dict
         self.variable_name_dict = variable_name_dict
 
         if direct_load:
-            self.load_data()
+            self.load_data(**kwargs)
 
     def load_data(self, **kwargs):
         
         if self.from_VirES:
-            self.load_from_VirES(**kwargs)
+            kwargs_VirES = kwargs.pop('kwargs_VirES', {})
+            self.load_from_VirES(**kwargs_VirES)
         elif self.from_HAPI:
-            self.load_from_HAPI(**kwargs)
+            kwargs_HAPI = kwargs.pop('kwargs_HAPI', {})
+            self.load_from_HAPI(**kwargs_HAPI)
         else:
             if 'cdf' in self.file_type.lower():
                 self.load_cdf_data()
@@ -144,6 +152,6 @@ class LoaderModel(object):
         parameters=""):
         from hapiclient import hapi
         mylog.StreamLogger.info(f"Loading data from HAPI for server {server}, dataset {dataset}, parameters {parameters}.")
-        data, meta = hapi(server, dataset, parameters=parameters, start=self.dt_fr, stop=self.dt_to)
+        data, meta = hapi(server, dataset, parameters, self.dt_fr.isoformat(), self.dt_to.isoformat())
         mylog.StreamLogger.info(f"Data loaded from HAPI.")
         return data, meta

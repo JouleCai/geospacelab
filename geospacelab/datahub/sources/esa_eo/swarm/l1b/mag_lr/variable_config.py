@@ -296,7 +296,7 @@ var.fullname = 'dB due to Sun induced perturbation in x direction of VFM frame'
 var.label = r'$\delta$B$_{Sun,x}$'
 var.unit = 'nT'
 var.unit_label = r'nT'
-var.group = r'$\delta$B_{Sun}'
+var.group = r'$\delta$B$_{Sun}$'
 # var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
@@ -319,7 +319,7 @@ var.fullname = 'dB due to Sun induced perturbation in y direction of VFM frame'
 var.label = r'$\delta$B$_{Sun,y}$'
 var.unit = 'nT'
 var.unit_label = r'nT'
-var.group = r'$\delta$B_{Sun}'
+var.group = r'$\delta$B$_{Sun}$'
 # var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
@@ -342,7 +342,7 @@ var.fullname = 'dB due to Sun induced perturbation in z direction of VFM frame'
 var.label = r'$\delta$B$_{Sun,z}$'
 var.unit = 'nT'
 var.unit_label = r'nT'
-var.group = r'$\delta$B_{Sun}'
+var.group = r'$\delta$B$_{Sun}$'
 # var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
@@ -366,7 +366,7 @@ var.fullname = 'dB due to AOCS induced perturbation in x direction of VFM frame'
 var.label = r'$\delta$B$_{AOCS,x}$'
 var.unit = 'nT'
 var.unit_label = r'nT'
-var.group = r'$\delta$B_{AOCS}'
+var.group = r'$\delta$B$_{AOCS}$'
 # var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
@@ -389,7 +389,7 @@ var.fullname = 'dB due to AOCS induced perturbation in y direction of VFM frame'
 var.label = r'$\delta$B$_{AOCS,y}$'
 var.unit = 'nT'
 var.unit_label = r'nT'
-var.group = r'$\delta$B_{AOCS}'
+var.group = r'$\delta$B$_{AOCS}$'
 # var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
@@ -412,7 +412,7 @@ var.fullname = 'dB due to AOCS induced perturbation in z direction of VFM frame'
 var.label = r'$\delta$B$_{AOCS,z}$'
 var.unit = 'nT'
 var.unit_label = r'nT'
-var.group = r'$\delta$B_{AOCS}'
+var.group = r'$\delta$B$_{AOCS}$'
 # var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
@@ -436,7 +436,7 @@ var.fullname = 'dB due to all other sources of perturbation in x direction of VF
 var.label = r'$\delta$B$_{other,x}$'
 var.unit = 'nT'
 var.unit_label = r'nT'
-var.group = r'$\delta$B_{other}'
+var.group = r'$\delta$B$_{other}$'
 # var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
@@ -460,7 +460,7 @@ var.fullname = 'dB due to all other sources of perturbation in y direction of VF
 var.label = r'$\delta$B$_{other,y}$'
 var.unit = 'nT'
 var.unit_label = r'nT'
-var.group = r'$\delta$B_{other}'
+var.group = r'$\delta$B$_{other}$'
 # var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs
@@ -483,7 +483,7 @@ var.fullname = 'dB due to all other sources of perturbation in z direction of VF
 var.label = r'$\delta$B$_{other,z}$'
 var.unit = 'nT'
 var.unit_label = r'nT'
-var.group = r'$\delta$B_{other}'
+var.group = r'$\delta$B$_{other}$'
 # var.error = var_name + '_err'
 var.depends = {0: depend_0}
 # set plot attrs

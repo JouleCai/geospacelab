@@ -37,6 +37,7 @@ class Loader(LoaderModel):
         
         self.variables['SC_GEO_r'] = self.variables['SC_GEO_ALT'] / 6371.2e3 + 1.0
         self.variables['rho_n'][self.variables['rho_n']>1] = np.nan
+        self.variables['rho_n'][self.variables['rho_n']<=1e-18] = np.nan
         self.variables['rho_n_ORBITMEAN'][self.variables['rho_n_ORBITMEAN']>1] = np.nan
         self.variables['SC_GEO_ALT'] = self.variables['SC_GEO_ALT'] * 1e-3
         self.variables['SC_GEO_LON'] = self.variables['SC_GEO_LON'] % 360

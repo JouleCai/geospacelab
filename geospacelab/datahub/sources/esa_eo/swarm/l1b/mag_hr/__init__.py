@@ -108,11 +108,20 @@ class Dataset(SwarmDataset):
     
     def search_data_files(self, file_patterns=None, file_name_by_day=True, archive_yearly=True, **kwargs):
         file_patterns = ['MAG' + self.sat_id.upper(), 'HR']
-        return super().search_data_files(
+        super().search_data_files(
             file_patterns=file_patterns, 
             file_name_by_day=file_name_by_day, 
             archive_yearly=archive_yearly, 
             **kwargs)
+        file_paths = []
+        versions = []
+        for fp, version in zip(self.data_file_paths, self.data_file_versions):
+            if 'ASM_VFM_IC' in fp.name:
+                continue
+            file_paths.append(fp)
+            versions.append(version)
+        self.data_file_paths = file_paths
+        self.data_file_versions = versions
     
     def time_filter_by_range(self, **kwargs):
         kwargs.update({'var_datetime_name': 'SC_DATETIME'})
