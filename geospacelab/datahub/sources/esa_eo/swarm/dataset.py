@@ -52,7 +52,7 @@ class Dataset(datahub.DatasetSourced):
         super().__init__(**kwargs)
 
         self.database = kwargs.pop('database', 'ESA/EarthOnline')
-        self.mission = kwargs.pop('mission', 'Swarm')
+        self.facility = kwargs.pop('facility', 'Swarm')
         self.instrument = kwargs.pop('instrument', '')
         self.data_file_ext = kwargs.pop('data_file_ext', '.cdf')
         self.product = kwargs.pop('product', '')
@@ -273,6 +273,11 @@ class Dataset(datahub.DatasetSourced):
         inds = condition(flag_values) if callable(condition) else None
         self.time_filter_by_inds(inds)
 
+    def check_data_files(self, **kwargs):
+        if self.from_VirES or self.from_HAPI:
+            return
+        super().check_data_files(**kwargs)
+    
     def search_data_files(
         self, 
         dt_fr=None, dt_to=None, 
@@ -587,6 +592,46 @@ class Dataset(datahub.DatasetSourced):
             visual=visual,)
         
         return ds_leo
+    
+    
+    def get_conjunction_with_site(
+        self,
+        with_available_measurements=True,
+        time_window_for_conjunction=None,
+        dt_fr=None, dt_to=None, 
+        el_lim=60.,
+        glat_site=None, glon_site=None, alt_site=None,
+        print_conj_list=False,
+    ):
+        import geospacelab.observatory.orbit.conjunction as sco_conj
+        if self.facility.lower() == 'swarm':
+            sat_id = 'swarm' + self.sat_id.lower()
+        else:
+            raise NotImplementedError("The conjunction calculation is only implemented for the Swarm mission for now.")
+        
+        dt_fr = self.dt_fr if dt_fr is None else dt_fr
+        dt_to = self.dt_to if dt_to is None else dt_to
+        el_lim = el_lim if el_lim is not None else 60.
+        glat_site = glat_site if glat_site is not None else 69.58
+        glon_site = glon_site if glon_site is not None else 19.23
+        alt_site = alt_site if alt_site is not None else 0.
+        
+        conj_list = sco_conj.conjunction_leo_to_site(
+            sat_id=sat_id,
+            dt_fr=dt_fr, dt_to=dt_to,
+            el_lim=el_lim,
+            glat_site=glat_site, glon_site=glon_site, alt_site=alt_site,
+            print_conj_list=print_conj_list,
+        )
+        
+        if with_available_measurements:
+            conj_list = sco_conj.filtering_by_instant_times(
+                conj_list, dts_instant=self['SC_DATETIME'].flatten(),
+                time_window=time_window_for_conjunction
+            )
+        
+        return conj_list
+        
 
     
     def __getitem__(self, key):
@@ -625,15 +670,15 @@ class Dataset(datahub.DatasetSourced):
             raise TypeError
 
     @property
-    def mission(self):
-        return self._mission
+    def facility(self):
+        return self._facility
 
-    @mission.setter
-    def mission(self, value):
+    @facility.setter
+    def facility(self, value):
         if isinstance(value, str):
-            self._mission = FacilityModel(value)
+            self._facility = FacilityModel(value)
         elif issubclass(value.__class__, FacilityModel):
-            self._mission = value
+            self._facility = value
         else:
             raise TypeError
 

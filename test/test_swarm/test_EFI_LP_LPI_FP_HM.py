@@ -198,8 +198,8 @@ def test_swarm_compare_EFI_LP_FP_HM():
     db.show()
 
 if __name__ == "__main__":
-    # test_swarm_EFI_LP_1B_overview()
-    # test_swarm_EFI_LPI_1B_overview()
-    # test_swarm_EFI_LP_FP_overview()
-    # test_swarm_compare_EFI_LP_FP_HM()
+    test_swarm_EFI_LP_1B_overview()
+    test_swarm_EFI_LPI_1B_overview()
+    test_swarm_EFI_LP_FP_overview()
+    test_swarm_compare_EFI_LP_FP_HM()
     test_swarm_EFI_LP_HM_overview()
