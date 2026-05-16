@@ -73,17 +73,17 @@ class Loader(LoaderModel):
         fb = self.variables['FLAG_B'].flatten()
         fb = (((fb[:,None] & (1 << np.arange(8)))) > 0).astype(int)
         self.variables['FLAG_B_BIN_AUX'] = fb
-        self.variables['FLAG_B_BIN_IND'] = np.arange(fb.shape[1])[np.newaxis, :] - 0.5
+        self.variables['FLAG_B_BIN_IND'] = np.arange(fb.shape[1]+1)[np.newaxis, :] - 0.5
         
         fb = self.variables['FLAG_q'].flatten()
         fb = (((fb[:,None] & (1 << np.arange(8)))) > 0).astype(int)
         self.variables['FLAG_q_BIN_AUX'] = fb
-        self.variables['FLAG_q_BIN_IND'] = np.arange(fb.shape[1])[np.newaxis, :] - 0.5
+        self.variables['FLAG_q_BIN_IND'] = np.arange(fb.shape[1]+1)[np.newaxis, :] - 0.5
         
         fb = self.variables['FLAG_Platform'].flatten()
         fb = (((fb[:,None] & (1 << np.arange(9)))) > 0).astype(int)
         self.variables['FLAG_Platform_BIN_AUX'] = fb
-        self.variables['FLAG_Platform_BIN_IND'] = np.arange(fb.shape[1])[np.newaxis, :] - 0.5
+        self.variables['FLAG_Platform_BIN_IND'] = np.arange(fb.shape[1]+1)[np.newaxis, :] - 0.5
 
     def load_cdf_data(self, var_names_cdf_epoch=None, var_names_independent_time=None):
        return super().load_cdf_data(var_names_cdf_epoch=var_names_cdf_epoch, var_names_independent_time=var_names_independent_time)

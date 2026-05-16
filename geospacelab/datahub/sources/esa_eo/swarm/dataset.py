@@ -37,7 +37,7 @@ FILE_RECORD_MODEL = {
 
 # default_data_search_recursive = True
 
-default_attrs_required = []
+default_attrs_required = ['sat_id']
 
 class Dataset(datahub.DatasetSourced):
     _default_variable_names = None

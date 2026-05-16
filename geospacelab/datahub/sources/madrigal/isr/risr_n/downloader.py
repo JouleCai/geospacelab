@@ -126,7 +126,7 @@ class Downloader(DownloaderBase):
                 dtstr = dtstr[0:2] + dtstr[2].upper() + dtstr[3:]
                 thisday = datetime.datetime.strptime(dtstr, "%d%b%y")
 
-                exp_name_patterns = re.findall('[\w.]+', exp.name)
+                exp_name_patterns = re.findall(r'[\w.]+', exp.name)
                 if len(exp_name_patterns) > 5:
                     exp_name_patterns = exp_name_patterns[:5]
                     exp_name_patterns[0] = exp_name_patterns[0].replace('.risrn', '') 

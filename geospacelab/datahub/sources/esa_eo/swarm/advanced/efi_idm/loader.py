@@ -58,17 +58,17 @@ class Loader(LoaderModel):
         fb = self.variables['FLAG_M_i_eff'].flatten()
         fb = (((fb[:,None] & (1 << np.arange(18)))) > 0).astype(int)
         self.variables['FLAG_M_i_eff_BIN_AUX'] = fb
-        self.variables['FLAG_M_i_eff_BIN_IND'] = np.arange(19)[np.newaxis, :] -0.5
+        self.variables['FLAG_M_i_eff_BIN_IND'] = np.arange(fb.shape[1]+1)[np.newaxis, :] -0.5
         
         fb = self.variables['FLAG_v_i'].flatten()
         fb = (((fb[:,None] & (1 << np.arange(18)))) > 0).astype(int)
         self.variables['FLAG_v_i_BIN_AUX'] = fb
-        self.variables['FLAG_v_i_BIN_IND'] = np.arange(19)[np.newaxis, :] -0.5
+        self.variables['FLAG_v_i_BIN_IND'] = np.arange(fb.shape[1]+1)[np.newaxis, :] -0.5
         
         fb = self.variables['FLAG_n_i'].flatten()
         fb = (((fb[:,None] & (1 << np.arange(18)))) > 0).astype(int)
         self.variables['FLAG_n_i_BIN_AUX'] = fb
-        self.variables['FLAG_n_i_BIN_IND'] = np.arange(19)[np.newaxis, :] -0.5
+        self.variables['FLAG_n_i_BIN_IND'] = np.arange(fb.shape[1]+1)[np.newaxis, :] -0.5
         
         
     def load_cdf_data(self, var_names_cdf_epoch=None, var_names_independent_time=None):

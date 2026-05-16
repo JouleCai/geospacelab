@@ -25,6 +25,8 @@ import importlib
 import datetime
 import pathlib
 
+from natsort import natsorted
+
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pybasic as pybasic
 from geospacelab.datahub.__metadata_base__ \
@@ -404,7 +406,7 @@ class DataHub(object):
         data_source_dir = this_file_dir / 'sources'
         sub_dirs = list(data_source_dir.glob("**"))
         data_sources = {}
-        for sub_dir in sub_dirs:
+        for sub_dir in natsorted(sub_dirs):
             init_file = sub_dir / "__init__.py"
             if not init_file.is_file():
                 continue

@@ -19,6 +19,7 @@ import re
 import netCDF4 as nc
 import pandas as pd
 import ftplib
+import time
 from contextlib import closing
 
 import geospacelab.toolbox.utilities.pydatetime as dttool
@@ -129,20 +130,27 @@ class Downloader(object):
                 mylog.StreamLogger.info(f'The requested data file already exists! See "{file_path}".')
                 self.done = True
                 continue
-            
-            (status, idxdata) = smapi.SuperMAGGetIndices(
-             self.user_id,
-             this_day,
-             extent,
-             ','.join(self.products),
-             FORMAT='list'
-            )
-            if status == 1:
-                self.save_to_nc(idxdata, file_path)
-            else:
-                self.done = False
-                mylog.StreamLogger.error(f'The requested data cannot be downloaded!')
-                return
+            done_c = False
+            for _ in range(5):
+                (status, idxdata) = smapi.SuperMAGGetIndices(
+                self.user_id,
+                this_day,
+                extent,
+                ','.join(self.products),
+                FORMAT='list'
+                )
+                if status == 1:
+                    self.save_to_nc(idxdata, file_path)
+                    done_c = True
+                    break
+                else:
+                    self.done = False
+                    mylog.StreamLogger.error(f'The requested data cannot be downloaded! Try again after 90 seconds. ({this_day.strftime("%Y-%m-%d")})')
+                    time.sleep(90)
+            time.sleep(90)
+            if not done_c:
+                mylog.StreamLogger.error(f'Failed to download data after 5 attempts. ({this_day.strftime("%Y-%m-%d")})')
+                continue
             self.done = True
 
     def save_to_nc(self, idxdata, file_path):
@@ -215,6 +223,11 @@ class Downloader(object):
         fnc.close()
         self.done = True
 
+
+if __name__ == "__main__":
+    dt_fr1 = datetime.datetime(2025, 1, 1, 1)
+    dt_to1 = datetime.datetime(2025, 12, 31, 23, 59)
+    Downloader(dt_fr1, dt_to1, force_download=False)
 
 
 

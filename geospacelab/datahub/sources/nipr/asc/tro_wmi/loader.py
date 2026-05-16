@@ -32,7 +32,7 @@ class Loader(object):
 
         # extract datetime from the file name
         file_name = self.file_path.name
-        rc = re.search('\d{2}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}-\d{2}', file_name)
+        rc = re.search(r'\d{2}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}-\d{2}', file_name)
         self.variables['DATETIME'] = datetime.datetime.strptime(rc.group()+'0000', "%y-%m-%d_%H-%M-%S-%f")
 
         file_dir = self.file_path.parent.parent.resolve()

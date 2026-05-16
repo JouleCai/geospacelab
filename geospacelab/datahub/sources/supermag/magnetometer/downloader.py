@@ -176,8 +176,8 @@ class Downloader(object):
 
 
 if __name__ == "__main__":
-    dt_fr1 = datetime.datetime(2016, 3, 15, 15)
-    dt_to1 = datetime.datetime(2016, 3, 15, 22)
+    dt_fr1 = datetime.datetime(2023, 1, 1, 1)
+    dt_to1 = datetime.datetime(2023, 12, 31, 23, 59)
     Downloader(dt_fr1, dt_to1, site_name='SKT', force_download=True)
 
 

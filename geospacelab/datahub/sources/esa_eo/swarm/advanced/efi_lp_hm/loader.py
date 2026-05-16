@@ -56,7 +56,7 @@ class Loader(LoaderModel):
         fb = self.variables['FLAG'].flatten()
         fb = (((fb[:,None] & (1 << np.arange(24)))) > 0).astype(int)
         self.variables['FLAG_BIN_AUX'] = fb
-        self.variables['FLAG_BIN_IND'] = np.arange(25)[np.newaxis, :] -0.5
+        self.variables['FLAG_BIN_IND'] = np.arange(fb.shape[1]+1)[np.newaxis, :] -0.5
         
         
     def load_cdf_data(self, var_names_cdf_epoch=None, var_names_independent_time=None):

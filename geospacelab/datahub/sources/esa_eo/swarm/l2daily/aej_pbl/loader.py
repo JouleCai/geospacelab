@@ -110,7 +110,7 @@ class Loader(LoaderModel):
         fb = self.variables['QUALITY_FLAG'].flatten()
         fb = (((fb[:,None] & (1 << np.arange(14)))) > 0).astype(int)
         self.variables['QUALITY_FLAG_BIN_AUX'] = fb
-        self.variables['QUALITY_FLAG_BIN_IND'] = np.arange(15)[np.newaxis, :] - 0.5
+        self.variables['QUALITY_FLAG_BIN_IND'] = np.arange(fb.shape[1]+1)[np.newaxis, :] - 0.5
         
     def load_cdf_data(self, var_names_cdf_epoch=None, var_names_independent_time=None):
         return super().load_cdf_data(var_names_cdf_epoch=var_names_cdf_epoch, var_names_independent_time=var_names_independent_time)
