@@ -15,16 +15,17 @@ import sys
 # sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath("../"))
+import geospacelab
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'GeospaceLab'
-copyright = '2021, Lei Cai'
+project = 'GeospaceLAB'
+copyright = '2026, Lei Cai'
 author = 'Lei Cai'
 
 # The full version, including alpha/beta/rc tags
-release = 'beta-v0.3.1'
+release = geospacelab.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -65,6 +66,7 @@ html_theme = 'sphinx_book_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+html_logo = "_static/logo.png"
 
 # Settings for autodoc
 # Mock importing packages
