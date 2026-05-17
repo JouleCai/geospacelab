@@ -31,14 +31,14 @@ try:
 except KeyError:
     print("Initialization for accessing the Swarm DISC database.")
     if pref._on_rtd:
-        default_username = 'GeospaceLab'
+        default_username = 'GeospaceLAB'
         save = 'y'
     else:
         mylog.StreamLogger.info(
             """
-            Since 2025, it requires logining to Swarm DISC FTP service with your EO's account.
+            Since 2025, it requires logging in to Swarm DISC FTP service with your EO's account.
             More information can be found here: https://earth.esa.int/eogateway/faq/how-do-i-access-swarm-data.
-            GeospaceLAB use keyring (https://github.com/jaraco/keyring) to store your acount name and password.
+            GeospaceLAB use keyring (https://github.com/jaraco/keyring) to store your account name and password.
             If you don't want to store the password, select "n" for "Save as default".
             And you may reset your password using keyring: keyring.set_password('ESA Earth Online', YOUR_USERNAME, YOUR_NEW_PASSWORD)
             """
