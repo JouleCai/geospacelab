@@ -73,8 +73,8 @@ autodoc_member_order = 'bysource'
 add_module_names = False
 
 # Settings for napoleon
-napoleon_google_docstring = False
-napoleon_numpy_docstring = True
+# napoleon_google_docstring = False
+# napoleon_numpy_docstring = True
 
 # Settings for copybutton
 copybutton_prompt_text = ">>> "
