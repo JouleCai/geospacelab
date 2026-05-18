@@ -956,8 +956,8 @@ class PolarMapPanel(GeoPanel):
         
         default_start_point_config = {
             'clip_on': False,
-            'alpha': 0.6,
-            'marker': 's', 'markersize': 2, 
+            'alpha': 0.8,
+            'marker': 's', 'markersize': 5, 
             'markerfacecolor': kwargs['trajectory_config']['color'], 
             'markeredgecolor': kwargs['trajectory_config']['color']}
         default_start_point_config.update(**kwargs.setdefault('start_point_config', {}))

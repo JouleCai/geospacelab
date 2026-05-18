@@ -25,6 +25,7 @@ def test_swarm_EFI_LP_1B_overview():
         datasource_contents=['esa_eo', 'swarm', 'l1b', 'efi_lp'], 
         product_version='latest', # 'latest' (default),
         sat_id='A', add_APEX=True)
+    ds.list_all_variables()
     
     panel_layouts = [
         [ds['n_i'], ds['n_e']],
@@ -199,7 +200,7 @@ def test_swarm_compare_EFI_LP_FP_HM():
 
 if __name__ == "__main__":
     test_swarm_EFI_LP_1B_overview()
-    test_swarm_EFI_LPI_1B_overview()
-    test_swarm_EFI_LP_FP_overview()
-    test_swarm_compare_EFI_LP_FP_HM()
-    test_swarm_EFI_LP_HM_overview()
+    # test_swarm_EFI_LPI_1B_overview()
+    # test_swarm_EFI_LP_FP_overview()
+    # test_swarm_compare_EFI_LP_FP_HM()
+    # test_swarm_EFI_LP_HM_overview()

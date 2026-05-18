@@ -175,6 +175,7 @@ class Dataset(datahub.DatasetSourced):
         
         var = self[var_name_glon].clone()
         var.name = var_name_glon.replace('GEO_LON', 'GEO_LST')
+        var.fullname = 'Local Solar Time'
         var.value = np.array(lsts)[:, np.newaxis]
         var.label = 'LST'
         var.unit = 'h'
@@ -205,18 +206,21 @@ class Dataset(datahub.DatasetSourced):
         
         var = self[var_name_glat].clone()
         var.name = var_name_glat.replace('GEO_LAT', 'APEX_LAT')
+        var.fullname = 'APEX Latitude'
         var.value = cs_apex['lat'].reshape(self[var_name_datetime].value.shape)
         var.label = 'APEX MLAT'
         self[var.name] = var
         
         var = self[var_name_glon].clone()
         var.name = var_name_glon.replace('GEO_LON', 'APEX_LON')
+        var.fullname = 'APEX Longitude'
         var.value = cs_apex['lon'].reshape(self[var_name_datetime].value.shape)
         var.label = 'APEX MLON'
         self[var.name] = var
         
         var = self[var_name_glon].clone()
         var.name = var_name_glon.replace('GEO_LON', 'APEX_MLT')
+        var.fullname = 'APEX Magnetic Local Time'
         var.value = cs_apex['mlt'].reshape(self[var_name_datetime].value.shape)
         var.label = 'APEX MLT'
         var.unit = 'h'
@@ -248,18 +252,21 @@ class Dataset(datahub.DatasetSourced):
         var.name = var_name_glat.replace('GEO_LAT', 'AACGM_LAT')
         var.value = cs_aacgm['lat'].reshape(self[var_name_datetime].value.shape)
         var.label = 'AACGM MLAT'
+        var.fullname = 'AACGM Latitude'
         self[var.name] = var
         
         var = self[var_name_glon].clone()
         var.name = var_name_glon.replace('GEO_LON', 'AACGM_LON')
         var.value = cs_aacgm['lon'].reshape(self[var_name_datetime].value.shape)
         var.label = 'AACGM MLON'
+        var.fullname = 'AACGM Longitude'
         self[var.name] = var    
         
         var = self[var_name_glon].clone()
         var.name = var_name_glon.replace('GEO_LON', 'AACGM_MLT')
         var.value = cs_aacgm['mlt'].reshape(self[var_name_datetime].value.shape)
         var.label = 'AACGM MLT'
+        var.fullname = 'AACGM Magnetic Local Time'
         var.unit = 'h'
         var.unit_label = 'h'
         var.group = 'AACGM_MLT'
@@ -522,6 +529,22 @@ class Dataset(datahub.DatasetSourced):
         )
         
         return download_obj
+    
+    def list_all_variables(self) -> None:
+        # list all variables in the dataset with their corresponding variable names in the source data files (e.g., cdf files) if the mapping is provided in self.variable_name_dict
+        # In the Markdown table format
+        label = self.label()
+        mylog.simpleinfo.info("Dataset: {}".format(label))
+        mylog.simpleinfo.info("Printing all of the variables ...")
+        mylog.simpleinfo.info('|{:<20s}|{:<30s}|{:<30s}|{:<100s}|'.format('No.', 'Variable name', 'Variable name (Source)', 'Description'))
+        mylog.simpleinfo.info('|' + '-'*20 + '|' + '-'*30 + '|' + '-'*30 + '|' + '-'*100 + '|')
+        for ind, var_name in enumerate(self._variables.keys()):
+            source_name = self.variable_name_dict.get(var_name, 'N/A') if hasattr(self, 'variable_name_dict') else 'N/A'
+            description = self._variables[var_name].description if hasattr(self._variables[var_name], 'description') else ''
+            if not str(description).strip():
+                description = self._variables[var_name].fullname if hasattr(self._variables[var_name], 'fullname') else ''
+            mylog.simpleinfo.info('|{:<20d}|{:<30s}|{:<30s}|{:<100s}|'.format(ind+1, var_name, source_name, description))
+        mylog.simpleinfo.info('')
     
     def gridding(
         self, 

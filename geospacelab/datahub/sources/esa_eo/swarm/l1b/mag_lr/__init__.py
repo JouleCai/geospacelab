@@ -98,7 +98,7 @@ default_variable_names = [
 
 # default_data_search_recursive = True
 
-default_attrs_required = []
+default_attrs_required = ['sat_id']
 
 
 class Dataset(SwarmDataset):
@@ -158,6 +158,7 @@ class Dataset(SwarmDataset):
             from_VirES=True, 
             from_FAST=self.from_FAST, 
             **kwargs,)
+        self.variable_name_dict = load_obj.variable_name_dict
         
         variables = load_obj.variables
         configured_variables = self._default_variable_config.configured_variables
@@ -222,6 +223,7 @@ class Dataset(SwarmDataset):
             from_HAPI=True, 
             from_FAST=self.from_FAST, 
             **kwargs,)
+        self.variable_name_dict = load_obj.variable_name_dict
         
         variables = load_obj.variables
         configured_variables = self._default_variable_config.configured_variables

@@ -67,6 +67,10 @@ html_theme = 'sphinx_book_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 html_logo = "_static/logo.png"
+html_theme_options = {
+    "show_navbar_depth": 2,      # Levels of TOC to expand by default
+    "navigation_with_keys": True # Navigate nested trees with arrow keys
+}
 
 # Settings for autodoc
 # Mock importing packages

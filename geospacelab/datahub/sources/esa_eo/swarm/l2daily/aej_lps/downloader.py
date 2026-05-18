@@ -13,7 +13,6 @@ from turtle import rt
 from geospacelab.config import prf
 
 from geospacelab.datahub.sources.esa_eo import swarm
-from geospacelab.datahub.sources.esa_eo.swarm.downloader import Downloader as DownloaderModel
 
 from geospacelab.datahub.sources.esa_eo.swarm.downloader import DownloaderSwarm
 
@@ -68,48 +67,3 @@ class Downloader(DownloaderSwarm):
             direct_download=direct_download, force_download=force_download, dry_run=dry_run,
         )
 
-
-class Downloader2(DownloaderModel):
-
-    _default_file_name_patterns = ['SW_OPER']
-
-    def __init__(
-            self, dt_fr, dt_to,
-            sat_id=None,
-            file_version=None,
-            file_extension='.cdf',
-            data_file_root_dir=None,
-            ftp_data_dir=None,
-            force=True, direct_download=True, **kwargs
-    ):
-
-        if ftp_data_dir is None:
-            ftp_data_dir = f'Level2daily/Latest_baselines/AEJ/LPS/Sat_{sat_id.upper()}'
-
-        if data_file_root_dir is None:
-            data_file_root_dir = prf.datahub_data_root_dir / "ESA" / "SWARM" / "Level2daily" / "AEJ_LPS"
-        file_name_patterns = list(self._default_file_name_patterns)
-
-        file_name_patterns.extend(['AEJ' + sat_id.upper()])
-        super(Downloader, self).__init__(
-            dt_fr, dt_to,
-            sat_id=sat_id,
-            data_file_root_dir=data_file_root_dir,
-            ftp_data_dir=ftp_data_dir,
-            file_version=file_version,
-            file_extension=file_extension,
-            force=force, direct_download=direct_download,
-            file_name_patterns=file_name_patterns, **kwargs
-        )
-
-    def download(self, **kwargs):
-
-        done = super(Downloader, self).download(**kwargs)
-        return done
-
-    def search_files(self, **kwargs):
-
-        file_list, versions = super(Downloader, self).search_files(**kwargs)
-
-        return file_list, versions
-        # version control
