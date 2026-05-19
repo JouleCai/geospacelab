@@ -49,7 +49,7 @@ def test_swarm_EFI_TII_TCT02_zoom():
 
     db = dashboards.TSDashboard(
         dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 12)},
-        # timeline_extra_labels=['GEO_LAT', 'GEO_LON', 'APEX_LAT', 'APEX_LON', 'APEX_MLT',]  # Not applicable for very scattered data points like AEJ_PBS peaks
+        timeline_extra_labels=['GEO_LAT', 'GEO_LON', 'APEX_LAT', 'APEX_LON', 'APEX_MLT']  # Not applicable for very scattered data points like AEJ_PBS peaks
         )
 
     ds = db.dock(datasource_contents=['esa_eo', 'swarm', 'advanced', 'efi_tct02'], sat_id='A', add_APEX=True,)
@@ -106,6 +106,6 @@ def test_swarm_EFI_TII_TCT16_zoom():
 
 
 if __name__ == "__main__":
-    test_swarm_EFI_TII_TCT02_overview()
+    # test_swarm_EFI_TII_TCT02_overview()
     test_swarm_EFI_TII_TCT02_zoom()
     # test_swarm_EFI_TII_TCT16_zoom()

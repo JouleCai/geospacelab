@@ -225,8 +225,10 @@ def test_swarm_MAG_LR_from_VirES_FAST():
     """Test loading Swarm MAG LR data product from VirES
 
     """
-    dt_fr = datetime.datetime(2026, 3, 21, 18, 00)
-    dt_to = datetime.datetime(2026, 3, 21, 18, 16)
+    dt_now = datetime.datetime.now()
+    dt_fr_FAST = datetime.datetime(dt_now.year, dt_now.month, dt_now.day) - datetime.timedelta(days=30)
+    dt_to_FAST = datetime.datetime(dt_now.year, dt_now.month, dt_now.day) - datetime.timedelta(days=30) \
+        + datetime.timedelta(hours=0, minutes=2)
 
     # Default kwargs for VirES data loading, which can be overridden when calling the dock method to load data from VirES. The measurements, models, and residuals to load can be specified in the kwargs_products dictionary. The default settings are for loading all available measurements and models, and no residuals. The available measurements and models depend on the specific collection and product being loaded, and can be checked in the VirES API documentation or by inspecting the variables in the loaded dataset.
     kwargs_products_default = {
@@ -244,7 +246,7 @@ def test_swarm_MAG_LR_from_VirES_FAST():
     
     
     db = dashboards.TSDashboard(
-        dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 12)},
+        dt_fr=dt_fr_FAST, dt_to=dt_to_FAST, figure_config={'figsize': (8, 12)},
         timeline_extra_labels=['GEO_LAT', 'GEO_LON', 'APEX_LAT', 'APEX_LON', 'APEX_MLT',]  # Not applicable for very scattered data points like AEJ_PBS peaks
         )
 
@@ -322,12 +324,13 @@ def test_swarm_MAG_LR_from_HAPI_FAST():
     """Test loading Swarm MAG LR data product from HAPI
 
     """
-    dt_fr = datetime.datetime(2026, 3, 21, 18, 00)
-    dt_to = datetime.datetime(2026, 3, 21, 18, 16)
-    
+    dt_now = datetime.datetime.now()
+    dt_fr_FAST = datetime.datetime(dt_now.year, dt_now.month, dt_now.day) - datetime.timedelta(days=30)
+    dt_to_FAST = datetime.datetime(dt_now.year, dt_now.month, dt_now.day) - datetime.timedelta(days=30) \
+        + datetime.timedelta(hours=0, minutes=2)
     
     db = dashboards.TSDashboard(
-        dt_fr=dt_fr, dt_to=dt_to, figure_config={'figsize': (8, 12)},
+        dt_fr=dt_fr_FAST, dt_to=dt_to_FAST, figure_config={'figsize': (8, 12)},
         timeline_extra_labels=['GEO_LAT', 'GEO_LON', 'APEX_LAT', 'APEX_LON', 'APEX_MLT',]  # Not applicable for very scattered data points like AEJ_PBS peaks
         )
 
@@ -362,9 +365,9 @@ def test_swarm_MAG_LR_from_HAPI_FAST():
 if __name__ == "__main__":
     # test_swarm_MAG_LR_overview()
     # test_swarm_MAG_LR_zoom()
-    test_swarm_MAG_HR_zoom()
-    test_swarm_MAG_LR_from_VirES_OPER()
-    test_swarm_MAG_LR_from_VirES_OPER_Residuals()
+    # test_swarm_MAG_HR_zoom()
+    # test_swarm_MAG_LR_from_VirES_OPER()
+    # test_swarm_MAG_LR_from_VirES_OPER_Residuals()
     test_swarm_MAG_LR_from_VirES_FAST()
     
     test_swarm_MAG_LR_from_HAPI_OPER()

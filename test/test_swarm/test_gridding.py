@@ -9,6 +9,107 @@ cwd = pathlib.Path(__file__).parent.resolve()
 file_dir_figure = cwd / 'figures'
 file_dir_figure.mkdir(parents=True, exist_ok=True)
 
+def simple_gridding_example():
+    # Initialize the start and end datetime for the data to be gridded
+    dt_fr = datetime.datetime(2024, 5, 10, 0, 0, 0)
+    dt_to = datetime.datetime(2024, 5, 14, 0, 0, 0)
+    sat_id = 'A'
+    # Create a Dashboard object for visualizing the gridded data
+    db = dashboards.TSDashboard(
+        dt_fr = dt_fr,
+        dt_to = dt_to,
+        figure_config = {
+            'figsize': (10, 8),
+        }
+    )
+    ds_pod = db.dock(
+        datasource_contents=['esa_eo', 'swarm', 'l2daily', 'dns_pod'], 
+        sat_id=sat_id, 
+        add_APEX=True, add_AACGM=True,
+    )
+    
+    ds_sector_ASC = ds_pod.gridding(
+        # Variable names to be gridded, 
+        # which should be a subset of the variables in the original dataset. 
+        # The gridded variables will be renamed with a prefix "SECTOR_ASC_GRID_" 
+        # to distinguish them from the original variables, 
+        # where ASC stands for Ascending.
+        var_names_gridding=['rho_n', 'SC_GEO_ALT', 'SC_GEO_LAT', 'SC_GEO_LON'],
+        # Sector to be gridded, which can be 'ASC' for ascending phase, 
+        # 'DSC' for descending phase, 
+        # 'N' for northern hemisphere, 
+        # or 'S' for southern hemisphere.
+        sector = 'ASC',
+        # Coordinate system for the gridding, which can be 'GEO' for geographic coordinates,
+        # 'APEX' for apex coordinates, or 'AACGM' for AACGM coordinates.
+        sector_cs = 'GEO',
+        # Latitude boundary for the sector to be gridded.
+        boundary_lat = 90.,
+        # Whether to perform along-track interpolation for the gridding.
+        along_track_interp=True, 
+        # Interpolation method for along-track interpolation, 
+        # which can be 'linear' for linear interpolation.
+        along_track_interp_method='linear',
+        # Grid resolution along the x axis (time axis). 
+        # If None, the grid resolution will be automatically determined based on 
+        # the satellite orbital period.
+        x_grid_res=None,
+        # Grid resolution along the y axis (latitude axis) in degrees.
+        y_grid_res=0.5,
+        # Data resolution for the original data to be gridded. 
+        # If None, the data resolution will be automatically determined 
+        # based on the original data. For LEO satellite, the resolution is 
+        # typically around 90 * 60 = 5400 s.
+        x_data_res=None, 
+        # Data resolution for the original data. For the POD data, 
+        # the resolution is 30 s. 
+        y_data_res=30, 
+        # Scale factor for the data resolution along the y axis for better visualization.
+        y_data_res_scale=1.5,
+        visual='on',
+    )
+    grid_rho_n_ASC = ds_sector_ASC['SECTOR_ASC_GRID_rho_n']
+    
+    panel_layouts = [
+        [ds_pod['rho_n']],
+        [ds_pod['SC_GEO_LAT']],
+        [ds_pod['SC_GEO_LST']],
+        [grid_rho_n_ASC],
+    ]
+    
+    # set axis scale and unit for better visualization, removing exponent for density in the upper-left corner of the panel.
+    ds_pod['rho_n'].visual.axis[1].data_scale = 1e12 
+    ds_pod['rho_n'].visual.axis[1].unit = r'$\cdot$10$^{-12}$ kg$\cdot$m$^{-3}$'
+    
+    grid_rho_n_ASC.visual.axis[2].data_scale = 1e12
+    grid_rho_n_ASC.visual.axis[2].unit = r'$\cdot$10$^{-12}$ kg$\cdot$m$^{-3}$'
+    # Set sector labels and data limits for better visualization
+    grid_rho_n_ASC.visual.axis[2].lim = [0, 8]
+    
+    db.set_layout(panel_layouts=panel_layouts, left=0.25, right=0.86, top=0.88, bottom=0.06, hspace=0.3)
+    db.draw()
+    
+    # Post-settings
+    # Set panel and axis labels for sector panels
+    # For Sector North panel
+    ax = db.panels[3]()
+    ds_sector_ASC.format_pseudo_lat_axis(ax, 'ASC', inverse=False, add_sperator=True)
+    ds_sector_ASC.format_pseudo_lat_label(ax, 'ASC', y_tick_res=45)
+    ax.set_ylabel('Ascending\n' + ax.get_ylabel(), labelpad=20)
+    
+    lsts_asc = ds_sector_ASC.ascending_nodes['GEO_LST']
+    lsts_dsc = ds_sector_ASC.descending_nodes['GEO_LST']
+    lst_median_asc = lsts_asc[len(lsts_asc) // 2]
+    lst_median_dsc = lsts_dsc[len(lsts_dsc) // 2]
+    
+    db.add_title(
+        y=1.03,
+        title='Swarm-{} DNS/POD gridded in different orbit sectors \n'.format(ds_pod.sat_id) + \
+            r'ASC: $\sim${:.1f} LST, DSC: $\sim${:.1f} LST'.format(lst_median_asc, lst_median_dsc),
+        fontsize='large', append_time=False)
+    db.show()
+    
+
     
 def test_gridding_interpolation_DNS_POD():
     """Test Swarm DNS/POD data product
@@ -245,6 +346,7 @@ def test_gridding_binning_FAC_TMS():
 
     
 if __name__ == "__main__":
-    test_gridding_interpolation_DNS_POD()
+    simple_gridding_example() 
+    # test_gridding_interpolation_DNS_POD()
     # test_gridding_binning_FAC_TMS()
     

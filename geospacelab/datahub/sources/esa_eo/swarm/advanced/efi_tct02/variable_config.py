@@ -41,7 +41,7 @@ depend_0 = {'UT': 'SC_DATETIME',
             'GEO_LAT': 'SC_GEO_LAT', 'GEO_LON': 'SC_GEO_LON',
             # 'QD_LAT': 'SC_QD_LAT', 'QD_LON': 'SC_QD_LON', 'QD_MLT': 'SC_QD_MLT',
             # 'AACGM_LAT': 'SC_AACGM_LAT', 'AACGM_LON': 'SC_AACGM_LON', 'AACGM_MLT': 'SC_AACGM_MLT',
-            # 'APEX_LAT': 'SC_APEX_LAT', 'APEX_LON': 'SC_APEX_LON', 'APEX_MLT': 'SC_APEX_MLT',
+            'APEX_LAT': 'SC_APEX_LAT', 'APEX_LON': 'SC_APEX_LON', 'APEX_MLT': 'SC_APEX_MLT',
             }
 
 depends_1_FLAG_1 = {'Binary Index': 'FLAG_1_BIN_IND'}

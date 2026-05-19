@@ -310,6 +310,28 @@ class TSPanel(Panel):
     @check_panel_ax
     def _get_var_for_config(self, ax=None, ind=0):
         var_for_config = self.axes_overview[ax]['variables'][ind]
+        
+        # set y labels and alignment two methods: fig.align_ylabels(axs[:, 1]) or yaxis.set_label_coords
+        if self.axes_overview[ax]['twinx'] != 'off':
+            if var_for_config.visual.axis[1].label in ['@v.group', None]:
+                var_for_config.visual.axis[1].label = '@v.label'
+            if var_for_config.visual.axis[1].unit in ['@v.unit', None]:
+                var_for_config.visual.axis[1].unit = '@v.unit_label'
+        else:
+            if '1' in var_for_config.visual.plot_config.style:
+                if len(self.axes_overview[ax]['variables']) == 1:
+                    if var_for_config.visual.axis[1].label in ['@v.group', None, '']:
+                        var_for_config.visual.axis[1].label = '@v.label'
+                else:
+                    if var_for_config.visual.axis[1].label in ['@v.label', None, '']:
+                        var_for_config.visual.axis[1].label = '@v.group'
+                if var_for_config.visual.axis[1].unit in [None, '']:
+                    var_for_config.visual.axis[1].unit = '@v.unit_label'
+            if '2' in var_for_config.visual.plot_config.style:
+                if var_for_config.visual.axis[2].label in [None, '']:
+                    var_for_config.visual.axis[2].label = '@v.label'
+                if var_for_config.visual.axis[2].unit in [None, '']:
+                    var_for_config.visual.axis[2].unit = '@v.unit_label'
         self._var_for_config = var_for_config
         return var_for_config
 
@@ -322,7 +344,7 @@ class TSPanel(Panel):
 
         # reverse the x axis if timeline_reverse=True
         if self.timeline_reverse:
-            var_for_config.visual.axis[0].reserve = True
+            var_for_config.visual.axis[0].reverse = True
         if var_for_config.visual.axis[0].reverse:
             self._xlim = [self._xlim[1], self._xlim[0]]
         ax.set_xlim(self._xlim)
@@ -406,7 +428,7 @@ class TSPanel(Panel):
         for ind, label in enumerate(self.timeline_extra_labels):
             if isinstance(label, dict):
                 label_new = copy.deepcopy(label)
-                label = label_new.keys()[0]
+                label = list(label_new.keys())[0]
                 var_name = label_new[label]
             else:
                 var_name = label
@@ -491,28 +513,6 @@ class TSPanel(Panel):
         # Set y axis lim
         self._set_ylim(ax=ax)
 
-        # set y labels and alignment two methods: fig.align_ylabels(axs[:, 1]) or yaxis.set_label_coords
-        if self.axes_overview[ax]['twinx'] != 'off':
-            if var_for_config.visual.axis[1].label in ['@v.group', None]:
-                var_for_config.visual.axis[1].label = '@v.label'
-            if var_for_config.visual.axis[1].unit in ['@v.unit', None]:
-                var_for_config.visual.axis[1].unit = '@v.unit_label'
-        else:
-            if len(self.axes_overview[ax]['variables']) == 1:
-                if var_for_config.visual.axis[1].label in ['@v.group', None, '']:
-                    var_for_config.visual.axis[1].label = '@v.label'
-                if var_for_config.visual.axis[1].unit in [None, '']:
-                    var_for_config.visual.axis[1].unit = '@v.unit_label'
-            else:
-                for var in self.axes_overview[ax]['variables']:
-                    if var.visual.axis[1].label in ['@v.label', None, '']:
-                        var.visual.axis[1].label = '@v.group'
-                    if var.visual.axis[1].unit in ['@v.unit', None, '']:
-                        var.visual.axis[1].unit = '@v.unit_label'
-                    if var.visual.axis[2].label in [None, '']:
-                        var.visual.axis[2].label = '@v.label'
-                    if var.visual.axis[2].unit in [None, '']:
-                        var.visual.axis[2].unit = '@v.unit_label'
         ylabel = var_for_config.get_visual_axis_attr('label', axis=1)
         yunit = var_for_config.get_visual_axis_attr('unit', axis=1)
         ylabel_style = var_for_config.get_visual_axis_attr('label_style', axis=1)
