@@ -422,7 +422,7 @@ def ringcurr96(x,y,z):
 
     # common /warp/ cpss,spss,dpsrr, xnext(3),xs,zswarped,dxsx,dxsy, dxsz,dzsx,dzsywarped,dzsz,other(4),zs
     # zs here is without y-z warp
-    global cpss,spss,dpsrr, xnext,xs,zswarped,dxsx,dxsy, dxsz,dzsx,dzsywarped,dzsz,other,zs
+    global cpss,spss,dpsrr, xnext,xs,zswarped,dxsx,dxsy, dxsz,dzsx,dzsywarped,dzsz,other,zsww
     d0,deltadx,xd,xldx = [2.,0.,0.,4.]  # the rc is now completely symmetric (deltadx=0)
 
     # the original values of f[i] were multiplied by beta[i] (to reduce the number of
@@ -438,6 +438,7 @@ def ringcurr96(x,y,z):
     d=d0+deltadx*fdx
 
     # this is the same simple way to spread out the sheet, as that used in t89
+    zs=zsww
     dzetas=np.sqrt(zs**2+d**2)
     rhos=  np.sqrt(xs**2+y**2)
     ddzetadx=(zs*dzsx+d*dddx)/dzetas
@@ -728,7 +729,7 @@ def birk1tot_02(ps, x,y,z):
     xas = x*cpsas-z*spsas
     zas = x*spsas+z*cpsas
     pas = 0.
-    if (xas != 0) & (y != 0):
+    if (xas != 0) | (y != 0):
         pas = np.arctan2(y,xas)
     tas=np.arctan2(np.sqrt(xas**2+y**2),zas)
     stas=np.sin(tas)
@@ -841,7 +842,7 @@ def birk1tot_02(ps, x,y,z):
         zas2=r*ct02as
         x2= xas2*cpsas+zas2*spsas
         z2=-xas2*spsas+zas2*cpsas
-        xi = [x1,y1,z1,ps]
+        xi = [x2,y2,z2,ps]
         d1 = diploop1(xi)
         # bx2,by2,bz2 are field components in the southern boundary point
         bx2,by2,bz2 = [0.]*3
@@ -1407,7 +1408,7 @@ def r2_birk(x,y,z, ps):
         by  =by1+by2
         bzsm=bzsm1+bzsm2
     elif (xks < delarg-delarg1):
-        bxsm,by,bzsm = np.dot(r2outer(xsm,y,zsm),-0.02)
+        bxsm,by,bzsm = np.dot(r2sheet(xsm,y,zsm),-0.02)
     elif (xks < delarg+delarg1):
         f1=-0.02*tksi(xks,delarg,delarg1)
         f2=-0.02-f1

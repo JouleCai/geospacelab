@@ -1,4 +1,0 @@
-include *.md
-include LICENSE
-recursive-include geopack *.md *.txt
-recursive-include notebooks *.ipynb

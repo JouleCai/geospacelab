@@ -106,6 +106,6 @@ def test_swarm_EFI_TII_TCT16_zoom():
 
 
 if __name__ == "__main__":
-    # test_swarm_EFI_TII_TCT02_overview()
-    # test_swarm_EFI_TII_TCT02_zoom()
-    test_swarm_EFI_TII_TCT16_zoom()
+    test_swarm_EFI_TII_TCT02_overview()
+    test_swarm_EFI_TII_TCT02_zoom()
+    # test_swarm_EFI_TII_TCT16_zoom()

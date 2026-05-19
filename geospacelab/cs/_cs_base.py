@@ -16,7 +16,6 @@ import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pyclass as pyclass
 import weakref
 import numpy as np
-from geopack import geopack
 
 default_coord_attrs = {
     'sph':  {

@@ -10,6 +10,7 @@ __docformat__ = "reStructureText"
 
 import numpy as np
 import re
+import copy
 import datetime
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -403,10 +404,16 @@ class TSPanel(Panel):
         x1 = np.array(ticks)
         ys = [x1]       # list of tick labels
         for ind, label in enumerate(self.timeline_extra_labels):
-            if label in x_depend.keys():
-                y0 = x_depend[label].flatten()
-            elif label in var_for_config.dataset.keys():
-                y0 = var_for_config.dataset[label].flatten()
+            if isinstance(label, dict):
+                label_new = copy.deepcopy(label)
+                label = label_new.keys()[0]
+                var_name = label_new[label]
+            else:
+                var_name = label
+            if var_name in x_depend.keys():
+                y0 = x_depend[var_name].flatten()
+            elif var_name in var_for_config.dataset.keys():
+                y0 = var_for_config.dataset[var_name].flatten()
             else:
                 raise KeyError
             if 'MLT' in label.upper():
@@ -488,6 +495,24 @@ class TSPanel(Panel):
         if self.axes_overview[ax]['twinx'] != 'off':
             if var_for_config.visual.axis[1].label in ['@v.group', None]:
                 var_for_config.visual.axis[1].label = '@v.label'
+            if var_for_config.visual.axis[1].unit in ['@v.unit', None]:
+                var_for_config.visual.axis[1].unit = '@v.unit_label'
+        else:
+            if len(self.axes_overview[ax]['variables']) == 1:
+                if var_for_config.visual.axis[1].label in ['@v.group', None, '']:
+                    var_for_config.visual.axis[1].label = '@v.label'
+                if var_for_config.visual.axis[1].unit in [None, '']:
+                    var_for_config.visual.axis[1].unit = '@v.unit_label'
+            else:
+                for var in self.axes_overview[ax]['variables']:
+                    if var.visual.axis[1].label in ['@v.label', None, '']:
+                        var.visual.axis[1].label = '@v.group'
+                    if var.visual.axis[1].unit in ['@v.unit', None, '']:
+                        var.visual.axis[1].unit = '@v.unit_label'
+                    if var.visual.axis[2].label in [None, '']:
+                        var.visual.axis[2].label = '@v.label'
+                    if var.visual.axis[2].unit in [None, '']:
+                        var.visual.axis[2].unit = '@v.unit_label'
         ylabel = var_for_config.get_visual_axis_attr('label', axis=1)
         yunit = var_for_config.get_visual_axis_attr('unit', axis=1)
         ylabel_style = var_for_config.get_visual_axis_attr('label_style', axis=1)

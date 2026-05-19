@@ -2,22 +2,86 @@ import numpy as np
 from geopack import t89,t96,t01,t04
 import os.path
 import datetime
+from urllib.request import urlopen, Request
+from urllib.parse import urljoin
+from fnmatch import fnmatch
 
-def init_igrf():
+igrf_pattern = 'igrf*coeffs.txt'
+
+def update_igrf(local_dir):
+    """
+    Update to the latest IGRF coefficients.
+    """
+
+    # Where to find the files.
+    url = 'http://www.ngdc.noaa.gov/IAGA/vmod/coeffs/'
+
+    # Find the coeff files.
+    coef_files = []
+    try:
+        request = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urlopen(request) as response:
+            if response.status != 200:
+                print(f'Failed to get the list of IGRF coefficients online. Status code: {response.status}')
+            else:
+                html = response.read().decode('utf-8')
+                for line in html.splitlines():
+                    if 'href' in line and '.txt' in line:
+                        start = line.find('href="')+6
+                        end = line.find('"', start)
+                        base_name = line[start:end]
+                        if fnmatch(base_name, igrf_pattern):
+                            coef_files.append(base_name)
+    except:
+        print('Failed to get the list of IGRF coefficients online.')
+    
+    # Download the files.
+    for coef_file in coef_files:
+        local_file = os.path.join(local_dir, coef_file)
+        if os.path.exists(local_file): continue
+
+        remote_file = urljoin(url, coef_file)
+        with urlopen(remote_file) as response:
+            if response.status != 200: continue
+            with open(local_file, 'wb') as file:
+                file.write(response.read())
+
+
+
+
+
+def init_igrf(version=None):
     """
     Initialize the IGRF coefficients and related coefs.
     Should be called once and only once when importing the geopack module.
+
+    :param version: The version of IGRF coefficients to load, e.g., '13'. If None, the latest version will be loaded.
     """
 
     global igrf, nmn,mns, nyear,years,yruts
 
     # print('Load IGRF coefficients ...')
 
-    bfn = 'igrf13coeffs.txt'
-    locffn = os.path.join(os.path.dirname(__file__), bfn)
+    # Load all available IGRF coefficients.
+    local_dir = os.path.join(os.path.dirname(__file__), 'igrf_coeffs')
+    if not os.path.exists(local_dir): os.mkdir(local_dir)
+    # update_igrf(local_dir)
+
+    if version is None:
+        # Load the latest version.
+        coef_files = os.listdir(local_dir)
+        versions = []
+        prefix, suffix = igrf_pattern.split('*')
+        for f in coef_files:
+            if f.startswith(prefix) and f.endswith(suffix):
+                versions.append(f[len(prefix):-len(suffix)])
+        version = max(versions, key=int)
+
+    base_name = 'igrf'+version+'coeffs.txt'
+    coef_file = os.path.join(local_dir, base_name)
 
     nheader = 3
-    with open(locffn, 'r') as file:
+    with open(coef_file, 'r') as file:
         for i in range(nheader):
             next(file)
         header = file.readline().rstrip()
@@ -1376,3 +1440,8 @@ def t96_mgnp(xn_pd,vel,xgsm,ygsm,zgsm):
 
 
 init_igrf()
+
+
+if __name__ == '__main__':
+    update_igrf()
+    init_igrf()
