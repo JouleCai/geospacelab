@@ -8,7 +8,6 @@ References
 import numpy as np
 import datetime
 
-from build.lib.geospacelab import wrapper
 import geospacelab.toolbox.utilities.pydatetime as dttool
 
 

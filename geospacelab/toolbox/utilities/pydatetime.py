@@ -212,11 +212,13 @@ def convert_doy_to_datetime(year, doys):
         doys = [doys]
     doys = numpy.array(doys)
     dts = numpy.empty_like(doys, dtype=datetime)
-    dt0 = datetime(year, 1, 1, 0, 0, 0)
-    total_seconds = (doys - 1) * 86400.
-    for ind, total_second in enumerate(total_seconds.flatten()):
-        delta_dt = timedelta(seconds=total_second)
-        dts[ind] = dt0 + delta_dt
+    
+    if type(year) is int:
+        years = numpy.full_like(doys, fill_value=year, dtype=numpy.int32)
+    else:
+        years = numpy.array(year).flatten()
+    for i, (y_c, doy_c) in enumerate(zip(years.flatten(), doys.flatten())):
+        dts[i] = datetime(int(y_c), 1, 1, 0, 0, 0) + timedelta(days=int(doy_c) - 1)
 
     if type_in in (int, float):
         return dts[0]

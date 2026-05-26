@@ -7,33 +7,6 @@ import datetime
 import numpy as np
 import geospacelab.toolbox.utilities.pydatetime as dttool
 
-variable_name_dict = {
-    # 'DATETIME_0': 'start_time',     # Segment start time in fractional hours of day.
-    # 'DATETIME': 'time',             # Time of the grid in fractional hours of day.
-    # 'GRID_MLAT': 'cLat_deg',         # Co-latitude in AACGM coordinates in degrees.
-    'GRID_MLT': 'mlt_hr',           # AACGM Magnetic Local Time (MLT) in hours.
-    'GRID_j_R': 'j_R',             # Radial current density in microampere per square meter. Positive upward (radially outward).
-    'GRID_j_FA': 'j_par',         # Field-aligned current density derived from j_R and magnetic inclination (Br/|B|) in microampere per square meter. Positive along the magnetic field (direction of B).
-    'dB_GEO_E': 'db_P',         # Magnetic field perturbation parallel to GEO eastward direction in units of nano-Tesla.
-    'dB_GEO_N': 'db_T',         # Magnetic field perturbation parallel to GEO northward direction in units of nano-Tesla.
-    'dB_GEO': 'db_geo',         # Magnetic field perturbation in GEO coordinates in units of nano-Tesla.
-    'GEO_R': 'R',             # Radius from center of the Earth in kilometers.
-    'GEO_POS': 'pos_geo',         # Vehicle position in GEO coordinates in units of kilometers.
-    'dB_AACGM_E': 'db_Ph_Ph',         # Magnetic field perturbation parallel to AACGM-v2 eastward direction in nano-Tesla.
-    'dB_AACGM_PE': 'db_Th_Ph',         # Magnetic field perturbation perpendicular to AACGM-v2 eastward direction in nano-Tesla.
-    'dB_GEO_N_SIGMA': 'del_db_T',         # Uncertainty of magnetic field perturbation parallel to GEO northward direction in units of nano-Tesla.
-    'dB_GEO_E_SIGMA': 'del_db_P',         # Uncertainty of magnetic field perturbation parallel to GEO eastward direction in units of nano-Tesla.
-    'dB_GEO_SIGMA': 'del_db_geo',         # Uncertainty of magnetic field perturbation in GEO coordinates in units of nano-Tesla.
-    'dB_AACGM_E_SIGMA': 'del_db_Ph_Ph',         # Uncertainty of magnetic field perturbation parallel to AACGM-v2 eastward direction in nano-Tesla.
-    'dB_AACGM_PE_SIGMA': 'del_db_Th_Ph',         # Uncertainty of magnetic field perturbation perpendicular to AACGM-v2 eastward direction in nano-Tesla.
-    'GRID_j_R_SIGMA': 'del_J_r',         # Uncertainty of radial current density in microampere per square meter.
-    'FIT_SOLVER_CODE': 'fit_solver_code',         # Code indicating the solver used for the spherical harmonic fit. 0: SVD solver, 1: Non-negative least squares solver, 2: Lasso regression solver.
-}
-
-cdf_var_names = ['year', 'doy', 'start_time', 'time', 'cLat_deg', 'mlt_hr', 'geo_cLat_deg', 
-           'geo_lon_deg', 'R', 'pos_geo', 'db_T', 'db_P', 'db_geo', 'j_R', 'j_par', 
-           'db_Th_Ph', 'db_Ph_Ph', 'del_db_T', 'del_db_P', 'del_db_geo', 'del_J_r', 
-           'fit_solver_code', 'del_db_Th_Ph', 'del_db_Ph_Ph']
 
 class Loader(object):
 
@@ -43,7 +16,6 @@ class Loader(object):
         self.metadata = {}
         self.file_path = file_path
         self.file_type = file_type
-        self.variable_name_dict = variable_name_dict
         self.pole = pole
 
         self.load_data()
@@ -51,50 +23,55 @@ class Loader(object):
     def load_data(self):
         dataset = netCDF4.Dataset(self.file_path)
         variables = {}
-        self.metadata['variables'] = {}
-        variables_nc = {}
-        for key in dataset.variables.keys():
-            var_nc = dataset.variables[key]
-            self.metadata['variables'][key] = {
-                'fill_value': getattr(var_nc, '_FillValue', None),
-                'dimensions': var_nc.shape,
-                'dtype': var_nc.dtype,
-                'comment': getattr(var_nc, 'comment', ''),
-            }
-            # check the fill value if exists, and replace the fill value with np.nan
-            if hasattr(var_nc, '_FillValue'):
-                fill_value = var_nc._FillValue
-                var_nc = np.where(var_nc[::] == fill_value, np.nan, var_nc[::])
-            variables_nc[key] = var_nc[::]
-            
-        for var_name, var_name_nc in self.variable_name_dict.items():
-            variables[var_name] = variables_nc[var_name_nc]
-        
-        dts_init = dttool.convert_doy_to_datetime(doys=variables_nc['doy'], year=variables_nc['year'],)
-        dts_0 = np.empty_like(dts_init)
-        dts = np.empty_like(dts_init)
-        variables_nc['start_time'] = variables_nc['start_time'].flatten() * 3600
-        variables_nc['start_time'] = variables_nc['start_time'].astype(np.int64)
-        variables_nc['time'] = variables_nc['time'].flatten() * 3600
-        variables_nc['time'] = variables_nc['time'].astype(np.int64)
-        for i, dt_i in enumerate(dts_init):
-            dts_0[i] = dt_i + datetime.timedelta(seconds=int(variables_nc['start_time'][i]))
-            dts[i] = dt_i + datetime.timedelta(seconds=int(variables_nc['time'][i]))
-        dts_1 = dts + (dts - dts_0)
-        variables['DATETIME_0'] = dts_0[:, np.newaxis]
-        variables['DATETIME'] = dts[:, np.newaxis]
-        variables['DATETIME_1'] = dts_1[:, np.newaxis]
+
+        year = dataset.variables['year'][::][0]
+        start_of_year = datetime.datetime(year, 1, 1) 
+        hhs = [int(np.floor(t)) for t in dataset.variables['time'][::]]
+        mms = [int(np.round((t-hh)*60)) for t, hh in zip(dataset.variables['time'][::], hhs)] 
+        sss = [int(np.round((t-hh - mm/60)*60)) for t, hh, mm in zip(dataset.variables['time'][::], hhs, mms)]  
+        dts = np.array([
+            start_of_year + datetime.timedelta(days=int(doy)-1, hours=hh, minutes=mm, seconds=ss)
+            for doy, hh, mm, ss in zip(
+                dataset.variables['doy'][::],
+                hhs,
+                mms,
+                sss,
+            )
+        ])
+
+        ntime = dts.shape[0]
+        nlon = dataset.variables['nLonGrid'][::][0]
+        nlat = dataset.variables['nLatGrid'][::][0]
+        colat = dataset.variables['cLat_deg'][::].reshape((ntime, nlon, nlat))
+
+        mlt = dataset.variables['mlt_hr'][::].reshape((ntime, nlon, nlat))
+
+        Jr = dataset.variables['jPar'][::].reshape(ntime, nlon, nlat)
 
         variables['DATETIME'] = dts[:, np.newaxis]
 
-        variables['GRID_MLAT'] = np.array(90. - variables_nc['cLat_deg'])
-        
-        if self.pole == 'N':
-            variables['GRID_j_FA'] = -variables['GRID_j_FA']
+        variables['GRID_MLAT'] = np.array(90. - colat)
+        variables['GRID_MLT'] = np.array(mlt)
+
+        variables['GRID_Jr'] = np.array(Jr)
 
         dataset.close()
 
         self.variables = variables
+
+
+cdf_var_names = [
+    'npnt', 'year', 'doy', 'time', 'avgint',
+    'kmax', 'mmax', 'res_deg', 'nLatGrid', 'nLonGrid',
+    'cLat_deg', 'mlt_hr', 'geo_cLat_deg', 'geo_lon_deg', 'R',
+    'pos_geo', 'db_R', 'db_T', 'db_P', 'db_geo',
+    'jPar', 'db_Th_Th', 'db_Ph_Th', 'db_Th_Ph', 'db_Ph_Ph',
+    'del_db_R', 'del_db_T', 'del_db_P', 'del_db_geo', 'del_jPar',
+    'del_db_Th_Th', 'del_db_Ph_Th', 'del_db_Th_Ph', 'del_db_Ph_Ph'
+]
+
+
+
 
 if __name__ == "__main__":
     import pathlib

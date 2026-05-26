@@ -13,7 +13,6 @@ import geospacelab.toolbox.utilities.pybasic as basic
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pydatetime as dttool
 from geospacelab.datahub.sources.jhuapl.ampere.grd.loader import Loader as default_Loader
-from geospacelab.datahub.sources.jhuapl.ampere.grd.downloader import Downloader as default_Downloader
 import geospacelab.datahub.sources.jhuapl.ampere.grd.variable_config as var_config
 
 
@@ -34,13 +33,22 @@ default_dataset_attrs = {
 
 default_variable_names = [
     'DATETIME', 
+    'DATETIME_0',
+    'DATETIME_1',
     'GRID_MLAT', 'GRID_MLT',
-    'GRID_Jr'
+    'GRID_j_R', 'GRID_j_FA',
+    'dB_GEO_E', 'dB_GEO_N', 'dB_GEO',
+    'GEO_R', 'GEO_POS',
+    'dB_AACGM_E', 'dB_AACGM_PE',
+    'dB_GEO_N_SIGMA', 'dB_GEO_E_SIGMA', 'dB_GEO_SIGMA',
+    'dB_AACGM_E_SIGMA', 'dB_AACGM_PE_SIGMA',
+    'GRID_j_R_SIGMA',
+    'FIT_SOLVER_CODE',
     ]
 
 # default_data_search_recursive = True
 
-default_attrs_required = []
+default_attrs_required = ['pole',]
 
 
 class Dataset(datahub.DatasetSourced):
@@ -67,7 +75,7 @@ class Dataset(datahub.DatasetSourced):
             self.loader = default_Loader
 
         if self.downloader is None:
-            self.downloader = default_Downloader
+            self.downloader = None
 
         self._validate_attrs()
 
@@ -149,52 +157,62 @@ class Dataset(datahub.DatasetSourced):
             
             initial_file_dir = kwargs.pop('initial_file_dir', None)
             if initial_file_dir is None:
-                initial_file_dir = self.data_root_dir / thisday.strftime("%Y%m%d")
-            for hh in range(24):
-                start_hour = thisday + datetime.timedelta(hours=hh)
-                end_hour = start_hour+datetime.timedelta(seconds=3600-1)
-                if (start_hour < dt_fr) or (end_hour >dt_to):
-                    continue 
-                
-                file_patterns = [
-                    self.product.upper(),
-                    start_hour.strftime("%Y%m%dT%H%M"),
-                    end_hour.strftime("%Y%m%dT%H%M"),
-                    self.pole
-                ]
-                # remove empty str
-                file_patterns = [pattern for pattern in file_patterns if str(pattern)]
-        
-                search_pattern = '*' + '*'.join(file_patterns) + '*'
-        
-                done = super().search_data_files(
-                    initial_file_dir=initial_file_dir,
-                    search_pattern=search_pattern,
-                    allow_multiple_files=False,
-                )
-                # Validate file paths
-        
-                if (not done and self.allow_download) or self.force_download:
-                    done = self.download_data(dt_fr=start_hour, dt_to=end_hour+datetime.timedelta(seconds=3600))
-                    if done:
-                        done = super().search_data_files(
-                            initial_file_dir=initial_file_dir,
-                            search_pattern=search_pattern,
-                            allow_multiple_files=False
-                        )
+                initial_file_dir = self.data_root_dir / str(thisday.year)
+
+            pole_str = 'north' if self.pole == 'N' else 'south'
+            file_patterns = [
+                'ampere',
+                thisday.strftime("%Y%m%d"),
+                pole_str,
+                self.product.lower(),
+            ]
+            # remove empty str
+            file_patterns = [pattern for pattern in file_patterns if str(pattern)]
+    
+            search_pattern = '*' + '*'.join(file_patterns) + '*'
+
+            done = super().search_data_files(
+                initial_file_dir=initial_file_dir,
+                search_pattern=search_pattern,
+                recursive=True,
+                allow_multiple_files=False,
+            )
+            # Validate file paths
+    
+            if (not done and self.allow_download) or self.force_download:
+                done = self.download_data()
+                if done:
+                    done = super().search_data_files(
+                        initial_file_dir=initial_file_dir,
+                        search_pattern=search_pattern,
+                        recursive=True,
+                        allow_multiple_files=False
+                    )
     
         return done
     
     def download_data(self, dt_fr=None, dt_to=None):
-        if dt_fr is None:
-            dt_fr = self.dt_fr
-        if dt_to is None:
-            dt_to = self.dt_to
-        download_obj = self.downloader(
-            dt_fr, dt_to,
-            data_product=self.product.lower(),
-            data_file_root_dir=self.data_root_dir, force_download=self.force_download, pole=self.pole)
-        return download_obj.done
+        raise NotImplementedError(
+            "Automatic download is deprecated since 2026, because the data provider no longer supports it. \n" + \
+            "Please download the daily data files manually from the AMPERE website \n" + \
+            "and put the data files in the data root directory {}. \n".format(self.data_root_dir) + \
+            "The subfolders should be separated by year, e.g., \"2024\". \n" + \
+            "To dock the AMPERE dataset with the previous version, use the keyword argument: \n" + \
+            "    \"datasource_contents=['jhuapl', 'deprecated', 'ampere', 'grd']\"\n" + \
+            "instead of\n" + 
+            "    \"datasource_contents=['jhuapl', 'ampere', 'grd']\"\n"
+            
+        )
+        
+        # if dt_fr is None:
+        #     dt_fr = self.dt_fr
+        # if dt_to is None:
+        #     dt_to = self.dt_to
+        # download_obj = self.downloader(
+        #     dt_fr, dt_to,
+        #     data_product=self.product.lower(),
+        #     data_file_root_dir=self.data_root_dir, force_download=self.force_download, pole=self.pole)
+        # return download_obj.done
 
     @property
     def database(self):

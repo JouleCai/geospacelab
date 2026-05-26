@@ -39,12 +39,12 @@ depend_0 = {'UT': 'DATETIME'}
 depend_c = {'SPECTRA': 'EMISSION_SPECTRA'}
 
 ####################################################################################################################
-var_name = 'GRID_Jr'
+var_name = 'GRID_j_FA'
 var = Var(name=var_name, ndim=4, variable_type='scalar', visual=visual)
 # set variable attrs
-var.fullname = 'Field-aligned current'
-var.label = r'FAC'
-var.group = 'Emission intensity'
+var.fullname = 'Field-aligned current (Positive: upward, radially outward)'
+var.label = r'FAC, +: upward'
+var.group = 'Current'
 var.unit = r'$\mu$A/m$^2$'
 var.depends = {0: depend_0, 1: {'AACGM_LAT': 'GRID_MLAT'}, 2: {'AACGM_MLT': 'GRID_MLT'}}
 # set plot attrs
@@ -56,3 +56,20 @@ axis = var.visual.axis
 
 
 configured_variables[var_name] = var
+
+#####################################################################################################################
+var_name = 'GRID_j_r'
+var = Var(name=var_name, ndim=4, variable_type='scalar', visual=visual)
+# set variable attrs
+var.fullname = 'Radial current (Positive: upward, radially outward)'
+var.label = r'$j_r$, +: upward'
+var.group = 'Current'
+var.unit = r'$\mu$A/m$^2$'
+var.depends = {0: depend_0, 1: {'AACGM_LAT': 'GRID_MLAT'}, 2: {'AACGM_MLT': 'GRID_MLT'}}
+# set plot attrs
+plot_config = var.visual.plot_config
+plot_config.config(**default_plot_config)
+plot_config.style = '2P'
+# set axis attrs
+axis = var.visual.axis
+

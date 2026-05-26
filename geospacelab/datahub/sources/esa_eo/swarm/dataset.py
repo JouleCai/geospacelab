@@ -506,7 +506,7 @@ class Dataset(datahub.DatasetSourced):
             records['file_name'] = np.concatenate((records['file_name'], [file_name]))
             records['product_version'] = np.concatenate((records['product_version'], [version]))
             records['product_name'] = np.concatenate((records['product_name'], [self.product]))
-            records['mission'] = np.concatenate((records['mission'], [self.mission if self.mission is not None else '']))
+            records['mission'] = np.concatenate((records['mission'], [self.facility if self.facility is not None else '']))
             records['sat_id'] = np.concatenate((records['sat_id'], [self.sat_id if self.sat_id is not None else '']))
             records['datetime_fr'] = np.concatenate((records['datetime_fr'], [dt_fr]))
             records['datetime_to'] = np.concatenate((records['datetime_to'], [dt_to]))

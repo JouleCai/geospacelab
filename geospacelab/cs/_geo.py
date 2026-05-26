@@ -395,7 +395,7 @@ class GEOCSpherical(SpaceSphericalCS):
             r = np.empty_like(self.coords.lat)
             for ind_dt, dt in enumerate(uts.flatten()):
                 # print(ind_dt, dt, cs.lat[ind_dt, 0])
-                lat[ind_dt], lon[ind_dt], r[ind_dt] = aacgm.convert_latlon_arr(in_lat=self.coords.lat[ind_dt],
+                lat[ind_dt], lon[ind_dt], r[ind_dt] = aacgm.convert_latlon(in_lat=self.coords.lat[ind_dt],
                                                                                in_lon=self.coords.lon[ind_dt],
                                                                                height=self.coords.height[ind_dt],
                                                                                dtime=dt, method_code=method_code)
@@ -411,7 +411,7 @@ class GEOCSpherical(SpaceSphericalCS):
                 lon = cs_new['lon']
                 mlt = np.empty_like(lon)
                 for ind_dt, dt in enumerate(self.ut.flatten()):
-                    mlt[ind_dt] = aacgm.convert_mlt(lon[ind_dt], dt)
+                    mlt[ind_dt] = aacgm.convert_mlt(lon[ind_dt], dt)[0]
             cs_new['mlt'] = mlt.reshape(lon_shape)
         return cs_new
 
