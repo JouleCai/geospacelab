@@ -45,7 +45,8 @@ default_dataset_attrs = {
 default_variable_names = [
     'DATETIME', 'DATETIME_1', 'DATETIME_2', 'AZ', 'AZ1', 'AZ2', 'EL', 'EL1', 'EL2', 'PULSE_LENGTH',
     'T_SYS', 'POWER_NORM', 'P_Tx', 'MODE_TYPE', 'POWER_LENGTH_F',
-    'LAG_SPACING', 'IPP', 'f_Tx', 'v_PHASE_Tx', 'v_PHASE_Tx_err',
+    'LAG_SPACING', 'IPP', 'f_Tx', 
+    'v_PHASE_Tx', 'v_PHASE_Tx_err',
     'SCAN_TYPE', 'CYCN', 'POSN', 'RANGE_RES', 'RANGE',
     'SNR', 'RESIDUAL', 'STATUS', 'FIT_TYPE', 'FPI_QUALITY',
     'ACF_NORM', 'ACF_NORM_ERR', 'n_pp', 'n_pp_err', 'n_e',

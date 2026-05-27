@@ -143,7 +143,10 @@ class Dataset(datahub.DatasetSourced):
         inds_cmb = np.argsort(self['DATETIME'].flatten())
         if any(np.diff(np.array(inds_cmb)) < 0):
             for var_name in self.keys():
-                self[var_name].value = self[var_name].value[inds_cmb, :]
+                try:
+                    self[var_name].value = self[var_name].value[inds_cmb, :]
+                except Exception as e:
+                    mylog.StreamLogger.error(f"Error processing variable {var_name}: {e}")
 
         if self.status_control:
             self.status_mask()

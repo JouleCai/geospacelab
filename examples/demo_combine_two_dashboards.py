@@ -89,7 +89,7 @@ def test_combine():
     dashboard.set_layout(panel_layouts=layout, hspace=0.1, top=0.95, bottom=0.65, left=0.1, right=0.9)
     dashboard.draw()
 
-    plt.show()
+    dashboard.show()
 
 
 if __name__ == '__main__':

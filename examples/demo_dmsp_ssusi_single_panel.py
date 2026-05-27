@@ -10,6 +10,7 @@ __docformat__ = "reStructureText"
 
 
 import datetime
+import pathlib
 import matplotlib.pyplot as plt
 
 # from geospacelab import preferences as pref
@@ -17,6 +18,8 @@ import matplotlib.pyplot as plt
 import geospacelab.visualization.mpl.geomap.geodashboards as geomap
 
 
+cwd = pathlib.Path(__file__).parent.resolve()
+    
 def test_ssusi():
     dt_fr = datetime.datetime(2015, 9, 8, 8)
     dt_to = datetime.datetime(2015, 9, 8, 23, 59)
@@ -102,7 +105,7 @@ def test_ssusi():
     # Add the title and save the figure
     polestr = 'North' if pole == 'N' else 'South'
     panel.add_title(title='DMSP/SSUSI, ' + band + ', ' + sat_id.upper() + ', ' + polestr + ', ' + time_c.strftime('%Y-%m-%d %H%M UT'))
-    plt.savefig('DMSP_SSUSI_' + time_c.strftime('%Y%m%d-%H%M') + '_' + band + '_' + sat_id.upper() + '_' + pole, dpi=300)
+    plt.savefig(cwd / ('DMSP_SSUSI_' + time_c.strftime('%Y%m%d-%H%M') + '_' + band + '_' + sat_id.upper() + '_' + pole), dpi=300)
 
     # show the figure
     plt.show()

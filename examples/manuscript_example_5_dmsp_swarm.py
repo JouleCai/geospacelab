@@ -256,7 +256,7 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
     dt_fr = swarm_dn - datetime.timedelta(minutes=delta_t)
     dt_to = swarm_dn + datetime.timedelta(minutes=delta_t)
 
-    timeline_extra_labels = ['GEO_LAT', 'GEO_LON', 'AACGM_LAT', 'AACGM_MLT']
+    timeline_extra_labels = [{'GEO_LAT': 'SC_GEO_LAT'}, {'GEO_LON': 'SC_GEO_LON'}, {'AACGM_LAT': 'SC_AACGM_LAT'}, {'AACGM_MLT': 'SC_AACGM_MLT'}]
     db_swarm = TSDashboard(dt_fr=dt_fr, dt_to=dt_to, timeline_extra_labels=timeline_extra_labels, figure=dashboard.figure)
 
     ds_swarm_tii = db_swarm.dock(
@@ -273,10 +273,10 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
         )
 
 
-    n_e = ds_swarm_lp['n_e']
-    n_e_c = ds_swarm_lp_c['n_e']
-    n_e.label = 'Swarm-A'
-    n_e_c.label = 'Swarm-C'
+    n_p = ds_swarm_lp['n_p']
+    n_p_c = ds_swarm_lp_c['n_p']
+    n_p.label = 'Swarm-A'
+    n_p_c.label = 'Swarm-C'
     T_e = ds_swarm_lp['T_e']
     T_e_c = ds_swarm_lp_c['T_e']
     T_e.label = 'Swarm-A'
@@ -287,7 +287,7 @@ def visual_dmsp_swarm(dmsp_dn, dmsp_sat_id, dmsp_orbit_id, swarm_dn, swarm_sat_i
     v_i_V_x = ds_swarm_tii['v_i_V_x']
     v_i_V_z = ds_swarm_tii['v_i_V_z']
      
-    db_swarm.set_layout([[v_i_H_x, v_i_H_y, v_i_V_x, v_i_V_z], [n_e, n_e_c], [T_e, T_e_c], ],
+    db_swarm.set_layout([[v_i_H_x, v_i_H_y, v_i_V_x, v_i_V_z], [n_p, n_p_c], [T_e, T_e_c], ],
                        left=0.58, right=0.93, top=0.5, hspace=0)
     db_swarm.draw()
     db_swarm.add_panel_labels()

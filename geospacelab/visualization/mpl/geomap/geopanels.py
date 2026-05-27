@@ -1293,7 +1293,7 @@ class PolarMapPanel(GeoPanel):
                 axis.set_ticklabels(c_tick_labels)
         else:
             if c_scale == 'log':
-                num_major_ticks = int(np.ceil(np.diff(np.log10(lim)))) * 2
+                num_major_ticks = int(np.ceil(np.diff(np.log10(lim))[0])) * 2
                 axis.set_major_locator(mticker.LogLocator(base=10.0, numticks=num_major_ticks))
                 n = c_tick_label_step
                 [l.set_visible(False) for (i, l) in enumerate(axis.get_ticklabels()) if i % n != 0]

@@ -81,6 +81,11 @@ var_name_dict = {
     'HEIGHT': 'gdalt'
 }
 
+var_name_2d = [
+    'n_pp', 'n_pp_err', 'n_e', 'n_e_err', 'T_i', 'T_i_err', 'T_r', 'T_r_err', 'nu_i', 'nu_i_err', 'v_i_los', 'v_i_los_err',
+    'comp_H_p', 'comp_H_p_err', 'comp_mix', 'comp_mix_err', 'v_DOP_los', 'v_DOP_los_err', 'HEIGHT'
+]
+
 
 class Loader:
     """
@@ -173,7 +178,8 @@ class Loader:
                     mylog.StreamLogger.warning(f"The requested variable {var_name_fh5} does not exist in the data file!")
                     variables[var_name] = None
                     continue
-                if rec_vars[var_name_fh5] == 1:
+                # if rec_vars[var_name_fh5] == 1:
+                if var_name not in var_name_2d:
                     variables[var_name] = vars_fh5[var_name_fh5][:, 0][:, np.newaxis]
                 else:
                     variables[var_name] = vars_fh5[var_name_fh5]

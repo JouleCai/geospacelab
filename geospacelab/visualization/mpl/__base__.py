@@ -728,7 +728,7 @@ class PanelBase(object):
                 icb.ax.yaxis.set_ticklabels(cax_tick_labels)
         else:
             if cax_scale == 'log':
-                num_major_ticks = int(np.ceil(np.diff(np.log10(ylim)))) * 2
+                num_major_ticks = int(np.ceil(np.diff(np.log10(ylim))[0])) * 2
                 cax.yaxis.set_major_locator(mpl.ticker.LogLocator(base=10.0, numticks=num_major_ticks))
                 n = cax_tick_label_step
                 [l.set_visible(False) for (i, l) in enumerate(cax.yaxis.get_ticklabels()) if i % n != 0]

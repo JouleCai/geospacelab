@@ -452,7 +452,7 @@ class LEOToolbox(DatasetUser):
         # Set the grids
         dt0 = dttool.get_start_of_the_day(self.dt_fr)
         if along_track_interp:
-            ny = int(np.ceil(np.diff(lat_range) / y_grid_res) + 1)
+            ny = int(np.ceil(np.diff(lat_range)[0] / y_grid_res) + 1)
             ys = np.linspace(lat_range[0], lat_range[1], ny)
         elif along_track_binning:
             ny = int(np.ceil((lat_range[1] - lat_range[0]) / along_track_binning_step))
