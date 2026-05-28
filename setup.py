@@ -54,7 +54,7 @@ setuptools.setup(
               'natsort>=7.1.1',
               'numpy>=2.4.0',
               'scipy>=1.6.0',
-              'netcdf4>=1.5.7',
+              'netcdf4>=1.7.4',
               'h5py>=3.2.1',
               'matplotlib>=3.5',
               'madrigalweb>=3.3',
@@ -68,7 +68,7 @@ setuptools.setup(
               'pandas>=1.5.3',
               'keyring',
           ],
-    python_requires='>=3.9,<3.13',
+    python_requires='>=3.12',
     # py_modules=["geospacelab"],
     # package_dir={'':'geospacelab'},
     classifiers=[

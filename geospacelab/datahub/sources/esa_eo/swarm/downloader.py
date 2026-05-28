@@ -188,8 +188,27 @@ class DownloaderSwarm(DownloaderFromFTPBase):
             for k, subdirs_k in subdirs.items():
                 pwd_ = ftp.pwd()
                 subdirs_ = subdirs_k + ['Sat_{}'.format(self.sat_id.upper())]
-                file_paths_remote_ = super().search_from_ftp(ftp, subdirs_, file_name_patterns, **kwargs)
+                try:
+                    file_paths_remote_ = super().search_from_ftp(ftp, subdirs_, file_name_patterns, **kwargs)
+                except Exception as e:
+                    mylog.StreamLogger.warning(
+                        f"Failed to search from FTP: {e}. Current subdirs: {subdirs_}. \n" + 
+                        "Try to search in another subdir.\n" + 
+                        "This is typically caused by permission issues. \n" +
+                        "Please check the subdir via a FTP client and the permission of the account used for FTP connection. \n" +
+                        "Perhaps your account can only access the latest data but not the older baselines."
+                        )
+                    if k in ['latest']:
+                        subdirs_ = ['Sat_{}'.format(self.sat_id.upper())]
+                        file_paths_remote_ = super().search_from_ftp(ftp, subdirs_, file_name_patterns, **kwargs)
+                    elif k in ['Older_baselines', 'Entire_mission']:
+                        pass
+                    else:
+                        mylog.StreamLogger.warning(f"Unknown subdir key {k}. Skip searching in this subdir.")
+                        pass
+                    
                 ftp.cwd(pwd_)
+                
                 if not list(file_paths_remote_):
                     continue
                 file_paths_remote.extend(file_paths_remote_)

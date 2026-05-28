@@ -18,7 +18,8 @@ import geospacelab.toolbox.utilities.pybasic as pybasic
 
 try:
     from geopack import geopack
-except ImportError:
+except Exception as e:
+    mylog.StreamLogger.warning("Error importing geopack: {}. Try to import from wrapper.".format(e))
     from geospacelab.wrapper.geopack import geopack
 
 
