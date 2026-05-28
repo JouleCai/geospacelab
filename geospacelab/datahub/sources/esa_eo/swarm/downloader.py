@@ -191,13 +191,13 @@ class DownloaderSwarm(DownloaderFromFTPBase):
                 try:
                     file_paths_remote_ = super().search_from_ftp(ftp, subdirs_, file_name_patterns, **kwargs)
                 except Exception as e:
-                    mylog.StreamLogger.warning(
-                        f"Failed to search from FTP: {e}. Current subdirs: {subdirs_}. \n" + 
-                        "Try to search in another subdir.\n" + 
-                        "This is typically caused by permission issues. \n" +
-                        "Please check the subdir via a FTP client and the permission of the account used for FTP connection. \n" +
-                        "Perhaps your account can only access the latest data but not the older baselines."
-                        )
+                    # mylog.StreamLogger.warning(
+                    #     f"Failed to search from FTP: {e}. Current subdirs: {subdirs_}. \n" + 
+                    #     "Try to search in another subdir.\n" + 
+                    #     "This is typically caused by permission issues. \n" +
+                    #     "Please check the subdir via a FTP client and the permission of the account used for FTP connection. \n" +
+                    #     "Perhaps your account can only access the latest data but not the older baselines."
+                    #     )
                     if k in ['latest']:
                         subdirs_ = ['Sat_{}'.format(self.sat_id.upper())]
                         file_paths_remote_ = super().search_from_ftp(ftp, subdirs_, file_name_patterns, **kwargs)
@@ -219,6 +219,8 @@ class DownloaderSwarm(DownloaderFromFTPBase):
         if not self._indexing:
             files_record = self._filtering_files_by_time(files_record, dt_fr=dt_fr, dt_to=dt_to)
             files_record = self._filtering_files_by_version(files_record, version=self.product_version)
+            if files_record['file_path'].size == 0:
+                mylog.StreamLogger.warning("No matching files found on the ftp after filtering by time and version.")
         self._files_record_remote = files_record
         file_paths_remote = files_record['file_path']
         return file_paths_remote

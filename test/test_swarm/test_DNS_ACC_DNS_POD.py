@@ -145,6 +145,10 @@ def test_compare_DNS_ACC_POD():
 def test_compare_POD_versions():
     """Test Swarm DNS/POD data product with different versions
     
+    NOTE
+    ------
+    Only applied for users who have the permission to access the "Older_baselines" folder on ESA EO SWARM data server!
+    
     """
     dt_fr = datetime.datetime(2016, 3, 14, 12, 0)
     dt_to = datetime.datetime(2016, 3, 15, 2, 0)
@@ -195,8 +199,8 @@ def test_compare_POD_versions():
 
 
 if __name__ == "__main__":
-    # test_swarm_DNS_ACC_overview()
-    # test_swarm_DNS_ACC_zoom()
-    # test_Swarm_DNS_POD_overview()
-    # test_compare_DNS_ACC_POD()
-    test_compare_POD_versions()
+    test_swarm_DNS_ACC_overview()
+    test_swarm_DNS_ACC_zoom()
+    test_Swarm_DNS_POD_overview()
+    test_compare_DNS_ACC_POD()
+    # test_compare_POD_versions()
