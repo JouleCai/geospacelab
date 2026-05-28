@@ -16,6 +16,11 @@ from geospacelab.cs._cs_base import SpaceCSBase, SphericalCoordinates, Cartesian
 import geospacelab.toolbox.utilities.pylogging as mylog
 import geospacelab.toolbox.utilities.pybasic as pybasic
 
+try:
+    from geopack import geopack
+except ImportError:
+    from geospacelab.wrapper.geopack import geopack
+
 
 class GEO(SpaceSphericalCS):
     def __init__(self, coords=None, ut=None, vector=None, **kwargs):
@@ -51,7 +56,6 @@ class GEO(SpaceSphericalCS):
         return cs_new
 
     def to_GEOC(self, kind='sph', **kwargs):
-        from geospacelab.cs import geopack
         height = self.coords.height
         if self['lat_unit'] == 'deg':
             factor = np.pi / 180.
@@ -326,7 +330,6 @@ class GEOCSpherical(SpaceSphericalCS):
         return cs_new.to_LENU(kind=kind, **kwargs)
 
     def to_GEO(self, **kwargs):
-        from geospacelab.cs import geopack
 
         r = self.coords.r * self.coords.Re
         theta = self.coords.theta

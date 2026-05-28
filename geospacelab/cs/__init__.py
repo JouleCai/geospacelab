@@ -13,8 +13,6 @@ from geospacelab.cs._cs_base import SphericalCoordinates, CartesianCoordinates, 
 from geospacelab.cs._geo import *
 from geospacelab.cs._aacgm import AACGM
 from geospacelab.cs._apex import APEX
-# from geopack import geopack
-from geospacelab.wrapper.geopack import geopack
 
 GEOC=GEOCSpherical
 
