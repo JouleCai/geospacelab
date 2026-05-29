@@ -12,6 +12,7 @@ __docformat__ = "reStructureText"
 import datetime
 import pathlib
 import matplotlib.pyplot as plt
+from pexpect import which
 
 # from geospacelab import preferences as pref
 # pref.user_config['visualization']['mpl']['style'] = 'dark'
@@ -105,10 +106,16 @@ def test_ssusi():
     # Add the title and save the figure
     polestr = 'North' if pole == 'N' else 'South'
     panel.add_title(title='DMSP/SSUSI, ' + band + ', ' + sat_id.upper() + ', ' + polestr + ', ' + time_c.strftime('%Y-%m-%d %H%M UT'))
-    plt.savefig(cwd / ('DMSP_SSUSI_' + time_c.strftime('%Y%m%d-%H%M') + '_' + band + '_' + sat_id.upper() + '_' + pole), dpi=300)
+    
+    file_dir = cwd
+    file_name = 'DMSP_SSUSI_' + time_c.strftime('%Y%m%d-%H%M') + '_' + band + '_' + sat_id.upper() + '_' + pole
+    dashboard.save_figure(file_dir=file_dir, file_name=file_name, dpi=300)
+    # Alternatively, you can also save the figure by plt.savefig
+    # plt.savefig(cwd / ('DMSP_SSUSI_' + time_c.strftime('%Y%m%d-%H%M') + '_' + band + '_' + sat_id.upper() + '_' + pole), dpi=300)
 
     # show the figure
-    plt.show()
+    dashboard.show()    # the dashboard.show() is recommended, 
+    # plt.show()
 
 
 if __name__ == "__main__":

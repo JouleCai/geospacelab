@@ -346,7 +346,7 @@ def test_gridding_binning_FAC_TMS():
 
     
 if __name__ == "__main__":
-    simple_gridding_example() 
-    # test_gridding_interpolation_DNS_POD()
-    # test_gridding_binning_FAC_TMS()
+    # simple_gridding_example() 
+    test_gridding_interpolation_DNS_POD()
+    test_gridding_binning_FAC_TMS()
     
