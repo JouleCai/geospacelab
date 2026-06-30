@@ -13,6 +13,8 @@
 GeospaceLAB provides a framework of data access, analysis, and visualization for the researchers in space physics and space weather. The documentation can be found 
 on [readthedocs.io](https://geospacelab.readthedocs.io/en/latest/).
 
+In addition, GeospaceLAB supports more than 30 data products for the Swarm mission. A separate documentation for the Swarm data products can be found [here](https://geospacelab-swarm.readthedocs.io/en/latest/).
+
 ## Features
 - Class-based data manager, including
   - __DataHub__: the core module (top-level class) to manage data from multiple sources,
